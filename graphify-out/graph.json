@@ -1,0 +1,4062 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "Controller.php",
+      "file_type": "code",
+      "source_file": "app/Http/Controllers/Controller.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 21,
+      "norm_label": "controller.php",
+      "id": "controllers_controller"
+    },
+    {
+      "label": "Controller",
+      "file_type": "code",
+      "source_file": "app/Http/Controllers/Controller.php",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 21,
+      "norm_label": "controller",
+      "id": "controllers_controller_controller"
+    },
+    {
+      "label": "User.php",
+      "file_type": "code",
+      "source_file": "app/Models/User.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "user.php",
+      "id": "models_user"
+    },
+    {
+      "label": "User",
+      "file_type": "code",
+      "source_file": "app/Models/User.php",
+      "source_location": "L10",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "user",
+      "id": "models_user_user"
+    },
+    {
+      "label": "Authenticatable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "authenticatable",
+      "id": "authenticatable"
+    },
+    {
+      "label": "HasFactory",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "hasfactory",
+      "id": "hasfactory"
+    },
+    {
+      "label": "Notifiable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "notifiable",
+      "id": "notifiable"
+    },
+    {
+      "label": ".casts()",
+      "file_type": "code",
+      "source_file": "app/Models/User.php",
+      "source_location": "L41",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": ".casts()",
+      "id": "models_user_user_casts"
+    },
+    {
+      "label": "AppServiceProvider.php",
+      "file_type": "code",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "appserviceprovider.php",
+      "id": "providers_appserviceprovider"
+    },
+    {
+      "label": "AppServiceProvider",
+      "file_type": "code",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "appserviceprovider",
+      "id": "providers_appserviceprovider_appserviceprovider"
+    },
+    {
+      "label": "ServiceProvider",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": "serviceprovider",
+      "id": "serviceprovider"
+    },
+    {
+      "label": ".register()",
+      "file_type": "code",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".register()",
+      "id": "providers_appserviceprovider_appserviceprovider_register"
+    },
+    {
+      "label": ".boot()",
+      "file_type": "code",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L20",
+      "_origin": "ast",
+      "community": 15,
+      "norm_label": ".boot()",
+      "id": "providers_appserviceprovider_appserviceprovider_boot"
+    },
+    {
+      "label": "app.php",
+      "file_type": "code",
+      "source_file": "bootstrap/app.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 25,
+      "norm_label": "app.php",
+      "id": "bootstrap_app"
+    },
+    {
+      "label": "packages.php",
+      "file_type": "code",
+      "source_file": "bootstrap/cache/packages.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 27,
+      "norm_label": "packages.php",
+      "id": "cache_packages"
+    },
+    {
+      "label": "services.php",
+      "file_type": "code",
+      "source_file": "bootstrap/cache/services.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 28,
+      "norm_label": "services.php",
+      "id": "cache_services"
+    },
+    {
+      "label": "providers.php",
+      "file_type": "code",
+      "source_file": "bootstrap/providers.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 26,
+      "norm_label": "providers.php",
+      "id": "bootstrap_providers"
+    },
+    {
+      "label": "composer.json",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "composer.json",
+      "id": "composer"
+    },
+    {
+      "label": "$schema",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "$schema",
+      "id": "composer_schema"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "name",
+      "id": "composer_name"
+    },
+    {
+      "label": "type",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "type",
+      "id": "composer_type"
+    },
+    {
+      "label": "description",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "description",
+      "id": "composer_description"
+    },
+    {
+      "label": "keywords",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "keywords",
+      "id": "composer_keywords"
+    },
+    {
+      "label": "license",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "license",
+      "id": "composer_license"
+    },
+    {
+      "label": "require",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "require",
+      "id": "composer_require"
+    },
+    {
+      "label": "php",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "php",
+      "id": "composer_require_php"
+    },
+    {
+      "label": "laravel/framework",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "laravel/framework",
+      "id": "composer_require_laravel_framework"
+    },
+    {
+      "label": "laravel/sanctum",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L11",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "laravel/sanctum",
+      "id": "composer_require_laravel_sanctum"
+    },
+    {
+      "label": "laravel/tinker",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "laravel/tinker",
+      "id": "composer_require_laravel_tinker"
+    },
+    {
+      "label": "livewire/livewire",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "livewire/livewire",
+      "id": "composer_require_livewire_livewire"
+    },
+    {
+      "label": "predis/predis",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L14",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "predis/predis",
+      "id": "composer_require_predis_predis"
+    },
+    {
+      "label": "spatie/laravel-permission",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L15",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "spatie/laravel-permission",
+      "id": "composer_require_spatie_laravel_permission"
+    },
+    {
+      "label": "require-dev",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L17",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "require-dev",
+      "id": "composer_require_dev"
+    },
+    {
+      "label": "fakerphp/faker",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L18",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "fakerphp/faker",
+      "id": "composer_require_dev_fakerphp_faker"
+    },
+    {
+      "label": "laravel/pail",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L19",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "laravel/pail",
+      "id": "composer_require_dev_laravel_pail"
+    },
+    {
+      "label": "laravel/pint",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L20",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "laravel/pint",
+      "id": "composer_require_dev_laravel_pint"
+    },
+    {
+      "label": "laravel/sail",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L21",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "laravel/sail",
+      "id": "composer_require_dev_laravel_sail"
+    },
+    {
+      "label": "mockery/mockery",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L22",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "mockery/mockery",
+      "id": "composer_require_dev_mockery_mockery"
+    },
+    {
+      "label": "nunomaduro/collision",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L23",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "nunomaduro/collision",
+      "id": "composer_require_dev_nunomaduro_collision"
+    },
+    {
+      "label": "phpunit/phpunit",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L24",
+      "_origin": "ast",
+      "community": 10,
+      "norm_label": "phpunit/phpunit",
+      "id": "composer_require_dev_phpunit_phpunit"
+    },
+    {
+      "label": "autoload",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L26",
+      "_origin": "ast",
+      "community": 14,
+      "norm_label": "autoload",
+      "id": "composer_autoload"
+    },
+    {
+      "label": "psr-4",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L27",
+      "_origin": "ast",
+      "community": 14,
+      "norm_label": "psr-4",
+      "id": "composer_autoload_psr_4"
+    },
+    {
+      "label": "App\\\\",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L28",
+      "_origin": "ast",
+      "community": 14,
+      "norm_label": "app\\\\",
+      "id": "composer_psr_4_app"
+    },
+    {
+      "label": "Database\\\\Factories\\\\",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L29",
+      "_origin": "ast",
+      "community": 14,
+      "norm_label": "database\\\\factories\\\\",
+      "id": "composer_psr_4_database_factories"
+    },
+    {
+      "label": "Database\\\\Seeders\\\\",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L30",
+      "_origin": "ast",
+      "community": 14,
+      "norm_label": "database\\\\seeders\\\\",
+      "id": "composer_psr_4_database_seeders"
+    },
+    {
+      "label": "autoload-dev",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L33",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "autoload-dev",
+      "id": "composer_autoload_dev"
+    },
+    {
+      "label": "psr-4",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L34",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "psr-4",
+      "id": "composer_autoload_dev_psr_4"
+    },
+    {
+      "label": "Tests\\\\",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L35",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "tests\\\\",
+      "id": "composer_psr_4_tests"
+    },
+    {
+      "label": "scripts",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L38",
+      "_origin": "ast",
+      "community": 12,
+      "norm_label": "scripts",
+      "id": "composer_scripts"
+    },
+    {
+      "label": "post-autoload-dump",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L39",
+      "_origin": "ast",
+      "community": 12,
+      "norm_label": "post-autoload-dump",
+      "id": "composer_scripts_post_autoload_dump"
+    },
+    {
+      "label": "post-update-cmd",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L43",
+      "_origin": "ast",
+      "community": 12,
+      "norm_label": "post-update-cmd",
+      "id": "composer_scripts_post_update_cmd"
+    },
+    {
+      "label": "post-root-package-install",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L46",
+      "_origin": "ast",
+      "community": 12,
+      "norm_label": "post-root-package-install",
+      "id": "composer_scripts_post_root_package_install"
+    },
+    {
+      "label": "post-create-project-cmd",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L49",
+      "_origin": "ast",
+      "community": 12,
+      "norm_label": "post-create-project-cmd",
+      "id": "composer_scripts_post_create_project_cmd"
+    },
+    {
+      "label": "dev",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L54",
+      "_origin": "ast",
+      "community": 12,
+      "norm_label": "dev",
+      "id": "composer_scripts_dev"
+    },
+    {
+      "label": "extra",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L59",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "extra",
+      "id": "composer_extra"
+    },
+    {
+      "label": "laravel",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L60",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "laravel",
+      "id": "composer_extra_laravel"
+    },
+    {
+      "label": "dont-discover",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L61",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "dont-discover",
+      "id": "composer_laravel_dont_discover"
+    },
+    {
+      "label": "config",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L64",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "config",
+      "id": "composer_config"
+    },
+    {
+      "label": "optimize-autoloader",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L65",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "optimize-autoloader",
+      "id": "composer_config_optimize_autoloader"
+    },
+    {
+      "label": "preferred-install",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L66",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "preferred-install",
+      "id": "composer_config_preferred_install"
+    },
+    {
+      "label": "sort-packages",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L67",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "sort-packages",
+      "id": "composer_config_sort_packages"
+    },
+    {
+      "label": "allow-plugins",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L68",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "allow-plugins",
+      "id": "composer_config_allow_plugins"
+    },
+    {
+      "label": "pestphp/pest-plugin",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L69",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "pestphp/pest-plugin",
+      "id": "composer_allow_plugins_pestphp_pest_plugin"
+    },
+    {
+      "label": "php-http/discovery",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L70",
+      "_origin": "ast",
+      "community": 11,
+      "norm_label": "php-http/discovery",
+      "id": "composer_allow_plugins_php_http_discovery"
+    },
+    {
+      "label": "minimum-stability",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L73",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "minimum-stability",
+      "id": "composer_minimum_stability"
+    },
+    {
+      "label": "prefer-stable",
+      "file_type": "code",
+      "source_file": "composer.json",
+      "source_location": "L74",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "prefer-stable",
+      "id": "composer_prefer_stable"
+    },
+    {
+      "label": "app.php",
+      "file_type": "code",
+      "source_file": "config/app.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 29,
+      "norm_label": "app.php",
+      "id": "config_app"
+    },
+    {
+      "label": "auth.php",
+      "file_type": "code",
+      "source_file": "config/auth.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 30,
+      "norm_label": "auth.php",
+      "id": "config_auth"
+    },
+    {
+      "label": "cache.php",
+      "file_type": "code",
+      "source_file": "config/cache.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 31,
+      "norm_label": "cache.php",
+      "id": "config_cache"
+    },
+    {
+      "label": "database.php",
+      "file_type": "code",
+      "source_file": "config/database.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 32,
+      "norm_label": "database.php",
+      "id": "config_database"
+    },
+    {
+      "label": "filesystems.php",
+      "file_type": "code",
+      "source_file": "config/filesystems.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 33,
+      "norm_label": "filesystems.php",
+      "id": "config_filesystems"
+    },
+    {
+      "label": "logging.php",
+      "file_type": "code",
+      "source_file": "config/logging.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 34,
+      "norm_label": "logging.php",
+      "id": "config_logging"
+    },
+    {
+      "label": "mail.php",
+      "file_type": "code",
+      "source_file": "config/mail.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 35,
+      "norm_label": "mail.php",
+      "id": "config_mail"
+    },
+    {
+      "label": "permission.php",
+      "file_type": "code",
+      "source_file": "config/permission.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 36,
+      "norm_label": "permission.php",
+      "id": "config_permission"
+    },
+    {
+      "label": "queue.php",
+      "file_type": "code",
+      "source_file": "config/queue.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 37,
+      "norm_label": "queue.php",
+      "id": "config_queue"
+    },
+    {
+      "label": "sanctum.php",
+      "file_type": "code",
+      "source_file": "config/sanctum.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 38,
+      "norm_label": "sanctum.php",
+      "id": "config_sanctum"
+    },
+    {
+      "label": "services.php",
+      "file_type": "code",
+      "source_file": "config/services.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 39,
+      "norm_label": "services.php",
+      "id": "config_services"
+    },
+    {
+      "label": "session.php",
+      "file_type": "code",
+      "source_file": "config/session.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 40,
+      "norm_label": "session.php",
+      "id": "config_session"
+    },
+    {
+      "label": "UserFactory.php",
+      "file_type": "code",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 13,
+      "norm_label": "userfactory.php",
+      "id": "factories_userfactory"
+    },
+    {
+      "label": "UserFactory",
+      "file_type": "code",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 13,
+      "norm_label": "userfactory",
+      "id": "factories_userfactory_userfactory"
+    },
+    {
+      "label": "Factory",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 13,
+      "norm_label": "factory",
+      "id": "factory"
+    },
+    {
+      "label": ".definition()",
+      "file_type": "code",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L24",
+      "_origin": "ast",
+      "community": 13,
+      "norm_label": ".definition()",
+      "id": "factories_userfactory_userfactory_definition"
+    },
+    {
+      "label": ".unverified()",
+      "file_type": "code",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L38",
+      "_origin": "ast",
+      "community": 13,
+      "norm_label": ".unverified()",
+      "id": "factories_userfactory_userfactory_unverified"
+    },
+    {
+      "label": "static",
+      "file_type": "code",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L38",
+      "_origin": "ast",
+      "community": 13,
+      "norm_label": "static",
+      "id": "static"
+    },
+    {
+      "label": "0001_01_01_000000_create_users_table.php",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 16,
+      "norm_label": "0001_01_01_000000_create_users_table.php",
+      "id": "migrations_0001_01_01_000000_create_users_table"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 16,
+      "norm_label": "up()",
+      "id": "migrations_0001_01_01_000000_create_users_table_up"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "source_location": "L43",
+      "_origin": "ast",
+      "community": 16,
+      "norm_label": "down()",
+      "id": "migrations_0001_01_01_000000_create_users_table_down"
+    },
+    {
+      "label": "0001_01_01_000001_create_cache_table.php",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 17,
+      "norm_label": "0001_01_01_000001_create_cache_table.php",
+      "id": "migrations_0001_01_01_000001_create_cache_table"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 17,
+      "norm_label": "up()",
+      "id": "migrations_0001_01_01_000001_create_cache_table_up"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "source_location": "L30",
+      "_origin": "ast",
+      "community": 17,
+      "norm_label": "down()",
+      "id": "migrations_0001_01_01_000001_create_cache_table_down"
+    },
+    {
+      "label": "0001_01_01_000002_create_jobs_table.php",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 18,
+      "norm_label": "0001_01_01_000002_create_jobs_table.php",
+      "id": "migrations_0001_01_01_000002_create_jobs_table"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 18,
+      "norm_label": "up()",
+      "id": "migrations_0001_01_01_000002_create_jobs_table_up"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "source_location": "L51",
+      "_origin": "ast",
+      "community": 18,
+      "norm_label": "down()",
+      "id": "migrations_0001_01_01_000002_create_jobs_table_down"
+    },
+    {
+      "label": "2026_06_07_213802_create_personal_access_tokens_table.php",
+      "file_type": "code",
+      "source_file": "database/migrations/2026_06_07_213802_create_personal_access_tokens_table.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 19,
+      "norm_label": "2026_06_07_213802_create_personal_access_tokens_table.php",
+      "id": "migrations_2026_06_07_213802_create_personal_access_tokens_table"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "database/migrations/2026_06_07_213802_create_personal_access_tokens_table.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 19,
+      "norm_label": "up()",
+      "id": "migrations_2026_06_07_213802_create_personal_access_tokens_table_up"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "database/migrations/2026_06_07_213802_create_personal_access_tokens_table.php",
+      "source_location": "L29",
+      "_origin": "ast",
+      "community": 19,
+      "norm_label": "down()",
+      "id": "migrations_2026_06_07_213802_create_personal_access_tokens_table_down"
+    },
+    {
+      "label": "2026_06_07_213810_create_permission_tables.php",
+      "file_type": "code",
+      "source_file": "database/migrations/2026_06_07_213810_create_permission_tables.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 20,
+      "norm_label": "2026_06_07_213810_create_permission_tables.php",
+      "id": "migrations_2026_06_07_213810_create_permission_tables"
+    },
+    {
+      "label": "up()",
+      "file_type": "code",
+      "source_file": "database/migrations/2026_06_07_213810_create_permission_tables.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 20,
+      "norm_label": "up()",
+      "id": "migrations_2026_06_07_213810_create_permission_tables_up"
+    },
+    {
+      "label": "down()",
+      "file_type": "code",
+      "source_file": "database/migrations/2026_06_07_213810_create_permission_tables.php",
+      "source_location": "L122",
+      "_origin": "ast",
+      "community": 20,
+      "norm_label": "down()",
+      "id": "migrations_2026_06_07_213810_create_permission_tables_down"
+    },
+    {
+      "label": "DatabaseSeeder.php",
+      "file_type": "code",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "databaseseeder.php",
+      "id": "seeders_databaseseeder"
+    },
+    {
+      "label": "DatabaseSeeder",
+      "file_type": "code",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "databaseseeder",
+      "id": "seeders_databaseseeder_databaseseeder"
+    },
+    {
+      "label": "Seeder",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": "seeder",
+      "id": "seeder"
+    },
+    {
+      "label": ".run()",
+      "file_type": "code",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L14",
+      "_origin": "ast",
+      "community": 6,
+      "norm_label": ".run()",
+      "id": "seeders_databaseseeder_databaseseeder_run"
+    },
+    {
+      "label": "package.json",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "package.json",
+      "id": "package"
+    },
+    {
+      "label": "private",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "private",
+      "id": "package_private"
+    },
+    {
+      "label": "type",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "type",
+      "id": "package_type"
+    },
+    {
+      "label": "scripts",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "scripts",
+      "id": "package_scripts"
+    },
+    {
+      "label": "build",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "build",
+      "id": "package_scripts_build"
+    },
+    {
+      "label": "dev",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "dev",
+      "id": "package_scripts_dev"
+    },
+    {
+      "label": "devDependencies",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "devdependencies",
+      "id": "package_devdependencies"
+    },
+    {
+      "label": "autoprefixer",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "autoprefixer",
+      "id": "package_devdependencies_autoprefixer"
+    },
+    {
+      "label": "axios",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "axios",
+      "id": "package_devdependencies_axios"
+    },
+    {
+      "label": "concurrently",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L11",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "concurrently",
+      "id": "package_devdependencies_concurrently"
+    },
+    {
+      "label": "laravel-vite-plugin",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "laravel-vite-plugin",
+      "id": "package_devdependencies_laravel_vite_plugin"
+    },
+    {
+      "label": "postcss",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "postcss",
+      "id": "package_devdependencies_postcss"
+    },
+    {
+      "label": "tailwindcss",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L14",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "tailwindcss",
+      "id": "package_devdependencies_tailwindcss"
+    },
+    {
+      "label": "vite",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L15",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "vite",
+      "id": "package_devdependencies_vite"
+    },
+    {
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L17",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "dependencies",
+      "id": "package_dependencies"
+    },
+    {
+      "label": "alpinejs",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L18",
+      "_origin": "ast",
+      "community": 2,
+      "norm_label": "alpinejs",
+      "id": "package_dependencies_alpinejs"
+    },
+    {
+      "label": "postcss.config.js",
+      "file_type": "code",
+      "source_file": "postcss.config.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 41,
+      "norm_label": "postcss.config.js",
+      "id": "postcss_config"
+    },
+    {
+      "label": "index.php",
+      "file_type": "code",
+      "source_file": "public/index.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 42,
+      "norm_label": "index.php",
+      "id": "public_index"
+    },
+    {
+      "label": "app.js",
+      "file_type": "code",
+      "source_file": "resources/js/app.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 22,
+      "norm_label": "app.js",
+      "id": "js_app"
+    },
+    {
+      "label": "bootstrap.js",
+      "file_type": "code",
+      "source_file": "resources/js/bootstrap.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 22,
+      "norm_label": "bootstrap.js",
+      "id": "js_bootstrap"
+    },
+    {
+      "label": "welcome.blade.php",
+      "file_type": "code",
+      "source_file": "resources/views/welcome.blade.php",
+      "source_location": null,
+      "_origin": "ast",
+      "community": 48,
+      "norm_label": "welcome.blade.php",
+      "id": "views_welcome_blade"
+    },
+    {
+      "label": "console.php",
+      "file_type": "code",
+      "source_file": "routes/console.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 43,
+      "norm_label": "console.php",
+      "id": "routes_console"
+    },
+    {
+      "label": "web.php",
+      "file_type": "code",
+      "source_file": "routes/web.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 44,
+      "norm_label": "web.php",
+      "id": "routes_web"
+    },
+    {
+      "label": "1f1c7dacd85c0e34762712cda83f954a.php",
+      "file_type": "code",
+      "source_file": "storage/framework/views/1f1c7dacd85c0e34762712cda83f954a.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 46,
+      "norm_label": "1f1c7dacd85c0e34762712cda83f954a.php",
+      "id": "views_1f1c7dacd85c0e34762712cda83f954a"
+    },
+    {
+      "label": "50e8da7b67dd8e92dff614a1caf2c273.php",
+      "file_type": "code",
+      "source_file": "storage/framework/views/50e8da7b67dd8e92dff614a1caf2c273.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 47,
+      "norm_label": "50e8da7b67dd8e92dff614a1caf2c273.php",
+      "id": "views_50e8da7b67dd8e92dff614a1caf2c273"
+    },
+    {
+      "label": "tailwind.config.js",
+      "file_type": "code",
+      "source_file": "tailwind.config.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 45,
+      "norm_label": "tailwind.config.js",
+      "id": "tailwind_config"
+    },
+    {
+      "label": "ExampleTest.php",
+      "file_type": "code",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "exampletest.php",
+      "id": "feature_exampletest"
+    },
+    {
+      "label": "ExampleTest",
+      "file_type": "code",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L8",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "exampletest",
+      "id": "feature_exampletest_exampletest"
+    },
+    {
+      "label": ".test_the_application_returns_a_successful_response()",
+      "file_type": "code",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": ".test_the_application_returns_a_successful_response()",
+      "id": "feature_exampletest_exampletest_test_the_application_returns_a_successful_response"
+    },
+    {
+      "label": "TestCase.php",
+      "file_type": "code",
+      "source_file": "tests/TestCase.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "testcase.php",
+      "id": "tests_testcase"
+    },
+    {
+      "label": "TestCase",
+      "file_type": "code",
+      "source_file": "tests/TestCase.php",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "testcase",
+      "id": "tests_testcase_testcase"
+    },
+    {
+      "label": "BaseTestCase",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "basetestcase",
+      "id": "basetestcase"
+    },
+    {
+      "label": "ExampleTest.php",
+      "file_type": "code",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "exampletest.php",
+      "id": "unit_exampletest"
+    },
+    {
+      "label": "ExampleTest",
+      "file_type": "code",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": "exampletest",
+      "id": "unit_exampletest_exampletest"
+    },
+    {
+      "label": ".test_that_true_is_true()",
+      "file_type": "code",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L12",
+      "_origin": "ast",
+      "community": 8,
+      "norm_label": ".test_that_true_is_true()",
+      "id": "unit_exampletest_exampletest_test_that_true_is_true"
+    },
+    {
+      "label": "vite.config.js",
+      "file_type": "code",
+      "source_file": "vite.config.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 49,
+      "norm_label": "vite.config.js",
+      "id": "vite_config"
+    },
+    {
+      "label": "graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 23,
+      "norm_label": "graphify.md",
+      "id": "rules_graphify"
+    },
+    {
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 23,
+      "norm_label": "graphify",
+      "id": "rules_graphify_graphify"
+    },
+    {
+      "label": "graphify.md",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 24,
+      "norm_label": "graphify.md",
+      "id": "workflows_graphify"
+    },
+    {
+      "label": "Workflow: graphify",
+      "file_type": "document",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 24,
+      "norm_label": "workflow: graphify",
+      "id": "workflows_graphify_workflow_graphify"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "readme.md",
+      "id": "readme"
+    },
+    {
+      "label": "\ud83c\udfe0 Osooli \u2014 Real Estate Platform",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83c\udfe0 osooli \u2014 real estate platform",
+      "id": "readme_osooli_real_estate_platform"
+    },
+    {
+      "label": "\ud83d\udccb Requirements",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83d\udccb requirements",
+      "id": "readme_requirements"
+    },
+    {
+      "label": "\ud83d\ude80 Installation",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L28",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "\ud83d\ude80 installation",
+      "id": "readme_installation"
+    },
+    {
+      "label": "1. Clone the repository",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L30",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "1. clone the repository",
+      "id": "readme_1_clone_the_repository"
+    },
+    {
+      "label": "2. Install PHP dependencies",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L37",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "2. install php dependencies",
+      "id": "readme_2_install_php_dependencies"
+    },
+    {
+      "label": "3. Install JavaScript dependencies",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L43",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "3. install javascript dependencies",
+      "id": "readme_3_install_javascript_dependencies"
+    },
+    {
+      "label": "4. Set up environment file",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "4. set up environment file",
+      "id": "readme_4_set_up_environment_file"
+    },
+    {
+      "label": "5. Configure your `.env` file",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L56",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "5. configure your `.env` file",
+      "id": "readme_5_configure_your_env_file"
+    },
+    {
+      "label": "6. Create the PostgreSQL database",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L74",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "6. create the postgresql database",
+      "id": "readme_6_create_the_postgresql_database"
+    },
+    {
+      "label": "7. Run database migrations",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L84",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "7. run database migrations",
+      "id": "readme_7_run_database_migrations"
+    },
+    {
+      "label": "8. (Optional) Seed the database",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L90",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "8. (optional) seed the database",
+      "id": "readme_8_optional_seed_the_database"
+    },
+    {
+      "label": "\u25b6\ufe0f Running the Project",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L98",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\u25b6\ufe0f running the project",
+      "id": "readme_running_the_project"
+    },
+    {
+      "label": "Start the development server",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L100",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "start the development server",
+      "id": "readme_start_the_development_server"
+    },
+    {
+      "label": "Compile frontend assets (in a separate terminal)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L108",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "compile frontend assets (in a separate terminal)",
+      "id": "readme_compile_frontend_assets_in_a_separate_terminal"
+    },
+    {
+      "label": "\ud83d\udce6 Installed Packages",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L116",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83d\udce6 installed packages",
+      "id": "readme_installed_packages"
+    },
+    {
+      "label": "PHP (Composer)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L118",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "php (composer)",
+      "id": "readme_php_composer"
+    },
+    {
+      "label": "JavaScript (npm)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L128",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "javascript (npm)",
+      "id": "readme_javascript_npm"
+    },
+    {
+      "label": "\ud83d\uddc4\ufe0f Database Viewer (pgAdmin 4)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L136",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83d\uddc4\ufe0f database viewer (pgadmin 4)",
+      "id": "readme_database_viewer_pgadmin_4"
+    },
+    {
+      "label": "\ud83d\udee0\ufe0f Useful Artisan Commands",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L146",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83d\udee0\ufe0f useful artisan commands",
+      "id": "readme_useful_artisan_commands"
+    },
+    {
+      "label": "\ud83d\udcc1 Project Structure",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L167",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83d\udcc1 project structure",
+      "id": "readme_project_structure"
+    },
+    {
+      "label": "\ud83e\udd1d Contributing",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L192",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83e\udd1d contributing",
+      "id": "readme_contributing"
+    },
+    {
+      "label": "\ud83d\udcc4 License",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L202",
+      "_origin": "ast",
+      "community": 4,
+      "norm_label": "\ud83d\udcc4 license",
+      "id": "readme_license"
+    },
+    {
+      "label": "osooli project context_v1.md",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "osooli project context_v1.md",
+      "id": "osooli_project_context_v1"
+    },
+    {
+      "label": "Osooli Project \u2014 Context Summary",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L881",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "osooli project \u2014 context summary",
+      "id": "osooli_project_context_v1_osooli_project_context_summary"
+    },
+    {
+      "label": "1. Project Overview",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L887",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "1. project overview",
+      "id": "osooli_project_context_v1_1_project_overview"
+    },
+    {
+      "label": "2. Phase 1 Scope (CLIENT REQUIREMENTS \u2014 final, agreed)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L898",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "2. phase 1 scope (client requirements \u2014 final, agreed)",
+      "id": "osooli_project_context_v1_2_phase_1_scope_client_requirements_final_agreed"
+    },
+    {
+      "label": "3. Final Technology Stack (decided \u2014 no more comparisons needed)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L918",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "3. final technology stack (decided \u2014 no more comparisons needed)",
+      "id": "osooli_project_context_v1_3_final_technology_stack_decided_no_more_comparisons_needed"
+    },
+    {
+      "label": "4. Environment Setup Status (Windows)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L950",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "4. environment setup status (windows)",
+      "id": "osooli_project_context_v1_4_environment_setup_status_windows"
+    },
+    {
+      "label": "5. Real Client GDB Data \u2014 ANALYZED (GDB.rar \u2192 Osooli.gdb)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L963",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "5. real client gdb data \u2014 analyzed (gdb.rar \u2192 osooli.gdb)",
+      "id": "osooli_project_context_v1_5_real_client_gdb_data_analyzed_gdb_rar_osooli_gdb"
+    },
+    {
+      "label": "Field analysis findings:",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L968",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "field analysis findings:",
+      "id": "osooli_project_context_v1_field_analysis_findings"
+    },
+    {
+      "label": "ArcGIS Domains discovered (= PostgreSQL ENUMs to create):",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L976",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "arcgis domains discovered (= postgresql enums to create):",
+      "id": "osooli_project_context_v1_arcgis_domains_discovered_postgresql_enums_to_create"
+    },
+    {
+      "label": "6. CRITICAL \u2014 Data Workflow Clarification (changes everything)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L990",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "6. critical \u2014 data workflow clarification (changes everything)",
+      "id": "osooli_project_context_v1_6_critical_data_workflow_clarification_changes_everything"
+    },
+    {
+      "label": "7. Proposed Database Schema (latest agreed design \u2014 NOT YET SCRIPTED)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1012",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "7. proposed database schema (latest agreed design \u2014 not yet scripted)",
+      "id": "osooli_project_context_v1_7_proposed_database_schema_latest_agreed_design_not_yet_scripted"
+    },
+    {
+      "label": "\u201cSynced from ArcGIS\u201d tables (re-imported periodically):",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1014",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "\u201csynced from arcgis\u201d tables (re-imported periodically):",
+      "id": "osooli_project_context_v1_synced_from_arcgis_tables_re_imported_periodically"
+    },
+    {
+      "label": "\u201cOwned by us\u201d tables:",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1043",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "\u201cowned by us\u201d tables:",
+      "id": "osooli_project_context_v1_owned_by_us_tables"
+    },
+    {
+      "label": "PostgreSQL ENUM types to create:",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1058",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "postgresql enum types to create:",
+      "id": "osooli_project_context_v1_postgresql_enum_types_to_create"
+    },
+    {
+      "label": "8. Documents Already Produced (in /mnt/user-data/outputs from earlier sessions)",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1076",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "8. documents already produced (in /mnt/user-data/outputs from earlier sessions)",
+      "id": "osooli_project_context_v1_8_documents_already_produced_in_mnt_user_data_outputs_from_earlier_sessions"
+    },
+    {
+      "label": "9. Pending / Open Items for Next Conversation",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1088",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "9. pending / open items for next conversation",
+      "id": "osooli_project_context_v1_9_pending_open_items_for_next_conversation"
+    },
+    {
+      "label": "10. Flutter / UI Design Status",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1101",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "10. flutter / ui design status",
+      "id": "osooli_project_context_v1_10_flutter_ui_design_status"
+    },
+    {
+      "label": "11. Key Constraints to Remember",
+      "file_type": "document",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1110",
+      "_origin": "ast",
+      "community": 1,
+      "norm_label": "11. key constraints to remember",
+      "id": "osooli_project_context_v1_11_key_constraints_to_remember"
+    },
+    {
+      "label": "osooli_claude_code_handoff.md",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "osooli_claude_code_handoff.md",
+      "id": "osooli_claude_code_handoff"
+    },
+    {
+      "label": "Osooli (\u0623\u0635\u0648\u0644\u064a) \u2014 DB Schema Handoff \u0644\u0640 Laravel Implementation",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "osooli (\u0627\u0635\u0648\u0644\u064a) \u2014 db schema handoff \u0644\u0640 laravel implementation",
+      "id": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation"
+    },
+    {
+      "label": "1. \u0627\u0644\u062a\u0642\u0646\u064a\u0627\u062a \u0627\u0644\u0645\u0624\u0643\u062f\u0629 (\u0644\u0627 \u062d\u0627\u062c\u0629 \u0644\u0645\u0631\u0627\u062c\u0639\u062a\u0647\u0627)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "1. \u0627\u0644\u062a\u0642\u0646\u064a\u0627\u062a \u0627\u0644\u0645\u0648\u0643\u062f\u0629 (\u0644\u0627 \u062d\u0627\u062c\u0629 \u0644\u0645\u0631\u0627\u062c\u0639\u062a\u0647\u0627)",
+      "id": "osooli_claude_code_handoff_1_\u0627\u0644\u062a\u0642\u0646\u064a\u0627\u062a_\u0627\u0644\u0645\u0624\u0643\u062f\u0629_\u0644\u0627_\u062d\u0627\u062c\u0629_\u0644\u0645\u0631\u0627\u062c\u0639\u062a\u0647\u0627"
+    },
+    {
+      "label": "2. \u0645\u0644\u0641 Schema \u0627\u0644\u062c\u0627\u0647\u0632",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L21",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "2. \u0645\u0644\u0641 schema \u0627\u0644\u062c\u0627\u0647\u0632",
+      "id": "osooli_claude_code_handoff_2_\u0645\u0644\u0641_schema_\u0627\u0644\u062c\u0627\u0647\u0632"
+    },
+    {
+      "label": "3. \u0645\u0644\u062e\u0635 \u0627\u0644\u062a\u0635\u0645\u064a\u0645 \u0627\u0644\u0646\u0647\u0627\u0626\u064a (17 \u062c\u062f\u0648\u0644)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L34",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "3. \u0645\u0644\u062e\u0635 \u0627\u0644\u062a\u0635\u0645\u064a\u0645 \u0627\u0644\u0646\u0647\u0627\u064a\u064a (17 \u062c\u062f\u0648\u0644)",
+      "id": "osooli_claude_code_handoff_3_\u0645\u0644\u062e\u0635_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644"
+    },
+    {
+      "label": "\u0623. \u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a (owned by us)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L36",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "\u0627. \u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a (owned by us)",
+      "id": "osooli_claude_code_handoff_\u0623_\u0627\u0644\u0647\u064a\u0643\u0644_\u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a_owned_by_us"
+    },
+    {
+      "label": "\u0628. \u0627\u0644\u0646\u0648\u0627\u0629 (synced from ArcGIS + owned by us)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L44",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "\u0628. \u0627\u0644\u0646\u0648\u0627\u0629 (synced from arcgis + owned by us)",
+      "id": "osooli_claude_code_handoff_\u0628_\u0627\u0644\u0646\u0648\u0627\u0629_synced_from_arcgis_owned_by_us"
+    },
+    {
+      "label": "\u062c. \u0627\u0644\u0646\u0638\u0627\u0645 (owned by us)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L58",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "\u062c. \u0627\u0644\u0646\u0638\u0627\u0645 (owned by us)",
+      "id": "osooli_claude_code_handoff_\u062c_\u0627\u0644\u0646\u0638\u0627\u0645_owned_by_us"
+    },
+    {
+      "label": "4. \u0623\u0647\u0645 \u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a \u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629 (\u0627\u0644\u0633\u064a\u0627\u0642 \u0627\u0644\u0643\u0627\u0645\u0644)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L68",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "4. \u0627\u0647\u0645 \u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a \u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629 (\u0627\u0644\u0633\u064a\u0627\u0642 \u0627\u0644\u0643\u0627\u0645\u0644)",
+      "id": "osooli_claude_code_handoff_4_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0627\u0644\u0633\u064a\u0627\u0642_\u0627\u0644\u0643\u0627\u0645\u0644"
+    },
+    {
+      "label": "5. \u062e\u0637\u0648\u0627\u062a Laravel \u0627\u0644\u062a\u0627\u0644\u064a\u0629 (\u0627\u0644\u0645\u0642\u062a\u0631\u062d\u0629 \u0644\u0640 Claude Code)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L106",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "5. \u062e\u0637\u0648\u0627\u062a laravel \u0627\u0644\u062a\u0627\u0644\u064a\u0629 (\u0627\u0644\u0645\u0642\u062a\u0631\u062d\u0629 \u0644\u0640 claude code)",
+      "id": "osooli_claude_code_handoff_5_\u062e\u0637\u0648\u0627\u062a_laravel_\u0627\u0644\u062a\u0627\u0644\u064a\u0629_\u0627\u0644\u0645\u0642\u062a\u0631\u062d\u0629_\u0644\u0640_claude_code"
+    },
+    {
+      "label": "6. \u0623\u0633\u0626\u0644\u0629 \u0645\u0641\u062a\u0648\u062d\u0629 (\u0644\u0627 \u062a\u0639\u064a\u0642 \u0627\u0644\u0639\u0645\u0644\u060c \u0644\u0643\u0646 \u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0645\u0639 Al-Esnad)",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L124",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "6. \u0627\u0633\u064a\u0644\u0629 \u0645\u0641\u062a\u0648\u062d\u0629 (\u0644\u0627 \u062a\u0639\u064a\u0642 \u0627\u0644\u0639\u0645\u0644\u060c \u0644\u0643\u0646 \u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629 \u0645\u0639 al-esnad)",
+      "id": "osooli_claude_code_handoff_6_\u0623\u0633\u0626\u0644\u0629_\u0645\u0641\u062a\u0648\u062d\u0629_\u0644\u0627_\u062a\u0639\u064a\u0642_\u0627\u0644\u0639\u0645\u0644_\u0644\u0643\u0646_\u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629_\u0645\u0639_al_esnad"
+    },
+    {
+      "label": "7. \u0645\u0644\u0641\u0627\u062a \u0645\u0631\u062c\u0639\u064a\u0629 \u0645\u0646 \u0647\u0630\u0647 \u0627\u0644\u062c\u0644\u0633\u0629",
+      "file_type": "document",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L132",
+      "_origin": "ast",
+      "community": 5,
+      "norm_label": "7. \u0645\u0644\u0641\u0627\u062a \u0645\u0631\u062c\u0639\u064a\u0629 \u0645\u0646 \u0647\u0630\u0647 \u0627\u0644\u062c\u0644\u0633\u0629",
+      "id": "osooli_claude_code_handoff_7_\u0645\u0644\u0641\u0627\u062a_\u0645\u0631\u062c\u0639\u064a\u0629_\u0645\u0646_\u0647\u0630\u0647_\u0627\u0644\u062c\u0644\u0633\u0629"
+    },
+    {
+      "label": "osooli_full_summary.md",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "osooli_full_summary.md",
+      "id": "osooli_full_summary"
+    },
+    {
+      "label": "Osooli (\u0623\u0635\u0648\u0644\u064a) \u2014 \u0645\u0644\u062e\u0635 \u0634\u0627\u0645\u0644 \u0644\u0644\u0645\u0634\u0631\u0648\u0639 + \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "osooli (\u0627\u0635\u0648\u0644\u064a) \u2014 \u0645\u0644\u062e\u0635 \u0634\u0627\u0645\u0644 \u0644\u0644\u0645\u0634\u0631\u0648\u0639 + \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a",
+      "id": "osooli_full_summary_osooli_\u0623\u0635\u0648\u0644\u064a_\u0645\u0644\u062e\u0635_\u0634\u0627\u0645\u0644_\u0644\u0644\u0645\u0634\u0631\u0648\u0639_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a"
+    },
+    {
+      "label": "(Handoff \u0643\u0627\u0645\u0644 \u0644\u0640 Claude Code - \u064a\u0628\u062f\u0623 \u0645\u0646 \u0647\u0646\u0627)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L2",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "(handoff \u0643\u0627\u0645\u0644 \u0644\u0640 claude code - \u064a\u0628\u062f\u0627 \u0645\u0646 \u0647\u0646\u0627)",
+      "id": "osooli_full_summary_handoff_\u0643\u0627\u0645\u0644_\u0644\u0640_claude_code_\u064a\u0628\u062f\u0623_\u0645\u0646_\u0647\u0646\u0627"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 1: \u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629 \u0639\u0644\u0649 \u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 1: \u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629 \u0639\u0644\u0649 \u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_1_\u0646\u0638\u0631\u0629_\u0639\u0627\u0645\u0629_\u0639\u0644\u0649_\u0627\u0644\u0645\u0634\u0631\u0648\u0639"
+    },
+    {
+      "label": "1.1 \u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L11",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "1.1 \u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "id": "osooli_full_summary_1_1_\u0627\u0644\u0645\u0634\u0631\u0648\u0639"
+    },
+    {
+      "label": "1.2 \u0646\u0637\u0627\u0642 \u0627\u0644\u0645\u0631\u062d\u0644\u0629 1 (\u0646\u0647\u0627\u0626\u064a \u0648\u0645\u062a\u0641\u0642 \u0639\u0644\u064a\u0647)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L19",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "1.2 \u0646\u0637\u0627\u0642 \u0627\u0644\u0645\u0631\u062d\u0644\u0629 1 (\u0646\u0647\u0627\u064a\u064a \u0648\u0645\u062a\u0641\u0642 \u0639\u0644\u064a\u0647)",
+      "id": "osooli_full_summary_1_2_\u0646\u0637\u0627\u0642_\u0627\u0644\u0645\u0631\u062d\u0644\u0629_1_\u0646\u0647\u0627\u0626\u064a_\u0648\u0645\u062a\u0641\u0642_\u0639\u0644\u064a\u0647"
+    },
+    {
+      "label": "1.3 \u0627\u0644\u0640 Stack \u0627\u0644\u0646\u0647\u0627\u0626\u064a (\u0645\u062d\u0633\u0648\u0645 - \u0644\u0627 \u0645\u0632\u064a\u062f \u0645\u0646 \u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0627\u062a)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L44",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "1.3 \u0627\u0644\u0640 stack \u0627\u0644\u0646\u0647\u0627\u064a\u064a (\u0645\u062d\u0633\u0648\u0645 - \u0644\u0627 \u0645\u0632\u064a\u062f \u0645\u0646 \u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0627\u062a)",
+      "id": "osooli_full_summary_1_3_\u0627\u0644\u0640_stack_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_\u0645\u062d\u0633\u0648\u0645_\u0644\u0627_\u0645\u0632\u064a\u062f_\u0645\u0646_\u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0627\u062a"
+    },
+    {
+      "label": "1.4 \u0642\u064a\u0648\u062f \u064a\u062c\u0628 \u062a\u0630\u0643\u0631\u0647\u0627 \u062f\u0627\u0626\u0645\u0627\u064b",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L62",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "1.4 \u0642\u064a\u0648\u062f \u064a\u062c\u0628 \u062a\u0630\u0643\u0631\u0647\u0627 \u062f\u0627\u064a\u0645\u0627",
+      "id": "osooli_full_summary_1_4_\u0642\u064a\u0648\u062f_\u064a\u062c\u0628_\u062a\u0630\u0643\u0631\u0647\u0627_\u062f\u0627\u0626\u0645\u0627"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 2: \u062d\u0627\u0644\u0629 \u0627\u0644\u0628\u064a\u0626\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629 (Windows)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L72",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 2: \u062d\u0627\u0644\u0629 \u0627\u0644\u0628\u064a\u064a\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629 (windows)",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_2_\u062d\u0627\u0644\u0629_\u0627\u0644\u0628\u064a\u0626\u0629_\u0627\u0644\u062d\u0627\u0644\u064a\u0629_windows"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 3: \u062a\u0635\u0645\u064a\u0645 \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u2014 \u0627\u0644\u0646\u0647\u0627\u0626\u064a (17 \u062c\u062f\u0648\u0644)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L88",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 3: \u062a\u0635\u0645\u064a\u0645 \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a \u2014 \u0627\u0644\u0646\u0647\u0627\u064a\u064a (17 \u062c\u062f\u0648\u0644)",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_3_\u062a\u0635\u0645\u064a\u0645_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644"
+    },
+    {
+      "label": "3.1 \u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a (owned by us)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L93",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "3.1 \u0627\u0644\u0647\u064a\u0643\u0644 \u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a (owned by us)",
+      "id": "osooli_full_summary_3_1_\u0627\u0644\u0647\u064a\u0643\u0644_\u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a_owned_by_us"
+    },
+    {
+      "label": "3.2 \u0627\u0644\u062c\u062f\u0627\u0648\u0644 \u0627\u0644\u0623\u0633\u0627\u0633\u064a\u0629",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L101",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "3.2 \u0627\u0644\u062c\u062f\u0627\u0648\u0644 \u0627\u0644\u0627\u0633\u0627\u0633\u064a\u0629",
+      "id": "osooli_full_summary_3_2_\u0627\u0644\u062c\u062f\u0627\u0648\u0644_\u0627\u0644\u0623\u0633\u0627\u0633\u064a\u0629"
+    },
+    {
+      "label": "3.3 \u0623\u0647\u0645 \u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a \u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629 (\u0644\u0645\u0627\u0630\u0627 \u0627\u0644\u062a\u0635\u0645\u064a\u0645 \u0647\u0643\u0630\u0627)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L118",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "3.3 \u0627\u0647\u0645 \u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a \u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629 (\u0644\u0645\u0627\u0630\u0627 \u0627\u0644\u062a\u0635\u0645\u064a\u0645 \u0647\u0643\u0630\u0627)",
+      "id": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627"
+    },
+    {
+      "label": "\u0627\u0644\u0642\u0637\u0639\u0629 \u0648\u0627\u0644\u0648\u062d\u062f\u0627\u062a \u0627\u0644\u0641\u0631\u0639\u064a\u0629 (`parent_parcel_id`)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L120",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "\u0627\u0644\u0642\u0637\u0639\u0629 \u0648\u0627\u0644\u0648\u062d\u062f\u0627\u062a \u0627\u0644\u0641\u0631\u0639\u064a\u0629 (`parent_parcel_id`)",
+      "id": "osooli_full_summary_\u0627\u0644\u0642\u0637\u0639\u0629_\u0648\u0627\u0644\u0648\u062d\u062f\u0627\u062a_\u0627\u0644\u0641\u0631\u0639\u064a\u0629_parent_parcel_id"
+    },
+    {
+      "label": "\u0627\u0644\u0645\u0644\u0643\u064a\u0629 \u0627\u0644\u0645\u0634\u062a\u0631\u0643\u0629 (`deed_owners`)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L126",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "\u0627\u0644\u0645\u0644\u0643\u064a\u0629 \u0627\u0644\u0645\u0634\u062a\u0631\u0643\u0629 (`deed_owners`)",
+      "id": "osooli_full_summary_\u0627\u0644\u0645\u0644\u0643\u064a\u0629_\u0627\u0644\u0645\u0634\u062a\u0631\u0643\u0629_deed_owners"
+    },
+    {
+      "label": "\u0627\u0644\u0645\u0633\u0627\u062d\u0627\u062a \u0627\u0644\u062b\u0644\u0627\u062b\u0629 (\u0644\u0627 \u062a\u062e\u0644\u0637 \u0628\u064a\u0646\u0647\u0627)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L143",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "\u0627\u0644\u0645\u0633\u0627\u062d\u0627\u062a \u0627\u0644\u062b\u0644\u0627\u062b\u0629 (\u0644\u0627 \u062a\u062e\u0644\u0637 \u0628\u064a\u0646\u0647\u0627)",
+      "id": "osooli_full_summary_\u0627\u0644\u0645\u0633\u0627\u062d\u0627\u062a_\u0627\u0644\u062b\u0644\u0627\u062b\u0629_\u0644\u0627_\u062a\u062e\u0644\u0637_\u0628\u064a\u0646\u0647\u0627"
+    },
+    {
+      "label": "\u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0647\u062c\u0631\u064a (`deed_date_hijri`)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L150",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "\u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0647\u062c\u0631\u064a (`deed_date_hijri`)",
+      "id": "osooli_full_summary_\u0627\u0644\u062a\u0627\u0631\u064a\u062e_\u0627\u0644\u0647\u062c\u0631\u064a_deed_date_hijri"
+    },
+    {
+      "label": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u0627\u062d\u064a (`survey_date`)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L156",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0631\u0641\u0639 \u0627\u0644\u0645\u0633\u0627\u062d\u064a (`survey_date`)",
+      "id": "osooli_full_summary_\u062a\u0627\u0631\u064a\u062e_\u0627\u0644\u0631\u0641\u0639_\u0627\u0644\u0645\u0633\u0627\u062d\u064a_survey_date"
+    },
+    {
+      "label": "3.4 ENUM Types (\u0628\u0642\u064a\u0645 \u062d\u0642\u064a\u0642\u064a\u0629 \u0645\u0624\u0643\u062f\u0629 \u0645\u0646 ArcGIS Domains)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L161",
+      "_origin": "ast",
+      "community": 7,
+      "norm_label": "3.4 enum types (\u0628\u0642\u064a\u0645 \u062d\u0642\u064a\u0642\u064a\u0629 \u0645\u0648\u0643\u062f\u0629 \u0645\u0646 arcgis domains)",
+      "id": "osooli_full_summary_3_4_enum_types_\u0628\u0642\u064a\u0645_\u062d\u0642\u064a\u0642\u064a\u0629_\u0645\u0624\u0643\u062f\u0629_\u0645\u0646_arcgis_domains"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 4: \u0628\u064a\u0627\u0646\u0627\u062a GDB \u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629 \u0627\u0644\u0645\u064f\u062d\u0644\u0644\u0629 (Osooli.gdb / GeoJSON)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L178",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 4: \u0628\u064a\u0627\u0646\u0627\u062a gdb \u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629 \u0627\u0644\u0645\u062d\u0644\u0644\u0629 (osooli.gdb / geojson)",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_4_\u0628\u064a\u0627\u0646\u0627\u062a_gdb_\u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629_\u0627\u0644\u0645_\u062d\u0644\u0644\u0629_osooli_gdb_geojson"
+    },
+    {
+      "label": "4.1 \u0642\u0648\u0627\u0639\u062f \u0627\u0644\u062a\u0646\u0638\u064a\u0641 \u0639\u0646\u062f \u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L187",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "4.1 \u0642\u0648\u0627\u0639\u062f \u0627\u0644\u062a\u0646\u0638\u064a\u0641 \u0639\u0646\u062f \u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f",
+      "id": "osooli_full_summary_4_1_\u0642\u0648\u0627\u0639\u062f_\u0627\u0644\u062a\u0646\u0638\u064a\u0641_\u0639\u0646\u062f_\u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 5: \u0627\u0644\u062e\u0637\u0648\u0627\u062a \u0627\u0644\u062a\u0627\u0644\u064a\u0629 \u0644\u0640 Claude Code (\u0628\u0627\u0644\u062a\u0631\u062a\u064a\u0628)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L200",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 5: \u0627\u0644\u062e\u0637\u0648\u0627\u062a \u0627\u0644\u062a\u0627\u0644\u064a\u0629 \u0644\u0640 claude code (\u0628\u0627\u0644\u062a\u0631\u062a\u064a\u0628)",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_5_\u0627\u0644\u062e\u0637\u0648\u0627\u062a_\u0627\u0644\u062a\u0627\u0644\u064a\u0629_\u0644\u0640_claude_code_\u0628\u0627\u0644\u062a\u0631\u062a\u064a\u0628"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 6: \u0639\u0646\u0627\u0635\u0631 \u0645\u0639\u0644\u0651\u0642\u0629 (\u063a\u064a\u0631 \u0645\u062a\u0639\u0644\u0642\u0629 \u0628\u0627\u0644\u0643\u0648\u062f \u0645\u0628\u0627\u0634\u0631\u0629\u060c \u0644\u0643\u0646 \u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629)",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L236",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 6: \u0639\u0646\u0627\u0635\u0631 \u0645\u0639\u0644\u0642\u0629 (\u063a\u064a\u0631 \u0645\u062a\u0639\u0644\u0642\u0629 \u0628\u0627\u0644\u0643\u0648\u062f \u0645\u0628\u0627\u0634\u0631\u0629\u060c \u0644\u0643\u0646 \u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629)",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_6_\u0639\u0646\u0627\u0635\u0631_\u0645\u0639\u0644_\u0642\u0629_\u063a\u064a\u0631_\u0645\u062a\u0639\u0644\u0642\u0629_\u0628\u0627\u0644\u0643\u0648\u062f_\u0645\u0628\u0627\u0634\u0631\u0629_\u0644\u0643\u0646_\u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629"
+    },
+    {
+      "label": "\u0627\u0644\u062c\u0632\u0621 7: \u0627\u0644\u0645\u0644\u0641\u0627\u062a \u0627\u0644\u0645\u0631\u062c\u0639\u064a\u0629 \u0645\u0646 \u0627\u0644\u062c\u0644\u0633\u0627\u062a \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
+      "file_type": "document",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L245",
+      "_origin": "ast",
+      "community": 3,
+      "norm_label": "\u0627\u0644\u062c\u0632\u0621 7: \u0627\u0644\u0645\u0644\u0641\u0627\u062a \u0627\u0644\u0645\u0631\u062c\u0639\u064a\u0629 \u0645\u0646 \u0627\u0644\u062c\u0644\u0633\u0627\u062a \u0627\u0644\u0633\u0627\u0628\u0642\u0629",
+      "id": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_7_\u0627\u0644\u0645\u0644\u0641\u0627\u062a_\u0627\u0644\u0645\u0631\u062c\u0639\u064a\u0629_\u0645\u0646_\u0627\u0644\u062c\u0644\u0633\u0627\u062a_\u0627\u0644\u0633\u0627\u0628\u0642\u0629"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Http/Controllers/Controller.php",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "controllers_controller",
+      "target": "controllers_controller_controller"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user",
+      "target": "hasfactory"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user",
+      "target": "models_user_user"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user",
+      "target": "notifiable"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user_user",
+      "target": "authenticatable"
+    },
+    {
+      "relation": "mixes_in",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user_user",
+      "target": "hasfactory"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user_user",
+      "target": "models_user_user_casts"
+    },
+    {
+      "relation": "mixes_in",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Models/User.php",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "models_user_user",
+      "target": "notifiable"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "seeders_databaseseeder_databaseseeder_run",
+      "target": "models_user_user"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "providers_appserviceprovider",
+      "target": "providers_appserviceprovider_appserviceprovider"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "providers_appserviceprovider",
+      "target": "serviceprovider"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "providers_appserviceprovider_appserviceprovider",
+      "target": "providers_appserviceprovider_appserviceprovider_boot"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "providers_appserviceprovider_appserviceprovider",
+      "target": "providers_appserviceprovider_appserviceprovider_register"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "app/Providers/AppServiceProvider.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "providers_appserviceprovider_appserviceprovider",
+      "target": "serviceprovider"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_autoload"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_autoload_dev"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_config"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_description"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_extra"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_keywords"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_license"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L73",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_minimum_stability"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_name"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L74",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_prefer_stable"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_require"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_require_dev"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_schema"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L38",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_scripts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer",
+      "target": "composer_type"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_laravel_framework"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_laravel_sanctum"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_laravel_tinker"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_livewire_livewire"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_php"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_predis_predis"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require",
+      "target": "composer_require_spatie_laravel_permission"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_fakerphp_faker"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_laravel_pail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_laravel_pint"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_laravel_sail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_mockery_mockery"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_nunomaduro_collision"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_require_dev",
+      "target": "composer_require_dev_phpunit_phpunit"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_autoload",
+      "target": "composer_autoload_psr_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_autoload_psr_4",
+      "target": "composer_psr_4_app"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_autoload_psr_4",
+      "target": "composer_psr_4_database_factories"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_autoload_psr_4",
+      "target": "composer_psr_4_database_seeders"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_autoload_dev",
+      "target": "composer_autoload_dev_psr_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_autoload_dev_psr_4",
+      "target": "composer_psr_4_tests"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L54",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_scripts",
+      "target": "composer_scripts_dev"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_scripts",
+      "target": "composer_scripts_post_autoload_dump"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_scripts",
+      "target": "composer_scripts_post_create_project_cmd"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L46",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_scripts",
+      "target": "composer_scripts_post_root_package_install"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L43",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_scripts",
+      "target": "composer_scripts_post_update_cmd"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L60",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_extra",
+      "target": "composer_extra_laravel"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L61",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_extra_laravel",
+      "target": "composer_laravel_dont_discover"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L68",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_config",
+      "target": "composer_config_allow_plugins"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L65",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_config",
+      "target": "composer_config_optimize_autoloader"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L66",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_config",
+      "target": "composer_config_preferred_install"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L67",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_config",
+      "target": "composer_config_sort_packages"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_config_allow_plugins",
+      "target": "composer_allow_plugins_pestphp_pest_plugin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "composer.json",
+      "source_location": "L70",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "composer_config_allow_plugins",
+      "target": "composer_allow_plugins_php_http_discovery"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "factories_userfactory",
+      "target": "factories_userfactory_userfactory"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "factories_userfactory",
+      "target": "factory"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "factories_userfactory_userfactory",
+      "target": "factories_userfactory_userfactory_definition"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L38",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "factories_userfactory_userfactory",
+      "target": "factories_userfactory_userfactory_unverified"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "factories_userfactory_userfactory",
+      "target": "factory"
+    },
+    {
+      "relation": "uses_static_prop",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "factories_userfactory_userfactory_definition",
+      "target": "static"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "database/factories/UserFactory.php",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "return_type",
+      "confidence_score": 1.0,
+      "source": "factories_userfactory_userfactory_unverified",
+      "target": "static"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "source_location": "L43",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_0001_01_01_000000_create_users_table",
+      "target": "migrations_0001_01_01_000000_create_users_table_down"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/0001_01_01_000000_create_users_table.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_0001_01_01_000000_create_users_table",
+      "target": "migrations_0001_01_01_000000_create_users_table_up"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_0001_01_01_000001_create_cache_table",
+      "target": "migrations_0001_01_01_000001_create_cache_table_down"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/0001_01_01_000001_create_cache_table.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_0001_01_01_000001_create_cache_table",
+      "target": "migrations_0001_01_01_000001_create_cache_table_up"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_0001_01_01_000002_create_jobs_table",
+      "target": "migrations_0001_01_01_000002_create_jobs_table_down"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_0001_01_01_000002_create_jobs_table",
+      "target": "migrations_0001_01_01_000002_create_jobs_table_up"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/2026_06_07_213802_create_personal_access_tokens_table.php",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_2026_06_07_213802_create_personal_access_tokens_table",
+      "target": "migrations_2026_06_07_213802_create_personal_access_tokens_table_down"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/2026_06_07_213802_create_personal_access_tokens_table.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_2026_06_07_213802_create_personal_access_tokens_table",
+      "target": "migrations_2026_06_07_213802_create_personal_access_tokens_table_up"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/2026_06_07_213810_create_permission_tables.php",
+      "source_location": "L122",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_2026_06_07_213810_create_permission_tables",
+      "target": "migrations_2026_06_07_213810_create_permission_tables_down"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/migrations/2026_06_07_213810_create_permission_tables.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "migrations_2026_06_07_213810_create_permission_tables",
+      "target": "migrations_2026_06_07_213810_create_permission_tables_up"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "seeders_databaseseeder",
+      "target": "seeder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "seeders_databaseseeder",
+      "target": "seeders_databaseseeder_databaseseeder"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "seeders_databaseseeder_databaseseeder",
+      "target": "seeder"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "database/seeders/DatabaseSeeder.php",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "seeders_databaseseeder_databaseseeder",
+      "target": "seeders_databaseseeder_databaseseeder_run"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package",
+      "target": "package_dependencies"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package",
+      "target": "package_devdependencies"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package",
+      "target": "package_private"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package",
+      "target": "package_scripts"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package",
+      "target": "package_type"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_scripts",
+      "target": "package_scripts_build"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_scripts",
+      "target": "package_scripts_dev"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_autoprefixer"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_axios"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_concurrently"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_laravel_vite_plugin"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_postcss"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_tailwindcss"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_vite"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_dependencies",
+      "target": "package_dependencies_alpinejs"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "resources/js/app.js",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "js_app",
+      "target": "js_bootstrap"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "feature_exampletest",
+      "target": "feature_exampletest_exampletest"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "feature_exampletest",
+      "target": "tests_testcase_testcase"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "feature_exampletest_exampletest",
+      "target": "feature_exampletest_exampletest_test_the_application_returns_a_successful_response"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Feature/ExampleTest.php",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "feature_exampletest_exampletest",
+      "target": "tests_testcase_testcase"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/TestCase.php",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import",
+      "confidence_score": 1.0,
+      "source": "tests_testcase",
+      "target": "tests_testcase_testcase"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/TestCase.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_testcase_testcase",
+      "target": "basetestcase"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unit_exampletest",
+      "target": "tests_testcase_testcase"
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unit_exampletest_exampletest",
+      "target": "tests_testcase_testcase"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unit_exampletest",
+      "target": "unit_exampletest_exampletest"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/Unit/ExampleTest.php",
+      "source_location": "L12",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unit_exampletest_exampletest",
+      "target": "unit_exampletest_exampletest_test_that_true_is_true"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/rules/graphify.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "rules_graphify",
+      "target": "rules_graphify_graphify"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/workflows/graphify.md",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "workflows_graphify",
+      "target": "workflows_graphify_workflow_graphify"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme",
+      "target": "readme_osooli_real_estate_platform"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L192",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_contributing"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L136",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_database_viewer_pgadmin_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_installation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_installed_packages"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L202",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_license"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L167",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_project_structure"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_requirements"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L98",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_running_the_project"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L146",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_osooli_real_estate_platform",
+      "target": "readme_useful_artisan_commands"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L30",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_1_clone_the_repository"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_2_install_php_dependencies"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L43",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_3_install_javascript_dependencies"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_4_set_up_environment_file"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_5_configure_your_env_file"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L74",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_6_create_the_postgresql_database"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L84",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_7_run_database_migrations"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L90",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installation",
+      "target": "readme_8_optional_seed_the_database"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L108",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_running_the_project",
+      "target": "readme_compile_frontend_assets_in_a_separate_terminal"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L100",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_running_the_project",
+      "target": "readme_start_the_development_server"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L128",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installed_packages",
+      "target": "readme_javascript_npm"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L118",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_installed_packages",
+      "target": "readme_php_composer"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L881",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1",
+      "target": "osooli_project_context_v1_osooli_project_context_summary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1101",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_10_flutter_ui_design_status"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1110",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_11_key_constraints_to_remember"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L887",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_1_project_overview"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L898",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_2_phase_1_scope_client_requirements_final_agreed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L918",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_3_final_technology_stack_decided_no_more_comparisons_needed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L950",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_4_environment_setup_status_windows"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L963",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_5_real_client_gdb_data_analyzed_gdb_rar_osooli_gdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L990",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_6_critical_data_workflow_clarification_changes_everything"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1012",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_7_proposed_database_schema_latest_agreed_design_not_yet_scripted"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1076",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_8_documents_already_produced_in_mnt_user_data_outputs_from_earlier_sessions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1088",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_osooli_project_context_summary",
+      "target": "osooli_project_context_v1_9_pending_open_items_for_next_conversation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L976",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_5_real_client_gdb_data_analyzed_gdb_rar_osooli_gdb",
+      "target": "osooli_project_context_v1_arcgis_domains_discovered_postgresql_enums_to_create"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L968",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_5_real_client_gdb_data_analyzed_gdb_rar_osooli_gdb",
+      "target": "osooli_project_context_v1_field_analysis_findings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1043",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_7_proposed_database_schema_latest_agreed_design_not_yet_scripted",
+      "target": "osooli_project_context_v1_owned_by_us_tables"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1058",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_7_proposed_database_schema_latest_agreed_design_not_yet_scripted",
+      "target": "osooli_project_context_v1_postgresql_enum_types_to_create"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli project context_v1.md",
+      "source_location": "L1014",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_project_context_v1_7_proposed_database_schema_latest_agreed_design_not_yet_scripted",
+      "target": "osooli_project_context_v1_synced_from_arcgis_tables_re_imported_periodically"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff",
+      "target": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_1_\u0627\u0644\u062a\u0642\u0646\u064a\u0627\u062a_\u0627\u0644\u0645\u0624\u0643\u062f\u0629_\u0644\u0627_\u062d\u0627\u062c\u0629_\u0644\u0645\u0631\u0627\u062c\u0639\u062a\u0647\u0627"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_2_\u0645\u0644\u0641_schema_\u0627\u0644\u062c\u0627\u0647\u0632"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_3_\u0645\u0644\u062e\u0635_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L68",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_4_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0627\u0644\u0633\u064a\u0627\u0642_\u0627\u0644\u0643\u0627\u0645\u0644"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L106",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_5_\u062e\u0637\u0648\u0627\u062a_laravel_\u0627\u0644\u062a\u0627\u0644\u064a\u0629_\u0627\u0644\u0645\u0642\u062a\u0631\u062d\u0629_\u0644\u0640_claude_code"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L124",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_6_\u0623\u0633\u0626\u0644\u0629_\u0645\u0641\u062a\u0648\u062d\u0629_\u0644\u0627_\u062a\u0639\u064a\u0642_\u0627\u0644\u0639\u0645\u0644_\u0644\u0643\u0646_\u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629_\u0645\u0639_al_esnad"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L132",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_osooli_\u0623\u0635\u0648\u0644\u064a_db_schema_handoff_\u0644\u0640_laravel_implementation",
+      "target": "osooli_claude_code_handoff_7_\u0645\u0644\u0641\u0627\u062a_\u0645\u0631\u062c\u0639\u064a\u0629_\u0645\u0646_\u0647\u0630\u0647_\u0627\u0644\u062c\u0644\u0633\u0629"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L36",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_3_\u0645\u0644\u062e\u0635_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_claude_code_handoff_\u0623_\u0627\u0644\u0647\u064a\u0643\u0644_\u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a_owned_by_us"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_3_\u0645\u0644\u062e\u0635_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_claude_code_handoff_\u0628_\u0627\u0644\u0646\u0648\u0627\u0629_synced_from_arcgis_owned_by_us"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_claude_code_handoff.md",
+      "source_location": "L58",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_claude_code_handoff_3_\u0645\u0644\u062e\u0635_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_claude_code_handoff_\u062c_\u0627\u0644\u0646\u0638\u0627\u0645_owned_by_us"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_osooli_\u0623\u0635\u0648\u0644\u064a_\u0645\u0644\u062e\u0635_\u0634\u0627\u0645\u0644_\u0644\u0644\u0645\u0634\u0631\u0648\u0639_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_1_\u0646\u0638\u0631\u0629_\u0639\u0627\u0645\u0629_\u0639\u0644\u0649_\u0627\u0644\u0645\u0634\u0631\u0648\u0639"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L72",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_2_\u062d\u0627\u0644\u0629_\u0627\u0644\u0628\u064a\u0626\u0629_\u0627\u0644\u062d\u0627\u0644\u064a\u0629_windows"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L88",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_3_\u062a\u0635\u0645\u064a\u0645_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L178",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_4_\u0628\u064a\u0627\u0646\u0627\u062a_gdb_\u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629_\u0627\u0644\u0645_\u062d\u0644\u0644\u0629_osooli_gdb_geojson"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L200",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_5_\u0627\u0644\u062e\u0637\u0648\u0627\u062a_\u0627\u0644\u062a\u0627\u0644\u064a\u0629_\u0644\u0640_claude_code_\u0628\u0627\u0644\u062a\u0631\u062a\u064a\u0628"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L236",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_6_\u0639\u0646\u0627\u0635\u0631_\u0645\u0639\u0644_\u0642\u0629_\u063a\u064a\u0631_\u0645\u062a\u0639\u0644\u0642\u0629_\u0628\u0627\u0644\u0643\u0648\u062f_\u0645\u0628\u0627\u0634\u0631\u0629_\u0644\u0643\u0646_\u0644\u0644\u0645\u062a\u0627\u0628\u0639\u0629"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L245",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary",
+      "target": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_7_\u0627\u0644\u0645\u0644\u0641\u0627\u062a_\u0627\u0644\u0645\u0631\u062c\u0639\u064a\u0629_\u0645\u0646_\u0627\u0644\u062c\u0644\u0633\u0627\u062a_\u0627\u0644\u0633\u0627\u0628\u0642\u0629"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_osooli_\u0623\u0635\u0648\u0644\u064a_\u0645\u0644\u062e\u0635_\u0634\u0627\u0645\u0644_\u0644\u0644\u0645\u0634\u0631\u0648\u0639_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a",
+      "target": "osooli_full_summary_handoff_\u0643\u0627\u0645\u0644_\u0644\u0640_claude_code_\u064a\u0628\u062f\u0623_\u0645\u0646_\u0647\u0646\u0627"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_1_\u0646\u0638\u0631\u0629_\u0639\u0627\u0645\u0629_\u0639\u0644\u0649_\u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "target": "osooli_full_summary_1_1_\u0627\u0644\u0645\u0634\u0631\u0648\u0639"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_1_\u0646\u0638\u0631\u0629_\u0639\u0627\u0645\u0629_\u0639\u0644\u0649_\u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "target": "osooli_full_summary_1_2_\u0646\u0637\u0627\u0642_\u0627\u0644\u0645\u0631\u062d\u0644\u0629_1_\u0646\u0647\u0627\u0626\u064a_\u0648\u0645\u062a\u0641\u0642_\u0639\u0644\u064a\u0647"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_1_\u0646\u0638\u0631\u0629_\u0639\u0627\u0645\u0629_\u0639\u0644\u0649_\u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "target": "osooli_full_summary_1_3_\u0627\u0644\u0640_stack_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_\u0645\u062d\u0633\u0648\u0645_\u0644\u0627_\u0645\u0632\u064a\u062f_\u0645\u0646_\u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0627\u062a"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L62",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_1_\u0646\u0638\u0631\u0629_\u0639\u0627\u0645\u0629_\u0639\u0644\u0649_\u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+      "target": "osooli_full_summary_1_4_\u0642\u064a\u0648\u062f_\u064a\u062c\u0628_\u062a\u0630\u0643\u0631\u0647\u0627_\u062f\u0627\u0626\u0645\u0627"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L93",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_3_\u062a\u0635\u0645\u064a\u0645_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_full_summary_3_1_\u0627\u0644\u0647\u064a\u0643\u0644_\u0627\u0644\u062c\u063a\u0631\u0627\u0641\u064a_owned_by_us"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L101",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_3_\u062a\u0635\u0645\u064a\u0645_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_full_summary_3_2_\u0627\u0644\u062c\u062f\u0627\u0648\u0644_\u0627\u0644\u0623\u0633\u0627\u0633\u064a\u0629"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L118",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_3_\u062a\u0635\u0645\u064a\u0645_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L161",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_3_\u062a\u0635\u0645\u064a\u0645_\u0642\u0627\u0639\u062f\u0629_\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a_\u0627\u0644\u0646\u0647\u0627\u0626\u064a_17_\u062c\u062f\u0648\u0644",
+      "target": "osooli_full_summary_3_4_enum_types_\u0628\u0642\u064a\u0645_\u062d\u0642\u064a\u0642\u064a\u0629_\u0645\u0624\u0643\u062f\u0629_\u0645\u0646_arcgis_domains"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L150",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627",
+      "target": "osooli_full_summary_\u0627\u0644\u062a\u0627\u0631\u064a\u062e_\u0627\u0644\u0647\u062c\u0631\u064a_deed_date_hijri"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627",
+      "target": "osooli_full_summary_\u0627\u0644\u0642\u0637\u0639\u0629_\u0648\u0627\u0644\u0648\u062d\u062f\u0627\u062a_\u0627\u0644\u0641\u0631\u0639\u064a\u0629_parent_parcel_id"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L143",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627",
+      "target": "osooli_full_summary_\u0627\u0644\u0645\u0633\u0627\u062d\u0627\u062a_\u0627\u0644\u062b\u0644\u0627\u062b\u0629_\u0644\u0627_\u062a\u062e\u0644\u0637_\u0628\u064a\u0646\u0647\u0627"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L126",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627",
+      "target": "osooli_full_summary_\u0627\u0644\u0645\u0644\u0643\u064a\u0629_\u0627\u0644\u0645\u0634\u062a\u0631\u0643\u0629_deed_owners"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L156",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_3_3_\u0623\u0647\u0645_\u0627\u0644\u0642\u0631\u0627\u0631\u0627\u062a_\u0627\u0644\u0647\u064a\u0643\u0644\u064a\u0629_\u0644\u0645\u0627\u0630\u0627_\u0627\u0644\u062a\u0635\u0645\u064a\u0645_\u0647\u0643\u0630\u0627",
+      "target": "osooli_full_summary_\u062a\u0627\u0631\u064a\u062e_\u0627\u0644\u0631\u0641\u0639_\u0627\u0644\u0645\u0633\u0627\u062d\u064a_survey_date"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "osooli_full_summary.md",
+      "source_location": "L187",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "osooli_full_summary_\u0627\u0644\u062c\u0632\u0621_4_\u0628\u064a\u0627\u0646\u0627\u062a_gdb_\u0627\u0644\u062d\u0642\u064a\u0642\u064a\u0629_\u0627\u0644\u0645_\u062d\u0644\u0644\u0629_osooli_gdb_geojson",
+      "target": "osooli_full_summary_4_1_\u0642\u0648\u0627\u0639\u062f_\u0627\u0644\u062a\u0646\u0638\u064a\u0641_\u0639\u0646\u062f_\u0627\u0644\u0627\u0633\u062a\u064a\u0631\u0627\u062f"
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "01a1d8f508a520f1497320ea0e5db1d850a594ab"
+}
