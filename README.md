@@ -1,23 +1,21 @@
-# 🏠 Osooli — Real Estate Platform
+# صكوكي — منصة إدارة الصكوك والأراضي
 
-> A modern real estate platform built with **Laravel 11**, **Livewire**, **Alpine.js**, and **PostgreSQL**.
+> منصة عقارية متكاملة مبنية على **Laravel 11**، **Livewire**، **Alpine.js**، و**PostgreSQL/PostGIS**.
 
 ---
 
-## 📋 Requirements
+## 📋 المتطلبات
 
-Make sure you have the following installed before starting:
-
-| Tool | Minimum Version | Download |
-|------|----------------|----------|
+| الأداة | الإصدار الأدنى | التنزيل |
+|--------|---------------|---------|
 | PHP | 8.2+ | https://www.php.net/downloads |
 | Composer | 2.x | https://getcomposer.org |
 | Node.js | 18+ | https://nodejs.org |
-| npm | 8+ | Comes with Node.js |
+| npm | 8+ | مضمّن مع Node.js |
 | Git | Any | https://git-scm.com |
 | PostgreSQL | 14+ | https://www.postgresql.org/download |
 
-> **Windows users (XAMPP):** After installing PostgreSQL, enable the `pdo_pgsql` and `pgsql` extensions in `C:\xampp\php\php.ini` by uncommenting these lines:
+> **مستخدمو Windows:** فعّل `pdo_pgsql` و`pgsql` في `php.ini` بإزالة `#` من السطرين:
 > ```ini
 > extension=pdo_pgsql
 > extension=pgsql
@@ -25,69 +23,65 @@ Make sure you have the following installed before starting:
 
 ---
 
-## 🚀 Installation
+## 🚀 التثبيت
 
-### 1. Clone the repository
+### 1. استنساخ المستودع
 
 ```bash
-git clone https://github.com/osooli-tech/osooli.git
-cd osooli
+git clone https://github.com/osooli-tech/sakuki.git
+cd sakuki
 ```
 
-### 2. Install PHP dependencies
+### 2. تثبيت تبعيات PHP
 
 ```bash
 composer install
 ```
 
-### 3. Install JavaScript dependencies
+### 3. تثبيت تبعيات JavaScript
 
 ```bash
 npm install
 ```
 
-### 4. Set up environment file
+### 4. إعداد ملف البيئة
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-### 5. Configure your `.env` file
-
-Open `.env` and update the database section:
+### 5. تهيئة `.env`
 
 ```env
-APP_NAME=Osooli
+APP_NAME=Sakuki
 APP_URL=http://localhost:8000
 
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_DATABASE=osooli_db
+DB_DATABASE=sakuki_db
 DB_USERNAME=postgres
 DB_PASSWORD=your_postgres_password
 
 REDIS_CLIENT=predis
 ```
 
-### 6. Create the PostgreSQL database
-
-Connect to PostgreSQL and run:
+### 6. إنشاء قاعدة البيانات
 
 ```sql
-CREATE DATABASE osooli_db;
-\c osooli_db
+CREATE DATABASE sakuki_db;
+\c sakuki_db
 CREATE EXTENSION IF NOT EXISTS postgis;
 ```
 
-### 7. Run database migrations
+### 7. تشغيل الـ migrations
 
 ```bash
 php artisan migrate
 ```
 
-### 8. (Optional) Seed the database
+### 8. (اختياري) تشغيل الـ seeders
 
 ```bash
 php artisan db:seed
@@ -95,17 +89,13 @@ php artisan db:seed
 
 ---
 
-## ▶️ Running the Project
-
-### Start the development server
+## ▶️ تشغيل المشروع
 
 ```bash
 php artisan serve
 ```
 
-The app will be available at: **http://127.0.0.1:8000**
-
-### Compile frontend assets (in a separate terminal)
+المشروع متاح على: **http://127.0.0.1:8000**
 
 ```bash
 npm run dev
@@ -113,92 +103,67 @@ npm run dev
 
 ---
 
-## 📦 Installed Packages
+## 📦 الحزم المثبّتة
 
 ### PHP (Composer)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `laravel/laravel` | 11.x | Core framework |
-| `livewire/livewire` | ^4.3 | Reactive UI components |
-| `laravel/sanctum` | ^4.3 | API authentication |
-| `spatie/laravel-permission` | ^6.25 | Roles & permissions |
+| الحزمة | الإصدار | الغرض |
+|--------|---------|-------|
+| `laravel/laravel` | 11.x | الإطار الأساسي |
+| `livewire/livewire` | ^4.3 | مكوّنات UI تفاعلية |
+| `laravel/sanctum` | ^4.3 | مصادقة API |
+| `spatie/laravel-permission` | ^6.25 | الأدوار والصلاحيات |
 | `predis/predis` | ^3.5 | Redis client |
 
 ### JavaScript (npm)
 
-| Package | Purpose |
-|---------|---------|
-| `alpinejs` | Lightweight JS interactivity |
+| الحزمة | الغرض |
+|--------|-------|
+| `alpinejs` | تفاعلية خفيفة |
 
 ---
 
-## 🗄️ Database Viewer (pgAdmin 4)
+## 🗄️ قاعدة البيانات (pgAdmin 4)
 
-If you installed PostgreSQL via the official installer, **pgAdmin 4** is included.
-
-1. Open pgAdmin 4
-2. Connect to `PostgreSQL 16` (password: your postgres password)
-3. Navigate to: `Databases` → `osooli_db` → `Schemas` → `public` → `Tables`
+1. افتح pgAdmin 4
+2. اتصل بـ `PostgreSQL 16`
+3. انتقل إلى: `Databases` → `sakuki_db` → `Schemas` → `public` → `Tables`
 
 ---
 
-## 🛠️ Useful Artisan Commands
+## 🛠️ أوامر Artisan المفيدة
 
 ```bash
-# Clear all caches
-php artisan optimize:clear
-
-# Run migrations fresh (⚠️ deletes all data)
-php artisan migrate:fresh
-
-# Run migrations with seeders
+php artisan optimize:clear      # مسح الـ cache
+php artisan migrate:fresh       # إعادة الـ migrations (يحذف البيانات)
 php artisan migrate:fresh --seed
-
-# View all routes
 php artisan route:list
-
-# Open interactive shell
 php artisan tinker
 ```
 
 ---
 
-## 📁 Project Structure
+## 📁 هيكل المشروع
 
 ```
-osooli/
+sakuki/
 ├── app/
-│   ├── Http/Controllers/     # Controllers
-│   ├── Models/               # Eloquent models
-│   └── Livewire/             # Livewire components
+│   ├── Http/Controllers/
+│   ├── Models/
+│   └── Livewire/
 ├── config/
-│   ├── sanctum.php           # Sanctum config
-│   └── permission.php        # Spatie permission config
 ├── database/
-│   ├── migrations/           # Database migrations
-│   └── seeders/              # Database seeders
+│   ├── migrations/
+│   ├── import/          ← سكربت استيراد GDB → PostGIS
+│   └── seeders/
 ├── resources/
-│   ├── views/                # Blade templates
-│   └── js/                   # JavaScript files
-├── routes/
-│   ├── web.php               # Web routes
-│   └── api.php               # API routes
-└── .env.example              # Environment template
+│   ├── views/
+│   └── js/
+└── routes/
 ```
 
 ---
 
-## 🤝 Contributing
+## 📄 الترخيص
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add your feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+مرخّص بموجب [MIT license](https://opensource.org/licenses/MIT).

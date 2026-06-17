@@ -36,7 +36,7 @@ DEFAULT_SOURCE = r'D:\Downloads\GDB_extracted\GDB\Osooli.gdb'
 DB = {
     'host':     '127.0.0.1',
     'port':     5432,
-    'dbname':   'osooli_db',
+    'dbname':   'sakuki_db',
     'user':     'postgres',
     'password': 'root',
     'options':  '-c client_encoding=UTF8',
