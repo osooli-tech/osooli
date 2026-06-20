@@ -23,3 +23,22 @@ yarn-error.log
 /.zed
 files.zip
 graphify-out/cache
+
+# Design concept files
+/tmp_concepts/
+*.zip
+stitch_sakuki_authentication_ui_concepts.zip
+
+# Renamed project docs (replaced by sakuki_*)
+osooli_*
+sakuki_claude_code_handoff.md
+sakuki_full_summary.md
+sakuki_db_erd_v5_final.mermaid
+sakuki_schema.sql
+sakuki project context_v1.md
+"sakuki project context_v1.md"
+CLAUDE.md
+CLAUDEAR.md
+.claude
+graphify-out
+.agents

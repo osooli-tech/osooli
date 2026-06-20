@@ -1,3 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .auth-bg {
+        background:
+            repeating-linear-gradient(0deg,  transparent, transparent 64px, rgba(255,255,255,0.03) 64px, rgba(255,255,255,0.03) 65px),
+            repeating-linear-gradient(90deg, transparent, transparent 64px, rgba(255,255,255,0.03) 64px, rgba(255,255,255,0.03) 65px),
+            linear-gradient(135deg, #002444 0%, #1b3a5c 55%, #003d28 100%);
+    }
+
+    .brand-panel {
+        background:
+            radial-gradient(ellipse at 20% 80%, rgba(0, 108, 78, 0.18) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 15%, rgba(172, 201, 242, 0.10) 0%, transparent 45%),
+            repeating-linear-gradient(0deg,  transparent, transparent 40px, rgba(172, 201, 242, 0.025) 40px, rgba(172, 201, 242, 0.025) 41px),
+            repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(172, 201, 242, 0.025) 40px, rgba(172, 201, 242, 0.025) 41px),
+            #002444;
+    }
+}
+
+@layer base {
+    html {
+        font-family: 'IBM Plex Sans Arabic', sans-serif;
+    }
+
+    .data-tabular {
+        font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        direction: ltr;
+        -webkit-font-smoothing: antialiased;
+    }
+}

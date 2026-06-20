@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 175" role="img" aria-label="Sakuki Almkaniyah">
+
+  <!-- Left building — light blue -->
+  <rect x="22" y="55" width="38" height="65" rx="2" fill="#abc9f2"/>
+  <rect x="28" y="63" width="10" height="10" rx="1" fill="rgba(0,36,68,0.28)"/>
+  <rect x="42" y="63" width="10" height="10" rx="1" fill="rgba(0,36,68,0.28)"/>
+  <rect x="28" y="78" width="10" height="10" rx="1" fill="rgba(0,36,68,0.28)"/>
+  <rect x="42" y="78" width="10" height="10" rx="1" fill="rgba(0,36,68,0.28)"/>
+  <rect x="28" y="93" width="10" height="10" rx="1" fill="rgba(0,36,68,0.28)"/>
+  <rect x="42" y="93" width="10" height="10" rx="1" fill="rgba(0,36,68,0.28)"/>
+
+  <!-- Center building — gold, tallest -->
+  <rect x="64" y="15" width="48" height="105" rx="2" fill="#c9a84c"/>
+  <rect x="70" y="24" width="13" height="12" rx="1" fill="rgba(0,36,68,0.18)"/>
+  <rect x="88" y="24" width="13" height="12" rx="1" fill="rgba(0,36,68,0.18)"/>
+  <rect x="70" y="41" width="13" height="12" rx="1" fill="rgba(0,36,68,0.18)"/>
+  <rect x="88" y="41" width="13" height="12" rx="1" fill="rgba(0,36,68,0.18)"/>
+  <rect x="70" y="58" width="13" height="12" rx="1" fill="rgba(0,36,68,0.18)"/>
+  <rect x="88" y="58" width="13" height="12" rx="1" fill="rgba(0,36,68,0.18)"/>
+
+  <!-- Right building — teal -->
+  <rect x="116" y="48" width="38" height="72" rx="2" fill="#68dbae"/>
+  <rect x="122" y="56" width="10" height="10" rx="1" fill="rgba(0,36,68,0.22)"/>
+  <rect x="136" y="56" width="10" height="10" rx="1" fill="rgba(0,36,68,0.22)"/>
+  <rect x="122" y="71" width="10" height="10" rx="1" fill="rgba(0,36,68,0.22)"/>
+  <rect x="136" y="71" width="10" height="10" rx="1" fill="rgba(0,36,68,0.22)"/>
+  <rect x="122" y="86" width="10" height="10" rx="1" fill="rgba(0,36,68,0.22)"/>
+  <rect x="136" y="86" width="10" height="10" rx="1" fill="rgba(0,36,68,0.22)"/>
+
+  <!-- Location pin (teardrop) on center building -->
+  <path d="M88,96 Q71,80 71,65 A17,17,0,0,1,105,65 Q105,80 88,96 Z" fill="white"/>
+  <circle cx="88" cy="63" r="7" fill="#002444"/>
+
+  <!-- Land survey diamond grid — all 4 meet at center point (88,128) -->
+  <!-- Top diamond -->
+  <path d="M88,104 L100,116 L88,128 L76,116 Z" fill="#1b8a7a"/>
+  <!-- Left diamond -->
+  <path d="M76,116 L88,128 L76,140 L64,128 Z" fill="#006c4e"/>
+  <!-- Right diamond -->
+  <path d="M100,116 L112,128 L100,140 L88,128 Z" fill="#68dbae"/>
+  <!-- Bottom diamond -->
+  <path d="M88,128 L100,140 L88,152 L76,140 Z" fill="#004d38"/>
+
+</svg>
