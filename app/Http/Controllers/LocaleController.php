@@ -10,7 +10,7 @@ class LocaleController extends Controller
 {
     public function switch(string $lang): RedirectResponse
     {
-        abort_if(!in_array($lang, ['ar', 'en']), 404);
+        abort_if(! in_array($lang, ['ar', 'en']), 404);
 
         session(['locale' => $lang]);
 

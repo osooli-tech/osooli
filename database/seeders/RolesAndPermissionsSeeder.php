@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -31,8 +31,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
     private const ROLES = [
         'super_admin' => null,                  // كل الصلاحيات
-        'manager'     => ['except' => ['roles.manage']],
-        'engineer'    => ['only' => [
+        'manager' => ['except' => ['roles.manage']],
+        'engineer' => ['only' => [
             'parcels.view',
             'parcels.view_map',
             'documents.download',
@@ -69,7 +69,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $user = User::firstOrCreate(
             ['email' => 'admin@sakuki.test'],
             [
-                'name'     => 'Super Admin',
+                'name' => 'Super Admin',
                 'password' => Hash::make('password'),
             ]
         );
@@ -78,8 +78,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
         Cache::flush();
 
-        $this->command->info('✓ Permissions: ' . count(self::PERMISSIONS));
-        $this->command->info('✓ Roles: ' . implode(', ', array_keys(self::ROLES)));
+        $this->command->info('✓ Permissions: '.count(self::PERMISSIONS));
+        $this->command->info('✓ Roles: '.implode(', ', array_keys(self::ROLES)));
         $this->command->info('✓ User: admin@sakuki.test / password');
     }
 }

@@ -1,24 +1,24 @@
 <?php
 
-use Laravel\Fortify\Features;
+declare(strict_types=1);
 
 return [
-    'guard'    => 'web',
-    'passwords'=> 'users',
+    'guard' => 'web',
+    'passwords' => 'users',
     'username' => 'email',
-    'email'    => 'email',
+    'email' => 'email',
 
     'lowercase_usernames' => true,
 
     // بعد Login الناجح → OTP page
     'home' => '/dashboard',
 
-    'prefix'   => '',
-    'domain'   => null,
-    'middleware'=> ['web'],
+    'prefix' => '',
+    'domain' => null,
+    'middleware' => ['web'],
 
     'limiters' => [
-        'login'      => 'login',       // 5 محاولات / دقيقة تلقائياً
+        'login' => 'login',       // 5 محاولات / دقيقة تلقائياً
         'two-factor' => 'two-factor',
     ],
 

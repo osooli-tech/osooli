@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'title' => 'User Management',
+    'add_user' => 'Add user',
+    'search_placeholder' => 'Search by name, email or phone',
+    'role' => 'Role',
+    'all_roles' => 'All roles',
+    'clear_filters' => 'Clear filters',
+    'no_results' => 'No users found',
+    'name' => 'Name',
+    'email' => 'Email',
+    'phone' => 'Phone',
+    'password' => 'Password',
+    'password_hint' => 'Leave blank to keep current password',
+    'status' => 'Status',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'last_login' => 'Last login',
+    'never' => 'Never logged in',
+    'actions' => 'Actions',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'save' => 'Save',
+    'cancel' => 'Cancel',
+    'create_title' => 'Add new user',
+    'edit_title' => 'Edit user',
+    'delete_confirm' => 'Are you sure you want to delete this user? This cannot be undone.',
+    'confirm_delete_btn' => 'Yes, delete',
+    'saved' => 'Saved successfully',
+    'deleted' => 'User deleted',
+    'cannot_delete_self' => 'You cannot delete your own account',
+    'role_select' => 'Select role',
+];

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -19,7 +22,7 @@ return new class extends Migration
         });
 
         // Partial unique index: national_id must be unique when not null
-        \Illuminate\Support\Facades\DB::statement(
+        DB::statement(
             'CREATE UNIQUE INDEX uq_owners_national_id ON owners(national_id) WHERE national_id IS NOT NULL'
         );
     }

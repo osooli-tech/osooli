@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -7,6 +9,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string|null $deed_no
+ * @property string|null $deed_date_hijri
+ * @property string|null $deed_status
+ * @property string|null $deed_class
+ * @property string|null $deed_area
+ */
 class Deed extends Model
 {
     protected $fillable = [

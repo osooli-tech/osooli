@@ -10,13 +10,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class OtpController extends Controller
 {
     public function show(): View|RedirectResponse
     {
-        if (!session()->has('otp_user_id')) {
+        if (! session()->has('otp_user_id')) {
             return redirect()->route('login');
         }
 
@@ -31,19 +32,19 @@ class OtpController extends Controller
 
         $userId = session('otp_user_id');
 
-        if (!$userId) {
+        if (! $userId) {
             return redirect()->route('login');
         }
 
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
         $cached = Cache::get("otp_{$user->id}");
 
-        if (!$cached || $cached !== $request->otp) {
+        if (! $cached || $cached !== $request->otp) {
             return back()->withErrors(['otp' => __('auth.otp_invalid')]);
         }
 
@@ -59,13 +60,13 @@ class OtpController extends Controller
     {
         $userId = session('otp_user_id');
 
-        if (!$userId) {
+        if (! $userId) {
             return redirect()->route('login');
         }
 
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -74,7 +75,7 @@ class OtpController extends Controller
 
         app()->setLocale(session('locale', 'ar'));
 
-        \Illuminate\Support\Facades\Mail::raw(
+        Mail::raw(
             __('auth.otp_email_body', ['otp' => $otp]),
             fn ($m) => $m->to($user->email)->subject(__('auth.otp_email_subject'))
         );

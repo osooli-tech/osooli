@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Models\User;
+
 return [
 
     /*
@@ -62,7 +66,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => env('AUTH_MODEL', User::class),
         ],
 
         // 'users' => [
@@ -113,8 +117,8 @@ return [
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
     'otp' => [
-        'ttl_minutes'     => 5,   // how long the OTP is valid (must match cache TTL)
-        'resend_seconds'  => 300, // cooldown before user can request a new OTP (matches OTP TTL)
+        'ttl_minutes' => 5,   // how long the OTP is valid (must match cache TTL)
+        'resend_seconds' => 300, // cooldown before user can request a new OTP (matches OTP TTL)
     ],
 
 ];

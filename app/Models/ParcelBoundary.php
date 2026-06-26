@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -27,10 +29,10 @@ class ParcelBoundary extends Model
     protected function casts(): array
     {
         return [
-            'n_dim'         => 'decimal:2',
-            's_dim'         => 'decimal:2',
-            'e_dim'         => 'decimal:2',
-            'w_dim'         => 'decimal:2',
+            'n_dim' => 'decimal:2',
+            's_dim' => 'decimal:2',
+            'e_dim' => 'decimal:2',
+            'w_dim' => 'decimal:2',
             'measured_area' => 'decimal:2',
         ];
     }
