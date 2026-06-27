@@ -10,17 +10,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * @property int                       $id
- * @property int                       $parcel_id
- * @property int                       $requested_by
- * @property string                    $field_name
- * @property string|null               $old_value
- * @property string|null               $new_value
+ * @property int $id
+ * @property int $parcel_id
+ * @property int $requested_by
+ * @property string $field_name
+ * @property string|null $old_value
+ * @property string|null $new_value
  * @property ModificationRequestStatus $status
- * @property string|null               $notes
- * @property Carbon|null               $resolved_at
- * @property Carbon                    $created_at
- * @property Carbon                    $updated_at
+ * @property string|null $notes
+ * @property Carbon|null $resolved_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class ModificationRequest extends Model
 {
