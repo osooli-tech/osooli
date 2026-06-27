@@ -120,5 +120,8 @@
 @endsection
 
 @push('scripts')
+    {{-- Load mapbox-gl from CDN to avoid Vite WebWorker bundling issues (v3) --}}
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
     @vite('resources/js/map.js')
 @endpush

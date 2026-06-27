@@ -1,11 +1,13 @@
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+// mapbox-gl is loaded via CDN in dashboard.blade.php to avoid Vite WebWorker bundling issues.
+// window.mapboxgl is available before this script runs.
 
 const container = document.getElementById('sakuki-map');
 if (! container) {
     // Not on a page that has the map.
 } else {
+    const mapboxgl = window.mapboxgl;
     const token = container.dataset.token ?? '';
+
     if (! token) {
         console.warn('[Sakuki] MAPBOX_TOKEN is not set. Add it to .env to enable the map.');
     } else {
