@@ -7,6 +7,7 @@ namespace App\Livewire\Settings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -38,12 +39,8 @@ class RoleManager extends Component
     /** @var array<string, bool> */
     public array $permissionChecks = [];
 
-    // Delete confirm
-    public bool $showDeleteConfirm = false;
-
+    // Delete (confirmed via SweetAlert on the frontend — no server-side modal state needed)
     public ?int $deletingRoleId = null;
-
-    public string $deletingRoleName = '';
 
     public function openCreate(): void
     {
@@ -65,7 +62,7 @@ class RoleManager extends Component
 
         $this->showCreateModal = false;
         $this->newRoleName = '';
-        $this->dispatch('notify', type: 'success', message: __('settings.role_created'));
+        $this->dispatch('swal:toast', type: 'success', message: __('settings.role_created'));
     }
 
     public function openEdit(int $roleId): void
@@ -103,28 +100,16 @@ class RoleManager extends Component
 
         $this->showEditModal = false;
         $this->editingRoleId = null;
-        $this->dispatch('notify', type: 'success', message: __('settings.permissions_saved'));
+        $this->dispatch('swal:toast', type: 'success', message: __('settings.permissions_saved'));
     }
 
-    public function confirmDelete(int $roleId, string $roleName): void
+    #[On('deleteRole')]
+    public function deleteRole(int $roleId): void
     {
-        $this->deletingRoleId = $roleId;
-        $this->deletingRoleName = $roleName;
-        $this->showDeleteConfirm = true;
-    }
+        $role = Role::findOrFail($roleId);
 
-    public function deleteRole(): void
-    {
-        if ($this->deletingRoleId === null) {
-            return;
-        }
-
-        $role = Role::findOrFail($this->deletingRoleId);
-
-        // Block if users are still assigned to this role
         if ($role->users()->count() > 0) {
-            $this->showDeleteConfirm = false;
-            $this->dispatch('notify', type: 'error', message: __('settings.role_has_users'));
+            $this->dispatch('swal:toast', type: 'error', message: __('settings.role_has_users'));
 
             return;
         }
@@ -132,17 +117,8 @@ class RoleManager extends Component
         $role->delete();
         Cache::flush();
 
-        $this->showDeleteConfirm = false;
         $this->deletingRoleId = null;
-        $this->deletingRoleName = '';
-        $this->dispatch('notify', type: 'success', message: __('settings.role_deleted'));
-    }
-
-    public function cancelDelete(): void
-    {
-        $this->showDeleteConfirm = false;
-        $this->deletingRoleId = null;
-        $this->deletingRoleName = '';
+        $this->dispatch('swal:toast', type: 'success', message: __('settings.role_deleted'));
     }
 
     /** @return array<string, list<string>> */

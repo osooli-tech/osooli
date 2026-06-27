@@ -110,7 +110,13 @@
                         <span class="material-symbols-outlined text-[14px]">tune</span>
                         {{ __('settings.edit_permissions') }}
                     </button>
-                    <button wire:click="confirmDelete({{ $role->id }}, '{{ $role->name }}')"
+                    <button onclick="confirmDeleteRole(
+                                {{ $role->id }},
+                                '{{ addslashes($role->name) }}',
+                                '{{ __('settings.confirm_delete_btn') }}',
+                                '{{ __('settings.cancel') }}',
+                                '{{ addslashes(__('settings.delete_confirm', ['role' => $role->name])) }}'
+                            )"
                             class="w-9 h-9 flex items-center justify-center rounded-xl
                                    border border-outline-variant dark:border-white/10
                                    text-on-surface-variant dark:text-on-primary-container
@@ -300,46 +306,6 @@
         </div>
     @endif
 
-    {{-- ── DELETE CONFIRM ── --}}
-    @if ($showDeleteConfirm)
-        <div class="fixed inset-0 z-[9999] overflow-y-auto" wire:key="modal-delete">
-            <div class="flex min-h-full items-center justify-center p-4">
-                <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"
-                     wire:click="cancelDelete"></div>
-                <div class="relative w-full max-w-sm
-                            bg-surface-container-lowest dark:bg-[#1a1f2e]
-                            rounded-2xl shadow-2xl border border-outline-variant dark:border-white/10
-                            overflow-hidden">
-                    <div class="h-1 bg-error shrink-0"></div>
-                    <div class="p-6 space-y-4">
-                        <div class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-[26px] text-error shrink-0">
-                                warning
-                            </span>
-                            <p class="text-sm text-on-surface dark:text-white leading-relaxed">
-                                {{ __('settings.delete_confirm', ['role' => $deletingRoleName]) }}
-                            </p>
-                        </div>
-                        <div class="flex justify-end gap-3">
-                            <button wire:click="cancelDelete"
-                                    class="px-4 py-2 text-sm rounded-xl
-                                           border border-outline-variant dark:border-white/10
-                                           text-on-surface-variant dark:text-on-primary-container
-                                           hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
-                                {{ __('settings.cancel') }}
-                            </button>
-                            <button wire:click="deleteRole"
-                                    wire:loading.attr="disabled"
-                                    class="px-4 py-2 text-sm font-semibold rounded-xl
-                                           bg-error text-white hover:brightness-110
-                                           disabled:opacity-60 transition-all">
-                                {{ __('settings.confirm_delete_btn') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
+    {{-- Delete confirmation handled by SweetAlert2 (confirmDeleteRole in app.js) --}}
 
 </div>
