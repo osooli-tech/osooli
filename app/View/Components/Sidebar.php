@@ -48,10 +48,22 @@ class Sidebar extends Component
             'permission' => 'users.view',
         ],
         [
+            'route' => 'audit-logs.index',
+            'label' => 'nav.audit_logs',
+            'icon' => 'history',
+            'permission' => 'audit_logs.view',
+        ],
+        [
             'route' => 'settings.index',
             'label' => 'nav.settings',
             'icon' => 'settings',
             'permission' => 'roles.manage',
+        ],
+        [
+            'route' => 'profile.index',
+            'label' => 'nav.profile',
+            'icon' => 'account_circle',
+            'permission' => null,
         ],
     ];
 

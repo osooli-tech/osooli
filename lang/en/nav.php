@@ -13,6 +13,7 @@ return [
     'users' => 'User Management',
     'roles' => 'Roles & Permissions',
     'audit_logs' => 'Audit Logs',
+    'profile' => 'Profile',
     'sync' => 'Sync Log',
     'settings' => 'Settings',
     'logout' => 'Logout',

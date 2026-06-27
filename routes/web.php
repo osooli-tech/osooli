@@ -53,6 +53,14 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:roles.manage')
         ->name('settings.index');
 
+    // Audit Logs
+    Route::get('/audit-logs', fn () => view('audit-logs.index'))
+        ->middleware('can:audit_logs.view')
+        ->name('audit-logs.index');
+
+    // Profile
+    Route::get('/profile', fn () => view('profile.index'))->name('profile.index');
+
     // GeoJSON API for map
     Route::get('/geo/parcels', [GeoJsonController::class, 'parcels'])->name('geo.parcels');
 
