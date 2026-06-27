@@ -40,6 +40,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:documents.download')
         ->name('documents.download');
 
+    // Modification Requests
+    Route::get('/modification-requests', fn () => view('modification-requests.index'))
+        ->middleware('can:modification_requests.view')
+        ->name('modification-requests.index');
+
     // Users
     Route::get('/users', fn () => view('users.index'))->name('users.index');
 

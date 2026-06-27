@@ -36,6 +36,12 @@ class Sidebar extends Component
             'permission' => 'documents.download',
         ],
         [
+            'route' => 'modification-requests.index',
+            'label' => 'nav.modification_requests',
+            'icon' => 'edit_note',
+            'permission' => 'modification_requests.view',
+        ],
+        [
             'route' => 'users.index',
             'label' => 'nav.users',
             'icon' => 'manage_accounts',

@@ -9,6 +9,7 @@ return [
     'parcels' => 'الأراضي',
     'survey_decisions' => 'القرارات المساحية',
     'documents' => 'المستندات',
+    'modification_requests' => 'طلبات التعديل',
     'users' => 'إدارة المستخدمين',
     'roles' => 'الأدوار والصلاحيات',
     'audit_logs' => 'سجل التدقيق',

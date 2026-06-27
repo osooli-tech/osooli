@@ -9,6 +9,7 @@ return [
     'parcels' => 'Parcels',
     'survey_decisions' => 'Survey Decisions',
     'documents' => 'Documents',
+    'modification_requests' => 'Modification Requests',
     'users' => 'User Management',
     'roles' => 'Roles & Permissions',
     'audit_logs' => 'Audit Logs',
