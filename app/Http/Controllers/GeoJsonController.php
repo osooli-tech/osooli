@@ -17,9 +17,23 @@ class GeoJsonController extends Controller
 
         /** @var list<\stdClass> $rows */
         $rows = DB::select(
-            'SELECT id, parcel_no, geo_id, asset_type, ST_AsGeoJSON(geom, 6) AS geom_json
-             FROM parcels
-             WHERE geom IS NOT NULL'
+            'SELECT
+                 p.id, p.parcel_no, p.geo_id, p.asset_type,
+                 pl.plan_no,
+                 d.name_ar AS district_name,
+                 deed.deed_no, deed.deed_date_hijri,
+                 ST_AsGeoJSON(p.geom, 6) AS geom_json
+             FROM parcels p
+             LEFT JOIN plans pl ON pl.id = p.plan_id
+             LEFT JOIN districts d ON d.id = pl.district_id
+             LEFT JOIN LATERAL (
+                 SELECT deed_no, deed_date_hijri
+                 FROM deeds
+                 WHERE parcel_id = p.id
+                 ORDER BY id DESC
+                 LIMIT 1
+             ) deed ON true
+             WHERE p.geom IS NOT NULL'
         );
 
         $features = array_map(static fn (\stdClass $row): array => [
@@ -30,6 +44,10 @@ class GeoJsonController extends Controller
                 'parcel_no' => $row->parcel_no,
                 'geo_id' => $row->geo_id,
                 'asset_type' => $row->asset_type,
+                'plan_no' => $row->plan_no,
+                'district_name' => $row->district_name,
+                'deed_no' => $row->deed_no,
+                'deed_date_hijri' => $row->deed_date_hijri,
             ],
         ], $rows);
 

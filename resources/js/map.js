@@ -69,6 +69,25 @@ if (! container) {
                 })
                 .catch((err) => console.error('[Sakuki] GeoJSON load failed:', err));
 
+            // Parcel number labels
+            map.addLayer({
+                id: 'parcels-labels',
+                type: 'symbol',
+                source: 'parcels',
+                layout: {
+                    'text-field': ['to-string', ['get', 'parcel_no']],
+                    'text-size': 11,
+                    'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                    'text-allow-overlap': false,
+                    'text-ignore-placement': false,
+                },
+                paint: {
+                    'text-color': '#002444',
+                    'text-halo-color': '#ffffff',
+                    'text-halo-width': 1.5,
+                },
+            });
+
             // Click: dispatch event for Alpine parcel-detail panel
             map.on('click', 'parcels-fill', (e) => {
                 const props = e.features[0].properties;
