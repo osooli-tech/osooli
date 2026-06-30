@@ -21,6 +21,7 @@
                         <th class="text-start px-5 py-3 font-medium">{{ __('parcels.parcel_no') }}</th>
                         <th class="text-start px-3 py-3 font-medium">{{ __('parcels.asset_type') }}</th>
                         <th class="text-start px-3 py-3 font-medium">{{ __('parcels.deed_no') }}</th>
+                        <th class="text-start px-3 py-3 font-medium">{{ __('parcels.deed_date') }}</th>
                         <th class="text-start px-3 py-3 font-medium">{{ __('parcels.deed_status') }}</th>
                     </tr>
                 </thead>
@@ -36,6 +37,9 @@
                             </td>
                             <td class="px-3 py-3 text-on-surface-variant dark:text-on-primary-container data-tabular">
                                 {{ $latestDeed?->deed_no ?? '—' }}
+                            </td>
+                            <td class="px-3 py-3 text-on-surface-variant dark:text-on-primary-container data-tabular">
+                                {{ $latestDeed?->deed_date_hijri ?? '—' }}
                             </td>
                             <td class="px-3 py-3">
                                 @if ($latestDeed?->deed_status === 'محدث')
