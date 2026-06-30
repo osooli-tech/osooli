@@ -46,6 +46,9 @@ GDB_LAYER = 'Osooli'
 SRC_CRS   = 'EPSG:32638'
 DST_CRS   = 'EPSG:4326'
 
+# مكتب هندسي افتراضي يُربط بكل قطعة مستوردة لحين توفر بيانات حقيقية لكل مكتب
+DEFAULT_ENGINEERING_OFFICE = 'مكتب الإسناد العالمي للاستشارات الهندسية'
+
 # ─── مساعدات ────────────────────────────────────────────────────────────────────
 
 def load_features(path: str) -> list:
@@ -119,6 +122,19 @@ def run(source_path: str):
         print(f"  ✓ {DB['dbname']}@{DB['host']}")
     except Exception as e:
         sys.exit(f"✗ فشل الاتصال: {e}")
+
+    # المكتب الهندسي الافتراضي — يُربط بكل قطعة لحين توفر بيانات حقيقية لكل مكتب
+    cur.execute("SELECT id FROM engineering_offices WHERE name = %s", (DEFAULT_ENGINEERING_OFFICE,))
+    office_row = cur.fetchone()
+    if office_row:
+        default_office_id = office_row[0]
+    else:
+        cur.execute("""
+            INSERT INTO engineering_offices (name, created_at, updated_at)
+            VALUES (%s, NOW(), NOW())
+            RETURNING id
+        """, (DEFAULT_ENGINEERING_OFFICE,))
+        default_office_id = cur.fetchone()[0]
 
     # ── 2. قراءة المصدر ─────────────────────────────────────────────────────
     print(f"\nقراءة البيانات...")
@@ -262,25 +278,27 @@ def run(source_path: str):
 
             # ── 4e. Parcel Boundaries ────────────────────────────────────
             # measured_area = NULL (لم تُقَس ميدانياً بعد)
+            # engineering_office_id = المكتب الافتراضي عند الإدراج فقط — لا يُستبدل تعيين يدوي لاحق
             cur.execute("""
                 INSERT INTO parcel_boundaries (
                     parcel_id,
                     n_border, s_border, e_border, w_border,
                     n_dim, s_dim, e_dim, w_dim,
-                    measured_area,
+                    measured_area, engineering_office_id,
                     created_at, updated_at
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NULL, NOW(), NOW())
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NULL, %s, NOW(), NOW())
                 ON CONFLICT (parcel_id) DO UPDATE SET
-                    n_border   = EXCLUDED.n_border,
-                    s_border   = EXCLUDED.s_border,
-                    e_border   = EXCLUDED.e_border,
-                    w_border   = EXCLUDED.w_border,
-                    n_dim      = EXCLUDED.n_dim,
-                    s_dim      = EXCLUDED.s_dim,
-                    e_dim      = EXCLUDED.e_dim,
-                    w_dim      = EXCLUDED.w_dim,
-                    updated_at = NOW()
+                    n_border               = EXCLUDED.n_border,
+                    s_border               = EXCLUDED.s_border,
+                    e_border               = EXCLUDED.e_border,
+                    w_border               = EXCLUDED.w_border,
+                    n_dim                  = EXCLUDED.n_dim,
+                    s_dim                  = EXCLUDED.s_dim,
+                    e_dim                  = EXCLUDED.e_dim,
+                    w_dim                  = EXCLUDED.w_dim,
+                    engineering_office_id  = COALESCE(parcel_boundaries.engineering_office_id, EXCLUDED.engineering_office_id),
+                    updated_at             = NOW()
             """, (
                 parcel_id,
                 v(p.get('N_Border')), v(p.get('S_Border')),
@@ -289,6 +307,7 @@ def run(source_path: str):
                 float(p['S_DIM']) if p.get('S_DIM')  else None,   # انتبه: S_DIM كابيتال
                 float(p['E_Dim'])  if p.get('E_Dim')  else None,
                 float(p['W_Dim'])  if p.get('W_Dim')  else None,
+                default_office_id,
             ))
             stats['boundaries'] += 1
 
