@@ -147,7 +147,7 @@ class UserIndex extends Component
 
         $this->showModal = false;
         $this->resetForm();
-        $this->dispatch('notify', type: 'success', message: __('users.saved'));
+        $this->dispatch('toast', type: 'success', message: __('users.saved'));
     }
 
     public function toggleActive(int $userId): void
@@ -181,7 +181,7 @@ class UserIndex extends Component
         if ($this->deletingId === Auth::id()) {
             $this->showDeleteConfirm = false;
             $this->deletingId = null;
-            $this->dispatch('notify', type: 'error', message: __('users.cannot_delete_self'));
+            $this->dispatch('toast', type: 'error', message: __('users.cannot_delete_self'));
 
             return;
         }
@@ -201,7 +201,7 @@ class UserIndex extends Component
 
         $this->showDeleteConfirm = false;
         $this->deletingId = null;
-        $this->dispatch('notify', type: 'success', message: __('users.deleted'));
+        $this->dispatch('toast', type: 'success', message: __('users.deleted'));
     }
 
     public function cancelDelete(): void

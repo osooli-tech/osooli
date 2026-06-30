@@ -220,7 +220,6 @@
 </div>{{-- end space-y-4 --}}
 
     {{-- Create / Edit Modal --}}
-    @teleport('body')
     @if ($showModal)
         <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
 
@@ -354,10 +353,8 @@
             </div>
         </div>
     @endif
-    @endteleport
 
     {{-- Delete confirm --}}
-    @teleport('body')
     @if ($showDeleteConfirm)
         <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -386,6 +383,5 @@
             </div>
         </div>
     @endif
-    @endteleport
 
 </div>{{-- end root --}}
