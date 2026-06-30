@@ -5,23 +5,19 @@ import Swal from 'sweetalert2';
 window.ApexCharts = ApexCharts;
 window.Swal = Swal;
 
-// ── SweetAlert2 toast — listens for swal:toast events from Livewire ──────────
-const Toast = Swal.mixin({
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timer: 3500,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer);
-        toast.addEventListener('mouseleave', Swal.resumeTimer);
-    },
-});
+// ── Toast notifications (dispatched from Livewire via $this->dispatch('toast')) ─
+window.addEventListener('toast', (e) => {
+    const { type, message } = e.detail;
 
-document.addEventListener('swal:toast', (e) => {
-    Toast.fire({
-        icon: e.detail.type,   // 'success' | 'error' | 'warning'
-        title: e.detail.message,
+    const iconMap = { success: 'success', error: 'error', warning: 'warning', info: 'info' };
+
+    Swal.fire({
+        icon: iconMap[type] ?? 'info',
+        title: message,
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        customClass: { popup: 'swal-toast-popup' },
     });
 });
 

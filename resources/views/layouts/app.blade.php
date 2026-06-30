@@ -102,6 +102,9 @@
 
     </header>
 
+    {{-- Toast notifications --}}
+    <x-toast />
+
     {{-- Content area --}}
     <main class="ms-[280px] mt-16 min-h-[calc(100vh-4rem)] p-6">
         @yield('content')
