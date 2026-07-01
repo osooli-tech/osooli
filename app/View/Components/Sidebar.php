@@ -24,6 +24,12 @@ class Sidebar extends Component
             'permission' => 'parcels.view',
         ],
         [
+            'route' => 'owners.index',
+            'label' => 'nav.owners',
+            'icon' => 'group',
+            'permission' => 'parcels.view',
+        ],
+        [
             'route' => 'survey-decisions.index',
             'label' => 'nav.survey_decisions',
             'icon' => 'fact_check',

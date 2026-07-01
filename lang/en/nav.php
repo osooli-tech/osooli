@@ -7,6 +7,7 @@ return [
     'main_nav' => 'Main Navigation',
     'dashboard' => 'Dashboard',
     'parcels' => 'Parcels',
+    'owners' => 'Owners',
     'survey_decisions' => 'Survey Decisions',
     'documents' => 'Documents',
     'modification_requests' => 'Modification Requests',

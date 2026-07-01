@@ -7,6 +7,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ParcelController;
+use App\Http\Controllers\ParcelExportController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
@@ -29,7 +30,14 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // Parcels
     Route::get('/parcels', fn () => view('parcels.index'))->name('parcels.index');
+    Route::get('/parcels/export/excel', [ParcelExportController::class, 'excel'])
+        ->middleware('can:exports.create')->name('parcels.export.excel');
+    Route::get('/parcels/export/pdf', [ParcelExportController::class, 'pdf'])
+        ->middleware('can:exports.create')->name('parcels.export.pdf');
     Route::get('/parcels/{parcel}', [ParcelController::class, 'show'])->name('parcels.show');
+
+    // Owners
+    Route::get('/owners', fn () => view('owners.index'))->name('owners.index');
 
     // Survey decisions
     Route::get('/survey-decisions', fn () => view('survey-decisions.index'))->name('survey-decisions.index');
