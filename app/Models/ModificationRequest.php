@@ -8,6 +8,7 @@ use App\Enums\ModificationRequestStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Lang;
 
 /**
  * @property int $id
@@ -53,5 +54,16 @@ class ModificationRequest extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(Owner::class, 'requested_by');
+    }
+
+    /**
+     * Human-friendly Arabic/English label for field_name (e.g. "asset_type" → "نوع الأصل").
+     * Falls back to the raw column name when no translation exists.
+     */
+    public function fieldLabel(): string
+    {
+        $key = 'parcels.'.$this->field_name;
+
+        return Lang::has($key) ? __($key) : $this->field_name;
     }
 }

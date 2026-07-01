@@ -105,10 +105,10 @@
 
                                 {{-- Field --}}
                                 <td class="px-5 py-3.5">
-                                    <span class="font-mono text-xs text-secondary dark:text-secondary/80
+                                    <span class="text-xs font-medium text-secondary dark:text-secondary/80
                                                  bg-secondary/10 dark:bg-secondary/20
-                                                 px-2 py-0.5 rounded-lg ltr">
-                                        {{ $req->field_name }}
+                                                 px-2 py-0.5 rounded-lg">
+                                        {{ $req->fieldLabel() }}
                                     </span>
                                 </td>
 
@@ -231,9 +231,9 @@
                                       text-on-surface-variant dark:text-on-primary-container mb-1">
                                 {{ __('modification_requests.col_field') }}
                             </p>
-                            <span class="font-mono text-sm text-secondary bg-secondary/10
-                                         dark:bg-secondary/20 px-3 py-1 rounded-lg ltr inline-block">
-                                {{ $req->field_name }}
+                            <span class="text-sm font-medium text-secondary bg-secondary/10
+                                         dark:bg-secondary/20 px-3 py-1 rounded-lg inline-block">
+                                {{ $req->fieldLabel() }}
                             </span>
                         </div>
 
