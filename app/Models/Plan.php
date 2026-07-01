@@ -12,6 +12,7 @@ class Plan extends Model
 {
     protected $fillable = ['plan_no', 'district_id'];
 
+    /** @return BelongsTo<District, $this> */
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);

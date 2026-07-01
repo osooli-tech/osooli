@@ -91,7 +91,7 @@
             {{-- Toggle hidden columns — only shown when some columns are currently hidden --}}
             @if (collect($populated)->contains(false))
                 <button wire:click="$toggle('showAllColumns')"
-                        class="ms-auto flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl
+                        class="flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl
                                border border-outline-variant dark:border-white/20
                                text-on-surface-variant dark:text-on-primary-container
                                hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
@@ -102,6 +102,28 @@
                 </button>
             @endif
 
+            {{-- Export --}}
+            @can('exports.create')
+                <div class="ms-auto flex items-center gap-2">
+                    <a href="{{ route('parcels.export.excel', ['search' => $search, 'filterAssetType' => $filterAssetType, 'filterLandTransaction' => $filterLandTransaction, 'filterDeedStatus' => $filterDeedStatus]) }}"
+                       class="flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl
+                              border border-outline-variant dark:border-white/20
+                              text-on-surface-variant dark:text-on-primary-container
+                              hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                        <span class="material-symbols-outlined text-[15px]">grid_on</span>
+                        {{ __('parcels.export_excel') }}
+                    </a>
+                    <a href="{{ route('parcels.export.pdf', ['search' => $search, 'filterAssetType' => $filterAssetType, 'filterLandTransaction' => $filterLandTransaction, 'filterDeedStatus' => $filterDeedStatus]) }}"
+                       class="flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl
+                              border border-outline-variant dark:border-white/20
+                              text-on-surface-variant dark:text-on-primary-container
+                              hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                        <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span>
+                        {{ __('parcels.export_pdf') }}
+                    </a>
+                </div>
+            @endcan
+
         </div>
     </div>
 
@@ -110,9 +132,12 @@
         $colCount = 3; // parcel_no + plan_no + actions (always visible)
         $colCount += ($showAllColumns || $populated['asset_type'])      ? 1 : 0;
         $colCount += ($showAllColumns || $populated['land_transaction']) ? 1 : 0;
+        $colCount += ($showAllColumns || $populated['district'])         ? 1 : 0;
         $colCount += ($showAllColumns || $populated['deed_no'])          ? 1 : 0;
+        $colCount += ($showAllColumns || $populated['deed_date'])        ? 1 : 0;
         $colCount += ($showAllColumns || $populated['deed_area'])        ? 1 : 0;
         $colCount += ($showAllColumns || $populated['deed_status'])      ? 1 : 0;
+        $colCount += ($showAllColumns || $populated['deed_class'])       ? 1 : 0;
     @endphp
 
     {{-- Table --}}
@@ -140,9 +165,19 @@
                                 {{ __('parcels.land_transaction') }}
                             </th>
                         @endif
+                        @if ($showAllColumns || $populated['district'])
+                            <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                                {{ __('parcels.district') }}
+                            </th>
+                        @endif
                         @if ($showAllColumns || $populated['deed_no'])
                             <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                                 {{ __('parcels.deed_no') }}
+                            </th>
+                        @endif
+                        @if ($showAllColumns || $populated['deed_date'])
+                            <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                                {{ __('parcels.deed_date') }}
                             </th>
                         @endif
                         @if ($showAllColumns || $populated['deed_area'])
@@ -153,6 +188,11 @@
                         @if ($showAllColumns || $populated['deed_status'])
                             <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                                 {{ __('parcels.deed_status') }}
+                            </th>
+                        @endif
+                        @if ($showAllColumns || $populated['deed_class'])
+                            <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                                {{ __('parcels.deed_class') }}
                             </th>
                         @endif
                         <th class="px-4 py-3"></th>
@@ -200,10 +240,26 @@
                                 </td>
                             @endif
 
+                            {{-- District --}}
+                            @if ($showAllColumns || $populated['district'])
+                                <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
+                                    {{ app()->isLocale('ar')
+                                        ? ($parcel->plan?->district?->name_ar ?? '—')
+                                        : ($parcel->plan?->district?->name_en ?? '—') }}
+                                </td>
+                            @endif
+
                             {{-- Deed No --}}
                             @if ($showAllColumns || $populated['deed_no'])
                                 <td class="px-4 py-3 text-on-surface dark:text-white data-tabular">
                                     {{ $parcel->latestDeed?->deed_no ?? '—' }}
+                                </td>
+                            @endif
+
+                            {{-- Deed Date --}}
+                            @if ($showAllColumns || $populated['deed_date'])
+                                <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container data-tabular">
+                                    {{ $parcel->latestDeed?->deed_date_hijri ?? '—' }}
                                 </td>
                             @endif
 
@@ -235,6 +291,13 @@
                                     @else
                                         <span class="text-on-surface-variant dark:text-on-primary-container">—</span>
                                     @endif
+                                </td>
+                            @endif
+
+                            {{-- Deed Class --}}
+                            @if ($showAllColumns || $populated['deed_class'])
+                                <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
+                                    {{ $parcel->latestDeed?->deed_class ?? '—' }}
                                 </td>
                             @endif
 

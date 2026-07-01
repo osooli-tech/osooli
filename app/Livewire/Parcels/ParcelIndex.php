@@ -88,17 +88,8 @@ class ParcelIndex extends Component
     public function parcels(): LengthAwarePaginator
     {
         return Parcel::query()
-            ->with(['plan', 'latestDeed'])
-            ->when($this->search !== '', function ($q): void {
-                $term = '%'.$this->search.'%';
-                $q->where(function ($inner) use ($term): void {
-                    $inner->where('parcel_no', 'ilike', $term)
-                        ->orWhereHas('deeds', fn ($d) => $d->where('deed_no', 'ilike', $term));
-                });
-            })
-            ->when($this->filterAssetType !== '', fn ($q) => $q->where('asset_type', $this->filterAssetType))
-            ->when($this->filterLandTransaction !== '', fn ($q) => $q->where('land_transaction', $this->filterLandTransaction))
-            ->when($this->filterDeedStatus !== '', fn ($q) => $q->whereHas('deeds', fn ($d) => $d->where('deed_status', $this->filterDeedStatus)))
+            ->with(['plan.district', 'latestDeed'])
+            ->filtered($this->search, $this->filterAssetType, $this->filterLandTransaction, $this->filterDeedStatus)
             ->orderBy('parcel_no')
             ->paginate(25);
     }
@@ -116,9 +107,12 @@ class ParcelIndex extends Component
         return [
             'asset_type' => $items->pluck('asset_type')->filter()->isNotEmpty(),
             'land_transaction' => $items->pluck('land_transaction')->filter()->isNotEmpty(),
+            'district' => $items->pluck('plan.district')->filter()->isNotEmpty(),
             'deed_no' => $deeds->pluck('deed_no')->filter()->isNotEmpty(),
+            'deed_date' => $deeds->pluck('deed_date_hijri')->filter()->isNotEmpty(),
             'deed_area' => $deeds->pluck('deed_area')->filter()->isNotEmpty(),
             'deed_status' => $deeds->pluck('deed_status')->filter()->isNotEmpty(),
+            'deed_class' => $deeds->pluck('deed_class')->filter()->isNotEmpty(),
         ];
     }
 

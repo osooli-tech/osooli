@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\DeedStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -42,6 +43,7 @@ class Parcel extends Model
         ];
     }
 
+    /** @return BelongsTo<Plan, $this> */
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
@@ -65,6 +67,7 @@ class Parcel extends Model
     }
 
     // Most recent deed regardless of status — used in list views
+    /** @return HasOne<Deed, $this> */
     public function latestDeed(): HasOne
     {
         return $this->hasOne(Deed::class)->latestOfMany();
@@ -94,5 +97,31 @@ class Parcel extends Model
     public function modificationRequests(): HasMany
     {
         return $this->hasMany(ModificationRequest::class);
+    }
+
+    /**
+     * Shared search/filter logic — used by the parcels list page and both export formats.
+     *
+     * @param  Builder<Parcel>  $query
+     * @return Builder<Parcel>
+     */
+    public function scopeFiltered(
+        Builder $query,
+        string $search = '',
+        string $assetType = '',
+        string $landTransaction = '',
+        string $deedStatus = ''
+    ): Builder {
+        return $query
+            ->when($search !== '', function (Builder $q) use ($search): void {
+                $term = '%'.$search.'%';
+                $q->where(function (Builder $inner) use ($term): void {
+                    $inner->where('parcel_no', 'ilike', $term)
+                        ->orWhereHas('deeds', fn (Builder $d) => $d->where('deed_no', 'ilike', $term));
+                });
+            })
+            ->when($assetType !== '', fn (Builder $q) => $q->where('asset_type', $assetType))
+            ->when($landTransaction !== '', fn (Builder $q) => $q->where('land_transaction', $landTransaction))
+            ->when($deedStatus !== '', fn (Builder $q) => $q->whereHas('deeds', fn (Builder $d) => $d->where('deed_status', $deedStatus)));
     }
 }
