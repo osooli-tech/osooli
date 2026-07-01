@@ -65,7 +65,7 @@ class RequestIndex extends Component
 
         // Guard: only allow valid transitions
         if (! in_array($transition, $request->status->allowedTransitions(), true)) {
-            $this->dispatch('swal:toast', type: 'error', message: __('modification_requests.invalid_transition'));
+            $this->dispatch('toast', type: 'error', message: __('modification_requests.invalid_transition'));
 
             return;
         }
@@ -86,7 +86,7 @@ class RequestIndex extends Component
         ]);
 
         $this->closeModal();
-        $this->dispatch('swal:toast', type: 'success', message: __('modification_requests.status_updated'));
+        $this->dispatch('toast', type: 'success', message: __('modification_requests.status_updated'));
     }
 
     #[Computed]
