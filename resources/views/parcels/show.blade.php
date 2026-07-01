@@ -279,119 +279,6 @@
             </dl>
         </div>
 
-        {{-- Boundary compass --}}
-        <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
-                    border border-outline-variant dark:border-white/10 shadow-sm">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="material-symbols-outlined text-[18px] text-secondary"
-                      style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
-                    straighten
-                </span>
-                <h2 class="font-semibold text-on-surface dark:text-white text-sm">
-                    {{ __('parcels.boundary_section') }}
-                </h2>
-            </div>
-
-            @if (! $parcel->boundary)
-                <div class="flex flex-col items-center justify-center py-8 gap-3
-                            text-on-surface-variant dark:text-on-primary-container">
-                    <span class="material-symbols-outlined text-[36px] opacity-30">straighten</span>
-                    <p class="text-sm">{{ __('parcels.no_boundary') }}</p>
-                </div>
-            @else
-                @php $b = $parcel->boundary; @endphp
-
-                {{-- Compass layout --}}
-                <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4">
-
-                    {{-- Top row: north --}}
-                    <div></div>
-                    <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
-                        <p class="text-on-surface-variant dark:text-on-primary-container mb-1">
-                            {{ __('parcels.n_border') }}
-                        </p>
-                        <p class="font-semibold text-on-surface dark:text-white leading-snug">
-                            {{ $b->n_border ?? '—' }}
-                        </p>
-                        @if ($b->n_dim)
-                            <p class="text-secondary data-tabular mt-0.5">{{ $b->n_dim }} م</p>
-                        @endif
-                    </div>
-                    <div></div>
-
-                    {{-- Middle row: west | center | east --}}
-                    <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
-                        <p class="text-on-surface-variant dark:text-on-primary-container mb-1">
-                            {{ __('parcels.w_border') }}
-                        </p>
-                        <p class="font-semibold text-on-surface dark:text-white leading-snug">
-                            {{ $b->w_border ?? '—' }}
-                        </p>
-                        @if ($b->w_dim)
-                            <p class="text-secondary data-tabular mt-0.5">{{ $b->w_dim }} م</p>
-                        @endif
-                    </div>
-                    <div class="flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[32px] text-outline-variant dark:text-white/20"
-                              style="font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
-                            explore
-                        </span>
-                    </div>
-                    <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
-                        <p class="text-on-surface-variant dark:text-on-primary-container mb-1">
-                            {{ __('parcels.e_border') }}
-                        </p>
-                        <p class="font-semibold text-on-surface dark:text-white leading-snug">
-                            {{ $b->e_border ?? '—' }}
-                        </p>
-                        @if ($b->e_dim)
-                            <p class="text-secondary data-tabular mt-0.5">{{ $b->e_dim }} م</p>
-                        @endif
-                    </div>
-
-                    {{-- Bottom row: south --}}
-                    <div></div>
-                    <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
-                        <p class="text-on-surface-variant dark:text-on-primary-container mb-1">
-                            {{ __('parcels.s_border') }}
-                        </p>
-                        <p class="font-semibold text-on-surface dark:text-white leading-snug">
-                            {{ $b->s_border ?? '—' }}
-                        </p>
-                        @if ($b->s_dim)
-                            <p class="text-secondary data-tabular mt-0.5">{{ $b->s_dim }} م</p>
-                        @endif
-                    </div>
-                    <div></div>
-
-                </div>
-
-                {{-- Extra info --}}
-                <dl class="space-y-2 text-sm border-t border-outline-variant dark:border-white/10 pt-3">
-                    @if ($b->measured_area)
-                        <div class="flex justify-between gap-2">
-                            <dt class="text-on-surface-variant dark:text-on-primary-container">
-                                {{ __('parcels.measured_area') }}
-                            </dt>
-                            <dd class="font-semibold text-on-surface dark:text-white data-tabular">
-                                {{ number_format((float) $b->measured_area, 0) }} {{ __('dashboard.area_unit_sqm') }}
-                            </dd>
-                        </div>
-                    @endif
-                    @if ($b->engineeringOffice)
-                        <div class="flex justify-between gap-2">
-                            <dt class="text-on-surface-variant dark:text-on-primary-container">
-                                {{ __('parcels.engineering_office') }}
-                            </dt>
-                            <dd class="font-medium text-on-surface dark:text-white text-end">
-                                {{ $b->engineeringOffice->name }}
-                            </dd>
-                        </div>
-                    @endif
-                </dl>
-            @endif
-        </div>
-
         {{-- Photos --}}
         @if ($parcel->photos->isNotEmpty())
             <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
@@ -420,6 +307,164 @@
     </div>
 
 </div>
+
+{{-- ── Boundaries + Mini-Map (full width, side by side) ──────────────────── --}}
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
+
+    {{-- Compass card --}}
+    <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
+                border border-outline-variant dark:border-white/10 shadow-sm">
+        <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined text-[18px] text-secondary"
+                  style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
+                straighten
+            </span>
+            <h2 class="font-semibold text-on-surface dark:text-white text-sm">
+                {{ __('parcels.boundary_section') }}
+            </h2>
+        </div>
+
+        @if (! $parcel->boundary)
+            <div class="flex flex-col items-center justify-center py-8 gap-3
+                        text-on-surface-variant dark:text-on-primary-container">
+                <span class="material-symbols-outlined text-[36px] opacity-30">straighten</span>
+                <p class="text-sm">{{ __('parcels.no_boundary') }}</p>
+            </div>
+        @else
+            @php $b = $parcel->boundary; @endphp
+
+            {{-- Compass layout --}}
+            <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4">
+
+                {{-- North --}}
+                <div></div>
+                <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
+                    <p class="text-on-surface-variant dark:text-on-primary-container mb-1">{{ __('parcels.n_border') }}</p>
+                    <p class="font-semibold text-on-surface dark:text-white leading-snug">{{ $b->n_border ?? '—' }}</p>
+                    @if ($b->n_dim) <p class="text-secondary data-tabular mt-0.5">{{ $b->n_dim }} م</p> @endif
+                </div>
+                <div></div>
+
+                {{-- West | North-arrow center | East --}}
+                <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
+                    <p class="text-on-surface-variant dark:text-on-primary-container mb-1">{{ __('parcels.w_border') }}</p>
+                    <p class="font-semibold text-on-surface dark:text-white leading-snug">{{ $b->w_border ?? '—' }}</p>
+                    @if ($b->w_dim) <p class="text-secondary data-tabular mt-0.5">{{ $b->w_dim }} م</p> @endif
+                </div>
+
+                {{-- North arrow indicator --}}
+                <div class="flex flex-col items-center justify-center gap-1">
+                    <svg width="28" height="28" viewBox="0 0 28 28" class="shrink-0">
+                        <polygon points="14,2 18,16 14,12 10,16" fill="#006c4e" opacity="0.9"/>
+                        <polygon points="14,26 18,12 14,16 10,12" fill="#9e9e9e" opacity="0.45"/>
+                    </svg>
+                    <span class="text-[10px] font-bold text-secondary">ش</span>
+                </div>
+
+                <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
+                    <p class="text-on-surface-variant dark:text-on-primary-container mb-1">{{ __('parcels.e_border') }}</p>
+                    <p class="font-semibold text-on-surface dark:text-white leading-snug">{{ $b->e_border ?? '—' }}</p>
+                    @if ($b->e_dim) <p class="text-secondary data-tabular mt-0.5">{{ $b->e_dim }} م</p> @endif
+                </div>
+
+                {{-- South --}}
+                <div></div>
+                <div class="bg-surface-container dark:bg-white/5 rounded-xl p-2">
+                    <p class="text-on-surface-variant dark:text-on-primary-container mb-1">{{ __('parcels.s_border') }}</p>
+                    <p class="font-semibold text-on-surface dark:text-white leading-snug">{{ $b->s_border ?? '—' }}</p>
+                    @if ($b->s_dim) <p class="text-secondary data-tabular mt-0.5">{{ $b->s_dim }} م</p> @endif
+                </div>
+                <div></div>
+
+            </div>
+
+            {{-- Extra info --}}
+            <dl class="space-y-2 text-sm border-t border-outline-variant dark:border-white/10 pt-3">
+                @if ($b->measured_area)
+                    <div class="flex justify-between gap-2">
+                        <dt class="text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.measured_area') }}</dt>
+                        <dd class="font-semibold text-on-surface dark:text-white data-tabular">
+                            {{ number_format((float) $b->measured_area, 0) }} {{ __('dashboard.area_unit_sqm') }}
+                        </dd>
+                    </div>
+                @endif
+                @if ($b->engineeringOffice)
+                    <div class="flex justify-between gap-2">
+                        <dt class="text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.engineering_office') }}</dt>
+                        <dd class="font-medium text-on-surface dark:text-white text-end">{{ $b->engineeringOffice->name }}</dd>
+                    </div>
+                @endif
+            </dl>
+        @endif
+    </div>
+
+    {{-- Mini-map --}}
+    <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl overflow-hidden
+                border border-outline-variant dark:border-white/10 shadow-sm min-h-[260px] relative"
+         x-data="parcelMiniMap(@js($parcelGeojson))"
+         x-init="init()">
+        @if ($parcelGeojson && config('services.mapbox.token'))
+            <div id="parcel-mini-map" class="absolute inset-0 w-full h-full rounded-2xl"></div>
+        @else
+            <div class="flex flex-col items-center justify-center h-full gap-3 py-12
+                        text-on-surface-variant dark:text-on-primary-container">
+                <span class="material-symbols-outlined text-[40px] opacity-30">map</span>
+                <p class="text-sm">{{ __('dashboard.mapbox_missing') }}</p>
+            </div>
+        @endif
+    </div>
+
+</div>
+
+@push('scripts')
+{{-- Load mapbox-gl from CDN — same approach as dashboard.blade.php to avoid Vite WebWorker bundling issues --}}
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<script>
+function parcelMiniMap(geojson) {
+    return {
+        init() {
+            if (!geojson || !window.mapboxgl) return;
+            const token = '{{ config('services.mapbox.token') }}';
+            if (!token) return;
+
+            mapboxgl.accessToken = token;
+            const isDark = document.documentElement.classList.contains('dark');
+            const map = new mapboxgl.Map({
+                container: 'parcel-mini-map',
+                style: isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
+                center: [45.0, 24.5],
+                zoom: 12,
+                attributionControl: false,
+            });
+
+            map.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true }), 'bottom-left');
+
+            map.on('load', () => {
+                const geom = JSON.parse(geojson);
+                const feature = { type: 'Feature', geometry: geom, properties: {} };
+
+                map.addSource('parcel', { type: 'geojson', data: feature });
+                map.addLayer({ id: 'parcel-fill', type: 'fill', source: 'parcel',
+                    paint: { 'fill-color': '#006c4e', 'fill-opacity': 0.35 } });
+                map.addLayer({ id: 'parcel-outline', type: 'line', source: 'parcel',
+                    paint: { 'line-color': '#006c4e', 'line-width': 2 } });
+
+                // Fit to parcel bounds
+                const coords = geom.type === 'MultiPolygon'
+                    ? geom.coordinates.flat(2)
+                    : geom.coordinates.flat(1);
+                const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
+                map.fitBounds(
+                    [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+                    { padding: 40, maxZoom: 17 }
+                );
+            });
+        }
+    };
+}
+</script>
+@endpush
 
 @else
     <div class="flex flex-col items-center justify-center py-32 gap-4

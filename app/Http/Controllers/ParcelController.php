@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Parcel;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 
 class ParcelController extends Controller
 {
@@ -19,6 +20,13 @@ class ParcelController extends Controller
             'photos',
         ]);
 
-        return view('parcels.show', compact('parcel'));
+        /** @var \stdClass|null $geoRow */
+        $geoRow = DB::selectOne(
+            'SELECT ST_AsGeoJSON(geom, 6) AS geom_json FROM parcels WHERE id = ?',
+            [$parcel->id]
+        );
+        $parcelGeojson = $geoRow?->geom_json;
+
+        return view('parcels.show', compact('parcel', 'parcelGeojson'));
     }
 }
