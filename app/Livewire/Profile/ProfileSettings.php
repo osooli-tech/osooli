@@ -47,7 +47,7 @@ class ProfileSettings extends Component
             'phone' => $this->phone ?: null,
         ]);
 
-        $this->dispatch('swal:toast', type: 'success', message: __('profile.info_saved'));
+        $this->dispatch('toast', type: 'success', message: __('profile.info_saved'));
     }
 
     public function changePassword(): void
@@ -73,7 +73,7 @@ class ProfileSettings extends Component
         $this->newPassword = '';
         $this->confirmPassword = '';
 
-        $this->dispatch('swal:toast', type: 'success', message: __('profile.password_changed'));
+        $this->dispatch('toast', type: 'success', message: __('profile.password_changed'));
     }
 
     public function render(): View

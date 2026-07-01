@@ -62,7 +62,7 @@ class RoleManager extends Component
 
         $this->showCreateModal = false;
         $this->newRoleName = '';
-        $this->dispatch('swal:toast', type: 'success', message: __('settings.role_created'));
+        $this->dispatch('toast', type: 'success', message: __('settings.role_created'));
     }
 
     public function openEdit(int $roleId): void
@@ -100,7 +100,7 @@ class RoleManager extends Component
 
         $this->showEditModal = false;
         $this->editingRoleId = null;
-        $this->dispatch('swal:toast', type: 'success', message: __('settings.permissions_saved'));
+        $this->dispatch('toast', type: 'success', message: __('settings.permissions_saved'));
     }
 
     #[On('deleteRole')]
@@ -109,7 +109,7 @@ class RoleManager extends Component
         $role = Role::findOrFail($roleId);
 
         if ($role->users()->count() > 0) {
-            $this->dispatch('swal:toast', type: 'error', message: __('settings.role_has_users'));
+            $this->dispatch('toast', type: 'error', message: __('settings.role_has_users'));
 
             return;
         }
@@ -118,7 +118,7 @@ class RoleManager extends Component
         Cache::flush();
 
         $this->deletingRoleId = null;
-        $this->dispatch('swal:toast', type: 'success', message: __('settings.role_deleted'));
+        $this->dispatch('toast', type: 'success', message: __('settings.role_deleted'));
     }
 
     /** @return array<string, list<string>> */
