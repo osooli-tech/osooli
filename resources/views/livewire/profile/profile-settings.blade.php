@@ -7,11 +7,11 @@
 
     {{-- Page Header --}}
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-on-surface">{{ __('profile.title') }}</h1>
-        <p class="text-sm text-on-surface-variant mt-1">{{ __('profile.subtitle') }}</p>
+        <h1 class="text-2xl font-bold text-on-surface dark:text-white">{{ __('profile.title') }}</h1>
+        <p class="text-sm text-on-surface-variant dark:text-white/60 mt-1">{{ __('profile.subtitle') }}</p>
     </div>
 
-    {{-- ─── Summary Card ───────────────────────────────────────────────── --}}
+    {{-- ─── Summary Card (navy — same in light & dark) ──────────────────── --}}
     <div class="bg-primary rounded-2xl p-6 mb-6">
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5">
 
@@ -23,15 +23,15 @@
             {{-- Info --}}
             <div class="flex-1 text-center sm:text-start">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                    <h2 class="text-xl font-bold text-on-primary">{{ $user->name }}</h2>
+                    <h2 class="text-xl font-bold text-white">{{ $user->name }}</h2>
                     @if($user->getRoleNames()->isNotEmpty())
                         <span class="inline-block px-3 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-xs font-semibold">
                             {{ $user->getRoleNames()->first() }}
                         </span>
                     @endif
                 </div>
-                <p class="text-on-primary/80 text-sm" dir="ltr">{{ $user->email }}</p>
-                <p class="text-on-primary/50 text-xs mt-1">
+                <p class="text-white/80 text-sm" dir="ltr">{{ $user->email }}</p>
+                <p class="text-white/60 text-xs mt-1">
                     {{ __('profile.member_since') }}: {{ $user->created_at?->format('Y/m/d') }}
                 </p>
             </div>
@@ -43,9 +43,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
 
         {{-- ─── Card 1: Personal Info ──────────────────────────────── --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-surface-container p-6 flex flex-col">
+        <div class="bg-white dark:bg-[#0f2235] rounded-2xl shadow-sm border border-surface-container dark:border-[#1a2e42] p-6 flex flex-col">
 
-            <h2 class="text-base font-semibold text-on-surface mb-5 flex items-center gap-2">
+            <h2 class="text-base font-semibold text-on-surface dark:text-white mb-5 flex items-center gap-2">
                 <span class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-secondary text-base">person</span>
                 </span>
@@ -56,14 +56,14 @@
 
                 {{-- Name --}}
                 <div>
-                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label class="block text-xs font-semibold text-on-surface-variant dark:text-white/60 uppercase tracking-wide mb-1.5">
                         {{ __('profile.name') }}
                     </label>
                     <input
                         type="text"
                         wire:model="name"
                         placeholder="{{ __('profile.name_placeholder') }}"
-                        class="w-full px-4 py-2.5 rounded-xl border border-surface-container-highest bg-surface text-on-surface placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
+                        class="w-full px-4 py-2.5 rounded-xl border border-surface-container-highest dark:border-[#2a3f55] bg-surface dark:bg-[#1a2e42] text-on-surface dark:text-white placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
                     >
                     @error('name')
                         <p class="text-error text-xs mt-1 flex items-center gap-1">
@@ -75,7 +75,7 @@
 
                 {{-- Email (read-only) --}}
                 <div>
-                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label class="block text-xs font-semibold text-on-surface-variant dark:text-white/60 uppercase tracking-wide mb-1.5">
                         {{ __('profile.email') }}
                     </label>
                     <div class="relative">
@@ -84,7 +84,7 @@
                             value="{{ $user->email }}"
                             readonly
                             dir="ltr"
-                            class="w-full px-4 py-2.5 pe-10 rounded-xl border border-surface-container-highest bg-surface-container text-on-surface-variant cursor-not-allowed text-sm"
+                            class="w-full px-4 py-2.5 pe-10 rounded-xl border border-surface-container-highest dark:border-[#2a3f55] bg-surface-container dark:bg-[#162840] text-on-surface-variant dark:text-white/50 cursor-not-allowed text-sm"
                         >
                         <span class="absolute top-1/2 -translate-y-1/2 end-3 material-symbols-outlined text-on-surface-variant/50 text-sm">lock</span>
                     </div>
@@ -92,7 +92,7 @@
 
                 {{-- Phone --}}
                 <div>
-                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label class="block text-xs font-semibold text-on-surface-variant dark:text-white/60 uppercase tracking-wide mb-1.5">
                         {{ __('profile.phone') }}
                     </label>
                     <input
@@ -100,7 +100,7 @@
                         wire:model="phone"
                         placeholder="{{ __('profile.phone_placeholder') }}"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-surface-container-highest bg-surface text-on-surface placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
+                        class="w-full px-4 py-2.5 rounded-xl border border-surface-container-highest dark:border-[#2a3f55] bg-surface dark:bg-[#1a2e42] text-on-surface dark:text-white placeholder-on-surface-variant/60 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
                     >
                     @error('phone')
                         <p class="text-error text-xs mt-1 flex items-center gap-1">
@@ -112,14 +112,14 @@
 
             </div>
 
-            <div class="mt-6 pt-5 border-t border-surface-container flex justify-end">
+            <div class="mt-6 pt-5 border-t border-surface-container dark:border-[#1a2e42] flex justify-end">
                 <button
                     wire:click="saveInfo"
                     wire:loading.attr="disabled"
                     wire:target="saveInfo"
                     class="inline-flex items-center gap-2 bg-secondary text-on-secondary px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
                 >
-                    <span class="material-symbols-outlined text-base" wire:loading.class="animate-spin" wire:target="saveInfo">save</span>
+                    <span class="material-symbols-outlined text-base">save</span>
                     <span wire:loading.remove wire:target="saveInfo">{{ __('profile.save_info') }}</span>
                     <span wire:loading wire:target="saveInfo">...</span>
                 </button>
@@ -129,11 +129,11 @@
 
         {{-- ─── Card 2: Change Password ─────────────────────────────── --}}
         <div
-            class="bg-white rounded-2xl shadow-sm border border-surface-container p-6 flex flex-col"
+            class="bg-white dark:bg-[#0f2235] rounded-2xl shadow-sm border border-surface-container dark:border-[#1a2e42] p-6 flex flex-col"
             x-data="{ showCurrent: false, showNew: false, showConfirm: false }"
         >
 
-            <h2 class="text-base font-semibold text-on-surface mb-5 flex items-center gap-2">
+            <h2 class="text-base font-semibold text-on-surface dark:text-white mb-5 flex items-center gap-2">
                 <span class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center shrink-0">
                     <span class="material-symbols-outlined text-secondary text-base">lock</span>
                 </span>
@@ -144,21 +144,18 @@
 
                 {{-- Current password --}}
                 <div>
-                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label class="block text-xs font-semibold text-on-surface-variant dark:text-white/60 uppercase tracking-wide mb-1.5">
                         {{ __('profile.current_password') }}
                     </label>
                     <div class="relative">
                         <input
                             :type="showCurrent ? 'text' : 'password'"
                             wire:model="currentPassword"
-                            class="w-full px-4 py-2.5 pe-11 rounded-xl border border-surface-container-highest bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
+                            class="w-full px-4 py-2.5 pe-11 rounded-xl border border-surface-container-highest dark:border-[#2a3f55] bg-surface dark:bg-[#1a2e42] text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
                         >
-                        <button
-                            type="button"
-                            @click="showCurrent = !showCurrent"
-                            class="absolute top-1/2 -translate-y-1/2 end-3 text-on-surface-variant hover:text-secondary transition-colors"
-                            tabindex="-1"
-                        >
+                        <button type="button" @click="showCurrent = !showCurrent"
+                            class="absolute top-1/2 -translate-y-1/2 end-3 text-on-surface-variant dark:text-white/50 hover:text-secondary transition-colors"
+                            tabindex="-1">
                             <span class="material-symbols-outlined text-lg leading-none" x-text="showCurrent ? 'visibility_off' : 'visibility'"></span>
                         </button>
                     </div>
@@ -172,21 +169,18 @@
 
                 {{-- New password --}}
                 <div>
-                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label class="block text-xs font-semibold text-on-surface-variant dark:text-white/60 uppercase tracking-wide mb-1.5">
                         {{ __('profile.new_password') }}
                     </label>
                     <div class="relative">
                         <input
                             :type="showNew ? 'text' : 'password'"
                             wire:model="newPassword"
-                            class="w-full px-4 py-2.5 pe-11 rounded-xl border border-surface-container-highest bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
+                            class="w-full px-4 py-2.5 pe-11 rounded-xl border border-surface-container-highest dark:border-[#2a3f55] bg-surface dark:bg-[#1a2e42] text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
                         >
-                        <button
-                            type="button"
-                            @click="showNew = !showNew"
-                            class="absolute top-1/2 -translate-y-1/2 end-3 text-on-surface-variant hover:text-secondary transition-colors"
-                            tabindex="-1"
-                        >
+                        <button type="button" @click="showNew = !showNew"
+                            class="absolute top-1/2 -translate-y-1/2 end-3 text-on-surface-variant dark:text-white/50 hover:text-secondary transition-colors"
+                            tabindex="-1">
                             <span class="material-symbols-outlined text-lg leading-none" x-text="showNew ? 'visibility_off' : 'visibility'"></span>
                         </button>
                     </div>
@@ -200,21 +194,18 @@
 
                 {{-- Confirm password --}}
                 <div>
-                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-1.5">
+                    <label class="block text-xs font-semibold text-on-surface-variant dark:text-white/60 uppercase tracking-wide mb-1.5">
                         {{ __('profile.confirm_password') }}
                     </label>
                     <div class="relative">
                         <input
                             :type="showConfirm ? 'text' : 'password'"
                             wire:model="confirmPassword"
-                            class="w-full px-4 py-2.5 pe-11 rounded-xl border border-surface-container-highest bg-surface text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
+                            class="w-full px-4 py-2.5 pe-11 rounded-xl border border-surface-container-highest dark:border-[#2a3f55] bg-surface dark:bg-[#1a2e42] text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-sm transition-all"
                         >
-                        <button
-                            type="button"
-                            @click="showConfirm = !showConfirm"
-                            class="absolute top-1/2 -translate-y-1/2 end-3 text-on-surface-variant hover:text-secondary transition-colors"
-                            tabindex="-1"
-                        >
+                        <button type="button" @click="showConfirm = !showConfirm"
+                            class="absolute top-1/2 -translate-y-1/2 end-3 text-on-surface-variant dark:text-white/50 hover:text-secondary transition-colors"
+                            tabindex="-1">
                             <span class="material-symbols-outlined text-lg leading-none" x-text="showConfirm ? 'visibility_off' : 'visibility'"></span>
                         </button>
                     </div>
@@ -228,7 +219,7 @@
 
             </div>
 
-            <div class="mt-6 pt-5 border-t border-surface-container flex justify-end">
+            <div class="mt-6 pt-5 border-t border-surface-container dark:border-[#1a2e42] flex justify-end">
                 <button
                     wire:click="changePassword"
                     wire:loading.attr="disabled"
