@@ -23,6 +23,9 @@ return [
     'total_owners' => 'Total Owners',
     'multi_owner_deeds' => 'Multi-Owner Deeds',
     'pending_requests' => 'Pending Modification Requests',
+    'updated_deeds' => 'Updated Deeds',
+    'non_updated_deeds' => 'Non-Updated Deeds',
+    'active_alerts' => 'Active Alerts',
     'top_owner' => 'Top Owner by Holdings',
     'deeds' => 'deeds',
     'area_unit_sqm' => 'm²',
@@ -62,4 +65,15 @@ return [
     'recent_alerts' => 'Outdated Deed Alerts',
     'no_alerts' => 'No alerts',
     'view_all' => 'View All',
+
+    // ── Map right panel ─────────────────────────────────────────
+    'coordinates' => 'Coordinates',
+    'related_documents' => 'Related Documents',
+    'no_documents' => 'No related documents',
+    'view_full_details' => 'View Full Details',
+    'map_layers' => 'Layers',
+    'satellite_view' => 'Satellite',
+    'street_view' => 'Street Map',
+    'show_labels' => 'Parcel Numbers',
+    'search_map_placeholder' => 'Search by parcel or deed number...',
 ];

@@ -23,6 +23,9 @@ return [
     'total_owners' => 'عدد الملاك',
     'multi_owner_deeds' => 'صكوك متعددة الملاك',
     'pending_requests' => 'طلبات التعديل المعلّقة',
+    'updated_deeds' => 'صكوك محدّثة',
+    'non_updated_deeds' => 'صكوك غير محدّثة',
+    'active_alerts' => 'تنبيهات نشطة',
     'top_owner' => 'أكثر مالك حيازةً',
     'deeds' => 'صك',
     'area_unit_sqm' => 'م²',
@@ -62,4 +65,15 @@ return [
     'recent_alerts' => 'تنبيهات الصكوك القديمة',
     'no_alerts' => 'لا توجد تنبيهات',
     'view_all' => 'عرض الكل',
+
+    // ── Map right panel ─────────────────────────────────────────
+    'coordinates' => 'الإحداثيات',
+    'related_documents' => 'المستندات المرتبطة',
+    'no_documents' => 'لا توجد مستندات مرتبطة',
+    'view_full_details' => 'عرض التفاصيل الكاملة',
+    'map_layers' => 'الطبقات',
+    'satellite_view' => 'قمر صناعي',
+    'street_view' => 'خريطة الشوارع',
+    'show_labels' => 'أرقام القطع',
+    'search_map_placeholder' => 'ابحث عن رقم قطعة أو صك...',
 ];

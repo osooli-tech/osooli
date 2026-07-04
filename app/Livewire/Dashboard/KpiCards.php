@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Dashboard;
 
+use App\Enums\DeedStatus;
 use App\Models\ModificationRequest;
 use App\Models\Parcel;
 use App\Models\Plan;
@@ -24,6 +25,12 @@ class KpiCards extends Component
     public int $multiOwnerDeeds = 0;
 
     public int $pendingRequests = 0;
+
+    public int $updatedDeeds = 0;
+
+    public int $nonUpdatedDeeds = 0;
+
+    public int $activeAlerts = 0;
 
     public string $totalArea = '—';
 
@@ -49,6 +56,9 @@ class KpiCards extends Component
         $this->totalOwners = DB::table('deed_owners')->distinct('owner_id')->count('owner_id');
 
         $this->totalDeeds = DB::table('deeds')->count();
+        $this->updatedDeeds = DB::table('deeds')->where('deed_status', DeedStatus::Updated->value)->count();
+        $this->nonUpdatedDeeds = DB::table('deeds')->where('deed_status', DeedStatus::Old->value)->count();
+        $this->activeAlerts = $this->pendingRequests + $this->nonUpdatedDeeds;
 
         // Deeds with more than one owner — single subquery
         $this->multiOwnerDeeds = (int) DB::scalar(

@@ -74,4 +74,27 @@
         :subtext="$topOwnerDeedCount > 0 ? number_format($topOwnerDeedCount).' '.__('dashboard.deeds') : null"
     />
 
+    <x-stat-card
+        :label="__('dashboard.updated_deeds')"
+        :value="number_format($updatedDeeds)"
+        icon="verified"
+        color="secondary"
+    />
+
+    <x-stat-card
+        :label="__('dashboard.non_updated_deeds')"
+        :value="number_format($nonUpdatedDeeds)"
+        icon="report"
+        color="error"
+        :subtext="$nonUpdatedDeeds > 0 ? __('dashboard.needs_action') : null"
+    />
+
+    <x-stat-card
+        :label="__('dashboard.active_alerts')"
+        :value="number_format($activeAlerts)"
+        icon="notifications_active"
+        color="error"
+        :subtext="$activeAlerts > 0 ? __('dashboard.needs_action') : __('dashboard.all_clear')"
+    />
+
 </div>
