@@ -21,13 +21,16 @@ class GeoJsonController extends Controller
                  p.id, p.parcel_no, p.geo_id, p.asset_type,
                  pl.plan_no,
                  d.name_ar AS district_name,
-                 deed.deed_no, deed.deed_date_hijri,
-                 ST_AsGeoJSON(p.geom, 6) AS geom_json
+                 deed.deed_no, deed.deed_date_hijri, deed.deed_area, deed.deed_status,
+                 ST_AsGeoJSON(p.geom, 6) AS geom_json,
+                 ST_Y(ST_Centroid(p.geom)) AS centroid_lat,
+                 ST_X(ST_Centroid(p.geom)) AS centroid_lng,
+                 (SELECT COUNT(*) FROM parcel_photos WHERE parcel_id = p.id) AS documents_count
              FROM parcels p
              LEFT JOIN plans pl ON pl.id = p.plan_id
              LEFT JOIN districts d ON d.id = pl.district_id
              LEFT JOIN LATERAL (
-                 SELECT deed_no, deed_date_hijri
+                 SELECT deed_no, deed_date_hijri, deed_area, deed_status
                  FROM deeds
                  WHERE parcel_id = p.id
                  ORDER BY id DESC
@@ -48,6 +51,11 @@ class GeoJsonController extends Controller
                 'district_name' => $row->district_name,
                 'deed_no' => $row->deed_no,
                 'deed_date_hijri' => $row->deed_date_hijri,
+                'deed_area' => $row->deed_area,
+                'deed_status' => $row->deed_status,
+                'centroid_lat' => $row->centroid_lat,
+                'centroid_lng' => $row->centroid_lng,
+                'documents_count' => (int) $row->documents_count,
             ],
         ], $rows);
 

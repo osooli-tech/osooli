@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Parcel;
+use App\Models\ParcelPhoto;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class ParcelController extends Controller
@@ -28,5 +30,16 @@ class ParcelController extends Controller
         $parcelGeojson = $geoRow?->geom_json;
 
         return view('parcels.show', compact('parcel', 'parcelGeojson'));
+    }
+
+    public function documents(Parcel $parcel): JsonResponse
+    {
+        $documents = $parcel->photos()->get()->map(fn (ParcelPhoto $photo) => [
+            'id' => $photo->id,
+            'type' => $photo->photo_type?->value,
+            'download_url' => route('documents.download', $photo),
+        ]);
+
+        return response()->json(['documents' => $documents]);
     }
 }

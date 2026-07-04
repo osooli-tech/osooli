@@ -35,6 +35,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/parcels/export/pdf', [ParcelExportController::class, 'pdf'])
         ->middleware('can:exports.create')->name('parcels.export.pdf');
     Route::get('/parcels/{parcel}', [ParcelController::class, 'show'])->name('parcels.show');
+    Route::get('/parcels/{parcel}/documents', [ParcelController::class, 'documents'])->name('parcels.documents');
 
     // Owners
     Route::get('/owners', fn () => view('owners.index'))->name('owners.index');

@@ -89,6 +89,7 @@ class Parcel extends Model
         return $this->hasMany(SurveyDecision::class);
     }
 
+    /** @return HasMany<ParcelPhoto, $this> */
     public function photos(): HasMany
     {
         return $this->hasMany(ParcelPhoto::class);
