@@ -8,4 +8,5 @@ enum PhotoType: string
 {
     case Aerial = 'جوية';
     case Ground = 'أرضية';
+    case BoundarySurvey = 'كروكي مساحي';
 }

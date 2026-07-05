@@ -16,5 +16,6 @@ return [
     'photo_types' => [
         'جوية' => 'Aerial',
         'أرضية' => 'Ground',
+        'كروكي مساحي' => 'Boundary Survey',
     ],
 ];
