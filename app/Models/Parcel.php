@@ -79,6 +79,7 @@ class Parcel extends Model
         return $this->hasOne(Deed::class)->where('deed_status', DeedStatus::Updated->value)->latestOfMany();
     }
 
+    /** @return HasOne<ParcelBoundary, $this> */
     public function boundary(): HasOne
     {
         return $this->hasOne(ParcelBoundary::class);

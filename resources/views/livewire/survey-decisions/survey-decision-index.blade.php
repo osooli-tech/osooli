@@ -84,12 +84,23 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('survey_decisions.qrar_source') }}
                         </th>
+                        <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                            {{ __('survey_decisions.measured_area') }}
+                        </th>
+                        <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                            {{ __('survey_decisions.matches_deed') }}
+                        </th>
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant dark:divide-white/10">
                     @forelse ($decisions as $decision)
-                        <tr class="hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                        @php
+                            $boundary = $decision->parcel?->boundary;
+                            $surveyDocument = $decision->parcel?->photos
+                                ->firstWhere('photo_type', \App\Enums\PhotoType::BoundarySurvey);
+                        @endphp
+                        <tr class="hover:bg-surface-container dark:hover:bg-white/5 transition-colors align-top">
 
                             {{-- Parcel No --}}
                             <td class="px-4 py-3 font-semibold text-on-surface dark:text-white data-tabular">
@@ -128,22 +139,87 @@
                                 @endif
                             </td>
 
-                            {{-- Link to parcel --}}
+                            {{-- Measured area (from parcel_boundaries) --}}
+                            <td class="px-4 py-3 text-on-surface dark:text-white data-tabular">
+                                {{ $boundary?->measured_area ? number_format((float) $boundary->measured_area, 2).' '.__('dashboard.area_unit_sqm') : '—' }}
+                            </td>
+
+                            {{-- Match status --}}
                             <td class="px-4 py-3">
-                                @if ($decision->parcel)
-                                    <a href="{{ route('parcels.show', $decision->parcel) }}"
-                                       class="inline-flex items-center gap-1 text-xs font-medium text-primary
-                                              hover:underline underline-offset-2 transition-colors">
-                                        <span class="material-symbols-outlined text-[15px]">arrow_back_ios</span>
-                                        {{ __('survey_decisions.view_parcel') }}
-                                    </a>
+                                @if ($boundary?->matches_deed === true)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                 bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-white/90">
+                                        {{ __('survey_decisions.matches_deed_yes') }}
+                                    </span>
+                                @elseif ($boundary?->matches_deed === false)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                                 bg-error/10 text-error dark:bg-error/20 dark:text-white/90">
+                                        {{ __('survey_decisions.matches_deed_no') }}
+                                    </span>
+                                @else
+                                    <span class="text-on-surface-variant dark:text-on-primary-container">
+                                        {{ __('survey_decisions.matches_deed_unknown') }}
+                                    </span>
                                 @endif
                             </td>
 
+                            {{-- Link to parcel + survey document --}}
+                            <td class="px-4 py-3">
+                                <div class="flex flex-col gap-1.5">
+                                    @if ($decision->parcel)
+                                        <a href="{{ route('parcels.show', $decision->parcel) }}"
+                                           class="inline-flex items-center gap-1 text-xs font-medium text-primary
+                                                  hover:underline underline-offset-2 transition-colors">
+                                            <span class="material-symbols-outlined text-[15px]">arrow_back_ios</span>
+                                            {{ __('survey_decisions.view_parcel') }}
+                                        </a>
+                                    @endif
+                                    @can('documents.download')
+                                        @if ($surveyDocument)
+                                            <a href="{{ route('documents.download', $surveyDocument) }}" target="_blank" rel="noopener"
+                                               class="inline-flex items-center gap-1 text-xs font-medium text-secondary
+                                                      hover:underline underline-offset-2 transition-colors">
+                                                <span class="material-symbols-outlined text-[15px]">description</span>
+                                                {{ __('survey_decisions.view_document') }}
+                                            </a>
+                                        @endif
+                                    @endcan
+                                </div>
+                            </td>
+
                         </tr>
+
+                        {{-- Boundaries row (borders + dimensions "as surveyed") --}}
+                        @if ($boundary && ($boundary->n_border || $boundary->s_border || $boundary->e_border || $boundary->w_border))
+                            <tr class="bg-surface-container dark:bg-[#161f2e] border-b border-outline-variant dark:border-white/10">
+                                <td colspan="9" class="px-4 py-3">
+                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
+                                        {{ __('survey_decisions.boundaries') }}
+                                    </p>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                                        <div>
+                                            <span class="text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.n_border') }}: </span>
+                                            <span class="text-on-surface dark:text-white">{{ $boundary->n_border ?? '—' }} ({{ $boundary->n_dim ?? '—' }})</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.s_border') }}: </span>
+                                            <span class="text-on-surface dark:text-white">{{ $boundary->s_border ?? '—' }} ({{ $boundary->s_dim ?? '—' }})</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.e_border') }}: </span>
+                                            <span class="text-on-surface dark:text-white">{{ $boundary->e_border ?? '—' }} ({{ $boundary->e_dim ?? '—' }})</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.w_border') }}: </span>
+                                            <span class="text-on-surface dark:text-white">{{ $boundary->w_border ?? '—' }} ({{ $boundary->w_dim ?? '—' }})</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-16 text-center">
+                            <td colspan="9" class="px-4 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3
                                             text-on-surface-variant dark:text-on-primary-container">
                                     <span class="material-symbols-outlined text-[48px] opacity-30">fact_check</span>

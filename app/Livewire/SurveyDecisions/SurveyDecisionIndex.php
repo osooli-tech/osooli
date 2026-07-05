@@ -54,7 +54,7 @@ class SurveyDecisionIndex extends Component
     public function decisions(): LengthAwarePaginator
     {
         return SurveyDecision::query()
-            ->with(['parcel.plan'])
+            ->with(['parcel.plan', 'parcel.boundary', 'parcel.photos'])
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
                 $q->where(function ($inner) use ($term): void {

@@ -22,6 +22,7 @@ class ParcelBoundary extends Model
         'e_dim',
         'w_dim',
         'measured_area',
+        'matches_deed',
         'survey_date',
         'engineering_office_id',
     ];
@@ -34,6 +35,7 @@ class ParcelBoundary extends Model
             'e_dim' => 'decimal:2',
             'w_dim' => 'decimal:2',
             'measured_area' => 'decimal:2',
+            'matches_deed' => 'boolean',
         ];
     }
 
