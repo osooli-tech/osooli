@@ -51,4 +51,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class);
     }
+
+    /**
+     * Fixed OTP code for this user, if the whitelisted test account is configured
+     * for it — never returns a value in production, regardless of config.
+     */
+    public function fixedTestOtp(): ?string
+    {
+        $testEmail = config('auth.otp.test_email');
+        $testCode = config('auth.otp.test_code');
+
+        if (app()->environment('production') || ! $testEmail || ! $testCode) {
+            return null;
+        }
+
+        return strcasecmp($this->email, $testEmail) === 0 ? (string) $testCode : null;
+    }
 }

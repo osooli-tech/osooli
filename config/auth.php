@@ -119,6 +119,10 @@ return [
     'otp' => [
         'ttl_minutes' => 5,   // how long the OTP is valid (must match cache TTL)
         'resend_seconds' => 300, // cooldown before user can request a new OTP (matches OTP TTL)
+        // Fixed OTP for one whitelisted test account, to speed up manual QA.
+        // Never applies in production regardless of these being set — see User::hasFixedTestOtp().
+        'test_email' => env('OTP_TEST_EMAIL'),
+        'test_code' => env('OTP_TEST_CODE'),
     ],
 
 ];
