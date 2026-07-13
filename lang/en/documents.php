@@ -17,5 +17,6 @@ return [
         'جوية' => 'Aerial',
         'أرضية' => 'Ground',
         'كروكي مساحي' => 'Boundary Survey',
+        'صك' => 'Deed',
     ],
 ];

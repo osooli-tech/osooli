@@ -76,4 +76,8 @@ return [
     'street_view' => 'خريطة الشوارع',
     'show_labels' => 'أرقام القطع',
     'search_map_placeholder' => 'ابحث عن رقم قطعة أو صك...',
+    'deed_document' => 'ملف الصك',
+    'view_deed' => 'عرض الصك',
+    'download_deed' => 'تنزيل الصك',
+    'deed_not_available' => 'الصك غير متوفر',
 ];

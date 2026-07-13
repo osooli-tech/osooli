@@ -33,6 +33,12 @@
                     .then((data) => { this.documents = data.documents ?? []; })
                     .finally(() => { this.documentsLoading = false; });
             },
+            deedDocument() {
+                return this.documents.find((d) => d.type === 'صك') ?? null;
+            },
+            otherDocuments() {
+                return this.documents.filter((d) => d.type !== 'صك');
+            },
          }"
          @parcel-selected.window="parcel = $event.detail; fetchDocuments(parcel.id)">
 
@@ -175,6 +181,33 @@
                                x-text="(parcel.centroid_lat && parcel.centroid_lng) ? Number(parcel.centroid_lat).toFixed(6) + ', ' + Number(parcel.centroid_lng).toFixed(6) : '—'"></p>
                         </div>
 
+                        {{-- ملف الصك --}}
+                        <div class="pt-4 border-t border-outline-variant dark:border-white/10">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
+                                {{ __('dashboard.deed_document') }}
+                            </p>
+                            <template x-if="documentsLoading">
+                                <p class="text-on-surface-variant dark:text-on-primary-container text-xs">…</p>
+                            </template>
+                            <template x-if="! documentsLoading && ! deedDocument()">
+                                <p class="text-on-surface-variant dark:text-on-primary-container text-xs">{{ __('dashboard.deed_not_available') }}</p>
+                            </template>
+                            <div class="flex items-center gap-2" x-show="! documentsLoading && deedDocument()">
+                                <a :href="deedDocument()?.download_url" target="_blank"
+                                   class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium
+                                          bg-primary text-white hover:opacity-90 transition-opacity">
+                                    <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                    {{ __('dashboard.view_deed') }}
+                                </a>
+                                <a :href="deedDocument()?.download_url" download
+                                   class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium
+                                          bg-secondary text-white hover:opacity-90 transition-opacity">
+                                    <span class="material-symbols-outlined text-[15px]">download</span>
+                                    {{ __('dashboard.download_deed') }}
+                                </a>
+                            </div>
+                        </div>
+
                         {{-- المستندات المرتبطة --}}
                         <div class="pt-4 border-t border-outline-variant dark:border-white/10">
                             <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
@@ -183,11 +216,11 @@
                             <template x-if="documentsLoading">
                                 <p class="text-on-surface-variant dark:text-on-primary-container text-xs">…</p>
                             </template>
-                            <template x-if="! documentsLoading && documents.length === 0">
+                            <template x-if="! documentsLoading && otherDocuments().length === 0">
                                 <p class="text-on-surface-variant dark:text-on-primary-container text-xs">{{ __('dashboard.no_documents') }}</p>
                             </template>
-                            <ul class="space-y-1.5" x-show="! documentsLoading && documents.length > 0">
-                                <template x-for="doc in documents" :key="doc.id">
+                            <ul class="space-y-1.5" x-show="! documentsLoading && otherDocuments().length > 0">
+                                <template x-for="doc in otherDocuments()" :key="doc.id">
                                     <li>
                                         <a :href="doc.download_url"
                                            class="flex items-center gap-2 text-primary hover:underline underline-offset-2 text-xs">

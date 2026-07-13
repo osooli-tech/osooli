@@ -76,4 +76,8 @@ return [
     'street_view' => 'Street Map',
     'show_labels' => 'Parcel Numbers',
     'search_map_placeholder' => 'Search by parcel or deed number...',
+    'deed_document' => 'Deed Document',
+    'view_deed' => 'View Deed',
+    'download_deed' => 'Download Deed',
+    'deed_not_available' => 'Deed not available',
 ];
