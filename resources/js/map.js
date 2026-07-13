@@ -58,7 +58,7 @@ if (! container) {
                     'line-color': [
                         'case',
                         ['boolean', ['feature-state', 'selected'], false], '#c9a84c',
-                        '#00875a',
+                        '#39ff14',
                     ],
                     'line-width': [
                         'case',
