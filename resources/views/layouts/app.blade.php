@@ -11,6 +11,11 @@
             this.isDark = ! this.isDark;
             localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
         },
+        sidebarOpen: localStorage.getItem('sidebarOpen') !== 'false',
+        toggleSidebar () {
+            this.sidebarOpen = ! this.sidebarOpen;
+            localStorage.setItem('sidebarOpen', this.sidebarOpen);
+        },
     }"
     :class="{ 'dark': isDark }"
 >
@@ -36,11 +41,23 @@
 
     <x-sidebar />
 
-    {{-- Topbar: fixed, spans the content area (start-[280px] = right:280px in RTL) --}}
-    <header class="fixed top-0 start-[280px] end-0 h-16 z-30
+    {{-- Topbar: fixed, spans the content area (start-[280px] = right:280px in RTL);
+         collapses to start-0 when the sidebar is hidden. --}}
+    <header class="fixed top-0 end-0 h-16 z-30
                    bg-surface-container-lowest dark:bg-[#161b22]
                    border-b border-outline-variant dark:border-white/10
-                   flex items-center gap-4 px-6">
+                   flex items-center gap-4 px-6
+                   transition-all duration-300 ease-in-out"
+            :class="sidebarOpen ? 'start-[280px]' : 'start-0'">
+
+        {{-- Sidebar toggle --}}
+        <button @click="toggleSidebar()"
+                class="w-9 h-9 flex items-center justify-center rounded-xl shrink-0
+                       text-on-surface-variant dark:text-on-primary-container
+                       hover:bg-surface-container dark:hover:bg-white/10 transition-colors"
+                title="{{ __('nav.toggle_sidebar') }}">
+            <span class="material-symbols-outlined text-[22px]">menu</span>
+        </button>
 
         {{-- Page title + breadcrumb (fills available space) --}}
         <div class="flex-1 min-w-0">
@@ -106,7 +123,8 @@
     <x-toast />
 
     {{-- Content area --}}
-    <main class="ms-[280px] mt-16 min-h-[calc(100vh-4rem)] p-6">
+    <main class="mt-16 min-h-[calc(100vh-4rem)] p-6 transition-all duration-300 ease-in-out"
+          :class="sidebarOpen ? 'ms-[280px]' : 'ms-0'">
         @yield('content')
     </main>
 

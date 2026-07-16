@@ -1,4 +1,6 @@
-<aside class="fixed inset-y-0 start-0 w-[280px] bg-primary z-40 flex flex-col select-none">
+<aside class="fixed inset-y-0 start-0 w-[280px] bg-primary z-40 flex flex-col select-none
+              transition-transform duration-300 ease-in-out"
+       :class="sidebarOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'">
 
     {{-- Logo — sidebar is always navy so we always use the dark-background version --}}
     <div class="flex items-center px-4 h-16 border-b border-white/10 shrink-0">

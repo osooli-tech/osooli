@@ -25,4 +25,5 @@ return [
     'switch_to_english' => 'English',
     'switch_to_arabic' => 'العربية',
     'map_browser' => 'المتصفح الجغرافي',
+    'toggle_sidebar' => 'إظهار/إخفاء القائمة',
 ];
