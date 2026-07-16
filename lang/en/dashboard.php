@@ -68,6 +68,8 @@ return [
 
     // ── Map right panel ─────────────────────────────────────────
     'coordinates' => 'Coordinates',
+    'corner_coordinates' => 'Corner Coordinates',
+    'corner' => 'Corner',
     'related_documents' => 'Related Documents',
     'no_documents' => 'No related documents',
     'view_full_details' => 'View Full Details',

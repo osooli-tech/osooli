@@ -29,6 +29,19 @@ if (! container) {
         let hoveredId = null;
         let selectedId = null;
 
+        // Extract the parcel's corner coordinates from its polygon geometry.
+        // Returns [{ lat, lng }] for the exterior ring, dropping the closing
+        // point that duplicates the first.
+        function extractCorners(geometry) {
+            if (! geometry) return [];
+            const ring = geometry.type === 'Polygon'
+                ? geometry.coordinates[0]
+                : (geometry.coordinates[0]?.[0] ?? []);
+            const points = ring.slice(0, -1);
+
+            return points.map(([lng, lat]) => ({ lat, lng }));
+        }
+
         function addParcelLayers() {
             const geoUrl = container.dataset.geojsonUrl;
             if (! geoUrl) return;
@@ -121,7 +134,9 @@ if (! container) {
                 selectedId = feature.id;
                 map.setFeatureState({ source: 'parcels', id: selectedId }, { selected: true });
 
-                window.dispatchEvent(new CustomEvent('parcel-selected', { detail: feature.properties }));
+                window.dispatchEvent(new CustomEvent('parcel-selected', {
+                    detail: { ...feature.properties, corners: extractCorners(feature.geometry) },
+                }));
             });
 
             map.on('mousemove', 'parcels-fill', (e) => {
@@ -202,7 +217,9 @@ if (! container) {
                 const bounds = new mapboxgl.LngLatBounds();
                 flat.forEach((c) => bounds.extend(c));
                 map.fitBounds(bounds, { padding: 120, maxZoom: 18 });
-                window.dispatchEvent(new CustomEvent('parcel-selected', { detail: match.properties }));
+                window.dispatchEvent(new CustomEvent('parcel-selected', {
+                    detail: { ...match.properties, corners: extractCorners(match.geometry) },
+                }));
             });
         }
     }

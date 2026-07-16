@@ -177,8 +177,27 @@
                             <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
                                 {{ __('dashboard.coordinates') }}
                             </p>
-                            <p class="font-semibold text-on-surface dark:text-white data-tabular ltr" dir="ltr"
+                            <p class="font-semibold text-on-surface dark:text-white data-tabular ltr mb-3" dir="ltr"
                                x-text="(parcel.centroid_lat && parcel.centroid_lng) ? Number(parcel.centroid_lat).toFixed(6) + ', ' + Number(parcel.centroid_lng).toFixed(6) : '—'"></p>
+
+                            {{-- إحداثيات أركان القطعة --}}
+                            <template x-if="parcel.corners && parcel.corners.length">
+                                <div>
+                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-1.5">
+                                        {{ __('dashboard.corner_coordinates') }}
+                                    </p>
+                                    <ul class="space-y-1">
+                                        <template x-for="(corner, i) in parcel.corners" :key="i">
+                                            <li class="flex items-center justify-between gap-2 text-xs">
+                                                <span class="text-on-surface-variant dark:text-on-primary-container shrink-0"
+                                                      x-text="'{{ __('dashboard.corner') }} ' + (i + 1)"></span>
+                                                <span class="font-medium text-on-surface dark:text-white data-tabular ltr" dir="ltr"
+                                                      x-text="Number(corner.lat).toFixed(6) + ', ' + Number(corner.lng).toFixed(6)"></span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
                         </div>
 
                         {{-- ملف الصك --}}

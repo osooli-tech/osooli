@@ -68,6 +68,8 @@ return [
 
     // ── Map right panel ─────────────────────────────────────────
     'coordinates' => 'الإحداثيات',
+    'corner_coordinates' => 'إحداثيات الأركان',
+    'corner' => 'ركن',
     'related_documents' => 'المستندات المرتبطة',
     'no_documents' => 'لا توجد مستندات مرتبطة',
     'view_full_details' => 'عرض التفاصيل الكاملة',
