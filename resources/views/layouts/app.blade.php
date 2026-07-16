@@ -11,10 +11,14 @@
             this.isDark = ! this.isDark;
             localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
         },
-        sidebarOpen: localStorage.getItem('sidebarOpen') !== 'false',
+        sidebarOpen: window.matchMedia('(min-width: 1024px)').matches
+            ? localStorage.getItem('sidebarOpen') !== 'false'
+            : false,
         toggleSidebar () {
             this.sidebarOpen = ! this.sidebarOpen;
-            localStorage.setItem('sidebarOpen', this.sidebarOpen);
+            if (window.matchMedia('(min-width: 1024px)').matches) {
+                localStorage.setItem('sidebarOpen', this.sidebarOpen);
+            }
         },
     }"
     :class="{ 'dark': isDark }"
@@ -41,14 +45,20 @@
 
     <x-sidebar />
 
-    {{-- Topbar: fixed, spans the content area (start-[280px] = right:280px in RTL);
-         collapses to start-0 when the sidebar is hidden. --}}
-    <header class="fixed top-0 end-0 h-16 z-30
+    {{-- Mobile backdrop — only visible below lg while the drawer is open --}}
+    <div x-show="sidebarOpen"
+         @click="toggleSidebar()"
+         class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+         x-cloak></div>
+
+    {{-- Topbar: fixed. On desktop it offsets by the sidebar width when open;
+         on mobile it always spans full width (the sidebar overlays it). --}}
+    <header class="fixed top-0 end-0 start-0 h-16 z-30
                    bg-surface-container-lowest dark:bg-[#161b22]
                    border-b border-outline-variant dark:border-white/10
-                   flex items-center gap-4 px-6
+                   flex items-center gap-4 px-4 sm:px-6
                    transition-all duration-300 ease-in-out"
-            :class="sidebarOpen ? 'start-[280px]' : 'start-0'">
+            :class="sidebarOpen ? 'lg:start-[280px]' : 'lg:start-0'">
 
         {{-- Sidebar toggle --}}
         <button @click="toggleSidebar()"
@@ -122,9 +132,9 @@
     {{-- Toast notifications --}}
     <x-toast />
 
-    {{-- Content area --}}
-    <main class="mt-16 min-h-[calc(100vh-4rem)] p-6 transition-all duration-300 ease-in-out"
-          :class="sidebarOpen ? 'ms-[280px]' : 'ms-0'">
+    {{-- Content area — full width on mobile, offset by the sidebar on desktop --}}
+    <main class="mt-16 min-h-[calc(100vh-4rem)] p-4 sm:p-6 transition-all duration-300 ease-in-out ms-0"
+          :class="sidebarOpen ? 'lg:ms-[280px]' : 'lg:ms-0'">
         @yield('content')
     </main>
 

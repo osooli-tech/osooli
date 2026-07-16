@@ -1,4 +1,4 @@
-<aside class="fixed inset-y-0 start-0 w-[280px] bg-primary z-40 flex flex-col select-none
+<aside class="fixed inset-y-0 start-0 w-[280px] bg-primary z-50 flex flex-col select-none shadow-2xl lg:shadow-none
               transition-transform duration-300 ease-in-out"
        :class="sidebarOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'">
 
