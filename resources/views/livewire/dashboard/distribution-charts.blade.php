@@ -23,8 +23,8 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: @json(array_values($byDeedStatus)),
-                                 labels: @json(array_keys($byDeedStatus)),
+                                 series: @js(array_values($byDeedStatus)),
+                                 labels: @js(array_keys($byDeedStatus)),
                                  colors: ['#006c4e', '#b3261e'],
                                  theme: { mode: {{ $isDark }} },
                                  legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
@@ -52,8 +52,8 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: @json(array_values($byAssetType)),
-                                 labels: @json(array_keys($byAssetType)),
+                                 series: @js(array_values($byAssetType)),
+                                 labels: @js(array_keys($byAssetType)),
                                  colors: ['#002444','#006c4e','#c9a84c','#abc9f2','#68dbae'],
                                  theme: { mode: {{ $isDark }} },
                                  legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
@@ -81,8 +81,8 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: @json(array_values($byLandTransaction)),
-                                 labels: @json(array_keys($byLandTransaction)),
+                                 series: @js(array_values($byLandTransaction)),
+                                 labels: @js(array_keys($byLandTransaction)),
                                  colors: ['#006c4e','#c9a84c','#002444','#abc9f2'],
                                  theme: { mode: {{ $isDark }} },
                                  legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
@@ -115,8 +115,8 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'bar', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @json(array_values($byCity)) }],
-                                 xaxis: { categories: @json(array_keys($byCity)), labels: { style: { fontSize: '11px' } } },
+                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byCity)) }],
+                                 xaxis: { categories: @js(array_keys($byCity)), labels: { style: { fontSize: '11px' } } },
                                  colors: ['#006c4e'],
                                  theme: { mode: {{ $isDark }} },
                                  dataLabels: { enabled: false },
@@ -143,8 +143,8 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'bar', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @json(array_values($byDistrict)) }],
-                                 xaxis: { categories: @json(array_keys($byDistrict)), labels: { style: { fontSize: '11px' } } },
+                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byDistrict)) }],
+                                 xaxis: { categories: @js(array_keys($byDistrict)), labels: { style: { fontSize: '11px' } } },
                                  colors: ['#c9a84c'],
                                  theme: { mode: {{ $isDark }} },
                                  dataLabels: { enabled: false },
@@ -205,8 +205,8 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'bar', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @json(array_values($byEngineeringOffice)) }],
-                                 xaxis: { categories: @json(array_keys($byEngineeringOffice)), labels: { style: { fontSize: '11px' } } },
+                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byEngineeringOffice)) }],
+                                 xaxis: { categories: @js(array_keys($byEngineeringOffice)), labels: { style: { fontSize: '11px' } } },
                                  colors: ['#abc9f2'],
                                  theme: { mode: {{ $isDark }} },
                                  dataLabels: { enabled: false },
