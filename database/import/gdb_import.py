@@ -42,16 +42,22 @@ DB = {
     'options':  '-c client_encoding=UTF8',
 }
 
-GDB_LAYER = 'Osooli'
+GDB_LAYER = 'Osooli'          # الطبقة الافتراضية — يمكن تجاوزها بـ --layer
 SRC_CRS   = 'EPSG:32638'
 DST_CRS   = 'EPSG:4326'
 
 # مكتب هندسي افتراضي يُربط بكل قطعة مستوردة لحين توفر بيانات حقيقية لكل مكتب
 DEFAULT_ENGINEERING_OFFICE = 'مكتب الإسناد العالمي للاستشارات الهندسية'
 
+# التسلسل الجغرافي الافتراضي لاستيعاب الأحياء القادمة من حقل District.
+# الأحياء (العمارية / الوصيل / الدرعية) تقع في محافظة الدرعية بمنطقة الرياض.
+DEFAULT_COUNTRY = 'المملكة العربية السعودية'
+DEFAULT_REGION  = 'منطقة الرياض'
+DEFAULT_CITY    = 'الدرعية'
+
 # ─── مساعدات ────────────────────────────────────────────────────────────────────
 
-def load_features(path: str) -> list:
+def load_features(path: str, layer: str = GDB_LAYER) -> list:
     """
     يقرأ GDB أو GeoJSON ويُرجع list من:
       {'geometry': dict, 'properties': dict}
@@ -60,8 +66,8 @@ def load_features(path: str) -> list:
     ext = os.path.splitext(path)[1].lower()
 
     if os.path.isdir(path) or ext == '.gdb':
-        print(f"  نوع المصدر : GDB")
-        with fiona.open(path, layer=GDB_LAYER) as src:
+        print(f"  نوع المصدر : GDB (طبقة: {layer})")
+        with fiona.open(path, layer=layer) as src:
             crs  = src.crs
             raw  = list(src)
         needs_proj = crs and '32638' in str(crs)
@@ -108,9 +114,95 @@ def v(val):
     return val
 
 
+# قيم الـ enum بالترتيب — الكود في GDB يقابل الترتيب (1 = الأول). مطابقة لتعريفات
+# قاعدة البيانات في create_enum_types.
+ENUM_VALUES = {
+    'asset_type':        ['أرض', 'شقة', 'عمارة', 'فيلا', 'مستودع'],
+    'land_transaction':  ['مباعة', 'مؤجرة', 'قيد البيع', 'خاصة'],
+    'deed_status':       ['محدث', 'قديم'],
+    'deed_class':        ['زراعي', 'سكني', 'صناعي'],
+    'qrar_source':       ['بلدي', 'مكتب هندسي', 'بدون'],
+    'allocation_method': ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
+    'fall_in':           ['مخطط زراعي', 'مخطط بلدية'],
+}
+
+
+def code_to_enum(field: str, code):
+    """يحوّل كود رقمي (1، 2، ...) إلى قيمة enum بالترتيب. يُرجع None إذا فارغ أو خارج النطاق."""
+    code = v(code)
+    if code is None:
+        return None
+    try:
+        idx = int(float(code))
+    except (ValueError, TypeError):
+        return None
+    values = ENUM_VALUES.get(field)
+    if not values or idx < 1 or idx > len(values):
+        return None
+    return values[idx - 1]
+
+
+def ensure_geo_chain(cur):
+    """
+    يضمن وجود دولة ← منطقة ← مدينة افتراضية ويُرجع city_id.
+    تُنشأ مرة واحدة لاستيعاب الأحياء القادمة من حقل District.
+    """
+    cur.execute("SELECT id FROM countries WHERE name_ar = %s", (DEFAULT_COUNTRY,))
+    row = cur.fetchone()
+    if row:
+        country_id = row[0]
+    else:
+        cur.execute(
+            "INSERT INTO countries (name_ar, created_at, updated_at) VALUES (%s, NOW(), NOW()) RETURNING id",
+            (DEFAULT_COUNTRY,)
+        )
+        country_id = cur.fetchone()[0]
+
+    cur.execute("SELECT id FROM regions WHERE name_ar = %s", (DEFAULT_REGION,))
+    row = cur.fetchone()
+    if row:
+        region_id = row[0]
+    else:
+        cur.execute(
+            "INSERT INTO regions (country_id, name_ar, created_at, updated_at) VALUES (%s, %s, NOW(), NOW()) RETURNING id",
+            (country_id, DEFAULT_REGION)
+        )
+        region_id = cur.fetchone()[0]
+
+    cur.execute("SELECT id FROM cities WHERE name_ar = %s", (DEFAULT_CITY,))
+    row = cur.fetchone()
+    if row:
+        city_id = row[0]
+    else:
+        cur.execute(
+            "INSERT INTO cities (region_id, name_ar, created_at, updated_at) VALUES (%s, %s, NOW(), NOW()) RETURNING id",
+            (region_id, DEFAULT_CITY)
+        )
+        city_id = cur.fetchone()[0]
+
+    return city_id
+
+
+def get_or_create_district(cur, name, city_id):
+    """find-or-create حي داخل المدينة الافتراضية ويُرجع district_id (أو None)."""
+    name = v(name)
+    if not name:
+        return None
+    name = str(name).strip()
+    cur.execute("SELECT id FROM districts WHERE name_ar = %s AND city_id = %s", (name, city_id))
+    row = cur.fetchone()
+    if row:
+        return row[0]
+    cur.execute(
+        "INSERT INTO districts (city_id, name_ar, created_at, updated_at) VALUES (%s, %s, NOW(), NOW()) RETURNING id",
+        (city_id, name)
+    )
+    return cur.fetchone()[0]
+
+
 # ─── الاستيراد ──────────────────────────────────────────────────────────────────
 
-def run(source_path: str):
+def run(source_path: str, layer: str = GDB_LAYER):
     started_at = datetime.now()
 
     # ── 1. الاتصال بقاعدة البيانات ──────────────────────────────────────────
@@ -136,11 +228,14 @@ def run(source_path: str):
         """, (DEFAULT_ENGINEERING_OFFICE,))
         default_office_id = cur.fetchone()[0]
 
+    # التسلسل الجغرافي الافتراضي (دولة ← منطقة ← مدينة) لاستيعاب الأحياء
+    default_city_id = ensure_geo_chain(cur)
+
     # ── 2. قراءة المصدر ─────────────────────────────────────────────────────
     print(f"\nقراءة البيانات...")
     print(f"  المسار     : {source_path}")
     try:
-        features = load_features(source_path)
+        features = load_features(source_path, layer)
         print(f"  ✓ {len(features)} قطعة")
     except Exception as e:
         conn.close()
@@ -181,28 +276,48 @@ def run(source_path: str):
             lead = group[0]          # Feature المرجع للبيانات المشتركة
             p    = lead['properties']
 
-            # ── 4a. Plan (find-or-create) ────────────────────────────────
+            # ── 4a. District + Plan (find-or-create) ─────────────────────
+            district_id = get_or_create_district(cur, p.get('District'), default_city_id)
+
             plan_no = str(p['Plan_No']).strip()
+            # COALESCE يحافظ على district_id سابق إن وُجد ولا يمسحه بـ NULL
             cur.execute("""
                 INSERT INTO plans (plan_no, district_id, created_at, updated_at)
-                VALUES (%s, NULL, NOW(), NOW())
-                ON CONFLICT (plan_no) DO NOTHING
-            """, (plan_no,))
+                VALUES (%s, %s, NOW(), NOW())
+                ON CONFLICT (plan_no) DO UPDATE SET
+                    district_id = COALESCE(EXCLUDED.district_id, plans.district_id),
+                    updated_at  = NOW()
+            """, (plan_no, district_id))
             cur.execute("SELECT id FROM plans WHERE plan_no = %s", (plan_no,))
             plan_id = cur.fetchone()[0]
 
             # ── 4b. Parcel (upsert on geo_id) ───────────────────────────
             parcel_no = str(p['Parcel']).strip() if p.get('Parcel') else None
+            m_price      = float(p['M_price'])      if p.get('M_price')      else None
+            parcel_price = float(p['Parcel_price']) if p.get('Parcel_price') else None
+            asset_type       = code_to_enum('asset_type',       p.get('Owner_Type'))
+            land_transaction = code_to_enum('land_transaction', p.get('Land_Trasaction'))
+            allocation_method = code_to_enum('allocation_method', p.get('Allocation_Method'))
+            fall_in          = code_to_enum('fall_in',          p.get('Fall_In'))
 
             cur.execute("""
-                INSERT INTO parcels (parcel_no, geo_id, plan_id, created_at, updated_at)
-                VALUES (%s, %s, %s, NOW(), NOW())
+                INSERT INTO parcels (parcel_no, geo_id, plan_id, m_price, parcel_price,
+                                     asset_type, land_transaction, allocation_method, fall_in,
+                                     created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
                 ON CONFLICT (geo_id) DO UPDATE SET
-                    parcel_no  = EXCLUDED.parcel_no,
-                    plan_id    = EXCLUDED.plan_id,
-                    updated_at = NOW()
+                    parcel_no         = EXCLUDED.parcel_no,
+                    plan_id           = EXCLUDED.plan_id,
+                    m_price           = EXCLUDED.m_price,
+                    parcel_price      = EXCLUDED.parcel_price,
+                    asset_type        = EXCLUDED.asset_type,
+                    land_transaction  = EXCLUDED.land_transaction,
+                    allocation_method = EXCLUDED.allocation_method,
+                    fall_in           = EXCLUDED.fall_in,
+                    updated_at        = NOW()
                 RETURNING id, (xmax = 0) AS is_new
-            """, (parcel_no, geo_id, plan_id))
+            """, (parcel_no, geo_id, plan_id, m_price, parcel_price,
+                  asset_type, land_transaction, allocation_method, fall_in))
             row        = cur.fetchone()
             parcel_id  = row[0]
             is_new     = row[1]
@@ -220,6 +335,9 @@ def run(source_path: str):
                 stats['updated'] += 1
 
             # ── 4c. Deed ─────────────────────────────────────────────────
+            deed_status = code_to_enum('deed_status', p.get('Deed_Status'))
+            deed_class  = code_to_enum('deed_class',  p.get('Deed_Class'))
+
             cur.execute(
                 "SELECT id FROM deeds WHERE parcel_id = %s AND deed_no = %s LIMIT 1",
                 (parcel_id, v(deed_no))
@@ -229,19 +347,25 @@ def run(source_path: str):
             if not existing_deed:
                 cur.execute("""
                     INSERT INTO deeds
-                        (parcel_id, deed_no, deed_date_hijri, deed_area, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, NOW(), NOW())
+                        (parcel_id, deed_no, deed_date_hijri, deed_area, deed_status, deed_class, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
                     RETURNING id
                 """, (
                     parcel_id,
                     v(deed_no),
                     parse_hijri(p.get('Deed_Date')),
                     float(p['Area']) if p.get('Area') else None,
+                    deed_status,
+                    deed_class,
                 ))
                 deed_id = cur.fetchone()[0]
                 stats['deeds'] += 1
             else:
                 deed_id = existing_deed[0]
+                cur.execute("""
+                    UPDATE deeds SET deed_status = %s, deed_class = %s, updated_at = NOW()
+                    WHERE id = %s
+                """, (deed_status, deed_class, deed_id))
 
             # ── 4d. Owners + deed_owners (مالك لكل feature في المجموعة) ─
             for feat in group:
@@ -312,24 +436,28 @@ def run(source_path: str):
             stats['boundaries'] += 1
 
             # ── 4f. Survey Decision ──────────────────────────────────────
-            # نُدرج فقط إذا وُجد Folder — Report_No و Qrar فارغان في هذه البيانات
+            # نُدرج فقط إذا وُجد Folder. Qrar = كود جهة القرار (qrar_source)، وليس رقم القرار.
             if p.get('Folder'):
+                qrar_source = code_to_enum('qrar_source', p.get('Qrar'))
+                report_no   = str(p['Report_No']) if p.get('Report_No') else None
                 cur.execute(
                     "SELECT id FROM survey_decisions WHERE parcel_id = %s LIMIT 1",
                     (parcel_id,)
                 )
-                if not cur.fetchone():
+                existing_decision = cur.fetchone()
+                if not existing_decision:
                     cur.execute("""
                         INSERT INTO survey_decisions
-                            (parcel_id, qrar_no, report_no, folder, created_at, updated_at)
-                        VALUES (%s, %s, %s, %s, NOW(), NOW())
-                    """, (
-                        parcel_id,
-                        v(p.get('Qrar')),
-                        str(p['Report_No']) if p.get('Report_No') else None,
-                        p['Folder'],
-                    ))
+                            (parcel_id, qrar_no, report_no, qrar_source, folder, created_at, updated_at)
+                        VALUES (%s, NULL, %s, %s, %s, NOW(), NOW())
+                    """, (parcel_id, report_no, qrar_source, p['Folder']))
                     stats['decisions'] += 1
+                else:
+                    cur.execute("""
+                        UPDATE survey_decisions
+                        SET qrar_source = %s, report_no = COALESCE(%s, report_no), updated_at = NOW()
+                        WHERE id = %s
+                    """, (qrar_source, report_no, existing_decision[0]))
 
             cur.execute("RELEASE SAVEPOINT sp_group")
 
@@ -402,5 +530,10 @@ if __name__ == '__main__':
         default=DEFAULT_SOURCE,
         help=f'مسار ملف GDB أو GeoJSON (افتراضي: {DEFAULT_SOURCE})'
     )
+    parser.add_argument(
+        '--layer', '-l',
+        default=GDB_LAYER,
+        help=f'اسم الطبقة داخل GDB (افتراضي: {GDB_LAYER})'
+    )
     args = parser.parse_args()
-    run(args.source)
+    run(args.source, args.layer)
