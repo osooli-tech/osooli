@@ -16,4 +16,10 @@ return [
     'no_results' => 'No results found',
     'search_placeholder' => 'Search by name, national ID or phone...',
     'clear' => 'Clear',
+
+    // ── Owners map ──────────────────────────────────────────────
+    'show_on_map' => 'On map',
+    'map_all_parcels' => 'All parcels on the map',
+    'map_parcels_of' => 'Parcels of',
+    'map_show_all' => 'Show all',
 ];

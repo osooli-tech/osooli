@@ -109,18 +109,30 @@
                                 </span>
                             </td>
 
-                            {{-- Expand button --}}
+                            {{-- Actions --}}
                             <td class="px-4 py-3">
-                                <button wire:click="toggleExpand({{ $owner->id }})"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl
-                                               border border-outline-variant dark:border-white/10
-                                               text-on-surface-variant dark:text-on-primary-container
-                                               hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
-                                    <span class="material-symbols-outlined text-[15px]">
-                                        {{ isset($expanded[$owner->id]) && $expanded[$owner->id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
-                                    </span>
-                                    {{ __('owners.view_parcels') }}
-                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button wire:click="toggleExpand({{ $owner->id }})"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl
+                                                   border border-outline-variant dark:border-white/10
+                                                   text-on-surface-variant dark:text-on-primary-container
+                                                   hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                                        <span class="material-symbols-outlined text-[15px]">
+                                            {{ isset($expanded[$owner->id]) && $expanded[$owner->id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+                                        </span>
+                                        {{ __('owners.view_parcels') }}
+                                    </button>
+
+                                    {{-- Filters the map below to this owner's parcels --}}
+                                    <button type="button"
+                                            @click="$dispatch('owner-map-select', { id: {{ $owner->id }}, name: @js($owner->name) })"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl
+                                                   bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-white/90
+                                                   hover:bg-secondary/20 dark:hover:bg-secondary/30 transition-colors">
+                                        <span class="material-symbols-outlined text-[15px]">map</span>
+                                        {{ __('owners.show_on_map') }}
+                                    </button>
+                                </div>
                             </td>
 
                         </tr>
