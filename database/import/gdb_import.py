@@ -116,6 +116,8 @@ def v(val):
 
 # قيم الـ enum بالترتيب — الكود في GDB يقابل الترتيب (1 = الأول). مطابقة لتعريفات
 # قاعدة البيانات في create_enum_types.
+# مرجع الأكواد موثّق في docs/gdb-coded-domains.md (من domains الخاصة بالـ GDB).
+# يجب مزامنة أي تعديل هنا مع app/Console/Commands/ImportParcelsGeoJson.php
 ENUM_VALUES = {
     'asset_type':        ['أرض', 'شقة', 'عمارة', 'فيلا', 'مستودع'],
     'land_transaction':  ['مباعة', 'مؤجرة', 'قيد البيع', 'خاصة'],

@@ -36,6 +36,9 @@ class ImportParcelsGeoJson extends Command
      * Enum values in order — the numeric code in the source maps to the position
      * (1 = first). Must match the definitions in create_enum_types.
      *
+     * Codes are documented in docs/gdb-coded-domains.md (from the GDB's own
+     * ArcGIS domains). Keep this in sync with database/import/gdb_import.py.
+     *
      * @var array<string, list<string>>
      */
     private const ENUM_VALUES = [
