@@ -29,7 +29,30 @@ class ParcelController extends Controller
         );
         $parcelGeojson = $geoRow?->geom_json;
 
-        return view('parcels.show', compact('parcel', 'parcelGeojson'));
+        // Surrounding parcels, drawn faded on the mini-map so the parcel can be
+        // read in context. Limited to what falls inside a small buffer around it.
+        /** @var list<\stdClass> $neighbourRows */
+        $neighbourRows = $parcelGeojson === null ? [] : DB::select(
+            'SELECT n.parcel_no, ST_AsGeoJSON(n.geom, 6) AS geom_json
+             FROM parcels n, parcels self
+             WHERE self.id = ?
+               AND n.id <> self.id
+               AND n.geom IS NOT NULL
+               AND ST_Intersects(n.geom, ST_Expand(self.geom, 0.004))
+             LIMIT 60',
+            [$parcel->id]
+        );
+
+        $neighboursGeojson = json_encode([
+            'type' => 'FeatureCollection',
+            'features' => array_map(static fn (\stdClass $row): array => [
+                'type' => 'Feature',
+                'geometry' => json_decode((string) $row->geom_json, false),
+                'properties' => ['parcel_no' => $row->parcel_no],
+            ], $neighbourRows),
+        ]);
+
+        return view('parcels.show', compact('parcel', 'parcelGeojson', 'neighboursGeojson'));
     }
 
     public function documents(Parcel $parcel): JsonResponse

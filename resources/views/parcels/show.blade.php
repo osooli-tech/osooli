@@ -401,7 +401,7 @@
     {{-- Mini-map --}}
     <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl overflow-hidden
                 border border-outline-variant dark:border-white/10 shadow-sm min-h-[260px] relative"
-         x-data="parcelMiniMap(@js($parcelGeojson))"
+         x-data="parcelMiniMap(@js($parcelGeojson), @js($neighboursGeojson), @js($parcel->parcel_no))"
          x-init="init()">
         @if ($parcelGeojson && config('services.mapbox.token'))
             <div id="parcel-mini-map" class="absolute inset-0 w-full h-full rounded-2xl"></div>
@@ -421,7 +421,7 @@
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script>
-function parcelMiniMap(geojson) {
+function parcelMiniMap(geojson, neighboursJson, parcelNo) {
     return {
         init() {
             if (!geojson || !window.mapboxgl) return;
@@ -442,13 +442,49 @@ function parcelMiniMap(geojson) {
 
             map.on('load', () => {
                 const geom = JSON.parse(geojson);
-                const feature = { type: 'Feature', geometry: geom, properties: {} };
+                const feature = { type: 'Feature', geometry: geom, properties: { parcel_no: parcelNo } };
+
+                // Neighbours first so they sit beneath the parcel itself
+                let neighbours = null;
+                try { neighbours = neighboursJson ? JSON.parse(neighboursJson) : null; } catch (e) { neighbours = null; }
+
+                if (neighbours && neighbours.features && neighbours.features.length) {
+                    map.addSource('neighbours', { type: 'geojson', data: neighbours });
+                    map.addLayer({ id: 'neighbours-fill', type: 'fill', source: 'neighbours',
+                        paint: { 'fill-color': '#94a3b8', 'fill-opacity': 0.12 } });
+                    map.addLayer({ id: 'neighbours-outline', type: 'line', source: 'neighbours',
+                        paint: { 'line-color': '#94a3b8', 'line-width': 1, 'line-opacity': 0.5 } });
+                    map.addLayer({ id: 'neighbours-labels', type: 'symbol', source: 'neighbours',
+                        layout: {
+                            'text-field': ['to-string', ['get', 'parcel_no']],
+                            'text-size': 10,
+                            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        },
+                        paint: {
+                            'text-color': isDark ? '#94a3b8' : '#64748b',
+                            'text-halo-color': isDark ? '#0f172a' : '#ffffff',
+                            'text-halo-width': 1.2,
+                            'text-opacity': 0.75,
+                        } });
+                }
 
                 map.addSource('parcel', { type: 'geojson', data: feature });
                 map.addLayer({ id: 'parcel-fill', type: 'fill', source: 'parcel',
                     paint: { 'fill-color': '#006c4e', 'fill-opacity': 0.35 } });
                 map.addLayer({ id: 'parcel-outline', type: 'line', source: 'parcel',
-                    paint: { 'line-color': '#006c4e', 'line-width': 2 } });
+                    paint: { 'line-color': '#39ff14', 'line-width': 2.5 } });
+                map.addLayer({ id: 'parcel-label', type: 'symbol', source: 'parcel',
+                    layout: {
+                        'text-field': ['to-string', ['get', 'parcel_no']],
+                        'text-size': 14,
+                        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        'text-allow-overlap': true,
+                    },
+                    paint: {
+                        'text-color': '#002444',
+                        'text-halo-color': '#ffffff',
+                        'text-halo-width': 2,
+                    } });
 
                 // Fit to parcel bounds
                 const coords = geom.type === 'MultiPolygon'
