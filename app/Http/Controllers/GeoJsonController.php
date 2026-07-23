@@ -25,7 +25,10 @@ class GeoJsonController extends Controller
                  ST_AsGeoJSON(p.geom, 6) AS geom_json,
                  ST_Y(ST_Centroid(p.geom)) AS centroid_lat,
                  ST_X(ST_Centroid(p.geom)) AS centroid_lng,
-                 (SELECT COUNT(*) FROM parcel_photos WHERE parcel_id = p.id) AS documents_count
+                 (SELECT COUNT(*) FROM parcel_photos WHERE parcel_id = p.id) AS documents_count,
+                 -- A parcel can be co-owned, so owners are aggregated rather than joined
+                 owners.names AS owner_names,
+                 owners.ids AS owner_ids
              FROM parcels p
              LEFT JOIN plans pl ON pl.id = p.plan_id
              LEFT JOIN districts d ON d.id = pl.district_id
@@ -36,6 +39,14 @@ class GeoJsonController extends Controller
                  ORDER BY id DESC
                  LIMIT 1
              ) deed ON true
+             LEFT JOIN LATERAL (
+                 SELECT string_agg(DISTINCT o.name, \' ، \') AS names,
+                        string_agg(DISTINCT o.id::text, \',\') AS ids
+                 FROM deeds dd
+                 JOIN deed_owners dow ON dow.deed_id = dd.id
+                 JOIN owners o ON o.id = dow.owner_id
+                 WHERE dd.parcel_id = p.id
+             ) owners ON true
              WHERE p.geom IS NOT NULL'
         );
 
@@ -56,6 +67,8 @@ class GeoJsonController extends Controller
                 'centroid_lat' => $row->centroid_lat,
                 'centroid_lng' => $row->centroid_lng,
                 'documents_count' => (int) $row->documents_count,
+                'owner_names' => $row->owner_names,
+                'owner_ids' => $row->owner_ids,
             ],
         ], $rows);
 

@@ -40,6 +40,7 @@ return [
     'back' => 'Back to Parcels',
     'parcel_info' => 'Parcel Information',
     'district' => 'District',
+    'owner' => 'Owner',
     'deeds_section' => 'Deeds',
     'no_deeds' => 'No deeds linked',
     'ownership_share' => 'Ownership Share',

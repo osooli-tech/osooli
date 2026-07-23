@@ -148,6 +148,11 @@
                                     <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">{{ __('parcels.district') }}</dt>
                                     <dd class="font-semibold text-on-surface dark:text-white text-end" x-text="parcel.district_name ?? '—'"></dd>
                                 </div>
+                                {{-- A parcel may be co-owned, so this can list several names --}}
+                                <div class="flex justify-between items-start gap-2">
+                                    <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">{{ __('parcels.owner') }}</dt>
+                                    <dd class="font-semibold text-on-surface dark:text-white text-end" x-text="parcel.owner_names ?? '—'"></dd>
+                                </div>
                                 <div class="flex justify-between items-start gap-2">
                                     <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">{{ __('parcels.deed_no') }}</dt>
                                     <dd class="font-semibold text-on-surface dark:text-white data-tabular text-end" x-text="parcel.deed_no ?? '—'"></dd>

@@ -40,6 +40,7 @@ return [
     'back' => 'العودة للأراضي',
     'parcel_info' => 'معلومات القطعة',
     'district' => 'الحي',
+    'owner' => 'المالك',
     'deeds_section' => 'الصكوك',
     'no_deeds' => 'لا توجد صكوك مرتبطة',
     'ownership_share' => 'حصة الملكية',
