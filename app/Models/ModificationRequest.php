@@ -46,11 +46,13 @@ class ModificationRequest extends Model
         ];
     }
 
+    /** @return BelongsTo<Parcel, $this> */
     public function parcel(): BelongsTo
     {
         return $this->belongsTo(Parcel::class);
     }
 
+    /** @return BelongsTo<Owner, $this> */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(Owner::class, 'requested_by');

@@ -18,6 +18,7 @@ class Plan extends Model
         return $this->belongsTo(District::class);
     }
 
+    /** @return HasMany<Parcel, $this> */
     public function parcels(): HasMany
     {
         return $this->hasMany(Parcel::class);

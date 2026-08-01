@@ -11,6 +11,7 @@ class Country extends Model
 {
     protected $fillable = ['name_ar', 'name_en', 'iso_code'];
 
+    /** @return HasMany<Region, $this> */
     public function regions(): HasMany
     {
         return $this->hasMany(Region::class);

@@ -31,6 +31,7 @@ class ParcelPhoto extends Model
         ];
     }
 
+    /** @return BelongsTo<Parcel, $this> */
     public function parcel(): BelongsTo
     {
         return $this->belongsTo(Parcel::class);

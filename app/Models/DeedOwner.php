@@ -25,11 +25,13 @@ class DeedOwner extends Model
         ];
     }
 
+    /** @return BelongsTo<Deed, $this> */
     public function deed(): BelongsTo
     {
         return $this->belongsTo(Deed::class);
     }
 
+    /** @return BelongsTo<Owner, $this> */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(Owner::class);

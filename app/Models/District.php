@@ -16,11 +16,13 @@ class District extends Model
 {
     protected $fillable = ['city_id', 'name_ar', 'name_en'];
 
+    /** @return BelongsTo<City, $this> */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
+    /** @return HasMany<Plan, $this> */
     public function plans(): HasMany
     {
         return $this->hasMany(Plan::class);

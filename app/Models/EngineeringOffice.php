@@ -11,6 +11,7 @@ class EngineeringOffice extends Model
 {
     protected $fillable = ['name', 'license_no', 'phone', 'email'];
 
+    /** @return HasMany<ParcelBoundary, $this> */
     public function parcelBoundaries(): HasMany
     {
         return $this->hasMany(ParcelBoundary::class);

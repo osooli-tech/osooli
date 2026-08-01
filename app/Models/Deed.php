@@ -34,11 +34,13 @@ class Deed extends Model
         ];
     }
 
+    /** @return BelongsTo<Parcel, $this> */
     public function parcel(): BelongsTo
     {
         return $this->belongsTo(Parcel::class);
     }
 
+    /** @return BelongsToMany<Owner, $this> */
     public function owners(): BelongsToMany
     {
         return $this->belongsToMany(Owner::class, 'deed_owners')
@@ -46,6 +48,7 @@ class Deed extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<DeedOwner, $this> */
     public function deedOwners(): HasMany
     {
         return $this->hasMany(DeedOwner::class);

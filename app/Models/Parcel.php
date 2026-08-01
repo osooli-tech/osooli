@@ -50,17 +50,20 @@ class Parcel extends Model
     }
 
     // The parent building/land this sub-unit (apartment) belongs to
+    /** @return BelongsTo<Parcel, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Parcel::class, 'parent_parcel_id');
     }
 
     // Sub-units (apartments) contained within this parcel
+    /** @return HasMany<Parcel, $this> */
     public function subUnits(): HasMany
     {
         return $this->hasMany(Parcel::class, 'parent_parcel_id');
     }
 
+    /** @return HasMany<Deed, $this> */
     public function deeds(): HasMany
     {
         return $this->hasMany(Deed::class);
@@ -74,9 +77,13 @@ class Parcel extends Model
     }
 
     // Active deed only (status = Updated) — used where status filtering matters
+    /** @return HasOne<Deed, $this> */
     public function currentDeed(): HasOne
     {
-        return $this->hasOne(Deed::class)->where('deed_status', DeedStatus::Updated->value)->latestOfMany();
+        return $this->hasOne(Deed::class)->ofMany(
+            ['id' => 'max'],
+            fn (Builder $query) => $query->where('deed_status', DeedStatus::Updated->value),
+        );
     }
 
     /** @return HasOne<ParcelBoundary, $this> */
@@ -85,6 +92,7 @@ class Parcel extends Model
         return $this->hasOne(ParcelBoundary::class);
     }
 
+    /** @return HasMany<SurveyDecision, $this> */
     public function surveyDecisions(): HasMany
     {
         return $this->hasMany(SurveyDecision::class);
@@ -96,6 +104,7 @@ class Parcel extends Model
         return $this->hasMany(ParcelPhoto::class);
     }
 
+    /** @return HasMany<ModificationRequest, $this> */
     public function modificationRequests(): HasMany
     {
         return $this->hasMany(ModificationRequest::class);

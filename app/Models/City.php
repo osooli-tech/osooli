@@ -12,11 +12,13 @@ class City extends Model
 {
     protected $fillable = ['region_id', 'name_ar', 'name_en'];
 
+    /** @return BelongsTo<Region, $this> */
     public function region(): BelongsTo
     {
         return $this->belongsTo(Region::class);
     }
 
+    /** @return HasMany<District, $this> */
     public function districts(): HasMany
     {
         return $this->hasMany(District::class);

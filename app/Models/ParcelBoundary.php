@@ -39,11 +39,13 @@ class ParcelBoundary extends Model
         ];
     }
 
+    /** @return BelongsTo<Parcel, $this> */
     public function parcel(): BelongsTo
     {
         return $this->belongsTo(Parcel::class);
     }
 
+    /** @return BelongsTo<EngineeringOffice, $this> */
     public function engineeringOffice(): BelongsTo
     {
         return $this->belongsTo(EngineeringOffice::class);
