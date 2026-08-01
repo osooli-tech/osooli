@@ -125,4 +125,20 @@ return [
         'test_code' => env('OTP_TEST_CODE'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mobile API OTP (owners)
+    |--------------------------------------------------------------------------
+    |
+    | Owners sign in to the mobile app with their phone number plus a one-time
+    | code. Until the SMS provider is wired up, `test_code` short-circuits
+    | delivery and accepts a fixed code — never in production.
+    |
+    */
+    'mobile_otp' => [
+        'ttl_minutes' => 5,
+        'max_attempts_per_hour' => 5,
+        'test_code' => env('MOBILE_OTP_TEST_CODE', '6666'),
+    ],
+
 ];

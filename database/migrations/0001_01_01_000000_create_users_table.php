@@ -11,7 +11,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("CREATE TYPE user_role_enum AS ENUM ('admin', 'viewer')");
+        // Postgres has no CREATE TYPE IF NOT EXISTS, and enum types survive the
+        // table drops that RefreshDatabase performs — so guard on the catalog.
+        DB::statement("DO $$ BEGIN
+            CREATE TYPE user_role_enum AS ENUM ('admin', 'viewer');
+        EXCEPTION WHEN duplicate_object THEN NULL; END $$;");
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
