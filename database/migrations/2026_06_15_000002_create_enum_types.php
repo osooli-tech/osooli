@@ -7,37 +7,44 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
+    /**
+     * Enum types and their values, in the order the source data encodes them
+     * (see docs/gdb-coded-domains.md).
+     *
+     * @var array<string, list<string>>
+     */
+    private const TYPES = [
+        'deed_status_enum' => ['محدث', 'قديم'],
+        'deed_class_enum' => ['زراعي', 'سكني', 'صناعي'],
+        'asset_type_enum' => ['أرض', 'شقة', 'عمارة', 'فيلا', 'مستودع'],
+        'qrar_source_enum' => ['بلدي', 'مكتب هندسي', 'بدون'],
+        'fall_in_enum' => ['مخطط زراعي', 'مخطط بلدية'],
+        'allocation_method_enum' => ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
+        'land_transaction_enum' => ['مباعة', 'مؤجرة', 'قيد البيع', 'خاصة'],
+        'photo_type_enum' => ['جوية', 'أرضية'],
+        'modification_request_status_enum' => ['pending', 'sent_to_arcgis', 'applied', 'rejected'],
+    ];
+
     public function up(): void
     {
-        DB::statement("CREATE TYPE deed_status_enum AS ENUM ('محدث', 'قديم')");
+        foreach (self::TYPES as $type => $values) {
+            $literals = implode(', ', array_map(
+                static fn (string $value): string => "'".str_replace("'", "''", $value)."'",
+                $values
+            ));
 
-        DB::statement("CREATE TYPE deed_class_enum AS ENUM ('زراعي', 'سكني', 'صناعي')");
-
-        DB::statement("CREATE TYPE asset_type_enum AS ENUM ('أرض', 'شقة', 'عمارة', 'فيلا', 'مستودع')");
-
-        DB::statement("CREATE TYPE qrar_source_enum AS ENUM ('بلدي', 'مكتب هندسي', 'بدون')");
-
-        DB::statement("CREATE TYPE fall_in_enum AS ENUM ('مخطط زراعي', 'مخطط بلدية')");
-
-        DB::statement("CREATE TYPE allocation_method_enum AS ENUM ('محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع')");
-
-        DB::statement("CREATE TYPE land_transaction_enum AS ENUM ('مباعة', 'مؤجرة', 'قيد البيع', 'خاصة')");
-
-        DB::statement("CREATE TYPE photo_type_enum AS ENUM ('جوية', 'أرضية')");
-
-        DB::statement("CREATE TYPE modification_request_status_enum AS ENUM ('pending', 'sent_to_arcgis', 'applied', 'rejected')");
+            // Postgres has no CREATE TYPE IF NOT EXISTS, and enum types survive
+            // the table drops RefreshDatabase performs — so swallow duplicates.
+            DB::statement("DO $$ BEGIN
+                CREATE TYPE {$type} AS ENUM ({$literals});
+            EXCEPTION WHEN duplicate_object THEN NULL; END $$;");
+        }
     }
 
     public function down(): void
     {
-        DB::statement('DROP TYPE IF EXISTS modification_request_status_enum');
-        DB::statement('DROP TYPE IF EXISTS photo_type_enum');
-        DB::statement('DROP TYPE IF EXISTS land_transaction_enum');
-        DB::statement('DROP TYPE IF EXISTS allocation_method_enum');
-        DB::statement('DROP TYPE IF EXISTS fall_in_enum');
-        DB::statement('DROP TYPE IF EXISTS qrar_source_enum');
-        DB::statement('DROP TYPE IF EXISTS asset_type_enum');
-        DB::statement('DROP TYPE IF EXISTS deed_class_enum');
-        DB::statement('DROP TYPE IF EXISTS deed_status_enum');
+        foreach (array_reverse(array_keys(self::TYPES)) as $type) {
+            DB::statement("DROP TYPE IF EXISTS {$type}");
+        }
     }
 };

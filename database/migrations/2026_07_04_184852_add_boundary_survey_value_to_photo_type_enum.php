@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TYPE photo_type_enum ADD VALUE 'كروكي مساحي'");
+        // IF NOT EXISTS keeps this replayable — enum types outlive the table
+        // drops that RefreshDatabase performs between test runs.
+        DB::statement("ALTER TYPE photo_type_enum ADD VALUE IF NOT EXISTS 'كروكي مساحي'");
     }
 
     /**
