@@ -13,7 +13,7 @@
 | Base URL (اختبار) | `https://lightgreen-snake-236372.hostingersite.com/api/v1` |
 | المصادقة | Laravel Sanctum — Bearer Token |
 | الترميز | UTF-8، JSON |
-| اللغة | ترسل `Accept-Language: ar` أو `en` (الافتراضي `ar`) |
+| اللغة | ترسل `Accept-Language: ar` أو `en` — بدون الترويسة ترجع الرسائل إنجليزية |
 | التواريخ الميلادية | ISO-8601 مثل `2026-07-23T10:30:00Z` |
 | تواريخ الصكوك | **هجرية كنص** مثل `1442-04-21` — لا تُحوَّل ولا تُعالج كتاريخ ميلادي |
 | الإحداثيات | WGS 84 (EPSG:4326) |

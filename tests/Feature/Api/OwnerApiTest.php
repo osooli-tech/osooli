@@ -89,6 +89,31 @@ class OwnerApiTest extends TestCase
             ->assertJsonStructure(['message']);
     }
 
+    public function test_messages_follow_the_accept_language_header(): void
+    {
+        // A real browser or Flutter client sends a weighted list, not a bare tag.
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0599999999'], [
+            'Accept-Language' => 'ar-SA,ar;q=0.9,en;q=0.8',
+        ])
+            ->assertStatus(404)
+            ->assertJsonPath('message', 'رقم الجوال غير مسجّل');
+
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0599999999'], [
+            'Accept-Language' => 'en-US,en;q=0.9',
+        ])
+            ->assertStatus(404)
+            ->assertJsonPath('message', 'Phone number is not registered');
+    }
+
+    public function test_an_unsupported_language_falls_back_instead_of_erroring(): void
+    {
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0599999999'], [
+            'Accept-Language' => 'fr-FR,fr;q=0.9',
+        ])
+            ->assertStatus(404)
+            ->assertJsonPath('message', 'Phone number is not registered');
+    }
+
     public function test_endpoints_reject_unauthenticated_requests(): void
     {
         foreach (['/api/v1/me', '/api/v1/parcels', '/api/v1/dashboard', '/api/v1/deeds'] as $endpoint) {

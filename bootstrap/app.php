@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\SetApiLocale;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -25,6 +26,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             SetLocale::class,
+        ]);
+
+        // The API has no session to read a locale from, so it takes the
+        // language from the request header instead. Prepended so that a
+        // message thrown by throttling or validation is already translated.
+        $middleware->api(prepend: [
+            SetApiLocale::class,
         ]);
         $middleware->alias([
             'set.locale' => SetLocale::class,
