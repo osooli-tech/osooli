@@ -31,14 +31,10 @@ class OwnerOtpService
             return null;
         }
 
+        // phone_normalized is maintained by Owner::saving and indexed —
+        // the previous double-regexp whereRaw scanned the whole table.
         return Owner::query()
-            ->whereNotNull('phone')
-            // Strip non-digits, then drop a 966 / 00966 country code and any
-            // leading zeros — mirroring normalisePhone() in SQL.
-            ->whereRaw(
-                "ltrim(regexp_replace(regexp_replace(phone, '[^0-9]', '', 'g'), '^(00966|966)', ''), '0') = ?",
-                [$normalised]
-            )
+            ->where('phone_normalized', $normalised)
             ->first();
     }
 
@@ -79,16 +75,7 @@ class OwnerOtpService
     /** Strips formatting and unifies +966 / 00966 / 05… into one comparable form. */
     public function normalisePhone(string $phone): string
     {
-        $digits = preg_replace('/\D/', '', $phone) ?? '';
-
-        foreach (['00966', '966'] as $prefix) {
-            if (str_starts_with($digits, $prefix)) {
-                $digits = substr($digits, strlen($prefix));
-                break;
-            }
-        }
-
-        return ltrim($digits, '0');
+        return Owner::normalisePhone($phone);
     }
 
     private function cacheKey(Owner $owner): string

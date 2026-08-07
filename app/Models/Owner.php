@@ -18,6 +18,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $name
  * @property string|null $national_id
  * @property string|null $phone
+ * @property string|null $phone_normalized
  * @property string|null $email
  * @property string|null $whatsapp
  */
@@ -26,6 +27,35 @@ class Owner extends Authenticatable
     use HasApiTokens;
 
     protected $fillable = ['name', 'national_id', 'phone', 'email', 'whatsapp'];
+
+    protected static function booted(): void
+    {
+        // Keep the indexed lookup column in sync with every phone change.
+        static::saving(function (Owner $owner): void {
+            $owner->phone_normalized = $owner->phone === null
+                ? null
+                : (self::normalisePhone($owner->phone) ?: null);
+        });
+    }
+
+    /**
+     * Reduces any accepted phone format (05…, +9665…, 009665…) to one
+     * comparable national form: digits only, country prefix and leading
+     * zeros stripped.
+     */
+    public static function normalisePhone(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone) ?? '';
+
+        foreach (['00966', '966'] as $prefix) {
+            if (str_starts_with($digits, $prefix)) {
+                $digits = substr($digits, strlen($prefix));
+                break;
+            }
+        }
+
+        return ltrim($digits, '0');
+    }
 
     /** @return BelongsToMany<Deed, $this> */
     public function deeds(): BelongsToMany
