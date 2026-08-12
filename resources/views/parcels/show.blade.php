@@ -276,6 +276,22 @@
                         </dd>
                     </div>
                 @endif
+                <div class="flex justify-between gap-2">
+                    <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">
+                        {{ __('parcels.m_price') }}
+                    </dt>
+                    <dd class="font-semibold text-on-surface dark:text-white data-tabular text-end">
+                        {{ $parcel->m_price === null ? '—' : number_format((float) $parcel->m_price).' '.__('parcels.sar') }}
+                    </dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">
+                        {{ __('parcels.parcel_price') }}
+                    </dt>
+                    <dd class="font-semibold text-secondary data-tabular text-end">
+                        {{ $parcel->parcel_price === null ? '—' : number_format((float) $parcel->parcel_price).' '.__('parcels.sar') }}
+                    </dd>
+                </div>
             </dl>
         </div>
 
