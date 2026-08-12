@@ -349,8 +349,10 @@
         @else
             @php $b = $parcel->boundary; @endphp
 
-            {{-- Compass layout --}}
-            <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4">
+            {{-- Compass layout. dir=ltr pins the grid geographically (north up,
+                 west on the viewer's left, east on the right) so the RTL page
+                 direction cannot mirror the sides. --}}
+            <div class="grid grid-cols-3 gap-2 text-center text-xs mb-4" dir="ltr">
 
                 {{-- North --}}
                 <div></div>
