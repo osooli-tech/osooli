@@ -13,7 +13,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * Full parcel shape for the detail screen, including geometry and documents.
  *
- * Prices (m_price / parcel_price) are deliberately never exposed to the app.
+ * Prices (m_price / parcel_price) are exposed since the portfolio/valuation
+ * release (2026-08); they were hidden in the first app version.
  *
  * @mixin Parcel
  */
@@ -38,6 +39,9 @@ class ParcelDetailResource extends JsonResource
             'plan_no' => $this->plan?->plan_no,
             'city' => $district?->city?->name_ar,
             'district' => $district?->name_ar,
+
+            'm_price' => $this->m_price === null ? null : (float) $this->m_price,
+            'parcel_price' => $this->parcel_price === null ? null : (float) $this->parcel_price,
 
             'centroid' => $this->centroid(),
             'corners' => $this->corners(),

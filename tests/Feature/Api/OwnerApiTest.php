@@ -194,6 +194,52 @@ class OwnerApiTest extends TestCase
             ]);
     }
 
+    public function test_dashboard_portfolio_sums_owned_parcel_values(): void
+    {
+        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+            ->assertOk()
+            // Sole owner of one parcel priced at 1,500,000 in makeParcel().
+            ->assertJsonPath('data.portfolio.total_value', 1500000)
+            ->assertJsonPath('data.portfolio.priced_parcels', 1)
+            ->assertJsonPath('data.portfolio.total_parcels', 1)
+            ->assertJsonPath('data.portfolio.avg_m_price', 1500);
+    }
+
+    public function test_dashboard_portfolio_weights_value_by_ownership_share(): void
+    {
+        // The signed-in owner holds a recorded 25% of the parcel's latest deed.
+        $deed = $this->ownedParcel->latestDeed;
+        $deed->owners()->updateExistingPivot($this->owner->id, ['ownership_share' => 25]);
+        $deed->owners()->attach($this->otherOwner->id, ['ownership_share' => 75]);
+
+        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+            ->assertOk()
+            ->assertJsonPath('data.portfolio.total_value', 375000);
+    }
+
+    public function test_dashboard_portfolio_splits_unrecorded_shares_equally(): void
+    {
+        // Neither co-owner has a recorded share — assume equal halves.
+        $this->ownedParcel->latestDeed->owners()->attach($this->otherOwner->id);
+
+        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+            ->assertOk()
+            ->assertJsonPath('data.portfolio.total_value', 750000);
+    }
+
+    public function test_parcel_responses_include_prices(): void
+    {
+        $this->actingAsOwner()->getJson('/api/v1/parcels')
+            ->assertOk()
+            ->assertJsonPath('data.0.m_price', 1500)
+            ->assertJsonPath('data.0.parcel_price', 1500000);
+
+        $this->actingAsOwner()->getJson("/api/v1/parcels/{$this->ownedParcel->id}")
+            ->assertOk()
+            ->assertJsonPath('data.m_price', 1500)
+            ->assertJsonPath('data.parcel_price', 1500000);
+    }
+
     public function test_deeds_index_is_paginated_and_scoped_to_the_owner(): void
     {
         $this->actingAsOwner()->getJson('/api/v1/deeds')

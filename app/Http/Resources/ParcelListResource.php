@@ -32,6 +32,8 @@ class ParcelListResource extends JsonResource
             'city' => $district?->city?->name_ar,
             'district' => $district?->name_ar,
             'area_sqm' => $deed?->deed_area === null ? null : (float) $deed->deed_area,
+            'm_price' => $this->m_price === null ? null : (float) $this->m_price,
+            'parcel_price' => $this->parcel_price === null ? null : (float) $this->parcel_price,
             'current_deed' => $deed === null ? null : [
                 'id' => $deed->id,
                 'deed_no' => $deed->deed_no,

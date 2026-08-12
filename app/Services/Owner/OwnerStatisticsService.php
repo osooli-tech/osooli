@@ -7,6 +7,7 @@ namespace App\Services\Owner;
 use App\Enums\DeedStatus;
 use App\Models\Deed;
 use App\Models\Owner;
+use App\Models\Parcel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,75 @@ class OwnerStatisticsService
             'cities_count' => count($this->byCity()),
             'documents_count' => $this->countIn('parcel_photos'),
         ];
+    }
+
+    /**
+     * Estimated value of the owner's holdings, weighted by ownership share.
+     *
+     * Prices come from the survey data source (parcels.parcel_price), so some
+     * parcels may be unpriced; the counts let the app say how much of the
+     * portfolio the total actually covers.
+     *
+     * @return array{total_value: float|null, priced_parcels: int, total_parcels: int, avg_m_price: float|null}
+     */
+    public function portfolio(): array
+    {
+        $parcels = $this->owner->parcels()
+            ->with('latestDeed.deedOwners')
+            ->get(['parcels.id', 'parcels.m_price', 'parcels.parcel_price']);
+
+        $total = 0.0;
+        $priced = 0;
+        $mPrices = [];
+
+        foreach ($parcels as $parcel) {
+            if ($parcel->m_price !== null) {
+                $mPrices[] = (float) $parcel->m_price;
+            }
+
+            if ($parcel->parcel_price === null) {
+                continue;
+            }
+
+            $priced++;
+            $total += (float) $parcel->parcel_price * $this->shareIn($parcel);
+        }
+
+        return [
+            'total_value' => $priced > 0 ? round($total, 2) : null,
+            'priced_parcels' => $priced,
+            'total_parcels' => $parcels->count(),
+            'avg_m_price' => $mPrices === [] ? null : round(array_sum($mPrices) / count($mPrices), 2),
+        ];
+    }
+
+    /**
+     * The owner's fraction (0..1) of one parcel, read from the latest deed.
+     *
+     * A NULL ownership_share means the share is only written as prose inside
+     * the deed document, so co-owners are assumed to hold equal parts. Owners
+     * reached through an older deed only are treated as full holders rather
+     * than silently dropping the parcel from the total.
+     */
+    private function shareIn(Parcel $parcel): float
+    {
+        $deed = $parcel->latestDeed;
+
+        if ($deed === null || $deed->deedOwners->isEmpty()) {
+            return 1.0;
+        }
+
+        $mine = $deed->deedOwners->firstWhere('owner_id', $this->owner->getKey());
+
+        if ($mine === null) {
+            return 1.0;
+        }
+
+        if ($mine->ownership_share !== null) {
+            return min(100.0, max(0.0, (float) $mine->ownership_share)) / 100;
+        }
+
+        return 1.0 / max(1, $deed->deedOwners->count());
     }
 
     /** Compact counters for the profile screen. */

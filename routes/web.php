@@ -17,6 +17,10 @@ Route::get('/locale/{lang}', [LocaleController::class, 'switch'])->name('locale.
 // Root → redirect to login
 Route::get('/', fn () => redirect()->route('login'));
 
+// Legal pages (public — also linked from the mobile app)
+Route::view('/privacy-policy', 'legal.privacy')->name('privacy.policy');
+Route::view('/terms-of-use', 'legal.terms')->name('terms.of.use');
+
 // OTP flow (after successful email + password)
 Route::middleware('set.locale')->group(function () {
     Route::get('/otp', [OtpController::class, 'show'])->name('otp.show');

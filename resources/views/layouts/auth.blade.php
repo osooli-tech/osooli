@@ -47,8 +47,16 @@
                 </div>
             </div>
 
-            {{-- Bottom spacer --}}
-            <div class="py-4"></div>
+            {{-- Legal links --}}
+            <div class="py-4 text-center text-xs text-on-surface-variant dark:text-on-primary-container z-10">
+                <a href="{{ route('privacy.policy') }}" class="hover:underline">
+                    {{ app()->isLocale('ar') ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+                </a>
+                <span class="mx-2">·</span>
+                <a href="{{ route('terms.of.use') }}" class="hover:underline">
+                    {{ app()->isLocale('ar') ? 'شروط الاستخدام' : 'Terms of Use' }}
+                </a>
+            </div>
 
         </main>
 

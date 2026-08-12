@@ -32,6 +32,7 @@ class DashboardController extends ApiController
                 return [
                     'greeting_name' => Str::before(trim($owner->name), ' '),
                     'stats' => $stats->summary(),
+                    'portfolio' => $stats->portfolio(),
                     'by_city' => $stats->byCity(),
                     'by_district' => $stats->byDistrict(),
                     'unread_notifications' => 0,
