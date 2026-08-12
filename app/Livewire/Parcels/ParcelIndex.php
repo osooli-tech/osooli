@@ -26,6 +26,9 @@ class ParcelIndex extends Component
 
     public string $filterDeedStatus = '';
 
+    /** '' (all), 'priced', or 'unpriced' — whether the parcel carries any price. */
+    public string $filterPricing = '';
+
     public bool $showAllColumns = false;
 
     /** @var array<string, string> */
@@ -78,9 +81,14 @@ class ParcelIndex extends Component
         $this->resetPage();
     }
 
+    public function updatingFilterPricing(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
-        $this->reset(['search', 'filterAssetType', 'filterLandTransaction', 'filterDeedStatus']);
+        $this->reset(['search', 'filterAssetType', 'filterLandTransaction', 'filterDeedStatus', 'filterPricing']);
         $this->resetPage();
     }
 
@@ -90,6 +98,12 @@ class ParcelIndex extends Component
         return Parcel::query()
             ->with(['plan.district', 'latestDeed'])
             ->filtered($this->search, $this->filterAssetType, $this->filterLandTransaction, $this->filterDeedStatus)
+            ->when($this->filterPricing === 'priced', fn ($query) => $query->where(
+                fn ($q) => $q->whereNotNull('m_price')->orWhereNotNull('parcel_price')
+            ))
+            ->when($this->filterPricing === 'unpriced', fn ($query) => $query
+                ->whereNull('m_price')
+                ->whereNull('parcel_price'))
             ->orderBy('parcel_no')
             ->paginate(25);
     }
@@ -113,6 +127,8 @@ class ParcelIndex extends Component
             'deed_area' => $deeds->pluck('deed_area')->filter()->isNotEmpty(),
             'deed_status' => $deeds->pluck('deed_status')->filter()->isNotEmpty(),
             'deed_class' => $deeds->pluck('deed_class')->filter()->isNotEmpty(),
+            'm_price' => $items->pluck('m_price')->filter()->isNotEmpty(),
+            'parcel_price' => $items->pluck('parcel_price')->filter()->isNotEmpty(),
         ];
     }
 

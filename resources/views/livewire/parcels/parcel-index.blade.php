@@ -78,8 +78,24 @@
                 </select>
             </div>
 
+            {{-- Pricing filter --}}
+            <div class="min-w-[130px]">
+                <label class="block text-xs font-medium text-on-surface-variant dark:text-on-primary-container mb-1">
+                    {{ __('parcels.pricing') }}
+                </label>
+                <select wire:model.live="filterPricing"
+                        class="w-full px-3 py-2 text-sm rounded-xl
+                               bg-surface-container dark:bg-[#252b3b]
+                               border border-outline-variant dark:border-white/10
+                               text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/40">
+                    <option value="">{{ __('parcels.all') }}</option>
+                    <option value="priced">{{ __('parcels.priced') }}</option>
+                    <option value="unpriced">{{ __('parcels.unpriced') }}</option>
+                </select>
+            </div>
+
             {{-- Clear filters --}}
-            @if ($search !== '' || $filterAssetType !== '' || $filterLandTransaction !== '' || $filterDeedStatus !== '')
+            @if ($search !== '' || $filterAssetType !== '' || $filterLandTransaction !== '' || $filterDeedStatus !== '' || $filterPricing !== '')
                 <button wire:click="clearFilters"
                         class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
                                text-error border border-error/30 hover:bg-error/10 transition-colors">
@@ -138,6 +154,8 @@
         $colCount += ($showAllColumns || $populated['deed_area'])        ? 1 : 0;
         $colCount += ($showAllColumns || $populated['deed_status'])      ? 1 : 0;
         $colCount += ($showAllColumns || $populated['deed_class'])       ? 1 : 0;
+        $colCount += ($showAllColumns || $populated['m_price'])          ? 1 : 0;
+        $colCount += ($showAllColumns || $populated['parcel_price'])     ? 1 : 0;
     @endphp
 
     {{-- Table --}}
@@ -193,6 +211,16 @@
                         @if ($showAllColumns || $populated['deed_class'])
                             <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                                 {{ __('parcels.deed_class') }}
+                            </th>
+                        @endif
+                        @if ($showAllColumns || $populated['m_price'])
+                            <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                                {{ __('parcels.m_price') }}
+                            </th>
+                        @endif
+                        @if ($showAllColumns || $populated['parcel_price'])
+                            <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                                {{ __('parcels.parcel_price') }}
                             </th>
                         @endif
                         <th class="px-4 py-3"></th>
@@ -298,6 +326,20 @@
                             @if ($showAllColumns || $populated['deed_class'])
                                 <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
                                     {{ $parcel->latestDeed?->deed_class ?? '—' }}
+                                </td>
+                            @endif
+
+                            {{-- Price / m² --}}
+                            @if ($showAllColumns || $populated['m_price'])
+                                <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container data-tabular">
+                                    {{ $parcel->m_price === null ? '—' : number_format((float) $parcel->m_price) }}
+                                </td>
+                            @endif
+
+                            {{-- Parcel value --}}
+                            @if ($showAllColumns || $populated['parcel_price'])
+                                <td class="px-4 py-3 font-semibold text-secondary data-tabular">
+                                    {{ $parcel->parcel_price === null ? '—' : number_format((float) $parcel->parcel_price) }}
                                 </td>
                             @endif
 
