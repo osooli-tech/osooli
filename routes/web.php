@@ -17,9 +17,23 @@ Route::get('/locale/{lang}', [LocaleController::class, 'switch'])->name('locale.
 // Root → redirect to login
 Route::get('/', fn () => redirect()->route('login'));
 
-// Legal pages (public — also linked from the mobile app)
-Route::view('/privacy-policy', 'legal.privacy')->name('privacy.policy');
-Route::view('/terms-of-use', 'legal.terms')->name('terms.of.use');
+// Legal pages (public — also linked from the mobile app). Content is
+// CMS-managed; the static blades remain as fallback until the seeder runs.
+Route::get('/privacy-policy', function () {
+    $document = \App\Models\LegalDocument::where('key', 'privacy')->first();
+
+    return $document === null
+        ? view('legal.privacy')
+        : view('legal.show', ['document' => $document]);
+})->name('privacy.policy');
+
+Route::get('/terms-of-use', function () {
+    $document = \App\Models\LegalDocument::where('key', 'terms')->first();
+
+    return $document === null
+        ? view('legal.terms')
+        : view('legal.show', ['document' => $document]);
+})->name('terms.of.use');
 
 // OTP flow (after successful email + password)
 Route::middleware('set.locale')->group(function () {
@@ -65,6 +79,12 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/settings', fn () => view('settings.index'))
         ->middleware('can:roles.manage')
         ->name('settings.index');
+
+    // Legal content editor
+    Route::get('/settings/legal/{key}', [\App\Http\Controllers\LegalDocumentController::class, 'edit'])
+        ->middleware('can:roles.manage')->name('legal.edit');
+    Route::post('/settings/legal/{key}', [\App\Http\Controllers\LegalDocumentController::class, 'update'])
+        ->middleware('can:roles.manage')->name('legal.update');
 
     // Audit Logs
     Route::get('/audit-logs', fn () => view('audit-logs.index'))

@@ -28,6 +28,10 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/request-otp', [AuthController::class, 'requestOtp'])->name('api.auth.request-otp');
 Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('api.auth.verify-otp');
 
+// Legal texts (public — shown before login)
+Route::get('legal/{key}', [\App\Http\Controllers\Api\V1\LegalController::class, 'show'])
+    ->name('api.legal.show');
+
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
 
