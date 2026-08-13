@@ -142,6 +142,39 @@ class OwnerStatisticsService
         return $this->groupedBy('districts');
     }
 
+    /** @return list<array{name: string, parcels_count: int}> */
+    public function byRegion(): array
+    {
+        return $this->groupedBy('regions');
+    }
+
+    /**
+     * Parcel counts per recorded owner on the latest deed of each owned
+     * parcel — shows how holdings split between the owner and co-owners.
+     *
+     * @return list<array{name: string, parcels_count: int}>
+     */
+    public function byOwner(): array
+    {
+        return DB::table('parcels')
+            ->join('deeds', function ($join): void {
+                $join->on('deeds.parcel_id', '=', 'parcels.id')
+                    ->whereRaw('deeds.id = (SELECT MAX(d2.id) FROM deeds d2 WHERE d2.parcel_id = parcels.id)');
+            })
+            ->join('deed_owners', 'deed_owners.deed_id', '=', 'deeds.id')
+            ->join('owners', 'owners.id', '=', 'deed_owners.owner_id')
+            ->whereIn('parcels.id', $this->parcelIds())
+            ->selectRaw('owners.name AS name, COUNT(DISTINCT parcels.id) AS parcels_count')
+            ->groupBy('owners.name')
+            ->orderByDesc('parcels_count')
+            ->get()
+            ->map(fn (object $row): array => [
+                'name' => (string) $row->name,
+                'parcels_count' => (int) $row->parcels_count,
+            ])
+            ->all();
+    }
+
     /** @return Collection<int, int> */
     private function parcelIds(): Collection
     {
@@ -172,7 +205,7 @@ class OwnerStatisticsService
     }
 
     /**
-     * Parcel counts grouped by city or district.
+     * Parcel counts grouped by city, district, or region.
      *
      * @return list<array{name: string, parcels_count: int}>
      */
@@ -183,8 +216,12 @@ class OwnerStatisticsService
             ->join('districts', 'districts.id', '=', 'plans.district_id')
             ->whereIn('parcels.id', $this->parcelIds());
 
-        if ($level === 'cities') {
+        if ($level === 'cities' || $level === 'regions') {
             $query->join('cities', 'cities.id', '=', 'districts.city_id');
+        }
+
+        if ($level === 'regions') {
+            $query->join('regions', 'regions.id', '=', 'cities.region_id');
         }
 
         return $query

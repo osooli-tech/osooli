@@ -50,7 +50,7 @@ class ParcelController extends ApiController
     public function map(): JsonResponse
     {
         $parcels = $this->parcels()->withGeometry()
-            ->with(['plan.district', 'latestDeed'])
+            ->with(['plan.district.city', 'latestDeed.owners'])
             ->get();
 
         return response()->json([

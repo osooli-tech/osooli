@@ -190,8 +190,13 @@ class OwnerApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.stats.parcels_total', 1)
             ->assertJsonStructure([
-                'data' => ['greeting_name', 'stats', 'by_city', 'by_district'],
-            ]);
+                'data' => ['greeting_name', 'stats', 'by_city', 'by_district', 'by_region', 'by_owner'],
+            ])
+            // The setUp owner holds the parcel's only deed, so the co-owner
+            // breakdown is exactly them with one parcel.
+            ->assertJsonPath('data.by_owner.0.name', 'مالك تجريبي')
+            ->assertJsonPath('data.by_owner.0.parcels_count', 1)
+            ->assertJsonPath('data.by_region.0.name', 'الرياض');
     }
 
     public function test_dashboard_portfolio_sums_owned_parcel_values(): void

@@ -35,6 +35,8 @@ class DashboardController extends ApiController
                     'portfolio' => $stats->portfolio(),
                     'by_city' => $stats->byCity(),
                     'by_district' => $stats->byDistrict(),
+                    'by_region' => $stats->byRegion(),
+                    'by_owner' => $stats->byOwner(),
                     'unread_notifications' => 0,
                 ];
             }

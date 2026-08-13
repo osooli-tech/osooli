@@ -32,9 +32,15 @@ class ParcelMapResource extends JsonResource
                 'parcel_no' => $this->parcel_no,
                 'asset_type' => $this->asset_type,
                 'district' => $this->plan?->district?->name_ar,
+                'city' => $this->plan?->district?->city?->name_ar,
+                'plan_no' => $this->plan?->plan_no,
                 'deed_no' => $deed?->deed_no,
                 'deed_status' => $deed?->deed_status,
                 'area_sqm' => $deed?->deed_area === null ? null : (float) $deed->deed_area,
+                'm_price' => $this->m_price === null ? null : (float) $this->m_price,
+                'parcel_price' => $this->parcel_price === null ? null : (float) $this->parcel_price,
+                // First recorded owner on the latest deed — used to color parcels per owner.
+                'owner_name' => $deed?->owners->first()?->name,
             ],
         ];
     }
