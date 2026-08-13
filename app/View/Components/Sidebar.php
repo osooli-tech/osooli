@@ -73,6 +73,29 @@ class Sidebar extends Component
         ],
     ];
 
+    /**
+     * The engineering and property services the platform is planned to cover.
+     *
+     * Listed but not linked: none of them has a screen or a data source yet.
+     * They are here so the shape of the finished product is visible — showing
+     * them as inert rather than as links that go nowhere is the honest form.
+     *
+     * @var array<int, array{label: string, icon: string}>
+     */
+    public array $serviceItems = [
+        ['label' => 'nav.services_survey_request', 'icon' => 'straighten'],
+        ['label' => 'nav.services_deeds', 'icon' => 'description'],
+        ['label' => 'nav.services_survey_decisions', 'icon' => 'fact_check'],
+        ['label' => 'nav.services_engineering_design', 'icon' => 'architecture'],
+        ['label' => 'nav.services_municipal', 'icon' => 'apartment'],
+        ['label' => 'nav.services_energy', 'icon' => 'bolt'],
+        ['label' => 'nav.services_gis', 'icon' => 'public'],
+        ['label' => 'nav.services_investment', 'icon' => 'trending_up'],
+        ['label' => 'nav.services_legal', 'icon' => 'gavel'],
+        ['label' => 'nav.services_other', 'icon' => 'more_horiz'],
+        ['label' => 'nav.services_marketplace', 'icon' => 'storefront'],
+    ];
+
     public function render(): View
     {
         return view('components.sidebar');
