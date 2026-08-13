@@ -24,6 +24,11 @@ class LegalDocumentTest extends TestCase
     {
         parent::setUp();
 
+        // These tests render real pages, and the layout pulls its assets
+        // through Vite. CI does not build them, and the manifest is not what
+        // is under test here.
+        $this->withoutVite();
+
         $this->document = LegalDocument::create([
             'key' => 'privacy',
             'title_ar' => 'سياسة الخصوصية',
