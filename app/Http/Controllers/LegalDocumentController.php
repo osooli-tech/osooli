@@ -4,15 +4,31 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateLegalDocumentRequest;
 use App\Models\LegalDocument;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
-/** Dashboard editor for the CMS-managed legal texts. */
+/** Public legal pages, and the dashboard editor behind them. */
 class LegalDocumentController extends Controller
 {
+    /** Public page. Renders in the visitor's language, falling back to Arabic. */
+    public function show(string $key): View
+    {
+        abort_unless(in_array($key, LegalDocument::KEYS, true), 404);
+
+        $document = LegalDocument::where('key', $key)->firstOrFail();
+        $locale = app()->getLocale();
+
+        return view('legal.show', [
+            'document' => $document,
+            'title' => $document->titleFor($locale),
+            'content' => $document->contentFor($locale),
+            'isTranslated' => $document->hasTranslation($locale),
+        ]);
+    }
+
     public function edit(string $key): View
     {
         abort_unless(in_array($key, LegalDocument::KEYS, true), 404);
@@ -22,20 +38,20 @@ class LegalDocumentController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $key): RedirectResponse
+    public function update(UpdateLegalDocumentRequest $request, string $key): RedirectResponse
     {
         abort_unless(in_array($key, LegalDocument::KEYS, true), 404);
 
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:120'],
-            'content' => ['required', 'string', 'max:100000'],
-        ]);
+        // The model purifies both bodies on write, so nothing unsafe is stored
+        // even if this request never went through the editor.
+        LegalDocument::where('key', $key)->firstOrFail()->update($request->validated());
 
-        LegalDocument::where('key', $key)->firstOrFail()->update($validated);
-        Cache::forget("legal_document_{$key}");
+        foreach (LegalDocument::LOCALES as $locale) {
+            Cache::forget("legal_document_{$key}_{$locale}");
+        }
 
         return redirect()
             ->route('legal.edit', $key)
-            ->with('status', __('تم حفظ المحتوى بنجاح'));
+            ->with('status', __('legal.saved'));
     }
 }
