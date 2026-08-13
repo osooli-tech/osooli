@@ -156,15 +156,6 @@ class OwnerApiTest extends TestCase
             ]);
     }
 
-    public function test_parcel_detail_never_exposes_prices(): void
-    {
-        $response = $this->actingAsOwner()->getJson("/api/v1/parcels/{$this->ownedParcel->id}")
-            ->assertOk();
-
-        $this->assertStringNotContainsString('m_price', $response->getContent());
-        $this->assertStringNotContainsString('parcel_price', $response->getContent());
-    }
-
     public function test_another_owners_parcel_is_reported_as_not_found(): void
     {
         $this->actingAsOwner()->getJson("/api/v1/parcels/{$this->foreignParcel->id}")

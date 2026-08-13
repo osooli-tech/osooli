@@ -34,6 +34,8 @@ class Parcel extends Model
         'fall_in',
         'source_gdb_id',
         'last_synced_at',
+        'm_price',
+        'parcel_price',
     ];
 
     protected function casts(): array
