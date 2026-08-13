@@ -9,7 +9,6 @@ use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
-use App\Models\LegalDocument;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
@@ -20,22 +19,15 @@ Route::get('/locale/{lang}', [LocaleController::class, 'switch'])->name('locale.
 Route::get('/', fn () => redirect()->route('login'));
 
 // Legal pages (public — also linked from the mobile app). Content is
-// CMS-managed; the static blades remain as fallback until the seeder runs.
-Route::get('/privacy-policy', function () {
-    $document = LegalDocument::where('key', 'privacy')->first();
+// CMS-managed and bilingual, so these need set.locale like every other page:
+// without it the visitor's language switch has no effect here.
+Route::middleware('set.locale')->group(function () {
+    Route::get('/privacy-policy', [LegalDocumentController::class, 'show'])
+        ->defaults('key', 'privacy')->name('privacy.policy');
 
-    return $document === null
-        ? view('legal.privacy')
-        : view('legal.show', ['document' => $document]);
-})->name('privacy.policy');
-
-Route::get('/terms-of-use', function () {
-    $document = LegalDocument::where('key', 'terms')->first();
-
-    return $document === null
-        ? view('legal.terms')
-        : view('legal.show', ['document' => $document]);
-})->name('terms.of.use');
+    Route::get('/terms-of-use', [LegalDocumentController::class, 'show'])
+        ->defaults('key', 'terms')->name('terms.of.use');
+});
 
 // OTP flow (after successful email + password)
 Route::middleware('set.locale')->group(function () {
