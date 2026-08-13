@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
+use App\Services\Parcel\DigitalTwinService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,24 @@ class ParcelController extends Controller
         ]);
 
         return view('parcels.show', compact('parcel', 'parcelGeojson', 'neighboursGeojson'));
+    }
+
+    /** The unified property file: every record we hold on one parcel, in one view. */
+    public function twin(Parcel $parcel, DigitalTwinService $twin): View
+    {
+        /** @var \stdClass|null $geoRow */
+        $geoRow = DB::selectOne(
+            'SELECT ST_AsGeoJSON(geom, 6) AS geom_json, ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng
+             FROM parcels WHERE id = ?',
+            [$parcel->id]
+        );
+
+        return view('parcels.twin', [
+            'parcel' => $parcel,
+            'twin' => $twin->for($parcel),
+            'parcelGeojson' => $geoRow?->geom_json,
+            'centroid' => $geoRow?->lat === null ? null : ['lat' => (float) $geoRow->lat, 'lng' => (float) $geoRow->lng],
+        ]);
     }
 
     public function documents(Parcel $parcel): JsonResponse
