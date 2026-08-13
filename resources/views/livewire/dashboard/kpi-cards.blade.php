@@ -1,4 +1,5 @@
-<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+{{-- Thirteen compact tiles: five per row on a wide screen keeps them to three rows. --}}
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
 
     <x-stat-card
         :label="__('dashboard.total_parcels')"

@@ -126,15 +126,19 @@
                 <template x-if="parcel">
                     <div class="space-y-6 text-sm">
 
-                        {{-- بيانات الصك --}}
+                        {{-- Parcel and deed identifiers --}}
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
-                                {{ __('parcels.deed_no') }}
+                                {{ __('parcels.parcel_info') }}
                             </p>
                             <dl class="space-y-2.5">
                                 <div class="flex justify-between items-start gap-2">
                                     <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">{{ __('parcels.parcel_no') }}</dt>
                                     <dd class="font-semibold text-on-surface dark:text-white data-tabular text-end" x-text="parcel.parcel_no ?? '—'"></dd>
+                                </div>
+                                <div class="flex justify-between items-start gap-2">
+                                    <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">{{ __('parcels.spatial_id') }}</dt>
+                                    <dd class="font-semibold text-on-surface dark:text-white data-tabular text-end ltr" dir="ltr" x-text="parcel.geo_id ?? '—'"></dd>
                                 </div>
                                 <div class="flex justify-between items-start gap-2">
                                     <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">{{ __('parcels.asset_type') }}</dt>
