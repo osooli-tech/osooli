@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeedController;
 use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\LegalController;
 use App\Http\Controllers\Api\V1\ModificationRequestController;
 use App\Http\Controllers\Api\V1\ParcelController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -29,7 +30,7 @@ Route::post('auth/request-otp', [AuthController::class, 'requestOtp'])->name('ap
 Route::post('auth/verify-otp', [AuthController::class, 'verifyOtp'])->name('api.auth.verify-otp');
 
 // Legal texts (public — shown before login)
-Route::get('legal/{key}', [\App\Http\Controllers\Api\V1\LegalController::class, 'show'])
+Route::get('legal/{key}', [LegalController::class, 'show'])
     ->name('api.legal.show');
 
 Route::middleware('auth:sanctum')->group(function (): void {

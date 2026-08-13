@@ -5,9 +5,11 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GeoJsonController;
+use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
+use App\Models\LegalDocument;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
@@ -20,7 +22,7 @@ Route::get('/', fn () => redirect()->route('login'));
 // Legal pages (public — also linked from the mobile app). Content is
 // CMS-managed; the static blades remain as fallback until the seeder runs.
 Route::get('/privacy-policy', function () {
-    $document = \App\Models\LegalDocument::where('key', 'privacy')->first();
+    $document = LegalDocument::where('key', 'privacy')->first();
 
     return $document === null
         ? view('legal.privacy')
@@ -28,7 +30,7 @@ Route::get('/privacy-policy', function () {
 })->name('privacy.policy');
 
 Route::get('/terms-of-use', function () {
-    $document = \App\Models\LegalDocument::where('key', 'terms')->first();
+    $document = LegalDocument::where('key', 'terms')->first();
 
     return $document === null
         ? view('legal.terms')
@@ -81,9 +83,9 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->name('settings.index');
 
     // Legal content editor
-    Route::get('/settings/legal/{key}', [\App\Http\Controllers\LegalDocumentController::class, 'edit'])
+    Route::get('/settings/legal/{key}', [LegalDocumentController::class, 'edit'])
         ->middleware('can:roles.manage')->name('legal.edit');
-    Route::post('/settings/legal/{key}', [\App\Http\Controllers\LegalDocumentController::class, 'update'])
+    Route::post('/settings/legal/{key}', [LegalDocumentController::class, 'update'])
         ->middleware('can:roles.manage')->name('legal.update');
 
     // Audit Logs
