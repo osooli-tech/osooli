@@ -160,14 +160,103 @@ if (! container) {
         map.on('load', addParcelLayers);
 
         // ── Layer controls ──────────────────────────────────────
-        const toggleLabelsBtn = document.getElementById('toggle-labels');
-        if (toggleLabelsBtn) {
-            toggleLabelsBtn.addEventListener('click', () => {
-                if (! map.getLayer('parcels-labels')) return;
-                const visible = map.getLayoutProperty('parcels-labels', 'visibility') !== 'none';
-                map.setLayoutProperty('parcels-labels', 'visibility', visible ? 'none' : 'visible');
-                toggleLabelsBtn.classList.toggle('bg-surface-container', ! visible);
-                toggleLabelsBtn.classList.toggle('dark:bg-white/10', ! visible);
+
+        // Each colouring is a Mapbox match expression plus the legend that
+        // explains it, so the two can never drift apart.
+        const BASE_COLOUR = '#00b386';
+        const OTHER_COLOUR = '#8a8f98';
+
+        const COLOUR_MODES = {
+            none: null,
+            deed_status: {
+                property: 'deed_status',
+                stops: [['محدث', '#00b386'], ['قديم', '#d9534f']],
+            },
+            asset_type: {
+                property: 'asset_type',
+                stops: [
+                    ['أرض', '#00b386'],
+                    ['فيلا', '#c9a84c'],
+                    ['عمارة', '#4a90d9'],
+                    ['شقة', '#9b6dd6'],
+                    ['مستودع', '#e07b39'],
+                ],
+            },
+            priced: {
+                property: 'is_priced',
+                stops: [[true, '#00b386'], [false, '#8a8f98']],
+                labels: { true: 'مسعّرة', false: 'غير مسعّرة' },
+            },
+        };
+
+        let colourMode = 'none';
+
+        function fillColourExpression(mode) {
+            const config = COLOUR_MODES[mode];
+            if (! config) return BASE_COLOUR;
+
+            return [
+                'match',
+                ['to-string', ['get', config.property]],
+                ...config.stops.flatMap(([value, colour]) => [String(value), colour]),
+                OTHER_COLOUR,
+            ];
+        }
+
+        function renderLegend(mode) {
+            const box = document.getElementById('map-legend');
+            const items = document.getElementById('map-legend-items');
+            if (! box || ! items) return;
+
+            const config = COLOUR_MODES[mode];
+            if (! config) {
+                box.classList.add('hidden');
+                items.innerHTML = '';
+                return;
+            }
+
+            box.classList.remove('hidden');
+            items.innerHTML = config.stops.map(([value, colour]) => {
+                const label = config.labels?.[String(value)] ?? String(value);
+                return `<div class="flex items-center gap-2 text-xs text-on-surface dark:text-white">
+                            <span class="w-3 h-3 rounded-sm shrink-0" style="background:${colour}"></span>
+                            <span>${label}</span>
+                        </div>`;
+            }).join('');
+        }
+
+        function applyColourMode() {
+            if (! map.getLayer('parcels-fill')) return;
+            map.setPaintProperty('parcels-fill', 'fill-color', fillColourExpression(colourMode));
+            renderLegend(colourMode);
+        }
+
+        document.querySelectorAll('input[name="parcel-colour"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                colourMode = radio.value;
+                applyColourMode();
+            });
+        });
+
+        // Per-layer visibility, remembered so a basemap switch restores it.
+        const hiddenLayers = new Set();
+
+        document.querySelectorAll('input[data-layer]').forEach((box) => {
+            box.addEventListener('change', () => {
+                const id = box.dataset.layer;
+                box.checked ? hiddenLayers.delete(id) : hiddenLayers.add(id);
+                if (map.getLayer(id)) {
+                    map.setLayoutProperty(id, 'visibility', box.checked ? 'visible' : 'none');
+                }
+            });
+        });
+
+        // Switching basemap rebuilds every layer, so the colouring and the
+        // hidden set have to be re-applied on top of the fresh style.
+        function restoreLayerState() {
+            applyColourMode();
+            hiddenLayers.forEach((id) => {
+                if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
             });
         }
 
@@ -183,7 +272,10 @@ if (! container) {
             toggleBasemapBtn.addEventListener('click', () => {
                 onSatellite = ! onSatellite;
                 map.setStyle(onSatellite ? satelliteStyle : streetStyle);
-                map.once('style.load', addParcelLayers);
+                map.once('style.load', () => {
+                    addParcelLayers();
+                    restoreLayerState();
+                });
                 basemapLabel.textContent = onSatellite
                     ? basemapLabel.dataset.streetLabel ?? 'خريطة الشوارع'
                     : basemapLabel.dataset.satelliteLabel ?? 'قمر صناعي';

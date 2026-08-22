@@ -82,4 +82,11 @@ return [
     'view_deed' => 'View Deed',
     'download_deed' => 'Download Deed',
     'deed_not_available' => 'Deed not available',
+    'colour_by' => 'Colour parcels by',
+    'colour_none' => 'No colouring',
+    'colour_priced' => 'Pricing',
+    'legend' => 'Legend',
+    'visible_layers' => 'Visible layers',
+    'layer_parcels' => 'Parcel fill',
+    'layer_outlines' => 'Parcel outlines',
 ];

@@ -82,4 +82,11 @@ return [
     'view_deed' => 'عرض الصك',
     'download_deed' => 'تنزيل الصك',
     'deed_not_available' => 'الصك غير متوفر',
+    'colour_by' => 'تلوين القطع حسب',
+    'colour_none' => 'بلا تلوين',
+    'colour_priced' => 'التسعير',
+    'legend' => 'مفتاح الخريطة',
+    'visible_layers' => 'الطبقات الظاهرة',
+    'layer_parcels' => 'تعبئة القطع',
+    'layer_outlines' => 'حدود القطع',
 ];

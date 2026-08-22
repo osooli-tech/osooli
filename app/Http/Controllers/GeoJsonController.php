@@ -18,7 +18,7 @@ class GeoJsonController extends Controller
         /** @var list<\stdClass> $rows */
         $rows = DB::select(
             'SELECT
-                 p.id, p.parcel_no, p.geo_id, p.asset_type,
+                 p.id, p.parcel_no, p.geo_id, p.asset_type, p.m_price,
                  pl.plan_no,
                  d.name_ar AS district_name,
                  deed.deed_no, deed.deed_date_hijri, deed.deed_area, deed.deed_status,
@@ -67,6 +67,8 @@ class GeoJsonController extends Controller
                 'centroid_lat' => $row->centroid_lat,
                 'centroid_lng' => $row->centroid_lng,
                 'documents_count' => (int) $row->documents_count,
+                // Drives the priced/unpriced colouring; the amount itself stays out.
+                'is_priced' => $row->m_price !== null,
                 'owner_names' => $row->owner_names,
                 'owner_ids' => $row->owner_ids,
             ],

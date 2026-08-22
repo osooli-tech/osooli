@@ -74,26 +74,93 @@
                 </div>
             </div>
 
-            {{-- Layer controls --}}
-            <div class="absolute top-3 end-3 z-10 bg-white/95 dark:bg-[#1a1f2e]/95 backdrop-blur
-                        rounded-xl shadow-md border border-outline-variant dark:border-white/10 p-2 space-y-1">
-                <p class="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container px-1.5 pb-1">
+            {{-- Layer controls. Collapsed to a button until opened, so the panel
+                 never covers the map while nobody is using it. --}}
+            <div class="absolute top-3 end-3 z-10" x-data="{ open: false }">
+
+                <button type="button" @click="open = ! open"
+                        class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium shadow-md
+                               bg-white/95 dark:bg-[#1a1f2e]/95 backdrop-blur border border-outline-variant
+                               dark:border-white/10 text-on-surface dark:text-white
+                               hover:bg-white dark:hover:bg-[#1a1f2e] transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">layers</span>
                     {{ __('dashboard.map_layers') }}
-                </p>
-                <button id="toggle-labels" type="button"
-                        class="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs font-medium
-                               text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
-                    <span class="material-symbols-outlined text-[16px]">label</span>
-                    {{ __('dashboard.show_labels') }}
                 </button>
-                <button id="toggle-basemap" type="button"
-                        class="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg text-xs font-medium
-                               text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
-                    <span class="material-symbols-outlined text-[16px]">satellite_alt</span>
-                    <span id="basemap-label"
-                          data-satellite-label="{{ __('dashboard.satellite_view') }}"
-                          data-street-label="{{ __('dashboard.street_view') }}">{{ __('dashboard.satellite_view') }}</span>
-                </button>
+
+                <div x-show="open" x-cloak @click.outside="open = false"
+                     class="mt-2 w-60 max-h-[70vh] overflow-y-auto rounded-xl shadow-lg p-3 space-y-4
+                            bg-white/97 dark:bg-[#1a1f2e]/97 backdrop-blur
+                            border border-outline-variant dark:border-white/10">
+
+                    {{-- Colour the parcels by one attribute at a time --}}
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-wide
+                                  text-on-surface-variant dark:text-on-primary-container mb-1.5">
+                            {{ __('dashboard.colour_by') }}
+                        </p>
+                        <div class="space-y-0.5">
+                            @foreach ([
+                                'none' => 'dashboard.colour_none',
+                                'deed_status' => 'parcels.deed_status',
+                                'asset_type' => 'parcels.asset_type',
+                                'priced' => 'dashboard.colour_priced',
+                            ] as $mode => $label)
+                                <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
+                                              text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
+                                    <input type="radio" name="parcel-colour" value="{{ $mode }}"
+                                           @checked($mode === 'none')
+                                           class="accent-secondary w-3.5 h-3.5 shrink-0">
+                                    {{ __($label) }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Legend, rebuilt by map.js whenever the colouring changes --}}
+                    <div id="map-legend" class="hidden">
+                        <p class="text-[10px] font-semibold uppercase tracking-wide
+                                  text-on-surface-variant dark:text-on-primary-container mb-1.5">
+                            {{ __('dashboard.legend') }}
+                        </p>
+                        <div id="map-legend-items" class="space-y-1"></div>
+                    </div>
+
+                    {{-- Individual layers --}}
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-wide
+                                  text-on-surface-variant dark:text-on-primary-container mb-1.5">
+                            {{ __('dashboard.visible_layers') }}
+                        </p>
+                        <div class="space-y-0.5">
+                            @foreach ([
+                                'parcels-fill' => ['dashboard.layer_parcels', 'category'],
+                                'parcels-outline' => ['dashboard.layer_outlines', 'pentagon'],
+                                'parcels-labels' => ['dashboard.show_labels', 'label'],
+                            ] as $layer => [$label, $icon])
+                                <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
+                                              text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
+                                    <input type="checkbox" checked data-layer="{{ $layer }}"
+                                           class="accent-secondary w-3.5 h-3.5 shrink-0">
+                                    <span class="material-symbols-outlined text-[15px]">{{ $icon }}</span>
+                                    {{ __($label) }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Basemap --}}
+                    <div class="pt-1 border-t border-outline-variant dark:border-white/10">
+                        <button id="toggle-basemap" type="button"
+                                class="flex items-center gap-2 w-full px-1.5 py-1.5 rounded-lg text-xs font-medium
+                                       text-on-surface dark:text-white hover:bg-surface-container
+                                       dark:hover:bg-white/5 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">satellite_alt</span>
+                            <span id="basemap-label"
+                                  data-satellite-label="{{ __('dashboard.satellite_view') }}"
+                                  data-street-label="{{ __('dashboard.street_view') }}">{{ __('dashboard.satellite_view') }}</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
