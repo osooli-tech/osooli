@@ -13,7 +13,10 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:locale" content="{{ app()->isLocale('ar') ? 'ar_SA' : 'en_US' }}">
 
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    {{-- public/favicon.ico is Laravel's empty placeholder, so it answers 404 and
+         the tab shows nothing. These are the Sakuki mark on a white plate. --}}
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
     {{-- The landing is a visitor's first request, so it loads its own bundle
          rather than the app's — no Tailwind, no Livewire, no icon font. --}}

@@ -126,7 +126,43 @@ return [
         .'or opening a file.',
     'app_cta_primary' => 'Get the app',
     'app_cta_secondary' => 'Learn more',
-    'app_art_alt' => 'The Sakuki app on a phone',
+
+    // ── Owner app tour (slider) ─────────────────────────────────
+    'tour_prev' => 'Previous screen',
+    'tour_next' => 'Next screen',
+    'tour_goto' => 'Go to :title',
+    'tour_of' => ':current of :total',
+
+    'tour_home_title' => 'The whole portfolio on one screen',
+    'tour_home_text' => 'Estimated value of the assets, how many properties and how much land, '
+        .'which deeds are current and which have gone stale — worked out from the data itself, '
+        .'not from a sheet someone keeps up by hand.',
+    'tour_home_alt' => 'The app home screen showing estimated asset value and portfolio figures',
+
+    'tour_parcels_title' => 'Every property, with its full file',
+    'tour_parcels_text' => 'Search by parcel, deed or plan number, and filter the list by deed '
+        .'status: current, stale, or no deed at all.',
+    'tour_parcels_alt' => 'The property list in the app with search and status filters',
+
+    'tour_deeds_title' => 'The complete deed register',
+    'tour_deeds_text' => 'Each deed with its number, issue date, area and type — open the scanned '
+        .'deed or jump to its parcel on the map in one tap.',
+    'tour_deeds_alt' => 'The deed register in the app, with cards and buttons to view deed or parcel',
+
+    'tour_detail_title' => 'The parcel, with its boundary and dimensions',
+    'tour_detail_text' => 'The boundary drawn on the map with edge lengths, and the full record: '
+        .'area, estimated value, plan number, geographic identifier and transaction type.',
+    'tour_detail_alt' => 'The parcel detail screen showing its boundary, dimensions and record',
+
+    'tour_owners_title' => 'Owners and change requests',
+    'tour_owners_text' => 'The parcel’s owners and the deeds attached to it, and a button that '
+        .'files a change request — one that follows an approval path and lands in the audit trail.',
+    'tour_owners_alt' => 'The parcel screen showing owners, attached deeds and the change request button',
+
+    'tour_map_title' => 'Your assets on a single map',
+    'tour_map_text' => 'Every parcel on the map by number. Tap one for its summary, measure '
+        .'distances and areas, and download the deed from where it sits.',
+    'tour_map_alt' => 'The app map showing numbered parcels and a summary of the selected one',
 
     // ── Trust ───────────────────────────────────────────────────
     'trust_eyebrow' => 'Security and governance',

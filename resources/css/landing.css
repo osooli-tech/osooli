@@ -180,6 +180,80 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
 .tier-flag{position:absolute;top:-13px;inset-inline-end:24px;background:var(--gold);color:#241A00;
   font-size:11px;font-weight:700;padding:5px 13px;border-radius:99px;letter-spacing:.02em}
 
+/* ─────────────────────────── owner app tour ─────────────────────────── */
+/* A scroll-snap strip, so it swipes on touch and stays usable with no script.
+   The neighbours stay on screen, shrunk and dimmed, so the reader can see
+   where they are in the set without a separate thumbnail row. */
+.tour{position:relative;display:flex;align-items:center;gap:12px;
+  margin-inline:calc(var(--gut) * -1);padding-inline:var(--gut)}
+.tour-track{display:flex;gap:clamp(16px,3vw,40px);overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;padding-block:14px;flex:1;
+  scrollbar-width:none;-ms-overflow-style:none}
+.tour-track::-webkit-scrollbar{display:none}
+.tour-track:focus-visible{outline:3px solid var(--gold);outline-offset:6px;border-radius:20px}
+.tour-slide{flex:0 0 auto;scroll-snap-align:center;width:clamp(210px,24vw,268px);
+  transition:transform .45s cubic-bezier(.22,.9,.3,1),opacity .45s ease;
+  transform:scale(.82);opacity:.34}
+.tour-slide.is-current{transform:none;opacity:1}
+/* Centre the first and last slide instead of letting them stick to an edge. */
+.tour-track::before,.tour-track::after{content:"";flex:0 0 auto;
+  width:calc(50% - clamp(105px,12vw,134px) - clamp(8px,1.5vw,20px))}
+
+.phone{position:relative;border-radius:30px;padding:8px;background:#001527;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(230,195,100,.08)}
+.tour-slide.is-current .phone{box-shadow:0 44px 90px -28px rgba(0,0,0,.85),
+  0 0 0 1px rgba(230,195,100,.28)}
+.phone img{width:100%;height:auto;aspect-ratio:9/19.5;object-fit:cover;object-position:top center;
+  border-radius:23px;background:#02243D;display:block}
+/* A screenshot that fails to load leaves the frame empty rather than a broken
+   icon; landing.js sets this once an image errors. */
+.phone.is-empty img{visibility:hidden}
+
+.tour-arrow{flex:0 0 auto;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;
+  transition:background .16s,border-color .16s,color .16s,opacity .16s}
+.tour-arrow:hover:not(:disabled){background:var(--gold);border-color:var(--gold);color:#241A00}
+.tour-arrow:disabled{opacity:.28;cursor:default}
+.tour-arrow svg{width:20px;height:20px}
+/* The chevrons are drawn pointing left and right; under RTL "previous" is the
+   one on the right, so the pair swaps rather than each glyph flipping. */
+[dir="rtl"] .tour-arrow--prev{order:3}
+[dir="rtl"] .tour-arrow--next{order:1}
+
+.tour-captions{position:relative;text-align:center;max-width:56ch;margin:clamp(24px,3vw,34px) auto 0;
+  min-height:132px}
+.tour-caption{position:absolute;inset-inline:0;top:0;opacity:0;transform:translateY(10px);
+  transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+.tour-caption.is-current{opacity:1;transform:none;pointer-events:auto;position:relative}
+.tour-caption h3{font-size:clamp(19px,2.2vw,25px);color:#fff;margin-bottom:12px}
+.tour-caption p{font-size:clamp(14px,1.2vw,16px);line-height:1.95;font-weight:300;color:#A9BDD4}
+
+.tour-rail{display:flex;align-items:center;justify-content:center;gap:0;
+  margin:clamp(22px,3vw,30px) auto 0;width:fit-content;position:relative;padding-inline:14px}
+/* the dimension line the ticks sit on */
+.tour-rail::before{content:"";position:absolute;inset-inline:0;top:50%;height:2px;
+  background:rgba(230,195,100,.28)}
+/* its end marks */
+.tour-rail::after{content:"";position:absolute;inset-inline:0;top:50%;height:12px;
+  transform:translateY(-50%);
+  border-inline:2px solid var(--gold);pointer-events:none}
+.tour-tick{width:34px;height:30px;background:none;border:0;cursor:pointer;padding:0;
+  display:grid;place-items:center;position:relative;z-index:1}
+.tour-tick span{display:block;width:2px;height:11px;background:rgba(230,195,100,.45);
+  border-radius:1px;transition:height .3s ease,background .3s ease,box-shadow .3s ease}
+.tour-tick:hover span{background:var(--gold)}
+.tour-tick.is-current span{height:22px;background:var(--gold);
+  box-shadow:0 0 12px rgba(230,195,100,.6)}
+
+.tour-actions{display:flex;gap:12px;justify-content:center;margin-top:clamp(28px,4vw,38px);
+  flex-wrap:wrap}
+
+@media (prefers-reduced-motion:reduce){
+  .tour-track{scroll-behavior:auto}
+  .tour-slide,.tour-caption{transition:none}
+}
+
 /* ─────────────────────────── tooling strip ─────────────────────────── */
 .stack-label{text-align:center;font-size:11.5px;font-weight:500;letter-spacing:.14em;
   color:var(--ink-3);margin-bottom:30px}
@@ -265,6 +339,13 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
   .tier--hi{order:-1}
   .foot-grid{grid-template-columns:1fr 1fr}
   .nav{display:none}
+}
+@media (max-width:760px){
+  /* One phone at a time, and the arrows give way to the swipe. */
+  .tour-arrow{display:none}
+  .tour-slide{width:min(72vw,262px);transform:scale(.9)}
+  .tour-track::before,.tour-track::after{width:calc(50% - min(36vw,131px))}
+  .tour-captions{min-height:172px}
 }
 @media (max-width:560px){
   .hdr .inner{height:64px}
