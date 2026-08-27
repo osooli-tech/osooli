@@ -37,8 +37,8 @@ return [
     'parcels_eyebrow' => 'Parcels and boundaries',
     'parcels_title' => 'Every parcel with its',
     'parcels_title_mark' => 'real boundary',
-    'parcels_lede' => 'Import GDB files straight into PostGIS and see your parcel polygons '
-        .'on the map, with areas computed from the actual coordinates — not from paper.',
+    'parcels_lede' => 'Your survey data already lives in ArcGIS. Upload it as it is, in a GDB '
+        .'file, with no entering properties one by one.',
     'parcels_check_1' => 'Corner coordinates and edge lengths for every parcel',
     'parcels_check_2' => 'Satellite and street layers with parcel numbers',
     'parcels_check_3' => 'Instant search by parcel, deed or plan number',

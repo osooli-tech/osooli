@@ -20,7 +20,7 @@
         <path class="pcl" d="M154 240 h102 v74 h-102 z"/>
         <path class="pcl" d="M288 240 h94 v74 h-94 z"/>
         <path class="dim" d="M154 122 H256 M154 117 V127 M256 117 V127"/>
-        <text x="205" y="112" fill="#E6C364" font-family="IBM Plex Sans" font-size="13"
+        <text x="205" y="112" fill="#E6C364" class="n" font-size="13"
               text-anchor="middle">50.0 m</text>
     </g>
 
@@ -39,31 +39,31 @@
         <rect x="0" y="0" width="238" height="42" rx="14" fill="#002444"/>
         <rect x="0" y="30" width="238" height="12" fill="#002444"/>
         <rect x="16" y="14" width="15" height="15" rx="3" fill="#E6C364"/>
-        <text x="42" y="26" fill="#fff" font-family="IBM Plex Sans Arabic" font-size="13"
-              font-weight="600">صك ملكية</text>
-        <text x="222" y="26" fill="#E6C364" font-family="IBM Plex Sans" font-size="11"
+        <text x="42" y="26" fill="#fff" font-size="13"
+              font-weight="500">صك ملكية</text>
+        <text x="222" y="26" fill="#E6C364" class="n" font-size="11"
               text-anchor="end">310125004521</text>
 
-        <text x="222" y="70" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="11.5"
+        <text x="222" y="70" fill="#6B7A8C" font-size="11.5"
               text-anchor="end">رقم القطعة</text>
-        <text x="16" y="70" fill="#0B1C30" font-family="IBM Plex Sans" font-size="12.5"
+        <text x="16" y="70" fill="#0B1C30" class="n" font-size="12.5"
               font-weight="600">452/B</text>
         <line x1="16" y1="82" x2="222" y2="82" stroke="#EEF1F6" stroke-width="1.4"/>
 
-        <text x="222" y="102" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="11.5"
+        <text x="222" y="102" fill="#6B7A8C" font-size="11.5"
               text-anchor="end">المساحة</text>
-        <text x="16" y="102" fill="#0B1C30" font-family="IBM Plex Sans" font-size="12.5"
+        <text x="16" y="102" fill="#0B1C30" class="n" font-size="12.5"
               font-weight="600">1,250 m²</text>
         <line x1="16" y1="114" x2="222" y2="114" stroke="#EEF1F6" stroke-width="1.4"/>
 
-        <text x="222" y="134" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="11.5"
+        <text x="222" y="134" fill="#6B7A8C" font-size="11.5"
               text-anchor="end">القرار المساحي</text>
         <g transform="translate(16 124)">
             <circle cx="6" cy="5" r="6" fill="rgba(4,107,78,.14)"/>
             <path d="M3.4 5.2 5.2 7 8.8 3.2" stroke="#046B4E" stroke-width="1.8" fill="none"
                   stroke-linecap="round"/>
-            <text x="18" y="9.5" fill="#046B4E" font-family="IBM Plex Sans Arabic" font-size="11.5"
-                  font-weight="600">مرتبط</text>
+            <text x="18" y="9.5" fill="#046B4E" font-size="11.5"
+                  font-weight="500">مرتبط</text>
         </g>
     </g>
 </svg>

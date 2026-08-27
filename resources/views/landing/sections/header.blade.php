@@ -1,20 +1,14 @@
 <header class="hdr">
     <div class="inner">
-        <a class="logo" href="{{ url('/') }}">
-            <span class="logo-mk">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#001527" aria-hidden="true" focusable="false">
-                    <path d="M12 2 3 8.4V22h6.2v-6.4h5.6V22H21V8.4z"/>
-                </svg>
-            </span>
-            {{ __('nav.app_name') }}
-        </a>
+        <x-landing.logo />
 
         <nav class="nav">
             <a href="#platform">{{ __('landing.nav_platform') }}</a>
             <a href="#app">{{ __('landing.nav_app') }}</a>
             <a href="#pricing">{{ __('landing.nav_pricing') }}</a>
             <a href="#trust">{{ __('landing.nav_trust') }}</a>
-            <a href="#clients">{{ __('landing.nav_clients') }}</a>
+            {{-- Restore alongside landing.sections.testimonials. --}}
+            {{-- <a href="#clients">{{ __('landing.nav_clients') }}</a> --}}
         </nav>
 
         <div class="hdr-cta">

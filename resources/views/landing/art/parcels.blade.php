@@ -25,18 +25,18 @@
 
         {{-- edge lengths --}}
         <path class="dim" style="stroke:#C49A3C" d="M152 116 H252 M152 111 V121 M252 111 V121"/>
-        <text x="202" y="106" fill="#8A6A1F" font-family="IBM Plex Sans" font-size="12"
+        <text x="202" y="106" fill="#8A6A1F" class="n" font-size="12"
               text-anchor="middle">50.0 m</text>
         <path class="dim" style="stroke:#C49A3C" d="M262 126 V194 M257 126 H267 M257 194 H267"/>
-        <text x="286" y="164" fill="#8A6A1F" font-family="IBM Plex Sans" font-size="12"
+        <text x="286" y="164" fill="#8A6A1F" class="n" font-size="12"
               text-anchor="middle">25.0 m</text>
     </g>
 
     <g transform="translate(300 296)">
         <rect x="0" y="0" width="164" height="60" rx="12" fill="#002444"/>
-        <text x="148" y="24" fill="#8FA6C0" font-family="IBM Plex Sans Arabic" font-size="11.5"
+        <text x="148" y="24" fill="#8FA6C0" font-size="11.5"
               text-anchor="end">المساحة المحسوبة</text>
-        <text x="148" y="46" fill="#E6C364" font-family="IBM Plex Sans" font-size="19"
+        <text x="148" y="46" fill="#E6C364" class="n" font-size="19"
               font-weight="600" text-anchor="end">1,250 m²</text>
     </g>
 </svg>

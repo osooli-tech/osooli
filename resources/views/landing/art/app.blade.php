@@ -20,46 +20,46 @@
         <rect x="9" y="9" width="210" height="340" rx="27" fill="#fff"/>
         <path d="M9 36a27 27 0 0 1 27-27h156a27 27 0 0 1 27 27v52H9z" fill="#002444"/>
         <rect x="96" y="18" width="36" height="5" rx="2.5" fill="rgba(255,255,255,.3)"/>
-        <text x="200" y="52" fill="#8FA6C0" font-family="IBM Plex Sans Arabic" font-size="10.5"
+        <text x="200" y="52" fill="#8FA6C0" font-size="10.5"
               text-anchor="end">صباح الخير</text>
-        <text x="200" y="72" fill="#fff" font-family="IBM Plex Sans Arabic" font-size="14"
-              font-weight="600" text-anchor="end">محفظتي العقارية</text>
+        <text x="200" y="72" fill="#fff" font-size="14"
+              font-weight="500" text-anchor="end">محفظتي العقارية</text>
 
         <rect x="22" y="76" width="88" height="52" rx="11" fill="#fff" stroke="#EEF1F6" stroke-width="1.4"/>
-        <text x="98" y="96" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="9.5"
+        <text x="98" y="96" fill="#6B7A8C" font-size="9.5"
               text-anchor="end">قطعي</text>
-        <text x="98" y="118" fill="#002444" font-family="IBM Plex Sans" font-size="19"
+        <text x="98" y="118" fill="#002444" class="n" font-size="19"
               font-weight="600" text-anchor="end">12</text>
         <rect x="118" y="76" width="88" height="52" rx="11" fill="#fff" stroke="#EEF1F6" stroke-width="1.4"/>
-        <text x="194" y="96" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="9.5"
+        <text x="194" y="96" fill="#6B7A8C" font-size="9.5"
               text-anchor="end">صكوك محدّثة</text>
-        <text x="194" y="118" fill="#046B4E" font-family="IBM Plex Sans" font-size="19"
+        <text x="194" y="118" fill="#046B4E" class="n" font-size="19"
               font-weight="600" text-anchor="end">10</text>
 
-        <text x="206" y="152" fill="#0B1C30" font-family="IBM Plex Sans Arabic" font-size="11.5"
-              font-weight="600" text-anchor="end">آخر القطع</text>
+        <text x="206" y="152" fill="#0B1C30" font-size="11.5"
+              font-weight="500" text-anchor="end">آخر القطع</text>
 
-        <g font-family="IBM Plex Sans Arabic">
+        <g>
             <rect x="22" y="162" width="184" height="46" rx="11" fill="#F4F6F9"/>
             <rect x="176" y="174" width="22" height="22" rx="7" fill="rgba(20,96,92,.12)"/>
-            <text x="166" y="182" fill="#0B1C30" font-size="10.5" font-weight="600" text-anchor="end">قطعة 452/ب</text>
+            <text x="166" y="182" fill="#0B1C30" font-size="10.5" font-weight="500" text-anchor="end">قطعة 452/ب</text>
             <text x="166" y="196" fill="#6B7A8C" font-size="9" text-anchor="end">1,250 م² · مخطط 1207/أ</text>
             <rect x="28" y="177" width="42" height="16" rx="5" fill="rgba(34,197,94,.16)"/>
-            <text x="49" y="188" fill="#04603F" font-size="8.5" text-anchor="middle" font-weight="600">محدّث</text>
+            <text x="49" y="188" fill="#04603F" font-size="8.5" text-anchor="middle" font-weight="500">محدّث</text>
 
             <rect x="22" y="216" width="184" height="46" rx="11" fill="#F4F6F9"/>
             <rect x="176" y="228" width="22" height="22" rx="7" fill="rgba(20,96,92,.12)"/>
-            <text x="166" y="236" fill="#0B1C30" font-size="10.5" font-weight="600" text-anchor="end">قطعة 208</text>
+            <text x="166" y="236" fill="#0B1C30" font-size="10.5" font-weight="500" text-anchor="end">قطعة 208</text>
             <text x="166" y="250" fill="#6B7A8C" font-size="9" text-anchor="end">940 م² · مخطط 894</text>
             <rect x="28" y="231" width="42" height="16" rx="5" fill="rgba(196,154,60,.2)"/>
-            <text x="49" y="242" fill="#7A5D14" font-size="8.5" text-anchor="middle" font-weight="600">قديم</text>
+            <text x="49" y="242" fill="#7A5D14" font-size="8.5" text-anchor="middle" font-weight="500">قديم</text>
 
             <rect x="22" y="270" width="184" height="46" rx="11" fill="#F4F6F9"/>
             <rect x="176" y="282" width="22" height="22" rx="7" fill="rgba(20,96,92,.12)"/>
-            <text x="166" y="290" fill="#0B1C30" font-size="10.5" font-weight="600" text-anchor="end">قطعة 77/ج</text>
+            <text x="166" y="290" fill="#0B1C30" font-size="10.5" font-weight="500" text-anchor="end">قطعة 77/ج</text>
             <text x="166" y="304" fill="#6B7A8C" font-size="9" text-anchor="end">2,100 م² · مخطط 1440</text>
             <rect x="28" y="285" width="42" height="16" rx="5" fill="rgba(34,197,94,.16)"/>
-            <text x="49" y="296" fill="#04603F" font-size="8.5" text-anchor="middle" font-weight="600">محدّث</text>
+            <text x="49" y="296" fill="#04603F" font-size="8.5" text-anchor="middle" font-weight="500">محدّث</text>
         </g>
 
         <line x1="9" y1="324" x2="219" y2="324" stroke="#EEF1F6" stroke-width="1.6"/>

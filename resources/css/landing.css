@@ -7,7 +7,15 @@
    palette in tailwind.config.js so the two surfaces stay in the same family.
    ========================================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+/* Tajawal is already the mobile app's face (see the Flutter theme's
+   fontFamily), so the landing shares it and the two surfaces finally read as
+   one product. It has no 600 — the weights below step 300 / 500 / 700 / 800,
+   and every rule here picks from that set rather than letting the browser
+   round a missing weight up.
+
+   IBM Plex Sans stays for figures only: parcel counts, areas and prices need
+   tabular numerals that line up in a column. */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 :root{
   --navy:#002444; --navy-2:#013553; --navy-3:#0a3a5e;
@@ -16,7 +24,7 @@
   --paper:#ffffff; --surface:#F8F9FF; --surface-2:#EFF4FF;
   --ink:#0B1C30; --ink-2:#4A5766; --ink-3:#6B7A8C;
   --line:#DCE3EE; --line-navy:rgba(171,201,242,.16);
-  --sans:'IBM Plex Sans Arabic','IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --sans:'Tajawal','IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --num:'IBM Plex Sans',ui-monospace,sans-serif;
   --gut:clamp(20px,5vw,72px);
 }
@@ -33,7 +41,7 @@ a{color:inherit;text-decoration:none}
 /* Skip link — the header is sticky, so keyboard users need a way past it. */
 .skip{position:absolute;inset-inline-start:-9999px;top:12px;z-index:200;
   background:var(--gold);color:#241A00;padding:11px 20px;border-radius:9px;
-  font-size:14px;font-weight:600}
+  font-size:14px;font-weight:700}
 .skip:focus{inset-inline-start:var(--gut)}
 
 /* ─────────────────────────── bands ─────────────────────────── */
@@ -55,13 +63,13 @@ a{color:inherit;text-decoration:none}
 .band--navy>*,.band--navy-grad>*{position:relative;z-index:1}
 
 /* ─────────────────────────── type ─────────────────────────── */
-.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11.5px;font-weight:600;
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11.5px;font-weight:500;
   letter-spacing:.13em;color:var(--gold);margin-bottom:20px}
 .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);opacity:.6}
 .band--paper .eyebrow,.band--surface .eyebrow{color:var(--green)}
 .band--paper .eyebrow::before,.band--surface .eyebrow::before{background:var(--green)}
 
-h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
+h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
 .h-display{font-size:clamp(34px,4.6vw,56px)}
 .h-section{font-size:clamp(28px,3.4vw,42px)}
 
@@ -80,7 +88,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
 
 /* ─────────────────────────── buttons ─────────────────────────── */
 .btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--sans);font-size:14.5px;
-  font-weight:600;padding:13px 26px;border-radius:9px;border:1.5px solid transparent;
+  font-weight:700;padding:13px 26px;border-radius:9px;border:1.5px solid transparent;
   cursor:pointer;white-space:nowrap;
   transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease}
 .btn:hover{transform:translateY(-2px)}
@@ -103,14 +111,18 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
   border-bottom:1px solid var(--line-navy);padding-inline:var(--gut)}
 .hdr .inner{display:flex;align-items:center;gap:clamp(16px,3vw,44px);height:74px}
 .logo{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:700;color:#fff;flex:none}
-.logo-mk{width:36px;height:36px;border-radius:10px;flex:none;
-  background:linear-gradient(140deg,var(--gold),#96741f);display:grid;place-items:center}
+/* A light plate under the mark. Both the header and the footer sit on navy,
+   and the mark's shield outline and plat tiles are navy themselves — without
+   this they read as holes rather than artwork. */
+.logo-mk{width:38px;height:38px;border-radius:10px;flex:none;
+  background:#fff;display:grid;place-items:center;padding:3px}
+.logo-mk img{width:100%;height:100%;object-fit:contain}
 .nav{display:flex;gap:clamp(14px,2vw,30px);font-size:14px;font-weight:500;color:#B3C6DB}
 .nav a{transition:color .16s}
 .nav a:hover{color:var(--gold)}
 .hdr-cta{margin-inline-start:auto;display:flex;align-items:center;gap:10px;flex:none}
 .lang{display:grid;place-items:center;width:36px;height:36px;border-radius:9px;
-  font-size:12.5px;font-weight:600;color:#B3C6DB;border:1px solid rgba(255,255,255,.16);
+  font-size:12.5px;font-weight:500;color:#B3C6DB;border:1px solid rgba(255,255,255,.16);
   transition:color .16s,border-color .16s}
 .lang:hover{color:var(--gold);border-color:var(--gold)}
 
@@ -148,7 +160,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
 .tier{background:var(--paper);border:1px solid var(--line);border-radius:16px;
   padding:30px 26px 34px;transition:transform .2s ease,box-shadow .2s ease}
 .tier:hover{transform:translateY(-4px);box-shadow:0 24px 50px -26px rgba(0,36,68,.3)}
-.tier-name{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.tier-name{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px}
 .tier-note{font-size:12.5px;color:var(--ink-3);min-height:34px;line-height:1.6}
 .tier-price{font-family:var(--num);font-size:38px;font-weight:600;letter-spacing:-.03em;
   color:var(--ink);margin:14px 0 4px;line-height:1}
@@ -169,10 +181,10 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
   font-size:11px;font-weight:700;padding:5px 13px;border-radius:99px;letter-spacing:.02em}
 
 /* ─────────────────────────── tooling strip ─────────────────────────── */
-.stack-label{text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.14em;
+.stack-label{text-align:center;font-size:11.5px;font-weight:500;letter-spacing:.14em;
   color:var(--ink-3);margin-bottom:30px}
 .stack{display:flex;justify-content:center;align-items:center;gap:clamp(26px,6vw,70px);flex-wrap:wrap}
-.stack div{display:flex;align-items:center;gap:11px;font-size:17px;font-weight:600;
+.stack div{display:flex;align-items:center;gap:11px;font-size:17px;font-weight:700;
   color:var(--ink-3);opacity:.72;transition:opacity .2s,color .2s}
 .stack div:hover{opacity:1;color:var(--ink)}
 .stack svg{width:26px;height:26px}
@@ -190,7 +202,7 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
 .who i{width:40px;height:40px;border-radius:11px;flex:none;display:grid;place-items:center;
   background:var(--surface-2);color:var(--navy)}
 .quote--hi .who i{background:rgba(230,195,100,.15);color:var(--gold)}
-.who b{display:block;font-size:13.5px;font-weight:600}
+.who b{display:block;font-size:13.5px;font-weight:700}
 .who span{font-size:11.5px;color:var(--ink-3)}
 .quote--hi .who span{color:#8FA6C0}
 
@@ -204,12 +216,12 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
 .store svg{width:22px;height:22px;flex:none}
 .store u{text-decoration:none;display:block;line-height:1.25}
 .store small{font-size:9.5px;color:#8FA6C0;display:block}
-.store b{font-size:13px;font-weight:600}
+.store b{font-size:13px;font-weight:700}
 
 /* ─────────────────────────── footer ─────────────────────────── */
 .foot{padding-block:clamp(52px,6vw,72px) 0}
 .foot-grid{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:clamp(26px,4vw,52px)}
-.foot-grid h2{font-size:13.5px;font-weight:600;color:#fff;margin-bottom:18px;letter-spacing:0}
+.foot-grid h2{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:0}
 .foot-grid a{display:block;font-size:13.5px;color:#96AAC2;padding:6px 0;transition:color .16s}
 .foot-grid a:hover{color:var(--gold)}
 .foot-about{font-size:13.5px;line-height:2;color:#96AAC2;font-weight:300;max-width:34ch;margin-top:18px}
@@ -223,7 +235,11 @@ h1,h2,h3{font-weight:700;letter-spacing:-.03em;line-height:1.22}
    anchor="end" label flips and runs off the right edge of its viewBox. The
    drawings are laid out in geometric coordinates, so pin them to LTR — Arabic
    runs inside still shape and order correctly through bidi. */
-.art{width:100%;height:auto;direction:ltr}
+/* The drawings inherit their type from here rather than carrying font-family
+   on each <text>, so changing the page's face changes the labels with it.
+   .n marks the figures that belong in tabular numerals. */
+.art{width:100%;height:auto;direction:ltr;font-family:var(--sans)}
+.art .n{font-family:var(--num);font-feature-settings:"tnum" 1}
 .pcl{fill:rgba(34,197,94,.14);stroke:#22C55E;stroke-width:2}
 .pcl-hi{fill:rgba(230,195,100,.26);stroke:var(--gold);stroke-width:2.8}
 .pcl-d{fill:rgba(0,108,78,.1);stroke:#046B4E;stroke-width:2}

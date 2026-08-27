@@ -2,14 +2,7 @@
     <div class="inner">
         <div class="foot-grid">
             <div>
-                <a class="logo" href="{{ url('/') }}">
-                    <span class="logo-mk">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#001527" aria-hidden="true" focusable="false">
-                            <path d="M12 2 3 8.4V22h6.2v-6.4h5.6V22H21V8.4z"/>
-                        </svg>
-                    </span>
-                    {{ __('nav.app_name') }}
-                </a>
+                <x-landing.logo />
                 <p class="foot-about">{{ __('landing.foot_about') }}</p>
             </div>
 

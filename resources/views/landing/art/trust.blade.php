@@ -26,9 +26,9 @@
         <rect x="0" y="0" width="156" height="50" rx="12" fill="#fff" stroke="#DCE3EE" stroke-width="2"/>
         <circle cx="28" cy="25" r="13" fill="rgba(4,107,78,.12)"/>
         <path d="M24.4 25.4 27 28l5-5.2" stroke="#046B4E" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-        <text x="140" y="22" fill="#0B1C30" font-family="IBM Plex Sans Arabic" font-size="11"
-              font-weight="600" text-anchor="end">تعديل معتمد</text>
-        <text x="140" y="38" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="9.5"
+        <text x="140" y="22" fill="#0B1C30" font-size="11"
+              font-weight="500" text-anchor="end">تعديل معتمد</text>
+        <text x="140" y="38" fill="#6B7A8C" font-size="9.5"
               text-anchor="end">مدير الأصول · قبل ٤ دقائق</text>
     </g>
 
@@ -36,9 +36,9 @@
         <rect x="0" y="0" width="156" height="50" rx="12" fill="#fff" stroke="#DCE3EE" stroke-width="2"/>
         <circle cx="28" cy="25" r="13" fill="rgba(196,154,60,.16)"/>
         <path d="M28 18v8M28 31v.6" stroke="#C49A3C" stroke-width="2.4" stroke-linecap="round"/>
-        <text x="140" y="22" fill="#0B1C30" font-family="IBM Plex Sans Arabic" font-size="11"
-              font-weight="600" text-anchor="end">طلب تعديل معلّق</text>
-        <text x="140" y="38" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="9.5"
+        <text x="140" y="22" fill="#0B1C30" font-size="11"
+              font-weight="500" text-anchor="end">طلب تعديل معلّق</text>
+        <text x="140" y="38" fill="#6B7A8C" font-size="9.5"
               text-anchor="end">بانتظار الاعتماد</text>
     </g>
 
@@ -47,9 +47,9 @@
         <circle cx="28" cy="25" r="13" fill="rgba(0,36,68,.09)"/>
         <path d="M28 17.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10M20 34c1.6-3 4.6-4.6 8-4.6s6.4 1.6 8 4.6"
               fill="none" stroke="#002444" stroke-width="2"/>
-        <text x="140" y="22" fill="#0B1C30" font-family="IBM Plex Sans Arabic" font-size="11"
-              font-weight="600" text-anchor="end">صلاحيات محدّدة</text>
-        <text x="140" y="38" fill="#6B7A8C" font-family="IBM Plex Sans Arabic" font-size="9.5"
+        <text x="140" y="22" fill="#0B1C30" font-size="11"
+              font-weight="500" text-anchor="end">صلاحيات محدّدة</text>
+        <text x="140" y="38" fill="#6B7A8C" font-size="9.5"
               text-anchor="end">٥ أدوار · ٢٤ صلاحية</text>
     </g>
 </svg>

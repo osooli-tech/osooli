@@ -12,7 +12,12 @@
     @include('landing.sections.app')
     @include('landing.sections.trust')
     @include('landing.sections.stack')
-    @include('landing.sections.testimonials')
+
+    {{-- Testimonials are held back until we have quotes from real customers to
+         run. The section, its component and its strings are all still in place:
+         uncomment this line and the "#clients" link in the header to restore it. --}}
+    {{-- @include('landing.sections.testimonials') --}}
+
     @include('landing.sections.cta')
 
 @endsection
