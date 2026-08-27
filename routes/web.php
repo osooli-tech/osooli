@@ -15,8 +15,9 @@ use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 // Locale switcher
 Route::get('/locale/{lang}', [LocaleController::class, 'switch'])->name('locale.switch');
 
-// Root → redirect to login
-Route::get('/', fn () => redirect()->route('login'));
+// Public landing page. Stays public even for a signed-in user — the header
+// swaps its call to action for a link back to the dashboard instead.
+Route::get('/', fn () => view('landing.index'))->name('landing');
 
 // Legal pages (public — also linked from the mobile app). Content is
 // CMS-managed and bilingual, so these need set.locale like every other page:
