@@ -48,6 +48,12 @@ class Sidebar extends Component
             'permission' => 'modification_requests.view',
         ],
         [
+            'route' => 'presentation-requests.index',
+            'label' => 'nav.presentation_requests',
+            'icon' => 'connect_without_contact',
+            'permission' => 'presentation_requests.view',
+        ],
+        [
             'route' => 'users.index',
             'label' => 'nav.users',
             'icon' => 'manage_accounts',

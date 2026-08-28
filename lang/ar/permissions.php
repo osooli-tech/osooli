@@ -20,6 +20,7 @@ return [
     'exports.create' => 'تصدير البيانات',
     'modification_requests.view' => 'مشاهدة طلبات التعديل',
     'modification_requests.manage' => 'إدارة طلبات التعديل',
+    'presentation_requests.view' => 'مشاهدة طلبات العروض التقديمية',
     'users.view' => 'مشاهدة المستخدمين',
     'users.create' => 'إضافة مستخدم',
     'users.edit' => 'تعديل مستخدم',

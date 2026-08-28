@@ -20,6 +20,7 @@ return [
     'exports.create' => 'Export Data',
     'modification_requests.view' => 'View Modification Requests',
     'modification_requests.manage' => 'Manage Modification Requests',
+    'presentation_requests.view' => 'View Demo Requests',
     'users.view' => 'View Users',
     'users.create' => 'Create User',
     'users.edit' => 'Edit User',

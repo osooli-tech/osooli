@@ -11,6 +11,7 @@ return [
     'survey_decisions' => 'Survey Decisions',
     'documents' => 'Documents',
     'modification_requests' => 'Modification Requests',
+    'presentation_requests' => 'Demo Requests',
     'users' => 'User Management',
     'roles' => 'Roles & Permissions',
     'audit_logs' => 'Audit Logs',

@@ -11,6 +11,7 @@ return [
     'documents' => 'المستندات',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
+    'presentation_requests' => 'طلبات العروض التقديمية',
     'users' => 'إدارة المستخدمين',
     'roles' => 'الأدوار والصلاحيات',
     'audit_logs' => 'سجل التدقيق',
