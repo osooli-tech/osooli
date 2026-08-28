@@ -3,47 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>@yield('title') — {{ __('nav.app_name') }}</title>
-    @vite(['resources/css/app.css'])
+    <meta name="robots" content="index, follow">
+
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+
+    {{-- These pages are reached from search and from inside the mobile app, so
+         they carry the public bundle and the site's own header and footer —
+         not the authenticated app's shell. --}}
+    @vite(['resources/css/landing.css', 'resources/js/landing.js'])
 </head>
-<body class="bg-surface min-h-screen">
-    <main class="max-w-3xl mx-auto px-6 py-12">
+<body>
 
-        {{-- These pages are reached directly from the app and from search, so
-             the language switch has to live here — there is no shell around
-             them carrying one. --}}
-        <div class="flex justify-end mb-2">
-            <a href="{{ route('locale.switch', app()->isLocale('ar') ? 'en' : 'ar') }}"
-               class="flex items-center gap-1.5 text-sm font-medium text-on-surface-variant
-                      hover:text-secondary transition-colors">
-                <span class="material-symbols-outlined text-[18px]">language</span>
-                {{ app()->isLocale('ar') ? 'EN' : 'ع' }}
-            </a>
-        </div>
+<a class="skip" href="#main">{{ __('landing.skip_to_content') }}</a>
 
-        <header class="mb-10 text-center">
-            <a href="{{ route('login') }}" class="inline-block mb-6">
-                <img src="{{ asset('images/logo.png') }}" alt="{{ __('nav.app_name') }}" class="h-16 mx-auto"
-                     onerror="this.style.display='none'">
-            </a>
-            <h1 class="text-3xl font-bold text-on-surface">@yield('title')</h1>
-            <p class="mt-2 text-sm text-on-surface-variant">
-                {{ __('legal.last_updated') }}: @yield('updated')
-            </p>
+@include('landing.sections.header')
+
+<main id="main" class="band band--surface legal">
+    <div class="legal-inner">
+
+        <header class="legal-head">
+            <h1>@yield('title')</h1>
+            @hasSection('updated')
+                <p class="legal-updated">
+                    {{ __('legal.last_updated') }}
+                    <span class="num">@yield('updated')</span>
+                </p>
+            @endif
         </header>
 
-        <article class="space-y-8 leading-relaxed text-on-surface">
+        <article class="legal-body">
             @yield('content')
         </article>
 
-        <footer class="mt-14 pt-6 border-t border-outline-variant text-center text-sm text-on-surface-variant">
-            <div class="flex items-center justify-center gap-3">
-                <a href="{{ route('privacy.policy') }}" class="hover:underline">{{ __('legal.privacy_link') }}</a>
-                <span>·</span>
-                <a href="{{ route('terms.of.use') }}" class="hover:underline">{{ __('legal.terms_link') }}</a>
-            </div>
-            <p class="mt-3">© {{ date('Y') }} {{ __('nav.app_name') }} — {{ __('legal.rights_reserved') }}</p>
-        </footer>
-    </main>
+        <nav class="legal-switch" aria-label="{{ __('landing.foot_company') }}">
+            <a href="{{ route('privacy.policy') }}"
+               @if (request()->routeIs('privacy.policy')) aria-current="page" @endif>
+                {{ __('legal.privacy_link') }}
+            </a>
+            <a href="{{ route('terms.of.use') }}"
+               @if (request()->routeIs('terms.of.use')) aria-current="page" @endif>
+                {{ __('legal.terms_link') }}
+            </a>
+        </nav>
+
+    </div>
+</main>
+
+@include('landing.sections.footer')
+
 </body>
 </html>

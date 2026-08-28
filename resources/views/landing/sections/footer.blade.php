@@ -8,19 +8,19 @@
 
             <div>
                 <h2>{{ __('landing.foot_platform') }}</h2>
-                <a href="#platform">{{ __('landing.parcels_eyebrow') }}</a>
-                <a href="#platform">{{ __('landing.deeds_eyebrow') }}</a>
-                <a href="#platform">{{ __('landing.decisions_eyebrow') }}</a>
+                <a href="{{ url("/") }}#platform">{{ __('landing.parcels_eyebrow') }}</a>
+                <a href="{{ url("/") }}#platform">{{ __('landing.deeds_eyebrow') }}</a>
+                <a href="{{ url("/") }}#platform">{{ __('landing.decisions_eyebrow') }}</a>
                 {{-- Restore alongside landing.sections.pricing. --}}
-                {{-- <a href="#pricing">{{ __('landing.nav_pricing') }}</a> --}}
+                {{-- <a href="{{ url("/") }}#pricing">{{ __('landing.nav_pricing') }}</a> --}}
             </div>
 
             <div>
                 <h2>{{ __('landing.foot_app') }}</h2>
-                <a href="#app">{{ __('landing.app_eyebrow') }}</a>
+                <a href="{{ url("/") }}#app">{{ __('landing.app_eyebrow') }}</a>
                 <a href="{{ config('landing.app_store_url') }}">App Store</a>
                 <a href="{{ config('landing.play_store_url') }}">Google Play</a>
-                <a href="#trust">{{ __('landing.nav_trust') }}</a>
+                <a href="{{ url("/") }}#trust">{{ __('landing.nav_trust') }}</a>
             </div>
 
             <div>

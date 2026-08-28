@@ -3,13 +3,13 @@
         <x-landing.logo />
 
         <nav class="nav">
-            <a href="#platform">{{ __('landing.nav_platform') }}</a>
-            <a href="#app">{{ __('landing.nav_app') }}</a>
+            <a href="{{ url("/") }}#platform">{{ __('landing.nav_platform') }}</a>
+            <a href="{{ url("/") }}#app">{{ __('landing.nav_app') }}</a>
             {{-- Restore alongside landing.sections.pricing. --}}
-            {{-- <a href="#pricing">{{ __('landing.nav_pricing') }}</a> --}}
-            <a href="#trust">{{ __('landing.nav_trust') }}</a>
+            {{-- <a href="{{ url("/") }}#pricing">{{ __('landing.nav_pricing') }}</a> --}}
+            <a href="{{ url("/") }}#trust">{{ __('landing.nav_trust') }}</a>
             {{-- Restore alongside landing.sections.testimonials. --}}
-            {{-- <a href="#clients">{{ __('landing.nav_clients') }}</a> --}}
+            {{-- <a href="{{ url("/") }}#clients">{{ __('landing.nav_clients') }}</a> --}}
         </nav>
 
         <div class="hdr-cta">
@@ -28,7 +28,7 @@
                 <a class="btn btn--sm btn--wire-l" href="{{ route('login') }}">
                     {{ __('landing.nav_login') }}
                 </a>
-                <a class="btn btn--sm btn--go" href="#contact">
+                <a class="btn btn--sm btn--go" href="{{ url("/") }}#contact">
                     {{ __('landing.nav_request_demo') }}
                 </a>
             @endauth
