@@ -18,6 +18,20 @@
         ['image' => 'app-assistant.webp',     'key' => 'assistant'],
         ['image' => 'app-account.webp',       'key' => 'account'],
     ];
+
+    /**
+     * Replacing a screenshot keeps its filename, and the host serves static
+     * files with a week of cache (`max-age=604800`). Without a version in the
+     * URL a visitor who has already loaded the page keeps the old shot for
+     * seven days, however many times the file is redeployed. Stamping the
+     * file's mtime onto the URL changes it the moment the file changes.
+     */
+    foreach ($slides as $i => $slide) {
+        $path = 'images/app/'.$slide['image'];
+        $file = public_path($path);
+        $slides[$i]['src'] = asset($path)
+            .'?v='.(is_file($file) ? filemtime($file) : '0');
+    }
 @endphp
 
 <section class="band band--navy-grad pad" id="app">
@@ -53,7 +67,7 @@
                             data-tour-slide
                             data-title="{{ __('landing.tour_'.$slide['key'].'_title') }}">
                         <div class="phone">
-                            <img src="{{ asset('images/app/'.$slide['image']) }}"
+                            <img src="{{ $slide['src'] }}"
                                  alt="{{ __('landing.tour_'.$slide['key'].'_alt') }}"
                                  width="575" height="1280" loading="lazy" decoding="async">
                         </div>
