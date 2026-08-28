@@ -4,15 +4,17 @@
      * touching markup, and so the count stays in one place — the rail, the
      * arrows and the live counter all read from it.
      *
-     * Each `image` is a real screenshot under public/images/app/.
+     * Each `image` is a real device screenshot under public/images/app/, stored as
+     * WebP: the sources are already JPEG, so PNG would faithfully re-encode the
+     * compression artefacts at seven times the weight.
      */
     $slides = [
-        ['image' => 'app-home.png',          'key' => 'home'],
-        ['image' => 'app-parcels.png',       'key' => 'parcels'],
-        ['image' => 'app-deeds.png',         'key' => 'deeds'],
-        ['image' => 'app-parcel-detail.png', 'key' => 'detail'],
-        ['image' => 'app-parcel-owners.png', 'key' => 'owners'],
-        ['image' => 'app-map.png',           'key' => 'map'],
+        ['image' => 'app-home.webp',          'key' => 'home'],
+        ['image' => 'app-parcels.webp',       'key' => 'parcels'],
+        ['image' => 'app-deeds.webp',         'key' => 'deeds'],
+        ['image' => 'app-parcel-detail.webp', 'key' => 'detail'],
+        ['image' => 'app-parcel-owners.webp', 'key' => 'owners'],
+        ['image' => 'app-map.webp',           'key' => 'map'],
     ];
 @endphp
 
@@ -51,7 +53,7 @@
                         <div class="phone">
                             <img src="{{ asset('images/app/'.$slide['image']) }}"
                                  alt="{{ __('landing.tour_'.$slide['key'].'_alt') }}"
-                                 width="1080" height="2340" loading="lazy" decoding="async">
+                                 width="576" height="1280" loading="lazy" decoding="async">
                         </div>
                     </figure>
                 @endforeach

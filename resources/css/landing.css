@@ -204,7 +204,10 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
   box-shadow:0 40px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(230,195,100,.08)}
 .tour-slide.is-current .phone{box-shadow:0 44px 90px -28px rgba(0,0,0,.85),
   0 0 0 1px rgba(230,195,100,.28)}
-.phone img{width:100%;height:auto;aspect-ratio:9/19.5;object-fit:cover;object-position:top center;
+/* 9/20 is the ratio the device screenshots actually come in (575x1280 and
+   610x1356 are both within 0.2% of it), so cover crops nothing — a taller
+   frame would slice the bottom off the tab bar. */
+.phone img{width:100%;height:auto;aspect-ratio:9/20;object-fit:cover;object-position:top center;
   border-radius:23px;background:#02243D;display:block}
 /* A screenshot that fails to load leaves the frame empty rather than a broken
    icon; landing.js sets this once an image errors. */

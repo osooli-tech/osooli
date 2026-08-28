@@ -1,20 +1,23 @@
 # Owner app screenshots
 
 The tour section on the landing page (`resources/views/landing/sections/app.blade.php`)
-reads these six files. Drop the real device screenshots in with exactly these names:
+reads these six files:
 
-| file                    | screen                                        |
-|-------------------------|-----------------------------------------------|
-| `app-home.png`          | الرئيسية — القيمة التقديرية ومؤشرات المحفظة   |
-| `app-parcels.png`       | العقارات — القائمة مع البحث والتصفية          |
-| `app-deeds.png`         | سجل الصكوك                                    |
-| `app-parcel-detail.png` | تفاصيل القطعة — الحدود والأبعاد               |
-| `app-parcel-owners.png` | القطعة — الملّاك والصكوك وطلب التعديل         |
-| `app-map.png`           | الخريطة — القطع وملخّص القطعة المختارة        |
+| file                     | screen                                        |
+|--------------------------|-----------------------------------------------|
+| `app-home.webp`          | الرئيسية — القيمة التقديرية ومؤشرات المحفظة   |
+| `app-parcels.webp`       | العقارات — القائمة مع البحث والتصفية          |
+| `app-deeds.webp`         | سجل الصكوك                                    |
+| `app-parcel-detail.webp` | تفاصيل القطعة 256 — الحدود والأبعاد           |
+| `app-parcel-owners.webp` | القطعة 262 — الملّاك والصكوك وطلب التعديل     |
+| `app-map.webp`           | الخريطة — القطعة 264 وأدوات القياس            |
 
-Portrait, ideally 1080×2340 or the same 9:19.5 ratio. They are rendered at
-about 250 CSS px wide, so anything above ~750 px wide is wasted bytes —
-compress before committing.
+Portrait, 9:20. They render at about 250 CSS px wide, so the native 575–610 px
+of a phone screenshot is already ample — do not upscale.
 
-Changing the order or adding a screen is a matter of editing the `$slides`
-array in the section, plus the matching `tour_*` strings in `lang/{ar,en}/landing.php`.
+WebP, quality 85. The sources are phone screenshots that have been through
+JPEG once already; PNG re-encodes those artefacts faithfully at roughly seven
+times the weight (1.9 MB for the set, against 212 kB here).
+
+Changing the order or adding a screen means editing the `$slides` array in the
+section, plus the matching `tour_*` strings in `lang/{ar,en}/landing.php`.
