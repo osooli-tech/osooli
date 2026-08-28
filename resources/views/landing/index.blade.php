@@ -14,7 +14,10 @@
     {{-- @include('landing.sections.pricing') --}}
     @include('landing.sections.app')
     @include('landing.sections.trust')
-    @include('landing.sections.stack')
+    {{-- The survey-tools strip ("works with the tools you already use") is
+         hidden for now. The section and its strings stay in place: uncomment
+         this line to restore it. --}}
+    {{-- @include('landing.sections.stack') --}}
 
     {{-- Testimonials are held back until we have quotes from real customers to
          run. The section, its component and its strings are all still in place:

@@ -9,12 +9,14 @@
      * compression artefacts at seven times the weight.
      */
     $slides = [
-        ['image' => 'app-home.webp',          'key' => 'home'],
-        ['image' => 'app-parcels.webp',       'key' => 'parcels'],
-        ['image' => 'app-deeds.webp',         'key' => 'deeds'],
-        ['image' => 'app-parcel-detail.webp', 'key' => 'detail'],
-        ['image' => 'app-parcel-owners.webp', 'key' => 'owners'],
         ['image' => 'app-map.webp',           'key' => 'map'],
+        ['image' => 'app-stats.webp',         'key' => 'stats'],
+        ['image' => 'app-charts.webp',        'key' => 'charts'],
+        ['image' => 'app-parcel-detail.webp', 'key' => 'detail'],
+        ['image' => 'app-parcel-survey.webp', 'key' => 'survey'],
+        ['image' => 'app-search.webp',        'key' => 'search'],
+        ['image' => 'app-assistant.webp',     'key' => 'assistant'],
+        ['image' => 'app-account.webp',       'key' => 'account'],
     ];
 @endphp
 
@@ -53,7 +55,7 @@
                         <div class="phone">
                             <img src="{{ asset('images/app/'.$slide['image']) }}"
                                  alt="{{ __('landing.tour_'.$slide['key'].'_alt') }}"
-                                 width="576" height="1280" loading="lazy" decoding="async">
+                                 width="575" height="1280" loading="lazy" decoding="async">
                         </div>
                     </figure>
                 @endforeach

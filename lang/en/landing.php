@@ -133,36 +133,48 @@ return [
     'tour_goto' => 'Go to :title',
     'tour_of' => ':current of :total',
 
-    'tour_home_title' => 'The whole portfolio on one screen',
-    'tour_home_text' => 'Estimated value of the assets, how many properties and how much land, '
-        .'which deeds are current and which have gone stale — worked out from the data itself, '
-        .'not from a sheet someone keeps up by hand.',
-    'tour_home_alt' => 'The app home screen showing estimated asset value and portfolio figures',
+    'tour_map_title' => 'Every asset on a single map',
+    'tour_map_text' => 'Parcels on the map by number. Tap one and its summary opens: area, plan, '
+        .'deed number and estimated value — with the deed download and the comparison on the '
+        .'same card.',
+    'tour_map_alt' => 'The owner map in the app with the summary card of the selected parcel',
 
-    'tour_parcels_title' => 'Every property, with its full file',
-    'tour_parcels_text' => 'Search by parcel, deed or plan number, and filter the list by deed '
-        .'status: current, stale, or no deed at all.',
-    'tour_parcels_alt' => 'The property list in the app with search and status filters',
+    'tour_stats_title' => 'The portfolio in figures, on one screen',
+    'tour_stats_text' => 'Estimated value of the assets and the average price per square metre, '
+        .'how many properties and how much land, which deeds are current and which have gone '
+        .'stale — worked out from the data itself, not from a sheet someone keeps by hand.',
+    'tour_stats_alt' => 'The statistics screen showing estimated asset value and portfolio cards',
 
-    'tour_deeds_title' => 'The complete deed register',
-    'tour_deeds_text' => 'Each deed with its number, issue date, area and type — open the scanned '
-        .'deed or jump to its parcel on the map in one tap.',
-    'tour_deeds_alt' => 'The deed register in the app, with cards and buttons to view deed or parcel',
+    'tour_charts_title' => 'Assets broken down by city and district',
+    'tour_charts_text' => 'Parcels distributed across cities, districts and regions, with four '
+        .'shortcuts to hand: properties, parcel comparison, requests and deeds.',
+    'tour_charts_alt' => 'Charts of parcels by city, district and region with the quick access row',
 
     'tour_detail_title' => 'The parcel, with its boundary and dimensions',
-    'tour_detail_text' => 'The boundary drawn on the map with edge lengths, and the full record: '
-        .'area, estimated value, plan number, geographic identifier and transaction type.',
-    'tour_detail_alt' => 'The parcel detail screen showing its boundary, dimensions and record',
+    'tour_detail_text' => 'The parcel drawn with the length of every edge, and the full record: '
+        .'area, estimated value and price per metre, plan number, geographic identifier, '
+        .'transaction type and how the boundary was fixed.',
+    'tour_detail_alt' => 'The parcel detail screen showing its shape, dimensions and record',
 
-    'tour_owners_title' => 'Owners and change requests',
-    'tour_owners_text' => 'The parcel’s owners and the deeds attached to it, and a button that '
-        .'files a change request — one that follows an approval path and lands in the audit trail.',
-    'tour_owners_alt' => 'The parcel screen showing owners, attached deeds and the change request button',
+    'tour_survey_title' => 'Boundaries, survey decision and documents',
+    'tour_survey_text' => 'All four boundaries with their lengths and neighbours, the survey '
+        .'decision with its source and date, and the deed attached as a PDF ready to download.',
+    'tour_survey_alt' => 'The parcel screen showing boundaries, survey decision and documents',
 
-    'tour_map_title' => 'Your assets on a single map',
-    'tour_map_text' => 'Every parcel on the map by number. Tap one for its summary, measure '
-        .'distances and areas, and download the deed from where it sits.',
-    'tour_map_alt' => 'The app map showing numbered parcels and a summary of the selected one',
+    'tour_search_title' => 'Search the way you know your land',
+    'tour_search_text' => 'Four ways to search your holdings: deed number, parcel number, plan, '
+        .'or owner name — and the result opens straight onto the parcel.',
+    'tour_search_alt' => 'The search screen with deed number, parcel number, plan and owner tabs',
+
+    'tour_assistant_title' => 'The smart property assistant — coming soon',
+    'tour_assistant_text' => 'Ask about any parcel in plain language, get an instant read on the '
+        .'portfolio, and be told which deeds need attention.',
+    'tour_assistant_alt' => 'The smart property assistant screen in the app, marked coming soon',
+
+    'tour_account_title' => 'The account and its settings',
+    'tour_account_text' => 'The owner profile with its figures, the switch between Arabic and '
+        .'English, and help, privacy policy and terms of use in one place.',
+    'tour_account_alt' => 'The account screen showing the owner profile, figures and app settings',
 
     // ── Trust ───────────────────────────────────────────────────
     'trust_eyebrow' => 'Security and governance',
