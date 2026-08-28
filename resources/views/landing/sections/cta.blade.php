@@ -65,7 +65,8 @@
             <p class="modal-status" data-demo-status role="status" aria-live="polite"></p>
 
             <button type="submit" class="btn btn--gold btn--lg" data-demo-submit>
-                {{ __('landing.request_form_submit') }}
+                <span class="btn-label">{{ __('landing.request_form_submit') }}</span>
+                <x-landing.btn-states />
             </button>
         </form>
     </div>

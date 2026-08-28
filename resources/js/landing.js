@@ -94,6 +94,43 @@
 }());
 
 /**
+ * Button busy states.
+ *
+ * A button carrying <span class="btn-label"> plus the faces from the
+ * x-landing.btn-states component can be put into a busy, done or failed state
+ * from here. The stylesheet owns the motion; this only flips attributes, so a
+ * request in flight costs no main-thread work.
+ */
+const buttonState = {
+    busy(el) {
+        if (! el) return;
+        el.disabled = true;
+        el.setAttribute('aria-busy', 'true');
+        el.removeAttribute('data-state');
+        el.setAttribute('data-busy', '');
+    },
+
+    /** @param {'done'|'fail'} outcome */
+    settle(el, outcome) {
+        if (! el) return;
+        el.removeAttribute('data-busy');
+        el.removeAttribute('aria-busy');
+        el.setAttribute('data-state', outcome);
+        // A failure needs the button back so the visitor can try again; a
+        // success leaves it held, because the dialog is about to close.
+        if (outcome === 'fail') el.disabled = false;
+    },
+
+    reset(el) {
+        if (! el) return;
+        el.disabled = false;
+        el.removeAttribute('aria-busy');
+        el.removeAttribute('data-busy');
+        el.removeAttribute('data-state');
+    },
+};
+
+/**
  * Demo request modal: open/close chrome plus the fetch() submit.
  *
  * Plain JS on purpose — this page loads its own light bundle with no
@@ -121,6 +158,7 @@
         form.reset();
         status.textContent = '';
         status.removeAttribute('data-state');
+        buttonState.reset(submitBtn);
         form.querySelectorAll('[data-touched]').forEach((el) => el.removeAttribute('data-touched'));
     };
 
@@ -144,7 +182,7 @@
         }
 
         const data = new FormData(form);
-        submitBtn.disabled = true;
+        buttonState.busy(submitBtn);
         status.removeAttribute('data-state');
         status.textContent = form.dataset.sending || '';
 
@@ -161,6 +199,7 @@
             if (response.status === 201) {
                 status.dataset.state = 'success';
                 status.textContent = form.dataset.success || '';
+                buttonState.settle(submitBtn, 'done');
                 form.reset();
                 window.setTimeout(close, 1800);
                 return;
@@ -171,6 +210,7 @@
                 const firstError = Object.values(body.errors || {})[0]?.[0];
                 status.dataset.state = 'error';
                 status.textContent = firstError || form.dataset.error || '';
+                buttonState.settle(submitBtn, 'fail');
                 return;
             }
 
@@ -178,8 +218,7 @@
         } catch (err) {
             status.dataset.state = 'error';
             status.textContent = form.dataset.error || '';
-        } finally {
-            submitBtn.disabled = false;
+            buttonState.settle(submitBtn, 'fail');
         }
     });
 }());
