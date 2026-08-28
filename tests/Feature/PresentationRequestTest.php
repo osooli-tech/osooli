@@ -105,4 +105,14 @@ class PresentationRequestTest extends TestCase
 
         $this->assertNull(PresentationRequest::first()->read_at);
     }
+
+    public function test_the_landing_page_renders_the_demo_request_modal(): void
+    {
+        $this->withoutVite();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-open-demo-modal', false)
+            ->assertSee('data-demo-form', false);
+    }
 }

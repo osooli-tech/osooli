@@ -217,6 +217,20 @@ return [
     'cta_button' => 'Book a demo',
     'store_from' => 'Download on',
 
+    // ── Demo request modal ──────────────────────────────────────
+    'request_form_title' => 'Book a demo',
+    'request_form_lede' => 'Leave your details and we will reach out to schedule it.',
+    'request_form_name' => 'Name',
+    'request_form_phone' => 'Phone number',
+    'request_form_phone_placeholder' => '05xxxxxxxx',
+    'request_form_message' => 'Message',
+    'request_form_optional' => 'optional',
+    'request_form_submit' => 'Send request',
+    'request_form_close' => 'Close',
+    'request_form_sending' => 'Sending...',
+    'request_form_success' => 'Your request was received — we will be in touch soon.',
+    'request_form_error' => 'Could not send the request. Check the details and try again.',
+
     // ── Footer ──────────────────────────────────────────────────
     'foot_about' => 'Spatial data for real estate — we turn your deeds and plans into one map '
         .'that decisions get made on.',

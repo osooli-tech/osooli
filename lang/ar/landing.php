@@ -208,6 +208,20 @@ return [
     'cta_button' => 'اطلب عرضاً تقديمياً',
     'store_from' => 'حمّله من',
 
+    // ── Demo request modal ──────────────────────────────────────
+    'request_form_title' => 'اطلب عرضاً تقديمياً',
+    'request_form_lede' => 'اترك بياناتك وسنتواصل معك لترتيب موعد العرض.',
+    'request_form_name' => 'الاسم',
+    'request_form_phone' => 'رقم الجوال',
+    'request_form_phone_placeholder' => '05xxxxxxxx',
+    'request_form_message' => 'رسالة',
+    'request_form_optional' => 'اختياري',
+    'request_form_submit' => 'إرسال الطلب',
+    'request_form_close' => 'إغلاق',
+    'request_form_sending' => 'جارٍ الإرسال...',
+    'request_form_success' => 'تم استلام طلبك، سنتواصل معك قريباً.',
+    'request_form_error' => 'تعذّر إرسال الطلب. تحقق من البيانات وحاول مرة أخرى.',
+
     // ── Footer ──────────────────────────────────────────────────
     'foot_about' => 'منصة البيانات المكانية العقارية — نحوّل صكوكك ومخططاتك إلى خريطة واحدة '
         .'تُتخذ عليها القرارات.',

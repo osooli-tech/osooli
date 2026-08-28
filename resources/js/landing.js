@@ -94,6 +94,97 @@
 }());
 
 /**
+ * Demo request modal: open/close chrome plus the fetch() submit.
+ *
+ * Plain JS on purpose — this page loads its own light bundle with no
+ * Livewire or Alpine, so the "#contact" CTA button drives a hand-rolled
+ * dialog instead of a framework component.
+ */
+(function () {
+    const modal = document.querySelector('[data-demo-modal]');
+    if (! modal) return;
+
+    const openers = document.querySelectorAll('[data-open-demo-modal]');
+    const closers = modal.querySelectorAll('[data-demo-close]');
+    const form = modal.querySelector('[data-demo-form]');
+    const status = modal.querySelector('[data-demo-status]');
+    const submitBtn = modal.querySelector('[data-demo-submit]');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    const open = () => {
+        modal.hidden = false;
+        modal.querySelector('input[name="name"]')?.focus();
+    };
+
+    const close = () => {
+        modal.hidden = true;
+        form.reset();
+        status.textContent = '';
+        status.removeAttribute('data-state');
+        form.querySelectorAll('[data-touched]').forEach((el) => el.removeAttribute('data-touched'));
+    };
+
+    openers.forEach((btn) => btn.addEventListener('click', open));
+    closers.forEach((btn) => btn.addEventListener('click', close));
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && ! modal.hidden) close();
+    });
+
+    form.addEventListener('blur', (e) => {
+        if (e.target instanceof HTMLElement) e.target.setAttribute('data-touched', '');
+    }, true);
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (! form.checkValidity()) {
+            form.querySelectorAll('input, textarea').forEach((el) => el.setAttribute('data-touched', ''));
+            return;
+        }
+
+        const data = new FormData(form);
+        submitBtn.disabled = true;
+        status.removeAttribute('data-state');
+        status.textContent = form.dataset.sending || '';
+
+        try {
+            const response = await fetch(form.action || '/presentation-requests', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || '',
+                },
+                body: data,
+            });
+
+            if (response.status === 201) {
+                status.dataset.state = 'success';
+                status.textContent = form.dataset.success || '';
+                form.reset();
+                window.setTimeout(close, 1800);
+                return;
+            }
+
+            if (response.status === 422) {
+                const body = await response.json();
+                const firstError = Object.values(body.errors || {})[0]?.[0];
+                status.dataset.state = 'error';
+                status.textContent = firstError || form.dataset.error || '';
+                return;
+            }
+
+            throw new Error('unexpected status ' + response.status);
+        } catch (err) {
+            status.dataset.state = 'error';
+            status.textContent = form.dataset.error || '';
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+}());
+
+/**
  * Landing page behaviour: reveal sections as they scroll into view.
  *
  * The reveal is opt-in from the stylesheet's side — `.rv` only starts hidden
