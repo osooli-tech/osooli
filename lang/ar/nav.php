@@ -12,6 +12,8 @@ return [
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
     'presentation_requests' => 'طلبات العروض التقديمية',
+    'notifications' => 'الإشعارات',
+    'notifications_empty' => 'لا توجد إشعارات جديدة',
     'users' => 'إدارة المستخدمين',
     'roles' => 'الأدوار والصلاحيات',
     'audit_logs' => 'سجل التدقيق',

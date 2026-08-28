@@ -12,6 +12,8 @@ return [
     'documents' => 'Documents',
     'modification_requests' => 'Modification Requests',
     'presentation_requests' => 'Demo Requests',
+    'notifications' => 'Notifications',
+    'notifications_empty' => 'No new notifications',
     'users' => 'User Management',
     'roles' => 'Roles & Permissions',
     'audit_logs' => 'Audit Logs',
