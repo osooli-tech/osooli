@@ -8,7 +8,10 @@
     @include('landing.sections.features-light')
     @include('landing.sections.decisions')
     @include('landing.sections.compare')
-    @include('landing.sections.pricing')
+    {{-- Pricing is hidden for now. The section, its tier component and its
+         strings are all still in place: uncomment this line and the two
+         "#pricing" links in the header and the footer to restore it. --}}
+    {{-- @include('landing.sections.pricing') --}}
     @include('landing.sections.app')
     @include('landing.sections.trust')
     @include('landing.sections.stack')

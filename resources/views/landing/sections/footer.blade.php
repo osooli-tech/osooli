@@ -11,7 +11,8 @@
                 <a href="#platform">{{ __('landing.parcels_eyebrow') }}</a>
                 <a href="#platform">{{ __('landing.deeds_eyebrow') }}</a>
                 <a href="#platform">{{ __('landing.decisions_eyebrow') }}</a>
-                <a href="#pricing">{{ __('landing.nav_pricing') }}</a>
+                {{-- Restore alongside landing.sections.pricing. --}}
+                {{-- <a href="#pricing">{{ __('landing.nav_pricing') }}</a> --}}
             </div>
 
             <div>

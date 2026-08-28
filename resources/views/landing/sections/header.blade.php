@@ -5,7 +5,8 @@
         <nav class="nav">
             <a href="#platform">{{ __('landing.nav_platform') }}</a>
             <a href="#app">{{ __('landing.nav_app') }}</a>
-            <a href="#pricing">{{ __('landing.nav_pricing') }}</a>
+            {{-- Restore alongside landing.sections.pricing. --}}
+            {{-- <a href="#pricing">{{ __('landing.nav_pricing') }}</a> --}}
             <a href="#trust">{{ __('landing.nav_trust') }}</a>
             {{-- Restore alongside landing.sections.testimonials. --}}
             {{-- <a href="#clients">{{ __('landing.nav_clients') }}</a> --}}
