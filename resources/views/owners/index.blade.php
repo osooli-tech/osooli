@@ -69,8 +69,6 @@
 
 @push('scripts')
 {{-- mapbox-gl from CDN — same approach as the dashboard to avoid Vite WebWorker bundling issues --}}
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script>
 function ownersMap() {
     return {
@@ -93,8 +91,13 @@ function ownersMap() {
                 .catch((err) => console.error('[Sakuki] GeoJSON load failed:', err));
 
             const token = @js(config('services.mapbox.token'));
-            if (! token || ! window.mapboxgl) return;
+            if (! token || ! window.loadMapbox) return;
 
+            window.loadMapbox().then((mapboxgl) => this.initMap(mapboxgl, token))
+                .catch(() => console.warn('[Sakuki] mapbox-gl failed to load; the map is unavailable but the page is not.'));
+        },
+
+        initMap(mapboxgl, token) {
             mapboxgl.accessToken = token;
             this.map = new mapboxgl.Map({
                 container: 'owners-map',

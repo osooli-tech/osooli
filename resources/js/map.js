@@ -1,16 +1,19 @@
-// mapbox-gl is loaded via CDN in dashboard.blade.php to avoid Vite WebWorker bundling issues.
-// window.mapboxgl is available before this script runs.
+// mapbox-gl comes from the CDN — Vite cannot bundle its WebWorker. The tag is
+// deferred and may fail outright on a network that cannot reach api.mapbox.com,
+// so nothing here may assume window.mapboxgl exists.
 
 const container = document.getElementById('sakuki-map');
 if (! container) {
     // Not on a page that has the map.
 } else {
-    const mapboxgl = window.mapboxgl;
     const token = container.dataset.token ?? '';
 
     if (! token) {
         console.warn('[Sakuki] MAPBOX_TOKEN is not set. Add it to .env to enable the map.');
+    } else if (! window.loadMapbox) {
+        console.warn('[Sakuki] mapbox loader not available.');
     } else {
+        window.loadMapbox().then((mapboxgl) => {
         mapboxgl.accessToken = token;
 
         const map = new mapboxgl.Map({
@@ -314,5 +317,8 @@ if (! container) {
                 }));
             });
         }
+        }).catch(() => {
+            console.warn('[Sakuki] mapbox-gl failed to load; the map is unavailable but the page is not.');
+        });
     }
 }

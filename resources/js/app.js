@@ -38,3 +38,36 @@ window.confirmDeleteRole = function (roleId, roleName, confirmText, cancelText, 
         }
     });
 };
+
+// ── Mapbox loader ──────────────────────────────────────────────────────────
+// mapbox-gl comes from the CDN, not the Vite bundle, because it cannot be
+// bundled with the app's WebWorker setup. Loaded via JS rather than a <script>
+// tag: a static tag — even deferred — blocks DOMContentLoaded until it
+// resolves, and on a network that cannot reach api.mapbox.com that is a
+// multi-second stall on every single page before Alpine or Livewire can start.
+// This way the rest of the page runs immediately; only the map itself waits.
+let mapboxLoading = null;
+
+window.loadMapbox = function loadMapbox() {
+    if (window.mapboxgl) {
+        return Promise.resolve(window.mapboxgl);
+    }
+    if (mapboxLoading) {
+        return mapboxLoading;
+    }
+
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+    document.head.appendChild(css);
+
+    mapboxLoading = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
+        script.onload = () => resolve(window.mapboxgl);
+        script.onerror = () => reject(new Error('mapbox-gl failed to load'));
+        document.head.appendChild(script);
+    });
+
+    return mapboxLoading;
+};

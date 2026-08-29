@@ -2,16 +2,20 @@
      parcel page and the digital twin so the map behaves identically on both.
      Loaded from the CDN rather than Vite, which cannot bundle its WebWorker. --}}
 {{-- Load mapbox-gl from CDN — same approach as dashboard.blade.php to avoid Vite WebWorker bundling issues --}}
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <script>
 function parcelMiniMap(geojson, neighboursJson, parcelNo) {
     return {
         init() {
-            if (!geojson || !window.mapboxgl) return;
+            if (!geojson || !window.loadMapbox) return;
             const token = '{{ config('services.mapbox.token') }}';
             if (!token) return;
 
+            window.loadMapbox()
+                .then((mapboxgl) => this.initMap(mapboxgl, token))
+                .catch(() => console.warn('[Sakuki] mapbox-gl failed to load; the map is unavailable but the page is not.'));
+        },
+
+        initMap(mapboxgl, token) {
             mapboxgl.accessToken = token;
             const isDark = document.documentElement.classList.contains('dark');
             const map = new mapboxgl.Map({
