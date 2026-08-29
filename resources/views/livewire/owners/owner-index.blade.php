@@ -193,6 +193,12 @@
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    {{-- Owner-defined portfolios: splitting this owner's own holdings into
+                                         named groups, distinct from the dashboard's city-based portfolios. --}}
+                                    <div class="mt-5 pt-4 border-t border-outline-variant dark:border-white/10">
+                                        <livewire:owners.portfolio-manager :owner-id="$owner->id" :key="'portfolio-'.$owner->id" />
+                                    </div>
                                 </td>
                             </tr>
                         @endif

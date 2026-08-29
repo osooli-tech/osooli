@@ -22,4 +22,13 @@ return [
     'map_all_parcels' => 'جميع القطع على الخريطة',
     'map_parcels_of' => 'قطع',
     'map_show_all' => 'عرض الكل',
+    'portfolios' => 'المحافظ',
+    'portfolio' => 'المحفظة',
+    'portfolio_name' => 'اسم المحفظة',
+    'add_portfolio' => 'إضافة',
+    'no_portfolios' => 'لا توجد محافظ بعد لهذا المالك.',
+    'confirm_delete_portfolio' => 'حذف هذه المحفظة؟ القطع المرتبطة بها تصبح بلا محفظة، ولا تُحذف.',
+    'portfolio_parcels_unit' => 'قطعة',
+    'assign_parcels' => 'توزيع القطع على المحافظ',
+    'unassigned' => 'بلا محفظة',
 ];

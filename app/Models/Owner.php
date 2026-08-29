@@ -65,6 +65,12 @@ class Owner extends Authenticatable
             ->withTimestamps();
     }
 
+    /** @return HasMany<OwnerPortfolio, $this> */
+    public function portfolios(): HasMany
+    {
+        return $this->hasMany(OwnerPortfolio::class);
+    }
+
     /** @return HasMany<DeedOwner, $this> */
     public function deedOwners(): HasMany
     {
