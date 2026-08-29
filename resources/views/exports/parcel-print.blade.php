@@ -196,6 +196,45 @@
 
     </div>
 
+    {{-- Map: a static image rather than the live Mapbox map, which cannot run
+         inside dompdf. Rasterised server-side (see ParcelMapSvgService) rather
+         than embedded as raw <svg>: dompdf's own inline-SVG support silently
+         drops shapes and text, rendering only the QR code's single-path SVG
+         correctly. One page of its own, since it needs the full width. --}}
+    @if ($mapImage)
+        <div class="body" style="page-break-before: always;">
+            <div class="section">
+                <h2>@ar(__('parcels.map_section'))</h2>
+                <div style="text-align: center;">
+                    <img src="{{ $mapImage }}" style="max-width: 100%;">
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Documents: each stored file is a PDF, so its first page is rasterised
+         server-side (see ParcelDocumentRenderService) rather than embedded as
+         a PDF-within-a-PDF, which dompdf cannot do. --}}
+    @if ($documents->isNotEmpty())
+        <div class="body" style="page-break-before: always;">
+            <div class="section">
+                <h2>@ar(__('parcels.documents_page_title'))</h2>
+                @foreach ($documents as $doc)
+                    <div style="margin-bottom: 18px; {{ ! $loop->first ? 'page-break-before: always;' : '' }}">
+                        <p style="font-size: 11px; font-weight: bold; color: #002444; margin-bottom: 6px;">
+                            @ar($doc['photo']->photo_type?->value ?? '—')
+                        </p>
+                        @if ($doc['preview'])
+                            <img src="{{ $doc['preview'] }}" style="max-width: 100%; border: 1px solid #ddd;">
+                        @else
+                            <p style="color: #888; font-size: 10px;">@ar(__('parcels.document_not_rendered'))</p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     <div class="footer">
         @ar(__('parcels.print_footer_note'))
     </div>

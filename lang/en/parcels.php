@@ -129,4 +129,10 @@ return [
     'print_report_title' => 'Parcel Data Report',
     'print_generated_at' => 'Generated on',
     'print_footer_note' => 'This report is generated automatically by the Sukooki platform and does not replace official documents. Scan the QR code to reach the parcel\'s full digital file.',
+    'map_section' => 'Location among neighbouring parcels',
+    'map_unit_metres' => 'm',
+    'map_legend_target' => 'This parcel',
+    'map_legend_neighbours' => 'Neighbouring parcels',
+    'documents_page_title' => 'Attached documents',
+    'document_not_rendered' => 'This document could not be rendered — see the original file in the platform.',
 ];

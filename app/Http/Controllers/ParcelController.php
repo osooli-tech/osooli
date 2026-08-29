@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
 use App\Services\Parcel\DigitalTwinService;
+use App\Services\Parcel\ParcelDocumentRenderService;
+use App\Services\Parcel\ParcelMapSvgService;
 use App\Services\Parcel\ParcelQrCodeService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
@@ -79,14 +81,28 @@ class ParcelController extends Controller
 
     /** A branded, printable one-page report for the parcel, with a QR code
      *  linking back to its digital twin so a printed copy stays traceable. */
-    public function print(Parcel $parcel, DigitalTwinService $twin): Response
-    {
-        $qrSvg = app(ParcelQrCodeService::class)->svgFor($parcel);
+    public function print(
+        Parcel $parcel,
+        DigitalTwinService $twin,
+        ParcelMapSvgService $mapSvg,
+        ParcelDocumentRenderService $documentRender
+    ): Response {
+        $parcel->loadMissing('photos');
+
+        // Only PDFs can be rasterised into a page image; anything else (there
+        // is none today, but the model does not guarantee it) is listed
+        // without a preview rather than silently dropped.
+        $documents = $parcel->photos->map(fn (ParcelPhoto $photo) => [
+            'photo' => $photo,
+            'preview' => $documentRender->firstPageDataUri($photo),
+        ]);
 
         return Pdf::loadView('exports.parcel-print', [
             'parcel' => $parcel,
             'twin' => $twin->for($parcel),
-            'qrSvg' => $qrSvg,
+            'qrSvg' => app(ParcelQrCodeService::class)->svgFor($parcel),
+            'mapImage' => $mapSvg->render($parcel),
+            'documents' => $documents,
         ])->setPaper('a4', 'portrait')
             ->download("parcel-{$parcel->parcel_no}.pdf");
     }
