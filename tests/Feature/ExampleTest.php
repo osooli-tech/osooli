@@ -8,8 +8,13 @@ use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    public function test_root_redirects_to_login(): void
+    public function test_root_serves_the_public_landing_page(): void
     {
-        $this->get('/')->assertRedirect(route('login'));
+        // Renders the real landing layout, which pulls its assets through
+        // Vite; the manifest exists locally but not in CI, so this stubs it
+        // rather than depending on a build having run.
+        $this->withoutVite();
+
+        $this->get('/')->assertOk();
     }
 }

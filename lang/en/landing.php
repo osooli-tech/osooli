@@ -171,7 +171,6 @@ return [
         .'portfolio, and be told which deeds need attention.',
     'tour_assistant_alt' => 'The smart property assistant screen in the app, marked coming soon',
 
-
     // ── Trust ───────────────────────────────────────────────────
     'trust_eyebrow' => 'Security and governance',
     'trust_title' => 'Your data stays',

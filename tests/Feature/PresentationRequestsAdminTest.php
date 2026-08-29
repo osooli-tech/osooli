@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Livewire\PresentationRequests\RequestIndex;
 use App\Models\PresentationRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,7 +39,7 @@ class PresentationRequestsAdminTest extends TestCase
         $newer = PresentationRequest::create(['name' => 'جديد', 'phone' => '0587654321']);
 
         Livewire::actingAs($this->admin())
-            ->test(\App\Livewire\PresentationRequests\RequestIndex::class)
+            ->test(RequestIndex::class)
             ->assertSeeInOrder(['جديد', 'قديم']);
     }
 
@@ -48,7 +49,7 @@ class PresentationRequestsAdminTest extends TestCase
         $this->assertNull($request->read_at);
 
         Livewire::actingAs($this->admin())
-            ->test(\App\Livewire\PresentationRequests\RequestIndex::class);
+            ->test(RequestIndex::class);
 
         $this->assertNotNull($request->fresh()->read_at);
     }

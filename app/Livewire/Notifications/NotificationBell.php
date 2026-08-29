@@ -8,6 +8,7 @@ use App\Enums\ModificationRequestStatus;
 use App\Models\ModificationRequest;
 use App\Models\PresentationRequest;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -18,13 +19,13 @@ class NotificationBell extends Component
 
     public function mount(): void
     {
-        $this->lastKnownCount = $this->count;
+        $this->lastKnownCount = $this->count();
     }
 
     /** Called on every wire:poll tick from the layout. */
     public function poll(): void
     {
-        $current = $this->count;
+        $current = $this->count();
 
         if ($current > $this->lastKnownCount) {
             $this->dispatch('play-notification-sound');
@@ -43,7 +44,7 @@ class NotificationBell extends Component
     /**
      * The most recent unread items from both sources, newest first.
      *
-     * @return list<array{type: string, title: string, subtitle: string, url: string, created_at: \Illuminate\Support\Carbon}>
+     * @return list<array{type: string, title: string, subtitle: string, url: string, created_at: Carbon}>
      */
     #[Computed]
     public function items(): array
@@ -67,7 +68,7 @@ class NotificationBell extends Component
             ->get()
             ->map(fn (ModificationRequest $r) => [
                 'type' => 'modification_request',
-                'title' => $r->parcel?->parcel_no ?? '—',
+                'title' => $r->parcel->parcel_no,
                 'subtitle' => $r->fieldLabel(),
                 'url' => route('modification-requests.index'),
                 'created_at' => $r->created_at,
