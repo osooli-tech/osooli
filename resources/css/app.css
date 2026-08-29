@@ -5,6 +5,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Alpine only removes x-cloak once it has initialised. Without this rule the
+ * elements it marks — dropdown panels, collapsed menus, inactive tabs — render
+ * expanded on first paint and then vanish, which reads as the page loading
+ * broken and rearranging itself.
+ */
+[x-cloak] {
+    display: none !important;
+}
+
 @layer components {
     .auth-bg {
         background:
