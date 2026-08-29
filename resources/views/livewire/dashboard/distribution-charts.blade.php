@@ -69,35 +69,6 @@
             @endif
         </div>
 
-        {{-- 3 · Land transaction --}}
-        <div class="{{ $cardCls }}">
-            <h3 class="{{ $titleCls }}">{{ __('dashboard.distribution_by_land_transaction') }}</h3>
-            @if (array_sum($byLandTransaction) === 0)
-                <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
-            @else
-                <div wire:ignore
-                     x-data="{
-                         c: null,
-                         init() {
-                             this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: @js(array_values($byLandTransaction)),
-                                 labels: @js(array_keys($byLandTransaction)),
-                                 colors: ['#006c4e','#c9a84c','#002444','#abc9f2'],
-                                 theme: { mode: {{ $isDark }} },
-                                 legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
-                                 dataLabels: { enabled: false },
-                                 plotOptions: { pie: { donut: { size: '60%' } } },
-                                 stroke: { width: 2 },
-                             });
-                             this.c.render();
-                         }
-                     }">
-                    <div x-ref="el"></div>
-                </div>
-            @endif
-        </div>
-
     </div>{{-- /row-1 --}}
 
     {{-- Row 2: 2 bar charts ────────────────────────────────────── --}}
@@ -164,10 +135,10 @@
     {{-- Row 3: linked/not-linked + engineering offices ────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        {{-- 6 · Linked vs not-linked to survey decision --}}
+        {{-- 6 · By the authority that issued the survey decision --}}
         <div class="{{ $cardCls }}">
-            <h3 class="{{ $titleCls }}">{{ __('dashboard.distribution_linked_decision') }}</h3>
-            @if ($linkedToDecision === 0 && $notLinkedToDecision === 0)
+            <h3 class="{{ $titleCls }}">{{ __('dashboard.distribution_by_qrar_source') }}</h3>
+            @if (array_sum($byQrarSource) === 0)
                 <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
             @else
                 <div wire:ignore
@@ -176,9 +147,9 @@
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
                                  chart: { type: 'donut', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: [{{ $linkedToDecision }}, {{ $notLinkedToDecision }}],
-                                 labels: ['{{ __('dashboard.linked') }}', '{{ __('dashboard.not_linked') }}'],
-                                 colors: ['#006c4e', '#b3261e'],
+                                 series: @js(array_values($byQrarSource)),
+                                 labels: @js(array_keys($byQrarSource)),
+                                 colors: ['#006c4e', '#c9a84c', '#8a8f98'],
                                  theme: { mode: {{ $isDark }} },
                                  legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
                                  dataLabels: { enabled: true, style: { fontSize: '12px' } },

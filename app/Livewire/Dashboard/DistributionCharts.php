@@ -6,7 +6,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Enums\AssetType;
 use App\Enums\DeedStatus;
-use App\Enums\LandTransaction;
+use App\Enums\QrarSource;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -25,15 +25,11 @@ class DistributionCharts extends Component
     /** @var array<string, int> parcels per district (top 10) */
     public array $byDistrict = [];
 
-    /** @var array<string, int> land_transaction distribution */
-    public array $byLandTransaction = [];
-
     /** @var array<string, int> parcels per engineering office */
     public array $byEngineeringOffice = [];
 
-    public int $linkedToDecision = 0;
-
-    public int $notLinkedToDecision = 0;
+    /** @var array<string, int> */
+    public array $byQrarSource = [];
 
     public function mount(): void
     {
@@ -90,20 +86,6 @@ class DistributionCharts extends Component
             ->map(fn ($v) => (int) $v)
             ->toArray();
 
-        // 5 — Land transaction (ensure all enum labels appear)
-        $txDefaults = array_fill_keys(
-            array_map(fn (LandTransaction $e) => $e->value, LandTransaction::cases()),
-            0
-        );
-        $txFromDb = DB::table('parcels')
-            ->selectRaw('land_transaction, COUNT(*) as cnt')
-            ->whereNotNull('land_transaction')
-            ->groupBy('land_transaction')
-            ->pluck('cnt', 'land_transaction')
-            ->map(fn ($v) => (int) $v)
-            ->toArray();
-        $this->byLandTransaction = array_merge($txDefaults, $txFromDb);
-
         // 6 — By engineering office (parcel_boundaries → engineering_offices)
         $this->byEngineeringOffice = DB::table('parcel_boundaries')
             ->join('engineering_offices', 'parcel_boundaries.engineering_office_id', '=', 'engineering_offices.id')
@@ -115,11 +97,19 @@ class DistributionCharts extends Component
             ->map(fn ($v) => (int) $v)
             ->toArray();
 
-        // 7 — Linked vs not linked to a survey decision
-        $total = DB::table('parcels')->count();
-        $linked = DB::table('survey_decisions')->distinct('parcel_id')->count('parcel_id');
-        $this->linkedToDecision = (int) $linked;
-        $this->notLinkedToDecision = max(0, (int) $total - (int) $linked);
+        // 7 — By the authority that issued the survey decision
+        $sourceDefaults = array_fill_keys(
+            array_map(fn (QrarSource $e) => $e->value, QrarSource::cases()),
+            0
+        );
+        $sourceFromDb = DB::table('survey_decisions')
+            ->selectRaw('qrar_source::text AS src, COUNT(*) as cnt')
+            ->whereNotNull('qrar_source')
+            ->groupBy('qrar_source')
+            ->pluck('cnt', 'src')
+            ->map(fn ($v) => (int) $v)
+            ->toArray();
+        $this->byQrarSource = array_merge($sourceDefaults, $sourceFromDb);
     }
 
     public function render(): View

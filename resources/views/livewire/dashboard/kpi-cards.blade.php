@@ -1,5 +1,6 @@
-{{-- Thirteen compact tiles: five per row on a wide screen keeps them to three rows. --}}
-<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+{{-- Thirteen compact tiles. The map now leads the page, so these read as a
+     secondary strip rather than the headline. --}}
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
 
     <x-stat-card
         :label="__('dashboard.total_parcels')"
