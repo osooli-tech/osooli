@@ -2,34 +2,43 @@
      secondary strip rather than the headline. --}}
 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
 
+    @if ($this->shows('total_parcels'))
     <x-stat-card
         :label="__('dashboard.total_parcels')"
         :value="number_format($totalParcels)"
         icon="terrain"
         color="primary"
     />
+    @endif
 
+    @if ($this->shows('total_deeds'))
     <x-stat-card
         :label="__('dashboard.total_deeds')"
         :value="number_format($totalDeeds)"
         icon="description"
         color="secondary"
     />
+    @endif
 
+    @if ($this->shows('total_area'))
     <x-stat-card
         :label="__('dashboard.total_area')"
         :value="$totalArea"
         icon="straighten"
         color="tertiary"
     />
+    @endif
 
+    @if ($this->shows('avg_area'))
     <x-stat-card
         :label="__('dashboard.avg_area')"
         :value="$avgArea"
         icon="calculate"
         color="primary"
     />
+    @endif
 
+    @if ($this->shows('max_min_area'))
     <x-stat-card
         :label="__('dashboard.max_min_area')"
         :value="$maxArea"
@@ -37,21 +46,27 @@
         color="secondary"
         :subtext="__('dashboard.min_area_label').': '.$minArea"
     />
+    @endif
 
+    @if ($this->shows('total_plans'))
     <x-stat-card
         :label="__('dashboard.total_plans')"
         :value="number_format($totalPlans)"
         icon="grid_view"
         color="tertiary"
     />
+    @endif
 
+    @if ($this->shows('total_owners'))
     <x-stat-card
         :label="__('dashboard.total_owners')"
         :value="number_format($totalOwners)"
         icon="group"
         color="primary"
     />
+    @endif
 
+    @if ($this->shows('multi_owner_deeds'))
     <x-stat-card
         :label="__('dashboard.multi_owner_deeds')"
         :value="number_format($multiOwnerDeeds)"
@@ -59,7 +74,9 @@
         color="secondary"
         :subtext="$multiOwnerDeeds > 0 ? __('dashboard.needs_action') : null"
     />
+    @endif
 
+    @if ($this->shows('pending_requests'))
     <x-stat-card
         :label="__('dashboard.pending_requests')"
         :value="number_format($pendingRequests)"
@@ -67,7 +84,9 @@
         color="error"
         :subtext="$pendingRequests > 0 ? __('dashboard.needs_action') : __('dashboard.all_clear')"
     />
+    @endif
 
+    @if ($this->shows('top_owner'))
     <x-stat-card
         :label="__('dashboard.top_owner')"
         :value="$topOwnerName"
@@ -75,14 +94,18 @@
         color="tertiary"
         :subtext="$topOwnerDeedCount > 0 ? number_format($topOwnerDeedCount).' '.__('dashboard.deeds') : null"
     />
+    @endif
 
+    @if ($this->shows('updated_deeds'))
     <x-stat-card
         :label="__('dashboard.updated_deeds')"
         :value="number_format($updatedDeeds)"
         icon="verified"
         color="secondary"
     />
+    @endif
 
+    @if ($this->shows('non_updated_deeds'))
     <x-stat-card
         :label="__('dashboard.non_updated_deeds')"
         :value="number_format($nonUpdatedDeeds)"
@@ -90,7 +113,9 @@
         color="error"
         :subtext="$nonUpdatedDeeds > 0 ? __('dashboard.needs_action') : null"
     />
+    @endif
 
+    @if ($this->shows('active_alerts'))
     <x-stat-card
         :label="__('dashboard.active_alerts')"
         :value="number_format($activeAlerts)"
@@ -98,5 +123,6 @@
         color="error"
         :subtext="$activeAlerts > 0 ? __('dashboard.needs_action') : __('dashboard.all_clear')"
     />
+    @endif
 
 </div>

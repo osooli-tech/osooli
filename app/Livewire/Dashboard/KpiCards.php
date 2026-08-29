@@ -14,6 +14,28 @@ use Livewire\Component;
 
 class KpiCards extends Component
 {
+    /**
+     * Which tiles to render. Empty shows every tile.
+     *
+     * The page mounts this twice: a short headline strip above the map, and
+     * the remainder below it, so the map is not pushed under a wall of numbers.
+     *
+     * @var list<string>
+     */
+    public array $only = [];
+
+    /** @var list<string> */
+    public array $except = [];
+
+    public function shows(string $key): bool
+    {
+        if ($this->only !== []) {
+            return in_array($key, $this->only, true);
+        }
+
+        return ! in_array($key, $this->except, true);
+    }
+
     public int $totalParcels = 0;
 
     public int $totalDeeds = 0;

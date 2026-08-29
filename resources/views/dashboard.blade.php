@@ -6,6 +6,9 @@
 @section('content')
 <div class="space-y-8">
 
+    {{-- The four figures that answer "what do we hold", ahead of the map. --}}
+    <livewire:dashboard.kpi-cards :only="['total_parcels', 'total_deeds', 'total_area', 'total_owners']" />
+
     {{-- Map + parcel detail panel (map ≈70%, panel ≈30%) --}}
     <div class="grid grid-cols-1 xl:grid-cols-10 gap-5"
          x-data="{
@@ -338,7 +341,7 @@
             </span>
             {{ __('dashboard.section_kpi') }}
         </h2>
-        <livewire:dashboard.kpi-cards />
+        <livewire:dashboard.kpi-cards :except="['total_parcels', 'total_deeds', 'total_area', 'total_owners']" />
     </section>
 
     {{-- Section 2: distribution charts --}}
