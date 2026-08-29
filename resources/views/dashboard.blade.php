@@ -6,19 +6,6 @@
 @section('content')
 <div class="space-y-8">
 
-    {{-- Section 1: KPI cards --}}
-    <section>
-        <h2 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest
-                   text-on-surface-variant dark:text-on-primary-container mb-4">
-            <span class="material-symbols-outlined text-[16px] text-secondary"
-                  style="font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;">
-                bar_chart_4_bars
-            </span>
-            {{ __('dashboard.section_kpi') }}
-        </h2>
-        <livewire:dashboard.kpi-cards />
-    </section>
-
     {{-- Map + parcel detail panel (map ≈70%, panel ≈30%) --}}
     <div class="grid grid-cols-1 xl:grid-cols-10 gap-5"
          x-data="{
@@ -341,6 +328,19 @@
 
     </div>
 
+    {{-- Section 1: KPI cards --}}
+    <section>
+        <h2 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest
+                   text-on-surface-variant dark:text-on-primary-container mb-4">
+            <span class="material-symbols-outlined text-[16px] text-secondary"
+                  style="font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;">
+                bar_chart_4_bars
+            </span>
+            {{ __('dashboard.section_kpi') }}
+        </h2>
+        <livewire:dashboard.kpi-cards />
+    </section>
+
     {{-- Section 2: distribution charts --}}
     <section>
         <h2 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest
@@ -352,6 +352,19 @@
             {{ __('dashboard.section_charts') }}
         </h2>
         <livewire:dashboard.distribution-charts />
+    </section>
+
+    {{-- Portfolios by city --}}
+    <section>
+        <h2 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest
+                   text-on-surface-variant dark:text-on-primary-container mb-4">
+            <span class="material-symbols-outlined text-[16px] text-secondary"
+                  style="font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;">
+                account_balance_wallet
+            </span>
+            {{ __('dashboard.section_portfolios') }}
+        </h2>
+        <livewire:dashboard.city-portfolios />
     </section>
 
     {{-- Section 3: operational widgets --}}

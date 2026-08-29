@@ -36,13 +36,9 @@ return [
     // ── Section 2: charts ───────────────────────────────────────
     'distribution_by_deed_status' => 'حالة الصكوك',
     'distribution_by_type' => 'نوع العقار',
-    'distribution_by_land_transaction' => 'نوع التعامل',
     'distribution_by_city' => 'التوزيع حسب المدينة',
     'distribution_by_district' => 'التوزيع حسب الحي',
-    'distribution_linked_decision' => 'الارتباط بقرار مساحي',
     'distribution_by_office' => 'المكاتب الهندسية',
-    'linked' => 'مرتبطة',
-    'not_linked' => 'غير مرتبطة',
     'no_data' => 'لا توجد بيانات',
 
     // ── Section 3: operational ──────────────────────────────────
@@ -89,4 +85,12 @@ return [
     'visible_layers' => 'الطبقات الظاهرة',
     'layer_parcels' => 'تعبئة القطع',
     'layer_outlines' => 'حدود القطع',
+    'section_portfolios' => 'المحافظ',
+    'portfolio_parcels' => 'عدد القطع',
+    'portfolio_area' => 'المساحة الإجمالية',
+    'portfolio_value' => 'القيمة التقديرية',
+    'portfolio_priced_of' => ':priced من :total قطعة مسعّرة',
+    'portfolio_chart_title' => 'توزيع القطع على المحافظ',
+    'area_unit_km' => 'كم²',
+    'distribution_by_qrar_source' => 'جهة إصدار القرار المساحي',
 ];

@@ -36,13 +36,9 @@ return [
     // ── Section 2: charts ───────────────────────────────────────
     'distribution_by_deed_status' => 'Deed Status',
     'distribution_by_type' => 'Asset Type',
-    'distribution_by_land_transaction' => 'Land Transaction',
     'distribution_by_city' => 'Distribution by City',
     'distribution_by_district' => 'Distribution by District',
-    'distribution_linked_decision' => 'Linked to Survey Decision',
     'distribution_by_office' => 'Engineering Offices',
-    'linked' => 'Linked',
-    'not_linked' => 'Not Linked',
     'no_data' => 'No data available',
 
     // ── Section 3: operational ──────────────────────────────────
@@ -89,4 +85,12 @@ return [
     'visible_layers' => 'Visible layers',
     'layer_parcels' => 'Parcel fill',
     'layer_outlines' => 'Parcel outlines',
+    'section_portfolios' => 'Portfolios',
+    'portfolio_parcels' => 'Parcels',
+    'portfolio_area' => 'Total area',
+    'portfolio_value' => 'Estimated value',
+    'portfolio_priced_of' => ':priced of :total parcels priced',
+    'portfolio_chart_title' => 'Parcels across portfolios',
+    'area_unit_km' => 'km²',
+    'distribution_by_qrar_source' => 'Survey decision authority',
 ];
