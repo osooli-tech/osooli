@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', __('auth.login_title')) — صكوكي</title>
+    <title>@yield('title', __('auth.login_title')) — {{ __('nav.app_name') }}</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     {{-- Anti-FOUC: apply dark class before first paint --}}
     <script>
         (function () {

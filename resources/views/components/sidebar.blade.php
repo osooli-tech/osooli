@@ -2,11 +2,12 @@
               transition-transform duration-300 ease-in-out"
        :class="sidebarOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'">
 
-    {{-- Logo — sidebar is always navy so we always use the dark-background version --}}
-    <div class="flex items-center px-4 h-16 border-b border-white/10 shrink-0">
-        <img src="{{ asset('images/logo2.jpeg') }}"
+    {{-- Logo — sidebar is always navy so the transparent-background mark is used directly --}}
+    <div class="flex items-center gap-2 px-4 h-16 border-b border-white/10 shrink-0">
+        <img src="{{ asset('images/logo-icon-sm.png') }}"
              alt="{{ __('nav.app_name') }}"
              class="h-10 w-auto object-contain">
+        <span class="text-white font-bold text-lg">{{ __('nav.app_name') }}</span>
     </div>
 
     {{-- Navigation --}}

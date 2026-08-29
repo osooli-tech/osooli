@@ -30,12 +30,6 @@ class Sidebar extends Component
             'permission' => 'parcels.view',
         ],
         [
-            'route' => 'survey-decisions.index',
-            'label' => 'nav.survey_decisions',
-            'icon' => 'fact_check',
-            'permission' => 'parcels.view',
-        ],
-        [
             'route' => 'documents.index',
             'label' => 'nav.documents',
             'icon' => 'folder_open',

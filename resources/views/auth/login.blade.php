@@ -74,9 +74,8 @@
 @endsection
 
 @section('brand-panel')
-    <img src="{{ asset('images/logo2.jpeg') }}" alt="صكوكي"
-         class="rounded-2xl shadow-2xl"
-         style="height:auto;width:320px;display:block;">
+    <img src="{{ asset('images/logo-full.png') }}" alt="{{ __('nav.app_name') }}"
+         style="height:auto;width:280px;display:block;">
     <p class="text-primary-fixed-dim text-lg max-w-xs leading-relaxed mt-6">
         {{ __('auth.brand_tagline') }}
     </p>
