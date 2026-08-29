@@ -16,7 +16,6 @@
         ['image' => 'app-parcel-survey.webp', 'key' => 'survey'],
         ['image' => 'app-search.webp',        'key' => 'search'],
         ['image' => 'app-assistant.webp',     'key' => 'assistant'],
-        ['image' => 'app-account.webp',       'key' => 'account'],
     ];
 
     /**

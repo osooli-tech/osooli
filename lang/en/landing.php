@@ -171,10 +171,6 @@ return [
         .'portfolio, and be told which deeds need attention.',
     'tour_assistant_alt' => 'The smart property assistant screen in the app, marked coming soon',
 
-    'tour_account_title' => 'The account and its settings',
-    'tour_account_text' => 'The owner profile with its figures, the switch between Arabic and '
-        .'English, and help, privacy policy and terms of use in one place.',
-    'tour_account_alt' => 'The account screen showing the owner profile, figures and app settings',
 
     // ── Trust ───────────────────────────────────────────────────
     'trust_eyebrow' => 'Security and governance',
