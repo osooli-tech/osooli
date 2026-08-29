@@ -7,8 +7,11 @@ namespace App\Http\Controllers;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
 use App\Services\Parcel\DigitalTwinService;
+use App\Services\Parcel\ParcelQrCodeService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class ParcelController extends Controller
@@ -72,6 +75,20 @@ class ParcelController extends Controller
             'parcelGeojson' => $geoRow?->geom_json,
             'centroid' => $geoRow?->lat === null ? null : ['lat' => (float) $geoRow->lat, 'lng' => (float) $geoRow->lng],
         ]);
+    }
+
+    /** A branded, printable one-page report for the parcel, with a QR code
+     *  linking back to its digital twin so a printed copy stays traceable. */
+    public function print(Parcel $parcel, DigitalTwinService $twin): Response
+    {
+        $qrSvg = app(ParcelQrCodeService::class)->svgFor($parcel);
+
+        return Pdf::loadView('exports.parcel-print', [
+            'parcel' => $parcel,
+            'twin' => $twin->for($parcel),
+            'qrSvg' => $qrSvg,
+        ])->setPaper('a4', 'portrait')
+            ->download("parcel-{$parcel->parcel_no}.pdf");
     }
 
     public function documents(Parcel $parcel): JsonResponse

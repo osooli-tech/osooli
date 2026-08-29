@@ -23,6 +23,14 @@
         {{ __('parcels.twin_open') }}
     </a>
 
+    <a href="{{ route('parcels.print', $parcel) }}"
+       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+              border border-outline-variant dark:border-white/10
+              text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+        <span class="material-symbols-outlined text-[18px]">print</span>
+        {{ __('parcels.print_report') }}
+    </a>
+
     <div class="flex items-center gap-2 flex-wrap">
         @if ($parcel->asset_type)
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

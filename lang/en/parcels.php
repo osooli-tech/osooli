@@ -125,4 +125,8 @@ return [
     'survey_section' => 'Survey decision',
     'price' => 'Price per m²',
     'city' => 'City',
+    'print_report' => 'Print report',
+    'print_report_title' => 'Parcel Data Report',
+    'print_generated_at' => 'Generated on',
+    'print_footer_note' => 'This report is generated automatically by the Sukooki platform and does not replace official documents. Scan the QR code to reach the parcel\'s full digital file.',
 ];
