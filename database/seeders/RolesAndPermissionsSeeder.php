@@ -20,6 +20,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'exports.create',
         'modification_requests.view',
         'modification_requests.manage',
+        'presentation_requests.view',
         'users.view',
         'users.create',
         'users.edit',

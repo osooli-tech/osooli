@@ -68,18 +68,31 @@ export default {
 
             // ── Typography ───────────────────────────────────────────────
             fontFamily: {
-                'arabic':       ['IBM Plex Sans Arabic', 'sans-serif'],
+                'arabic':       ['Tajawal', 'IBM Plex Sans', 'sans-serif'],
                 'data-tabular': ['IBM Plex Sans', 'sans-serif'],
+            },
+
+            // Tajawal steps 400 → 500 → 700; there is no 600. Left alone the
+            // browser rounds `font-semibold` up to 700, and the dashboard uses
+            // it 155 times — almost all on text-xs and text-[10px] labels,
+            // badges and table headings, where 700 turns Arabic into a smudge.
+            // Pointing the utility at 500 keeps those readable and leaves
+            // `font-bold` as the only heavy step, so the hierarchy survives.
+            fontWeight: {
+                'semibold': '500',
             },
 
             fontSize: {
                 'display-lg':  ['36px', { lineHeight: '44px', fontWeight: '700' }],
-                'headline-lg': ['28px', { lineHeight: '36px', fontWeight: '600' }],
-                'headline-md': ['22px', { lineHeight: '30px', fontWeight: '600' }],
+                // 700 rather than 600 here: at 28px and 22px a heading wants the
+                // weight, and Tajawal has nothing between 500 and 700.
+                'headline-lg': ['28px', { lineHeight: '36px', fontWeight: '700' }],
+                'headline-md': ['22px', { lineHeight: '30px', fontWeight: '700' }],
                 'body-lg':     ['18px', { lineHeight: '28px', fontWeight: '400' }],
                 'body-md':     ['16px', { lineHeight: '24px', fontWeight: '400' }],
                 'body-sm':     ['14px', { lineHeight: '20px', fontWeight: '400' }],
-                'label-md':    ['14px', { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '600' }],
+                // A 14px tracked-out label reads better at 500 than at 700.
+                'label-md':    ['14px', { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '500' }],
             },
 
             // ── Spacing ──────────────────────────────────────────────────

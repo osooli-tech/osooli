@@ -9,14 +9,20 @@ use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
+use App\Http\Controllers\PresentationRequestController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 // Locale switcher
 Route::get('/locale/{lang}', [LocaleController::class, 'switch'])->name('locale.switch');
 
-// Root → redirect to login
-Route::get('/', fn () => redirect()->route('login'));
+// Public landing page. Stays public even for a signed-in user — the header
+// swaps its call to action for a link back to the dashboard instead.
+Route::get('/', fn () => view('landing.index'))->name('landing');
+
+// Demo request form, submitted from the landing page CTA modal.
+Route::post('/presentation-requests', [PresentationRequestController::class, 'store'])
+    ->name('presentation-requests.store');
 
 // Legal pages (public — also linked from the mobile app). Content is
 // CMS-managed and bilingual, so these need set.locale like every other page:
@@ -66,6 +72,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/modification-requests', fn () => view('modification-requests.index'))
         ->middleware('can:modification_requests.view')
         ->name('modification-requests.index');
+
+    // Presentation (demo) Requests
+    Route::get('/presentation-requests', fn () => view('presentation-requests.index'))
+        ->middleware('can:presentation_requests.view')
+        ->name('presentation-requests.index');
 
     // Users
     Route::get('/users', fn () => view('users.index'))->name('users.index');

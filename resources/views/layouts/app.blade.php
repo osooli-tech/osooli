@@ -110,11 +110,7 @@
                 {{ app()->isLocale('ar') ? 'EN' : 'ع' }}
             </a>
 
-            <button class="relative w-9 h-9 flex items-center justify-center rounded-xl
-                           text-on-surface-variant dark:text-on-primary-container
-                           hover:bg-surface-container dark:hover:bg-white/10 transition-colors">
-                <span class="material-symbols-outlined text-[20px]">notifications</span>
-            </button>
+            <livewire:notifications.notification-bell />
 
         </div>
 

@@ -21,6 +21,14 @@ window.addEventListener('toast', (e) => {
     });
 });
 
+// ── Notification sound (dispatched from NotificationBell when unread count rises) ─
+window.addEventListener('play-notification-sound', () => {
+    new Audio('/sounds/notification.wav').play().catch(() => {
+        // Autoplay can be blocked before the visitor's first interaction with
+        // the page — missing the chime once is harmless, so this is silent.
+    });
+});
+
 // ── SweetAlert2 delete confirmation — called from Blade via onclick ───────────
 window.confirmDeleteRole = function (roleId, roleName, confirmText, cancelText, titleText) {
     Swal.fire({
