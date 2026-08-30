@@ -62,7 +62,13 @@
                               style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
                             {{ $service['icon'] }}
                         </span>
-                        <span>{{ __($service['label']) }}</span>
+                        <span class="flex-1">{{ __($service['label']) }}</span>
+                        @if ($service['soon'])
+                            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full
+                                         bg-tertiary-container/40 text-tertiary-container shrink-0">
+                                {{ __('nav.services_coming_soon_badge') }}
+                            </span>
+                        @endif
                     </span>
                 @endforeach
             </div>
