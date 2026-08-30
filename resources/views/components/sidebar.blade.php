@@ -52,24 +52,46 @@
             {{-- Plain x-show: x-collapse measures the panel at init, and this one
                  starts hidden, so it would pin the height at zero. --}}
             <div x-show="servicesOpen" x-cloak class="ps-3 mt-0.5 space-y-0.5">
-                <p class="px-3 py-1 text-[11px] text-primary-fixed-dim/70">{{ __('nav.services_soon') }}</p>
-
                 @foreach ($serviceItems as $service)
-                    <span aria-disabled="true"
-                          class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
-                                 text-primary-fixed-dim/60 cursor-default">
-                        <span class="material-symbols-outlined text-[19px] shrink-0"
-                              style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
-                            {{ $service['icon'] }}
-                        </span>
-                        <span class="flex-1">{{ __($service['label']) }}</span>
-                        @if ($service['soon'])
+                    @php
+                        $serviceHref = $service['route'] ? route($service['route']) : null;
+                        $serviceIsActive = $serviceHref && request()->routeIs($service['route']);
+                    @endphp
+
+                    @if ($serviceHref)
+                        <a href="{{ $serviceHref }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-150
+                                  {{ $serviceIsActive
+                                      ? 'bg-white/15 text-white'
+                                      : 'text-primary-fixed-dim hover:bg-white/8 hover:text-white' }}"
+                           {{ $serviceIsActive ? 'aria-current=page' : '' }}>
+                            <span class="material-symbols-outlined text-[19px] shrink-0"
+                                  style="font-variation-settings: 'FILL' {{ $serviceIsActive ? 1 : 0 }}, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
+                                {{ $service['icon'] }}
+                            </span>
+                            <span class="flex-1">{{ __($service['label']) }}</span>
+                            @if ($service['soon'])
+                                <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full
+                                             bg-tertiary-container/40 text-tertiary-container shrink-0">
+                                    {{ __('nav.services_coming_soon_badge') }}
+                                </span>
+                            @endif
+                        </a>
+                    @else
+                        <span aria-disabled="true"
+                              class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm
+                                     text-primary-fixed-dim/60 cursor-default">
+                            <span class="material-symbols-outlined text-[19px] shrink-0"
+                                  style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
+                                {{ $service['icon'] }}
+                            </span>
+                            <span class="flex-1">{{ __($service['label']) }}</span>
                             <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full
                                          bg-tertiary-container/40 text-tertiary-container shrink-0">
                                 {{ __('nav.services_coming_soon_badge') }}
                             </span>
-                        @endif
-                    </span>
+                        </span>
+                    @endif
                 @endforeach
             </div>
         </div>

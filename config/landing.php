@@ -17,6 +17,14 @@ return [
 
     'contact_email' => env('LANDING_CONTACT_EMAIL', 'sales@sakuki.sa'),
 
+    /*
+    | Null until the client supplies a real number — the services pages hide
+    | the phone/WhatsApp contact card rather than show a placeholder as if it
+    | were live, the way the design mockups show a number.
+    */
+    'contact_phone' => env('LANDING_CONTACT_PHONE'),
+    'contact_whatsapp' => env('LANDING_CONTACT_WHATSAPP'),
+
     'app_store_url' => env('LANDING_APP_STORE_URL', '#'),
     'play_store_url' => env('LANDING_PLAY_STORE_URL', '#'),
 

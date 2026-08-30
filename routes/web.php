@@ -10,6 +10,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
 use App\Http\Controllers\PresentationRequestController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
@@ -78,6 +79,18 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/presentation-requests', fn () => view('presentation-requests.index'))
         ->middleware('can:presentation_requests.view')
         ->name('presentation-requests.index');
+
+    // Service catalogue — informational pages, open to any signed-in user.
+    Route::get('/services/survey-request', [ServiceController::class, 'surveyRequest'])
+        ->name('services.survey-request');
+    Route::get('/services/engineering-design', [ServiceController::class, 'engineeringDesign'])
+        ->name('services.engineering-design');
+    Route::get('/services/solar-energy', [ServiceController::class, 'solarEnergy'])
+        ->name('services.solar-energy');
+    Route::get('/services/valuation', [ServiceController::class, 'valuation'])
+        ->name('services.valuation');
+    Route::get('/services/investment', [ServiceController::class, 'investment'])
+        ->name('services.investment');
 
     // Users
     Route::get('/users', fn () => view('users.index'))->name('users.index');

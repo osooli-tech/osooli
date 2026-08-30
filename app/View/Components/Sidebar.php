@@ -74,21 +74,21 @@ class Sidebar extends Component
     ];
 
     /**
-     * The engineering and property services the platform is planned to cover.
+     * The engineering and property services the platform covers.
      *
-     * Listed but not linked: none of them has a screen or a data source yet.
-     * They are here so the shape of the finished product is visible — showing
-     * them as inert rather than as links that go nowhere is the honest form.
+     * Items with a `route` link to a real content page. `route` is null only
+     * for services that have no page yet ("خدمات البلدية") — shown inert
+     * rather than as a link that goes nowhere.
      *
-     * @var array<int, array{label: string, icon: string}>
+     * @var array<int, array{label: string, icon: string, route: string|null, soon: bool}>
      */
     public array $serviceItems = [
-        ['label' => 'nav.services_survey_request', 'icon' => 'straighten', 'soon' => false],
-        ['label' => 'nav.services_engineering_design', 'icon' => 'architecture', 'soon' => false],
-        ['label' => 'nav.services_solar_energy', 'icon' => 'solar_power', 'soon' => false],
-        ['label' => 'nav.services_valuation', 'icon' => 'assessment', 'soon' => true],
-        ['label' => 'nav.services_investment', 'icon' => 'trending_up', 'soon' => true],
-        ['label' => 'nav.services_municipal', 'icon' => 'apartment', 'soon' => false],
+        ['label' => 'nav.services_survey_request', 'icon' => 'straighten', 'route' => 'services.survey-request', 'soon' => false],
+        ['label' => 'nav.services_engineering_design', 'icon' => 'architecture', 'route' => 'services.engineering-design', 'soon' => false],
+        ['label' => 'nav.services_solar_energy', 'icon' => 'solar_power', 'route' => 'services.solar-energy', 'soon' => false],
+        ['label' => 'nav.services_valuation', 'icon' => 'assessment', 'route' => 'services.valuation', 'soon' => true],
+        ['label' => 'nav.services_investment', 'icon' => 'trending_up', 'route' => 'services.investment', 'soon' => true],
+        ['label' => 'nav.services_municipal', 'icon' => 'apartment', 'route' => null, 'soon' => false],
     ];
 
     public function render(): View
