@@ -146,4 +146,55 @@ return [
     'notify_subject' => 'أرغب بالتنبيه عند إطلاق خدمة: :service',
     'notify_button' => 'أعلمني عند الإطلاق',
 
+    // ── Municipal services ──────────────────────────────────────
+    'municipal_title' => 'خدمات البلدية',
+    'municipal_subtitle' => 'جميع الخدمات البلدية الإلكترونية في مكان واحد.',
+
+    'municipal_badge_time_saving' => 'توفير الوقت والجهد',
+    'municipal_badge_tracking' => 'متابعة الطلبات لحظة بلحظة',
+    'municipal_badge_secure_payment' => 'دفع الرسوم إلكترونياً بأمان',
+    'municipal_badge_notifications' => 'إشعارات فورية بحالة الطلب',
+
+    'municipal_building_permits_title' => 'رخص البناء',
+    'municipal_building_permits_description' => 'إصدار رخص البناء الجديدة وتعديل وإضافة الأدوار.',
+
+    'municipal_shop_licenses_title' => 'رخص المحلات',
+    'municipal_shop_licenses_description' => 'إصدار وتجديد رخص المحلات التجارية والصناعية.',
+
+    'municipal_certificates_title' => 'إصدار الشهادات',
+    'municipal_certificates_description' => 'إصدار الشهادات البلدية المختلفة.',
+
+    'municipal_amend_license_title' => 'تعديل رخصة',
+    'municipal_amend_license_description' => 'تعديل وتحديث بيانات الرخص البلدية.',
+
+    'municipal_demolition_title' => 'هدم وإزالة',
+    'municipal_demolition_description' => 'إصدار رخص الهدم والإزالة للمباني والمنشآت.',
+
+    'municipal_utilities_title' => 'توصيل الخدمات',
+    'municipal_utilities_description' => 'طلب توصيل خدمات المياه والكهرباء والصرف الصحي.',
+
+    'municipal_billboards_title' => 'اللوحات الإعلانية',
+    'municipal_billboards_description' => 'إصدار وتصريح اللوحات الإعلانية.',
+
+    'municipal_commercial_activity_title' => 'الأنشطة التجارية',
+    'municipal_commercial_activity_description' => 'إصدار رخص الأنشطة التجارية المختلفة.',
+
+    'municipal_fencing_title' => 'تسوير الأراضي',
+    'municipal_fencing_description' => 'إصدار رخص تسوير الأراضي والفضاء.',
+
+    'municipal_other_title' => 'خدمات أخرى',
+    'municipal_other_description' => 'خدمات بلدية أخرى متنوعة.',
+
+    'municipal_about_heading' => 'نبذة عن الخدمة',
+    'municipal_about_body' => 'نوفر لك جميع الخدمات البلدية الإلكترونية لتسهيل الإجراءات وتوفير الوقت والجهد.',
+
+    'municipal_features_heading' => 'مميزات الخدمة',
+    'municipal_feature_available' => 'تقديم الطلبات إلكترونياً على مدار الساعة',
+    'municipal_feature_tracking' => 'متابعة حالة الطلب لحظة بلحظة',
+    'municipal_feature_payment' => 'دفع الرسوم إلكترونياً',
+    'municipal_feature_notifications' => 'إشعارات فورية بحالة الطلب',
+
+    'municipal_cta_button' => 'طلب خدمة بلدية',
+    'municipal_cta_subject' => 'طلب خدمة بلدية: :service',
+
 ];

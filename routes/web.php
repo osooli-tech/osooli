@@ -7,6 +7,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\OwnerExportController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
 use App\Http\Controllers\PresentationRequestController;
@@ -60,6 +61,10 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // Owners
     Route::get('/owners', fn () => view('owners.index'))->name('owners.index');
+    Route::get('/owners/export/excel', [OwnerExportController::class, 'excel'])
+        ->middleware('can:exports.create')->name('owners.export.excel');
+    Route::get('/owners/{owner}/print', [OwnerExportController::class, 'pdf'])
+        ->middleware('can:exports.create')->name('owners.print');
 
     // Survey decisions
     Route::get('/survey-decisions', fn () => view('survey-decisions.index'))->name('survey-decisions.index');
@@ -91,6 +96,8 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->name('services.valuation');
     Route::get('/services/investment', [ServiceController::class, 'investment'])
         ->name('services.investment');
+    Route::get('/services/municipal', [ServiceController::class, 'municipal'])
+        ->name('services.municipal');
 
     // Users
     Route::get('/users', fn () => view('users.index'))->name('users.index');

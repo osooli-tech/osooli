@@ -18,17 +18,23 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo) {
         initMap(mapboxgl, token) {
             mapboxgl.accessToken = token;
             const isDark = document.documentElement.classList.contains('dark');
+            const streetStyle = isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11';
+            const satelliteStyle = 'mapbox://styles/mapbox/satellite-streets-v12';
+
+            // Aerial imagery is the default background here — it shows the
+            // parcel against the real terrain rather than a generic basemap.
             const map = new mapboxgl.Map({
                 container: 'parcel-mini-map',
-                style: isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
+                style: satelliteStyle,
                 center: [45.0, 24.5],
                 zoom: 12,
                 attributionControl: false,
             });
 
             map.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true }), 'bottom-left');
+            map.addControl(basemapToggleControl(streetStyle, satelliteStyle, () => addLayers()), 'top-left');
 
-            map.on('load', () => {
+            function addLayers() {
                 const geom = JSON.parse(geojson);
                 const feature = { type: 'Feature', geometry: geom, properties: { parcel_no: parcelNo } };
 
@@ -83,8 +89,47 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo) {
                     [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
                     { padding: 40, maxZoom: 17 }
                 );
-            });
+            }
+
+            map.on('load', addLayers);
         }
+    };
+}
+
+// A small Mapbox IControl that switches the mini-map between the aerial
+// (default) background and the plain street style, re-adding the parcel
+// layers every time — setStyle() wipes custom sources on a style swap.
+function basemapToggleControl(streetStyle, satelliteStyle, onStyleReload) {
+    let map;
+    let onSatellite = true;
+    let button;
+
+    const icon = () => onSatellite ? 'map' : 'satellite_alt';
+    const title = () => onSatellite ? '{{ __('parcels.show_streets') }}' : '{{ __('parcels.show_satellite') }}';
+
+    return {
+        onAdd(mapInstance) {
+            map = mapInstance;
+            const container = document.createElement('div');
+            container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+            button = document.createElement('button');
+            button.type = 'button';
+            button.title = title();
+            button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;">${icon()}</span>`;
+            button.addEventListener('click', () => {
+                onSatellite = !onSatellite;
+                map.setStyle(onSatellite ? satelliteStyle : streetStyle);
+                map.once('style.load', onStyleReload);
+                button.title = title();
+                button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;">${icon()}</span>`;
+            });
+            container.appendChild(button);
+            return container;
+        },
+        onRemove() {
+            button?.parentNode?.parentNode?.removeChild(button.parentNode);
+            map = undefined;
+        },
     };
 }
 </script>

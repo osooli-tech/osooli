@@ -35,6 +35,17 @@
                 </button>
             @endif
 
+            @can('exports.create')
+                <a href="{{ route('owners.export.excel', ['search' => $search]) }}"
+                   class="ms-auto flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl
+                          border border-outline-variant dark:border-white/20
+                          text-on-surface-variant dark:text-on-primary-container
+                          hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                    <span class="material-symbols-outlined text-[15px]">grid_on</span>
+                    {{ __('owners.export_excel') }}
+                </a>
+            @endcan
+
         </div>
     </div>
 
@@ -132,6 +143,17 @@
                                         <span class="material-symbols-outlined text-[15px]">map</span>
                                         {{ __('owners.show_on_map') }}
                                     </button>
+
+                                    @can('exports.create')
+                                        <a href="{{ route('owners.print', $owner) }}"
+                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl
+                                                  border border-outline-variant dark:border-white/10
+                                                  text-on-surface-variant dark:text-on-primary-container
+                                                  hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                                            <span class="material-symbols-outlined text-[15px]">picture_as_pdf</span>
+                                            {{ __('owners.print_report') }}
+                                        </a>
+                                    @endcan
                                 </div>
                             </td>
 

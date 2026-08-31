@@ -21,6 +21,8 @@ return [
     'min_area_label' => 'أصغر',
     'total_plans' => 'عدد المخططات',
     'total_owners' => 'عدد الملاك',
+    'avg_price_per_metre' => 'متوسط سعر المتر',
+    'total_estimated_value' => 'إجمالي القيمة التقديرية',
     'multi_owner_deeds' => 'صكوك متعددة الملاك',
     'pending_requests' => 'طلبات التعديل المعلّقة',
     'updated_deeds' => 'صكوك محدّثة',
@@ -29,7 +31,7 @@ return [
     'top_owner' => 'أكثر مالك حيازةً',
     'deeds' => 'صك',
     'area_unit_sqm' => 'م²',
-    'area_unit_million' => 'م',
+    'area_unit_million' => 'مليون م²',
     'needs_action' => 'تنتظر إجراء',
     'all_clear' => 'لا طلبات معلّقة',
 

@@ -10,10 +10,11 @@
     <p class="text-xs text-on-surface-variant dark:text-on-primary-container leading-relaxed flex-1">
         {{ $description }}
     </p>
-    <a href="mailto:{{ config('landing.contact_email') }}?subject={{ rawurlencode(__('services.request_subject', ['service' => $serviceName])) }}"
+    <a href="https://wa.me/{{ preg_replace('/\D/', '', config('landing.contact_whatsapp')) }}?text={{ rawurlencode(__('services.request_subject', ['service' => $serviceName])) }}"
+       target="_blank" rel="noopener"
        class="mt-4 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium
               bg-secondary text-white hover:opacity-90 transition-opacity">
-        <span class="material-symbols-outlined text-[15px]">send</span>
+        <span class="material-symbols-outlined text-[15px]">chat</span>
         {{ __('services.request_service') }}
     </a>
 </div>

@@ -31,4 +31,19 @@ return [
     'portfolio_parcels_unit' => 'قطعة',
     'assign_parcels' => 'توزيع القطع على المحافظ',
     'unassigned' => 'بلا محفظة',
+
+    // ── تصدير ────────────────────────────────────────────────────
+    'export_excel' => 'تصدير Excel',
+    'print_report' => 'طباعة تقرير',
+
+    // ── تقرير محفظة المالك (PDF) ────────────────────────────────
+    'report_title' => 'تقرير محفظة المالك',
+    'report_subtitle' => 'تقرير شامل لقطع وصكوك المالك',
+    'owner_info_section' => 'بيانات المالك',
+    'summary_section' => 'ملخص المحفظة',
+    'cities_count' => 'عدد المدن',
+    'total_area_owned' => 'إجمالي المساحة المملوكة',
+    'valuation_section' => 'التقييم التقديري',
+    'valuation_coverage_note' => 'القيمة محسوبة من :priced من أصل :total قطعة مسعّرة',
+    'deeds_table_heading' => 'القطع والصكوك',
 ];

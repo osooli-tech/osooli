@@ -21,6 +21,8 @@ return [
     'min_area_label' => 'Smallest',
     'total_plans' => 'Total Plans',
     'total_owners' => 'Total Owners',
+    'avg_price_per_metre' => 'Avg. Price per m²',
+    'total_estimated_value' => 'Total Estimated Value',
     'multi_owner_deeds' => 'Multi-Owner Deeds',
     'pending_requests' => 'Pending Modification Requests',
     'updated_deeds' => 'Updated Deeds',

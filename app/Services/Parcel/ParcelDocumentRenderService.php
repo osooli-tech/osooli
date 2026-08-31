@@ -10,14 +10,16 @@ use Imagick;
 use ImagickException;
 
 /**
- * Rasterises the first page of a stored document (almost always a scanned
- * deed or survey sketch, uploaded as PDF) into a PNG the print report can
- * embed with a plain <img> tag — dompdf cannot embed one PDF's pages inside
- * another.
+ * Turns a stored document into a data: URI the print report can embed with a
+ * plain <img> tag. A scanned deed or survey sketch is uploaded as PDF and
+ * needs its first page rasterised — dompdf cannot embed one PDF's pages
+ * inside another. A site photo (aerial/ground) is already an image and is
+ * just re-encoded as-is.
  *
- * Requires Imagick built with a PDF delegate (Ghostscript). Confirmed present
- * on production; where it is not — e.g. some local dev setups — a document
- * is skipped rather than the whole report failing, and the report says so.
+ * PDF rasterising requires Imagick built with a PDF delegate (Ghostscript).
+ * Confirmed present on production; where it is not — e.g. some local dev
+ * setups — a PDF document is skipped rather than the whole report failing,
+ * and the report says so. Plain images do not need Imagick at all.
  */
 class ParcelDocumentRenderService
 {
@@ -25,21 +27,39 @@ class ParcelDocumentRenderService
 
     private const MAX_WIDTH = 1000;
 
+    /** @var list<string> */
+    private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+
     public static function available(): bool
     {
         return extension_loaded('imagick');
     }
 
     /** Returns a data: URI for an <img> src, or null if it could not be rendered. */
-    public function firstPageDataUri(ParcelPhoto $document): ?string
+    public function dataUri(ParcelPhoto $document): ?string
     {
-        if (! self::available()) {
+        $path = $this->resolvePath($document->photo_url);
+
+        if ($path === null) {
             return null;
         }
 
-        $path = $this->resolvePath($document->photo_url);
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-        if ($path === null || ! str_ends_with(strtolower($path), '.pdf')) {
+        if ($extension === 'pdf') {
+            return $this->rasterisePdfFirstPage($path, $document->id);
+        }
+
+        if (in_array($extension, self::IMAGE_EXTENSIONS, true)) {
+            return $this->encodeImage($path, $extension);
+        }
+
+        return null;
+    }
+
+    private function rasterisePdfFirstPage(string $path, int $documentId): ?string
+    {
+        if (! self::available()) {
             return null;
         }
 
@@ -63,13 +83,26 @@ class ParcelDocumentRenderService
             return 'data:image/png;base64,'.base64_encode($blob);
         } catch (ImagickException $e) {
             Log::warning('Could not rasterise document for print report', [
-                'document_id' => $document->id,
+                'document_id' => $documentId,
                 'path' => $path,
                 'error' => $e->getMessage(),
             ]);
 
             return null;
         }
+    }
+
+    private function encodeImage(string $path, string $extension): ?string
+    {
+        $contents = @file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        $mime = $extension === 'jpg' ? 'jpeg' : $extension;
+
+        return "data:image/{$mime};base64,".base64_encode($contents);
     }
 
     /** photo_url is a public-disk URL such as /storage/documents/deeds/x.pdf. */

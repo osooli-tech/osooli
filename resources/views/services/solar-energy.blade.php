@@ -79,10 +79,11 @@
     {{-- CTA --}}
     <div class="bg-secondary/10 dark:bg-secondary/15 rounded-2xl p-6 text-center mb-6">
         <p class="font-semibold text-on-surface dark:text-white mb-3">{{ __('services.solar_cta_heading') }}</p>
-        <a href="mailto:{{ config('landing.contact_email') }}?subject={{ rawurlencode(__('services.solar_cta_subject')) }}"
+        <a href="https://wa.me/{{ preg_replace('/\D/', '', config('landing.contact_whatsapp')) }}?text={{ rawurlencode(__('services.solar_cta_subject')) }}"
+           target="_blank" rel="noopener"
            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium
                   bg-secondary text-white hover:opacity-90 transition-opacity">
-            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span class="material-symbols-outlined text-[16px]">chat</span>
             {{ __('services.solar_cta_button') }}
         </a>
     </div>

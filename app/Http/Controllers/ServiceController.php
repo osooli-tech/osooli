@@ -29,6 +29,11 @@ class ServiceController extends Controller
         return view('services.solar-energy');
     }
 
+    public function municipal(): View
+    {
+        return view('services.municipal');
+    }
+
     public function valuation(): View
     {
         return view('services.coming-soon', [

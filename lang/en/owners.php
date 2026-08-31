@@ -31,4 +31,19 @@ return [
     'portfolio_parcels_unit' => 'parcels',
     'assign_parcels' => 'Assign parcels to portfolios',
     'unassigned' => 'Unassigned',
+
+    // ── Export ──────────────────────────────────────────────────
+    'export_excel' => 'Export Excel',
+    'print_report' => 'Print report',
+
+    // ── Owner portfolio report (PDF) ───────────────────────────
+    'report_title' => 'Owner Portfolio Report',
+    'report_subtitle' => "A comprehensive report on the owner's parcels and deeds",
+    'owner_info_section' => 'Owner Information',
+    'summary_section' => 'Portfolio Summary',
+    'cities_count' => 'Cities',
+    'total_area_owned' => 'Total Area Owned',
+    'valuation_section' => 'Estimated Valuation',
+    'valuation_coverage_note' => 'Value computed from :priced of :total priced parcels',
+    'deeds_table_heading' => 'Parcels & Deeds',
 ];

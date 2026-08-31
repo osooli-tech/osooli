@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\PhotoType;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
 use App\Services\Parcel\DigitalTwinService;
@@ -87,22 +88,36 @@ class ParcelController extends Controller
         ParcelMapSvgService $mapSvg,
         ParcelDocumentRenderService $documentRender
     ): Response {
-        $parcel->loadMissing('photos');
+        $parcel->loadMissing(['photos', 'currentDeed']);
 
-        // Only PDFs can be rasterised into a page image; anything else (there
-        // is none today, but the model does not guarantee it) is listed
-        // without a preview rather than silently dropped.
+        // A document that cannot be rendered (no Imagick locally, or an
+        // unsupported file type) is listed without a preview rather than
+        // silently dropped.
         $documents = $parcel->photos->map(fn (ParcelPhoto $photo) => [
             'photo' => $photo,
-            'preview' => $documentRender->firstPageDataUri($photo),
+            'preview' => $documentRender->dataUri($photo),
         ]);
+
+        // A ground-level shot reads as "the parcel" more than an aerial one;
+        // aerial is the fallback rather than left out.
+        $sitePhoto = $parcel->photos->firstWhere('photo_type', PhotoType::Ground)
+            ?? $parcel->photos->firstWhere('photo_type', PhotoType::Aerial);
+
+        /** @var \stdClass|null $geoRow */
+        $geoRow = DB::selectOne(
+            'SELECT ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM parcels WHERE id = ?',
+            [$parcel->id]
+        );
 
         return Pdf::loadView('exports.parcel-print', [
             'parcel' => $parcel,
             'twin' => $twin->for($parcel),
-            'qrSvg' => app(ParcelQrCodeService::class)->svgFor($parcel),
+            'qrImage' => app(ParcelQrCodeService::class)->pngDataUriFor($parcel),
             'mapImage' => $mapSvg->render($parcel),
             'documents' => $documents,
+            'sitePhoto' => $sitePhoto ? $documentRender->dataUri($sitePhoto) : null,
+            'reportNumber' => sprintf('SK-%s-%04d', now()->format('Y-m-d'), $parcel->id),
+            'centroid' => $geoRow?->lat === null ? null : ['lat' => (float) $geoRow->lat, 'lng' => (float) $geoRow->lng],
         ])->setPaper('a4', 'portrait')
             ->download("parcel-{$parcel->parcel_no}.pdf");
     }

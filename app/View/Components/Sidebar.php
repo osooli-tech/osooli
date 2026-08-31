@@ -74,11 +74,9 @@ class Sidebar extends Component
     ];
 
     /**
-     * The engineering and property services the platform covers.
-     *
-     * Items with a `route` link to a real content page. `route` is null only
-     * for services that have no page yet ("خدمات البلدية") — shown inert
-     * rather than as a link that goes nowhere.
+     * The engineering and property services the platform covers. Every item
+     * now has a real content page; `soon` only marks the two not yet launched
+     * (valuation, investment) with a badge — it does not affect linking.
      *
      * @var array<int, array{label: string, icon: string, route: string|null, soon: bool}>
      */
@@ -88,7 +86,7 @@ class Sidebar extends Component
         ['label' => 'nav.services_solar_energy', 'icon' => 'solar_power', 'route' => 'services.solar-energy', 'soon' => false],
         ['label' => 'nav.services_valuation', 'icon' => 'assessment', 'route' => 'services.valuation', 'soon' => true],
         ['label' => 'nav.services_investment', 'icon' => 'trending_up', 'route' => 'services.investment', 'soon' => true],
-        ['label' => 'nav.services_municipal', 'icon' => 'apartment', 'route' => null, 'soon' => false],
+        ['label' => 'nav.services_municipal', 'icon' => 'apartment', 'route' => 'services.municipal', 'soon' => false],
     ];
 
     public function render(): View

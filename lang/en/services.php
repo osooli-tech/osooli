@@ -146,4 +146,55 @@ return [
     'notify_subject' => 'Notify me when this service launches: :service',
     'notify_button' => 'Notify me at launch',
 
+    // ── Municipal services ──────────────────────────────────────
+    'municipal_title' => 'Municipal Services',
+    'municipal_subtitle' => 'Every municipal e-service in one place.',
+
+    'municipal_badge_time_saving' => 'Saves time and effort',
+    'municipal_badge_tracking' => 'Track requests as they progress',
+    'municipal_badge_secure_payment' => 'Secure electronic fee payment',
+    'municipal_badge_notifications' => 'Instant status notifications',
+
+    'municipal_building_permits_title' => 'Building permits',
+    'municipal_building_permits_description' => 'Issue new building permits, and amend or add floors.',
+
+    'municipal_shop_licenses_title' => 'Shop licenses',
+    'municipal_shop_licenses_description' => 'Issue and renew commercial and industrial shop licenses.',
+
+    'municipal_certificates_title' => 'Certificate issuance',
+    'municipal_certificates_description' => 'Issue various municipal certificates.',
+
+    'municipal_amend_license_title' => 'Amend a license',
+    'municipal_amend_license_description' => 'Amend and update municipal license data.',
+
+    'municipal_demolition_title' => 'Demolition & removal',
+    'municipal_demolition_description' => 'Issue demolition and removal permits for buildings and structures.',
+
+    'municipal_utilities_title' => 'Utility connections',
+    'municipal_utilities_description' => 'Request water, electricity and sewage connections.',
+
+    'municipal_billboards_title' => 'Billboards',
+    'municipal_billboards_description' => 'Issue and permit advertising billboards.',
+
+    'municipal_commercial_activity_title' => 'Commercial activities',
+    'municipal_commercial_activity_description' => 'Issue licenses for various commercial activities.',
+
+    'municipal_fencing_title' => 'Land fencing',
+    'municipal_fencing_description' => 'Issue permits for fencing land and open plots.',
+
+    'municipal_other_title' => 'Other services',
+    'municipal_other_description' => 'Various other municipal services.',
+
+    'municipal_about_heading' => 'About this service',
+    'municipal_about_body' => 'We provide every municipal e-service in one place, saving you time and effort.',
+
+    'municipal_features_heading' => 'Service features',
+    'municipal_feature_available' => 'Submit requests electronically, around the clock',
+    'municipal_feature_tracking' => 'Track your request status in real time',
+    'municipal_feature_payment' => 'Pay fees electronically',
+    'municipal_feature_notifications' => 'Instant notifications on your request status',
+
+    'municipal_cta_button' => 'Request a municipal service',
+    'municipal_cta_subject' => 'Municipal service request: :service',
+
 ];

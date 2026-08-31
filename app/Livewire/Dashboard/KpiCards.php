@@ -68,6 +68,10 @@ class KpiCards extends Component
     /** Number of deeds held by the top owner */
     public int $topOwnerDeedCount = 0;
 
+    public string $avgPricePerMetre = '—';
+
+    public string $totalEstimatedValue = '—';
+
     public function mount(): void
     {
         $this->totalParcels = Parcel::count();
@@ -119,6 +123,19 @@ class KpiCards extends Component
             $this->topOwnerName = $top->name;
             $this->topOwnerDeedCount = (int) $top->deed_cnt;
         }
+
+        // AVG/SUM ignore NULL rows on their own — a parcel without a
+        // recorded price just does not count toward either figure.
+        /** @var object{avg_price: string|null, total_value: string|null}|null $pricing */
+        $pricing = DB::selectOne('SELECT AVG(m_price) AS avg_price, SUM(parcel_price) AS total_value FROM parcels');
+
+        $this->avgPricePerMetre = $pricing?->avg_price === null
+            ? '—'
+            : number_format((float) $pricing->avg_price, 0).' '.__('parcels.sar');
+
+        $this->totalEstimatedValue = $pricing?->total_value === null
+            ? '—'
+            : number_format((float) $pricing->total_value, 0).' '.__('parcels.sar');
     }
 
     private function fmtArea(float $v): string

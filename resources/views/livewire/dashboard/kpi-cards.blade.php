@@ -66,6 +66,24 @@
     />
     @endif
 
+    @if ($this->shows('avg_price_per_metre'))
+    <x-stat-card
+        :label="__('dashboard.avg_price_per_metre')"
+        :value="$avgPricePerMetre"
+        icon="payments"
+        color="secondary"
+    />
+    @endif
+
+    @if ($this->shows('total_estimated_value'))
+    <x-stat-card
+        :label="__('dashboard.total_estimated_value')"
+        :value="$totalEstimatedValue"
+        icon="account_balance_wallet"
+        color="tertiary"
+    />
+    @endif
+
     @if ($this->shows('multi_owner_deeds'))
     <x-stat-card
         :label="__('dashboard.multi_owner_deeds')"
