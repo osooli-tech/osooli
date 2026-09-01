@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Import;
 
 use App\Models\ParcelPhoto;
+use FilesystemIterator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Links a ZIP of PDFs to the parcels they belong to.
@@ -22,76 +25,116 @@ final class DocumentImporter implements Importer
 
     public function analyze(string $sourcePath): ImportPreview
     {
-        [$rule, $matched, $unmatched] = $this->inspect($sourcePath);
+        [$rule, $matched, $unmatched, $dir] = $this->inspect($sourcePath);
 
-        return new ImportPreview(
-            totalItems: count($matched) + count($unmatched),
-            willCreate: array_sum(array_map(fn (array $m): int => count($m['parcel_ids']), $matched)),
-            willUpdate: 0,
-            unmatched: count($unmatched),
-            details: [
-                'rule' => $rule?->value,
-                'photo_type' => $rule?->photoType()->value,
-                'unmatched_files' => array_slice($unmatched, 0, 50),
-            ],
-            warnings: $unmatched === [] ? [] : [count($unmatched).' file(s) matched no parcel and will be skipped.'],
-        );
+        try {
+            return new ImportPreview(
+                totalItems: count($matched) + count($unmatched),
+                willCreate: array_sum(array_map(fn (array $m): int => count($m['parcel_ids']), $matched)),
+                willUpdate: 0,
+                unmatched: count($unmatched),
+                details: [
+                    'rule' => $rule?->value,
+                    'photo_type' => $rule?->photoType()->value,
+                    'unmatched_files' => array_slice($unmatched, 0, 50),
+                ],
+                warnings: $unmatched === [] ? [] : [count($unmatched).' file(s) matched no parcel and will be skipped.'],
+            );
+        } finally {
+            $this->removeDirectory($dir);
+        }
     }
 
     public function commit(string $sourcePath): ImportResult
     {
-        [$rule, $matched, $unmatched] = $this->inspect($sourcePath);
+        [$rule, $matched, $unmatched, $dir] = $this->inspect($sourcePath);
 
-        if ($rule === null) {
-            return new ImportResult(0, 0, count($unmatched), 0, ['rule' => null], ['No naming rule matched any file in the archive.']);
-        }
-
-        $disk = Storage::disk('public');
-        $created = 0;
-
-        foreach ($matched as $entry) {
-            $stored = $rule->subdirectory().'/'.$entry['filename'];
-            $disk->put($stored, (string) file_get_contents($entry['path']));
-
-            foreach ($entry['parcel_ids'] as $parcelId) {
-                // parcel_photos.photo_type is a native Postgres enum
-                // (photo_type_enum), not a varchar — going through the model
-                // (whose photo_type cast is App\Enums\PhotoType) gives Postgres a
-                // correctly typed binding. A raw DB::table()->updateOrInsert()
-                // with a plain string risks "column photo_type is of type
-                // photo_type_enum but expression is of type text". This also
-                // avoids updateOrInsert clobbering created_at on an update.
-                ParcelPhoto::updateOrCreate(
-                    ['parcel_id' => $parcelId, 'photo_type' => $rule->photoType()->value],
-                    ['photo_url' => '/storage/'.$stored]
+        try {
+            if ($rule === null) {
+                return new ImportResult(
+                    created: 0,
+                    updated: 0,
+                    skipped: count($unmatched),
+                    errors: 0,
+                    // Same key set as the normal-path return below, so a
+                    // consumer reading details['unmatched_files'] or
+                    // details['photo_type'] never hits a missing key just
+                    // because no rule matched.
+                    details: [
+                        'rule' => null,
+                        'photo_type' => null,
+                        'unmatched_files' => array_slice($unmatched, 0, 50),
+                    ],
+                    warnings: ['No naming rule matched any file in the archive.'],
                 );
-                $created++;
             }
-        }
 
-        return new ImportResult(
-            created: $created,
-            updated: 0,
-            skipped: count($unmatched),
-            errors: 0,
-            details: [
-                'rule' => $rule->value,
-                'photo_type' => $rule->photoType()->value,
-                'unmatched_files' => array_slice($unmatched, 0, 50),
-            ],
-            warnings: [],
-        );
+            $disk = Storage::disk('public');
+            $created = 0;
+            $updated = 0;
+
+            foreach ($matched as $entry) {
+                $stored = $rule->subdirectory().'/'.$entry['filename'];
+                // The extraction directory is removed once this method returns
+                // (see the finally block below), so the PDF bytes must be
+                // copied onto the public disk before that happens — read the
+                // file out of the extracted tree now, not lazily.
+                $disk->put($stored, (string) file_get_contents($entry['path']));
+
+                foreach ($entry['parcel_ids'] as $parcelId) {
+                    // parcel_photos.photo_type is a native Postgres enum
+                    // (photo_type_enum), not a varchar — going through the model
+                    // (whose photo_type cast is App\Enums\PhotoType) gives Postgres a
+                    // correctly typed binding. A raw DB::table()->updateOrInsert()
+                    // with a plain string risks "column photo_type is of type
+                    // photo_type_enum but expression is of type text". This also
+                    // avoids updateOrInsert clobbering created_at on an update.
+                    $photo = ParcelPhoto::updateOrCreate(
+                        ['parcel_id' => $parcelId, 'photo_type' => $rule->photoType()->value],
+                        ['photo_url' => '/storage/'.$stored]
+                    );
+
+                    $photo->wasRecentlyCreated ? $created++ : $updated++;
+                }
+            }
+
+            return new ImportResult(
+                created: $created,
+                updated: $updated,
+                skipped: count($unmatched),
+                errors: 0,
+                details: [
+                    'rule' => $rule->value,
+                    'photo_type' => $rule->photoType()->value,
+                    'unmatched_files' => array_slice($unmatched, 0, 50),
+                ],
+                warnings: [],
+            );
+        } finally {
+            $this->removeDirectory($dir);
+        }
     }
 
     /**
-     * @return array{0: DocumentRule|null, 1: list<array{filename: string, path: string, parcel_ids: list<int>}>, 2: list<string>}
+     * Extracts the archive and classifies every PDF it holds.
+     *
+     * Each call extracts into its own, uniquely named directory rather than a
+     * fixed one derived from $sourcePath alone. A fixed, shared extraction
+     * root would let a file removed from the source between two runs (or a
+     * concurrent run reading the same parent directory) silently reappear:
+     * ZipArchive::extractTo() only writes the entries the current archive
+     * contains, it never clears files a previous extraction left behind. The
+     * caller (analyze()/commit()) is responsible for deleting the returned
+     * directory once it is done reading from it.
+     *
+     * @return array{0: DocumentRule|null, 1: list<array{filename: string, path: string, parcel_ids: list<int>}>, 2: list<string>, 3: string}
      */
     private function inspect(string $sourcePath): array
     {
-        $dir = $this->extractor->extract($sourcePath, dirname($sourcePath).'/extracted');
+        $dir = $this->extractor->extract($sourcePath, dirname($sourcePath).'/extracted-'.bin2hex(random_bytes(8)));
 
         $pdfs = [];
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
 
         foreach ($iterator as $file) {
             if ($file->isFile() && strtolower($file->getExtension()) === 'pdf') {
@@ -124,7 +167,7 @@ final class DocumentImporter implements Importer
             $matched[] = ['filename' => $filename, 'path' => $path, 'parcel_ids' => $parcelIds];
         }
 
-        return [$rule, $matched, $unmatched];
+        return [$rule, $matched, $unmatched, $dir];
     }
 
     /**
@@ -175,5 +218,24 @@ final class DocumentImporter implements Importer
             ->where('plans.plan_no', trim($m[2]))
             ->pluck('parcels.id')
             ->all();
+    }
+
+    /** Recursively deletes a per-call extraction directory this importer created. */
+    private function removeDirectory(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $fileInfo) {
+            $fileInfo->isDir() ? @rmdir($fileInfo->getPathname()) : @unlink($fileInfo->getPathname());
+        }
+
+        @rmdir($dir);
     }
 }

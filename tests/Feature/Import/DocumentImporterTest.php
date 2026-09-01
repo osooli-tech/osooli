@@ -33,9 +33,9 @@ final class DocumentImporterTest extends TestCase
     }
 
     /** @param list<string> $names */
-    private function zipOf(array $names): string
+    private function zipOf(array $names, string $filename = 'docs.zip'): string
     {
-        $path = $this->tmp.'/docs.zip';
+        $path = $this->tmp.'/'.$filename;
         $zip = new ZipArchive;
         $zip->open($path, ZipArchive::CREATE);
         foreach ($names as $name) {
@@ -170,10 +170,14 @@ final class DocumentImporterTest extends TestCase
         $this->makeParcel('91-25', '91', '25', '311608002898');
         $zip = $this->zipOf(['311608002898.pdf']);
 
-        $this->importer()->commit($zip);
-        $this->importer()->commit($zip);
+        $first = $this->importer()->commit($zip);
+        $second = $this->importer()->commit($zip);
 
         $this->assertSame(1, DB::table('parcel_photos')->count());
+        $this->assertSame(1, $first->created, 'the first pass creates the row');
+        $this->assertSame(0, $first->updated);
+        $this->assertSame(0, $second->created, 'the second pass must not be counted as a creation');
+        $this->assertSame(1, $second->updated, 'the second pass updates the existing row instead');
     }
 
     public function test_it_ignores_entries_that_are_not_pdfs(): void
@@ -183,5 +187,38 @@ final class DocumentImporterTest extends TestCase
         $preview = $this->importer()->analyze($this->zipOf(['311608002898.pdf', 'readme.txt']));
 
         $this->assertSame(1, $preview->totalItems, 'non-PDF entries are not counted as items');
+    }
+
+    public function test_commit_with_no_matching_rule_reports_the_same_details_shape_as_a_normal_commit(): void
+    {
+        // "abc" matches neither rule: not all digits (Deed) and no hyphen (SurveyMap).
+        $result = $this->importer()->commit($this->zipOf(['abc.pdf']));
+
+        $this->assertSame(0, $result->created);
+        $this->assertSame(1, $result->skipped);
+        $this->assertArrayHasKey('photo_type', $result->details, 'the null-rule path must expose the same keys as a normal commit');
+        $this->assertArrayHasKey('unmatched_files', $result->details);
+        $this->assertSame(['abc.pdf'], $result->details['unmatched_files']);
+    }
+
+    public function test_a_second_commit_never_sees_the_first_archives_extracted_files(): void
+    {
+        $first = $this->makeParcel('91-25', '91', '25', '311608002898');
+        $second = $this->makeParcel('401-2', '401', '2', '502134007711');
+
+        // Both archives land in the same temp directory (same dirname($sourcePath))
+        // but under different filenames — exactly what LinkDeedDocuments does when
+        // it randomises only the zip filename. A fixed, shared extraction root
+        // would let the first archive's file leak into the second inspect() call.
+        $this->importer()->commit($this->zipOf(['311608002898.pdf'], 'first.zip'));
+
+        // Simulate the operator deleting the first document between runs.
+        DB::table('parcel_photos')->where('parcel_id', $first)->delete();
+
+        // The second archive does not contain 311608002898.pdf at all.
+        $this->importer()->commit($this->zipOf(['502134007711.pdf'], 'second.zip'));
+
+        $this->assertDatabaseMissing('parcel_photos', ['parcel_id' => $first], 'a stale extracted copy must not resurrect the deleted document');
+        $this->assertDatabaseHas('parcel_photos', ['parcel_id' => $second]);
     }
 }

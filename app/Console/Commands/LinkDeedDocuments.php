@@ -43,7 +43,18 @@ class LinkDeedDocuments extends Command
         $zip = new ZipArchive;
         $zip->open($zipPath, ZipArchive::CREATE);
 
-        foreach (glob($dir.'/*.pdf') ?: [] as $pdf) {
+        // glob('*.pdf') is case-sensitive, which would silently drop a
+        // "*.PDF" scan (real scans routinely carry an upper-case extension).
+        // DocumentImporter::inspect() already matches case-insensitively via
+        // strtolower($file->getExtension()) — this mirrors that here, since
+        // it is the zip-building step, not the importer, that reads the raw
+        // directory listing.
+        $pdfs = array_filter(
+            glob($dir.'/*') ?: [],
+            static fn (string $path): bool => is_file($path) && preg_match('/\.pdf$/i', $path) === 1
+        );
+
+        foreach ($pdfs as $pdf) {
             $zip->addFile($pdf, basename($pdf));
         }
 
