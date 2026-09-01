@@ -47,7 +47,14 @@ class ImportBatch extends Model
      * Moves the batch forward, refusing any transition the lifecycle forbids.
      *
      * Returns false rather than throwing: a double-clicked Confirm is a normal
-     * thing for a browser to do, not an exceptional one.
+     * thing for a browser to do, not an exceptional one. The in-memory legality
+     * check alone is not enough to stop a genuine double commit — two requests
+     * can both load the row while it is still Previewed and both pass it — so
+     * the write itself is a compare-and-swap: the UPDATE only takes effect if
+     * the row's status in the database still matches what this instance read.
+     * A loser (0 rows affected) is treated exactly like an illegal transition,
+     * and this instance is left as it was — it never adopts a status it did
+     * not actually manage to write.
      *
      * @param  array<string, mixed>  $attributes
      */
@@ -57,14 +64,34 @@ class ImportBatch extends Model
             return false;
         }
 
-        $this->forceFill([...$attributes, 'status' => $status])->save();
+        $payload = $this->newInstance()
+            ->forceFill([...$attributes, 'status' => $status, 'updated_at' => now()])
+            ->getAttributes();
+
+        $affected = static::query()
+            ->whereKey($this->getKey())
+            ->where('status', $this->getRawOriginal('status'))
+            ->update($payload);
+
+        if ($affected === 0) {
+            return false;
+        }
+
+        $this->forceFill($payload)->syncOriginal();
 
         return true;
     }
 
+    /**
+     * Force the batch into the terminal Failed state, recording why.
+     *
+     * Delegates to transitionTo(), so a batch that has already reached a
+     * terminal state (Completed or Failed) is left untouched instead of being
+     * retroactively flipped — see ImportStatus::allowedNext().
+     */
     public function markFailed(string $message): void
     {
-        $this->forceFill(['status' => ImportStatus::Failed, 'error_message' => $message])->save();
+        $this->transitionTo(ImportStatus::Failed, ['error_message' => $message]);
     }
 
     /**
