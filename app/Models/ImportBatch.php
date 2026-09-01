@@ -110,17 +110,23 @@ class ImportBatch extends Model
      */
     public function dispatchAnalysis(): void
     {
+        // Dispatched via the global helper functions rather than the static
+        // ::dispatch()/::dispatchSync() methods: the two are behaviourally
+        // identical (both end up at app(Dispatcher::class)->dispatch[Sync]()
+        // with the same job instance), but the static form is a StaticCall
+        // node that trips a larastan rule incompatible with the phpstan
+        // version pinned in this project, crashing analysis of this file.
         config('imports.queue_sync')
-            ? AnalyzeImportBatch::dispatchSync($this->id)
-            : AnalyzeImportBatch::dispatch($this->id);
+            ? dispatch_sync(new AnalyzeImportBatch($this->id))
+            : dispatch(new AnalyzeImportBatch($this->id));
     }
 
     /** Queue the commit pass, or run it inline; see dispatchAnalysis(). */
     public function dispatchCommit(): void
     {
         config('imports.queue_sync')
-            ? CommitImportBatch::dispatchSync($this->id)
-            : CommitImportBatch::dispatch($this->id);
+            ? dispatch_sync(new CommitImportBatch($this->id))
+            : dispatch(new CommitImportBatch($this->id));
     }
 
     /**
