@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Enums\PhotoType;
-use App\Models\Deed;
-use App\Models\ParcelPhoto;
+use App\Services\Import\DocumentImporter;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class LinkDeedDocuments extends Command
 {
@@ -26,48 +24,42 @@ class LinkDeedDocuments extends Command
      */
     protected $description = 'Link deed PDF scans (named by deed number) in storage/app/public/documents/deeds to their parcels as "صك" documents';
 
-    public function handle(): int
+    /**
+     * Zips storage/app/public/documents/deeds and hands it to DocumentImporter,
+     * so this CLI path shares the same rule detection and multi-parcel deed
+     * fan-out as the dashboard import instead of its own ->first()-based match.
+     */
+    public function handle(DocumentImporter $importer): int
     {
-        $dir = 'documents/deeds';
-        $disk = Storage::disk('public');
+        $dir = storage_path('app/public/documents/deeds');
 
-        if (! $disk->exists($dir)) {
-            $this->error("Directory not found: storage/app/public/{$dir}");
+        if (! is_dir($dir)) {
+            $this->error("Directory not found: {$dir}");
 
             return self::FAILURE;
         }
 
-        $files = $disk->files($dir);
-        $linked = 0;
-        $noMatch = [];
+        $zipPath = storage_path('app/private/link-deeds-'.uniqid().'.zip');
+        $zip = new ZipArchive;
+        $zip->open($zipPath, ZipArchive::CREATE);
 
-        foreach ($files as $path) {
-            if (! preg_match('/\.pdf$/i', $path)) {
-                continue;
-            }
-
-            // Filename (without extension) is the deed number.
-            $deedNo = trim(pathinfo($path, PATHINFO_FILENAME));
-
-            $deed = Deed::where('deed_no', $deedNo)->first();
-
-            if ($deed === null) {
-                $noMatch[] = $deedNo;
-
-                continue;
-            }
-
-            ParcelPhoto::updateOrCreate(
-                ['parcel_id' => $deed->parcel_id, 'photo_type' => PhotoType::Deed->value],
-                ['photo_url' => '/storage/'.$path]
-            );
-            $linked++;
+        foreach (glob($dir.'/*.pdf') ?: [] as $pdf) {
+            $zip->addFile($pdf, basename($pdf));
         }
 
-        $this->info("Deed documents linked: {$linked}");
+        $zip->close();
 
-        if ($noMatch !== []) {
-            $this->warn('PDFs with no matching deed ('.count($noMatch).'): '.implode(', ', array_slice($noMatch, 0, 15)).(count($noMatch) > 15 ? ' …' : ''));
+        try {
+            $result = $importer->commit($zipPath);
+        } finally {
+            @unlink($zipPath);
+        }
+
+        $this->info("Deed documents linked: {$result->created}");
+
+        if ($result->skipped > 0) {
+            $this->warn('PDFs with no matching deed ('.$result->skipped.'): '
+                .implode(', ', array_slice($result->details['unmatched_files'] ?? [], 0, 15)));
         }
 
         return self::SUCCESS;
