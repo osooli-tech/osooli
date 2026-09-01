@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GeoJsonController;
+use App\Http\Controllers\ImportUploadController;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\OwnerExportController;
@@ -123,6 +124,14 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // GeoJSON API for map
     Route::get('/geo/parcels', [GeoJsonController::class, 'parcels'])->name('geo.parcels');
+
+    // Data import
+    Route::middleware('can:imports.create')->group(function () {
+        Route::get('/imports', fn () => view('imports.index'))->name('imports.index');
+        Route::post('/imports/upload', [ImportUploadController::class, 'create'])->name('imports.upload.create');
+        Route::post('/imports/upload/{uuid}/chunk', [ImportUploadController::class, 'chunk'])->name('imports.upload.chunk');
+        Route::post('/imports/upload/{uuid}/complete', [ImportUploadController::class, 'complete'])->name('imports.upload.complete');
+    });
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

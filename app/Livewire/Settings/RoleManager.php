@@ -22,6 +22,7 @@ class RoleManager extends Component
         'requests' => ['modification_requests.view', 'modification_requests.manage'],
         'users' => ['users.view', 'users.create', 'users.edit', 'users.delete'],
         'admin' => ['roles.manage', 'audit_logs.view', 'sync.view'],
+        'imports' => ['imports.create'],
     ];
 
     // Create modal

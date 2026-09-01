@@ -28,6 +28,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'roles.manage',
         'audit_logs.view',
         'sync.view',
+        'imports.create',
     ];
 
     private const ROLES = [
