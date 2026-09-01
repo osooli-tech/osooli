@@ -28,5 +28,12 @@ return [
 
     // Run analyze/commit inline instead of on the queue. For hosts with no
     // queue worker, where a queued job would leave the page waiting forever.
+    //
+    // Note: the jobs' $timeout property is NOT enforced in this mode —
+    // Laravel's SyncQueue has no timeout machinery at all (that is Laravel's
+    // design, not a bug here), so the real ceiling becomes PHP's
+    // max_execution_time and the web server's gateway timeout. Intended for
+    // hosts without a queue worker and for modest-sized imports; a host that
+    // expects large imports should run a real queue worker instead.
     'queue_sync' => (bool) env('IMPORT_QUEUE_SYNC', false),
 ];

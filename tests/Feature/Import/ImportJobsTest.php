@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -125,5 +126,63 @@ final class ImportJobsTest extends TestCase
         $batch->refresh();
         $this->assertSame(ImportStatus::Failed, $batch->status);
         $this->assertNotEmpty($batch->error_message);
+    }
+
+    public function test_analyze_refuses_a_batch_that_is_already_analyzing(): void
+    {
+        // Simulates the concurrent case: another worker already moved this
+        // batch to Analyzing and has not finished. A second job for the same
+        // batch id — a redelivery, or a duplicate dispatch — must not touch
+        // it: Analyzing has no legal transition back to Analyzing, so the
+        // transitionTo() guard should refuse it before analyze() ever runs.
+        $batch = $this->documentsBatch(ImportStatus::Analyzing);
+
+        (new AnalyzeImportBatch($batch->id))->handle();
+
+        $batch->refresh();
+        $this->assertSame(ImportStatus::Analyzing, $batch->status);
+        $this->assertNull($batch->preview);
+        $this->assertNull($batch->analyzed_at);
+    }
+
+    public function test_analyze_failed_handler_marks_an_incomplete_batch_as_failed(): void
+    {
+        // Simulates a worker dying outside handle()'s try/catch — an OOM
+        // kill or a queue-level timeout — leaving the batch stuck mid-flight.
+        // Laravel calls failed() in that case; without it the batch would
+        // stay Analyzing forever with no trace anywhere.
+        $batch = $this->documentsBatch(ImportStatus::Analyzing);
+
+        (new AnalyzeImportBatch($batch->id))->failed(new RuntimeException('worker killed'));
+
+        $batch->refresh();
+        $this->assertSame(ImportStatus::Failed, $batch->status);
+        $this->assertNotEmpty($batch->error_message);
+    }
+
+    public function test_commit_failed_handler_marks_an_incomplete_batch_as_failed_with_a_partial_write_warning(): void
+    {
+        $batch = $this->documentsBatch(ImportStatus::Committing);
+
+        (new CommitImportBatch($batch->id))->failed(new RuntimeException('worker killed'));
+
+        $batch->refresh();
+        $this->assertSame(ImportStatus::Failed, $batch->status);
+        $this->assertStringContainsString('idempotent upsert', (string) $batch->error_message);
+    }
+
+    public function test_failed_handler_does_not_clobber_a_completed_batch(): void
+    {
+        // markFailed() refuses to act on a terminal batch. A failed() call
+        // arriving late (e.g. a stale timeout signal for a job that in fact
+        // finished successfully in the meantime) must not retroactively
+        // flip a Completed import to Failed.
+        $batch = $this->documentsBatch(ImportStatus::Completed);
+
+        (new CommitImportBatch($batch->id))->failed(new RuntimeException('stale failure signal'));
+
+        $batch->refresh();
+        $this->assertSame(ImportStatus::Completed, $batch->status);
+        $this->assertNull($batch->error_message);
     }
 }

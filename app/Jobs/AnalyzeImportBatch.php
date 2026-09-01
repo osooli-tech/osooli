@@ -45,4 +45,24 @@ final class AnalyzeImportBatch implements ShouldQueue
             $batch->markFailed($e->getMessage());
         }
     }
+
+    /**
+     * Called by the queue worker once this job is deemed to have failed for
+     * good — including the cases the try/catch in handle() never sees, such
+     * as the worker process being OOM-killed or hitting the queue-level
+     * timeout outside that block. Without this, a batch killed mid-Analyzing
+     * would be stuck there forever: a redelivered attempt finds the batch
+     * already mid-transition and the transitionTo() guard silently returns,
+     * which Laravel records as a successful completion — nothing in `jobs`,
+     * nothing in `failed_jobs`, no trace. markFailed() already refuses to
+     * touch a batch that has already reached a terminal state, so this
+     * cannot clobber a batch that in fact finished successfully in the
+     * meantime.
+     */
+    public function failed(Throwable $e): void
+    {
+        ImportBatch::find($this->batchId)?->markFailed(
+            'The analyze job did not finish running: '.$e->getMessage()
+        );
+    }
 }
