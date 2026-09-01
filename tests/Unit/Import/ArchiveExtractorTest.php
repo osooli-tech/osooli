@@ -65,8 +65,24 @@ final class ArchiveExtractorTest extends TestCase
         $zip = $this->makeZip('abs.zip', ['/etc/passwd' => 'pwned']);
 
         $this->expectException(ArchiveException::class);
+        $this->expectExceptionMessageMatches('/absolute/i');
 
         (new ArchiveExtractor)->extract($zip, $this->tmp.'/out');
+    }
+
+    public function test_it_rejects_a_symlink_entry(): void
+    {
+        $path = $this->tmp.'/symlink.zip';
+        $zip = new ZipArchive;
+        $zip->open($path, ZipArchive::CREATE);
+        $zip->addFromString('link', '../../outside');
+        $zip->setExternalAttributesName('link', ZipArchive::OPSYS_UNIX, 0xA1FF << 16);
+        $zip->close();
+
+        $this->expectException(ArchiveException::class);
+        $this->expectExceptionMessageMatches('/type/i');
+
+        (new ArchiveExtractor)->extract($path, $this->tmp.'/out');
     }
 
     public function test_it_rejects_an_archive_with_too_many_entries(): void
