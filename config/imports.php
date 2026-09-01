@@ -7,6 +7,11 @@ return [
     // read from PHP, so the GDB import shells out to this.
     'ogr2ogr_path' => env('IMPORT_OGR2OGR_PATH', 'ogr2ogr'),
 
+    // Absolute path to the GDAL ogrinfo binary, used only to enumerate a
+    // geodatabase's layers before conversion. Ships in the same GDAL
+    // package as ogr2ogr.
+    'ogrinfo_path' => env('IMPORT_OGRINFO_PATH', 'ogrinfo'),
+
     // Upload chunk size, in bytes. Kept under post_max_size so the browser can
     // send large archives without a server configuration change.
     'chunk_bytes' => (int) env('IMPORT_CHUNK_BYTES', 2 * 1024 * 1024),

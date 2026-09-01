@@ -15,9 +15,10 @@ use Symfony\Component\Process\Process;
  */
 final class GdbConverter
 {
-    private const REQUIRED_FIELDS = ['Geo_ID', 'Deed_No'];
-
-    public function __construct(private readonly ArchiveExtractor $extractor) {}
+    public function __construct(
+        private readonly ArchiveExtractor $extractor,
+        private readonly GdbLayerPicker $layerPicker = new GdbLayerPicker,
+    ) {}
 
     public function isAvailable(): bool
     {
@@ -35,13 +36,11 @@ final class GdbConverter
             return $sourcePath;
         }
 
-        $extracted = $this->extractor->extract($sourcePath, $workDir.'/extracted');
-        $gdb = $this->findGeodatabase($extracted);
-
-        if ($gdb === null) {
-            throw new ArchiveException('No .gdb directory was found inside the archive.');
-        }
-
+        // Checked before extraction: on a host without GDAL there is no point
+        // spending time and disk unpacking what may be a very large archive
+        // only to fail afterwards. The .geojson/.json passthrough above must
+        // stay ahead of this check — it needs no GDAL at all and is the
+        // documented escape hatch for GDAL-less hosts.
         if (! $this->isAvailable()) {
             throw new ArchiveException(
                 'The ogr2ogr binary (GDAL) was not found, so a geodatabase cannot be converted. '
@@ -49,11 +48,19 @@ final class GdbConverter
             );
         }
 
-        $layer = $this->pickLayer($gdb);
+        $extracted = $this->extractor->extract($sourcePath, $workDir.'/extracted');
+        $gdb = $this->findGeodatabase($extracted);
+
+        if ($gdb === null) {
+            throw new ArchiveException('No .gdb directory was found inside the archive.');
+        }
+
+        $layer = $this->layerPicker->pick($gdb);
         $output = $workDir.'/converted.geojson';
 
         $process = new Process([
-            $this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', $output, $gdb, $layer,
+            // "--" stops ogr2ogr from parsing a layer name starting with "-" as an option.
+            $this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', $output, $gdb, '--', $layer,
         ]);
         $process->setTimeout(600);
         $process->run();
@@ -84,42 +91,5 @@ final class GdbConverter
         }
 
         return null;
-    }
-
-    /**
-     * Picks the layer carrying both Geo_ID and Deed_No. A geodatabase holds
-     * several layers (this one also has Adjacent_Parcel) and only the parcel
-     * layer can be imported.
-     *
-     * @throws ArchiveException
-     */
-    private function pickLayer(string $gdb): string
-    {
-        $process = new Process([$this->binary(), '-al', '-so', '-json', $gdb]);
-        $process->setTimeout(120);
-        $process->run();
-
-        if (! $process->isSuccessful()) {
-            // ogrinfo-style JSON is unavailable on some builds; fall back to the
-            // conventional layer name rather than failing outright.
-            return 'sakoki_with_deed';
-        }
-
-        $info = json_decode($process->getOutput(), true);
-        $found = [];
-
-        foreach ($info['layers'] ?? [] as $layer) {
-            $name = (string) ($layer['name'] ?? '');
-            $found[] = $name;
-            $fields = array_map(fn (array $f): string => (string) ($f['name'] ?? ''), $layer['fields'] ?? []);
-
-            if (count(array_intersect(self::REQUIRED_FIELDS, $fields)) === count(self::REQUIRED_FIELDS)) {
-                return $name;
-            }
-        }
-
-        throw new ArchiveException(
-            'No layer carrying both Geo_ID and Deed_No was found. Layers present: '.implode(', ', $found)
-        );
     }
 }
