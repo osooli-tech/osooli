@@ -5,13 +5,20 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Http\Middleware\SetLocale;
+use App\Services\Import\ArchiveExtractor;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(ArchiveExtractor::class, fn (): ArchiveExtractor => new ArchiveExtractor(
+            maxEntries: (int) config('imports.max_archive_entries'),
+            maxTotalBytes: (int) config('imports.max_archive_bytes'),
+        ));
+    }
 
     public function boot(): void
     {
