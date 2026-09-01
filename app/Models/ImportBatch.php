@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Enums\ImportKind;
 use App\Enums\ImportStatus;
+use App\Jobs\AnalyzeImportBatch;
+use App\Jobs\CommitImportBatch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -100,6 +102,25 @@ class ImportBatch extends Model
     public function markFailed(string $message): void
     {
         $this->transitionTo(ImportStatus::Failed, ['error_message' => $message]);
+    }
+
+    /**
+     * Queue the analyze pass, or run it inline when no queue worker can be
+     * relied on to pick it up (see the imports.queue_sync config doc).
+     */
+    public function dispatchAnalysis(): void
+    {
+        config('imports.queue_sync')
+            ? AnalyzeImportBatch::dispatchSync($this->id)
+            : AnalyzeImportBatch::dispatch($this->id);
+    }
+
+    /** Queue the commit pass, or run it inline; see dispatchAnalysis(). */
+    public function dispatchCommit(): void
+    {
+        config('imports.queue_sync')
+            ? CommitImportBatch::dispatchSync($this->id)
+            : CommitImportBatch::dispatch($this->id);
     }
 
     /**
