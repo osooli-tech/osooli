@@ -64,9 +64,11 @@ class ImportBatch extends Model
             return false;
         }
 
-        $payload = $this->newInstance()
-            ->forceFill([...$attributes, 'status' => $status, 'updated_at' => now()])
-            ->getAttributes();
+        $fill = [...$attributes, 'status' => $status, 'updated_at' => now()];
+
+        // Cast $fill to DB-ready values on a throwaway instance rather than on
+        // $this, so a failed compare-and-swap below leaves $this untouched.
+        $payload = $this->newInstance()->forceFill($fill)->getAttributes();
 
         $affected = static::query()
             ->whereKey($this->getKey())
@@ -77,7 +79,13 @@ class ImportBatch extends Model
             return false;
         }
 
-        $this->forceFill($payload)->syncOriginal();
+        // Re-run the same raw $fill through $this's own cast pipeline instead
+        // of reusing $payload: $payload already went through the 'array' cast
+        // once (preview/result are JSON strings there), and forceFill()-ing an
+        // already-encoded JSON string back through that cast would json_encode
+        // it a second time, corrupting $this->preview into a double-encoded
+        // string instead of the array its docblock promises.
+        $this->forceFill($fill)->syncOriginal();
 
         return true;
     }

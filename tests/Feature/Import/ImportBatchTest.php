@@ -91,6 +91,28 @@ final class ImportBatchTest extends TestCase
         $this->assertSame(ImportStatus::Committing, $staleCopy->fresh()->status);
     }
 
+    public function test_transitioning_with_an_array_attribute_keeps_it_an_array_in_memory(): void
+    {
+        // Regression test for a double-encoding bug: transitionTo() builds a
+        // DB-ready $payload (where an 'array'-cast attribute is already a JSON
+        // string) before it knows whether the compare-and-swap will succeed.
+        // A version that reused that already-encoded $payload to update $this
+        // in memory would run the 'array' cast a second time on the JSON
+        // string itself, leaving $batch->preview a double-encoded string
+        // instead of an array. This asserts the in-memory value directly,
+        // without going through fresh(), since fresh() would mask the bug by
+        // re-reading the (correctly single-encoded) row from the database.
+        $batch = $this->batch(ImportStatus::Analyzing);
+
+        $this->assertTrue($batch->transitionTo(ImportStatus::Previewed, [
+            'preview' => ['total_items' => 8, 'warnings' => ['x']],
+        ]));
+
+        $this->assertIsArray($batch->preview);
+        $this->assertSame(8, $batch->preview['total_items']);
+        $this->assertSame(['x'], $batch->preview['warnings']);
+    }
+
     public function test_marking_failed_records_the_message(): void
     {
         $batch = $this->batch(ImportStatus::Analyzing);
