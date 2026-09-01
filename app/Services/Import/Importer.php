@@ -10,8 +10,9 @@ interface Importer
      * Inspect the source and report what a commit would do.
      *
      * Implementations MUST NOT write to the database. The whole
-     * preview-then-confirm flow rests on this, and the test suite asserts it
-     * by comparing row counts before and after.
+     * preview-then-confirm flow rests on this. Every implementation MUST be
+     * covered by a test that compares database row counts before and after
+     * calling analyze() to verify no writes occur.
      */
     public function analyze(string $sourcePath): ImportPreview;
 
