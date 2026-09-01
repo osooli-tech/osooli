@@ -66,6 +66,79 @@ final class ParcelGeoJsonImporterTest extends TestCase
         $this->assertDatabaseHas('deeds', ['deed_no' => '311608002898']);
     }
 
+    /**
+     * created/updated must count DISTINCT PARCELS, the same unit the preview
+     * reports, so the wizard's confirm screen reconciles. Counting upsert
+     * conflicts instead would report 5 created + 2 updated on the first run —
+     * the two extra being the second deed-groups of 28-112 and 34-82 touching
+     * rows this same run had just inserted.
+     */
+    public function test_created_and_updated_count_distinct_parcels(): void
+    {
+        $first = $this->importer()->commit($this->fixture());
+
+        $this->assertSame(5, $first->created);
+        $this->assertSame(0, $first->updated, 'a parcel inserted this run is not also an update');
+
+        $second = $this->importer()->commit($this->fixture());
+
+        $this->assertSame(0, $second->created);
+        $this->assertSame(5, $second->updated);
+    }
+
+    public function test_preview_and_commit_agree_on_the_same_numbers(): void
+    {
+        $preview = $this->importer()->analyze($this->fixture());
+        $result = $this->importer()->commit($this->fixture());
+
+        $this->assertSame($preview->willCreate, $result->created);
+        $this->assertSame($preview->willUpdate, $result->updated);
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function fixtureFeatures(): array
+    {
+        /** @var array{features: list<array<string, mixed>>} $raw */
+        $raw = json_decode((string) file_get_contents($this->fixture()), true);
+
+        return $raw['features'];
+    }
+
+    /**
+     * parcels.geo_id is NOT NULL UNIQUE, so '' is a legal value — a blank one
+     * would insert a real parcel that every later blank-Geo_ID feature then
+     * overwrites through ON CONFLICT (geo_id).
+     */
+    public function test_it_skips_a_feature_with_a_blank_geo_id(): void
+    {
+        $features = $this->fixtureFeatures();
+        $good = $features[0];
+        $blank = $features[0];
+        $blank['properties']['Geo_ID'] = '';
+
+        $result = $this->importer()->importFeatures([$good, $blank]);
+
+        $this->assertSame(1, $result->skipped);
+        $this->assertSame(0, $result->errors, 'a blank Geo_ID is a skip, not an error');
+        $this->assertDatabaseHas('parcels', ['geo_id' => $good['properties']['Geo_ID']]);
+        $this->assertDatabaseMissing('parcels', ['geo_id' => '']);
+    }
+
+    /** An absent key must skip too, not raise an undefined-key ErrorException. */
+    public function test_it_skips_a_feature_whose_geo_id_key_is_missing(): void
+    {
+        $features = $this->fixtureFeatures();
+        $good = $features[0];
+        $missing = $features[0];
+        unset($missing['properties']['Geo_ID']);
+
+        $result = $this->importer()->importFeatures([$good, $missing]);
+
+        $this->assertSame(1, $result->skipped);
+        $this->assertSame(0, $result->errors);
+        $this->assertSame(1, DB::table('parcels')->count());
+    }
+
     public function test_commit_is_idempotent(): void
     {
         $this->importer()->commit($this->fixture());

@@ -66,35 +66,55 @@ final class ParcelGeoJsonImporter implements Importer
 
         // A parcel may carry several deeds, so one Geo_ID can span several
         // groups. The preview counts parcels, which is what the wizard reports.
+        // Blank Geo_IDs are excluded from every count here because commit()
+        // skips them outright — see importFeatures().
         $geoIds = [];
+        $deedGroups = 0;
+        $blank = 0;
+
         foreach ($groups as $group) {
             $geoId = (string) ($group[0]['properties']['Geo_ID'] ?? '');
-            $geoIds[$geoId] = $geoId;
-        }
 
-        $create = 0;
-        $update = 0;
-        $warnings = [];
-
-        foreach ($geoIds as $geoId) {
             if ($geoId === '') {
-                $warnings[] = __('A feature has no Geo_ID and will be skipped.');
+                $blank += count($group);
 
                 continue;
             }
 
-            // Read-only: this is the one query analyze() is allowed to make.
-            DB::table('parcels')->where('geo_id', $geoId)->exists() ? $update++ : $create++;
+            $geoIds[$geoId] = $geoId;
+            $deedGroups++;
+        }
+
+        $warnings = [];
+
+        if ($blank > 0) {
+            $warnings[] = __(':count features have no Geo_ID and will be skipped.', ['count' => $blank]);
+        }
+
+        // Read-only: this single lookup is the only query analyze() is allowed
+        // to make. One query for the whole batch rather than one per parcel —
+        // the real export runs to ~3,000 parcels and analyze() is called from a
+        // queued job.
+        $existing = [];
+        foreach (DB::table('parcels')->whereIn('geo_id', array_values($geoIds))->pluck('geo_id') as $value) {
+            $existing[(string) $value] = true;
+        }
+
+        $update = 0;
+        foreach ($geoIds as $geoId) {
+            if (isset($existing[$geoId])) {
+                $update++;
+            }
         }
 
         return new ImportPreview(
             totalItems: count($features),
-            willCreate: $create,
+            willCreate: count($geoIds) - $update,
             willUpdate: $update,
             unmatched: 0,
             details: [
                 'parcels' => count($geoIds),
-                'deeds' => count($groups),
+                'deeds' => $deedGroups,
             ],
             warnings: $warnings,
         );
@@ -112,24 +132,57 @@ final class ParcelGeoJsonImporter implements Importer
 
         $stats = ['inserted' => 0, 'updated' => 0, 'deeds' => 0, 'owners' => 0, 'boundaries' => 0, 'decisions' => 0, 'errors' => 0];
         $warnings = [];
+        $skipped = 0;
+
+        // geo_id => whether the parcel was inserted (true) or updated (false) on
+        // the first group of that parcel to land this run. A parcel holding two
+        // deeds arrives as two groups; without this the second group would count
+        // the row the first one just inserted as an update, and `updated` would
+        // not reconcile with the preview's willUpdate.
+        $outcomes = [];
 
         foreach ($groups as $group) {
+            $geoId = (string) ($group[0]['properties']['Geo_ID'] ?? '');
+
+            // parcels.geo_id is NOT NULL UNIQUE, so '' is a perfectly legal
+            // value: importing a blank one would create a real parcel that every
+            // later blank-Geo_ID feature then collides with through
+            // ON CONFLICT (geo_id), collapsing unrelated parcels into one shared
+            // row. Skip instead — the preview already promises this.
+            if ($geoId === '') {
+                $skipped += count($group);
+
+                continue;
+            }
+
+            $insertedBefore = $stats['inserted'];
+
             try {
                 // Regular closure with `use (&$stats)` — an arrow fn would capture
                 // $stats by value and silently drop the counters.
                 DB::transaction(function () use ($group, $cityId, $officeId, &$stats): void {
                     $this->importGroup($group, $cityId, $officeId, $stats);
                 });
+
+                // Recorded only on success, so a rolled-back group cannot leave
+                // a phantom parcel in the created/updated tallies.
+                $outcomes[$geoId] ??= $stats['inserted'] > $insertedBefore;
             } catch (Throwable $e) {
                 $stats['errors']++;
-                $warnings[] = ($group[0]['properties']['Geo_ID'] ?? '?').': '.$e->getMessage();
+                $warnings[] = $geoId.': '.$e->getMessage();
             }
         }
 
+        if ($skipped > 0) {
+            $warnings[] = __(':count features have no Geo_ID and were skipped.', ['count' => $skipped]);
+        }
+
+        $created = count(array_filter($outcomes));
+
         return new ImportResult(
-            created: $stats['inserted'],
-            updated: $stats['updated'],
-            skipped: 0,
+            created: $created,
+            updated: count($outcomes) - $created,
+            skipped: $skipped,
             errors: $stats['errors'],
             details: [
                 'deeds' => $stats['deeds'],
