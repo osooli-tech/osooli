@@ -162,7 +162,7 @@
                         {{-- Expanded parcels --}}
                         @if (isset($expanded[$owner->id]) && $expanded[$owner->id])
                             @php
-                                $ownerParcels = $owner->deeds()
+                                $ownerParcels = $owner->currentDeeds()
                                     ->with('parcel.plan')
                                     ->get()
                                     ->map(fn ($deed) => [

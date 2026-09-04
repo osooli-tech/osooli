@@ -33,13 +33,18 @@ import psycopg2
 
 DEFAULT_SOURCE = r'D:\Downloads\GDB_extracted\GDB\Osooli.gdb'
 
+# القيم الافتراضية لتطوير محلي فقط. للاتصال بأي قاعدة أخرى (إنتاج مثلاً) مرّر
+# متغيرات البيئة بنفس أسماء Laravel — لا كلمات سر ولا مضيفات إنتاج تُكتب هنا:
+#   DB_HOST=... DB_PORT=... DB_DATABASE=... DB_USERNAME=... DB_PASSWORD=... \
+#   DB_SSLMODE=require python database/import/gdb_import.py ...
 DB = {
-    'host':     '127.0.0.1',
-    'port':     5432,
-    'dbname':   'sakuki_db',
-    'user':     'postgres',
-    'password': 'root',
+    'host':     os.environ.get('DB_HOST', '127.0.0.1'),
+    'port':     int(os.environ.get('DB_PORT', '5432')),
+    'dbname':   os.environ.get('DB_DATABASE', 'sakuki_db'),
+    'user':     os.environ.get('DB_USERNAME', 'postgres'),
+    'password': os.environ.get('DB_PASSWORD', 'root'),
     'options':  '-c client_encoding=UTF8',
+    'sslmode':  os.environ.get('DB_SSLMODE', 'prefer'),
 }
 
 GDB_LAYER = 'Osooli'          # الطبقة الافتراضية — يمكن تجاوزها بـ --layer
@@ -67,7 +72,10 @@ def load_features(path: str, layer: str = GDB_LAYER) -> list:
 
     if os.path.isdir(path) or ext == '.gdb':
         print(f"  نوع المصدر : GDB (طبقة: {layer})")
-        with fiona.open(path, layer=layer) as src:
+        # هذا الـ GDB يخزّن الحقول النصية بترميز cp1256 (Windows Arabic) لا UTF-8،
+        # وGDAL يفشل بصمت ويستبدل كل حرف بـ U+FFFD بدون هذا الترميز الصريح —
+        # لا يوجد تعويض لاحق بعد القراءة، الفقد نهائي.
+        with fiona.open(path, layer=layer, encoding='cp1256') as src:
             crs  = src.crs
             raw  = list(src)
         needs_proj = crs and '32638' in str(crs)
@@ -259,6 +267,26 @@ def run(source_path: str, layer: str = GDB_LAYER):
         for key, cnt in multi_owner_groups.items():
             print(f"      {key[0]} / {key[1]} — {cnt} ملاك")
 
+    # نفس رقم الهوية بأكثر من اسم داخل هذا المصدر — خطأ إدخال في الغالب
+    # (نُسخ اسم مالك آخر بالخطأ)، لا يعني بالضرورة اختلاف بسيط بالصياغة.
+    # الاستيراد لن يستبدل اسم مالك موجود مسبقًا، لكن هذا يستحق مراجعة يدوية
+    # للمصدر نفسه قبل أي استيراد لاحق.
+    names_by_id: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
+    for feat in features:
+        p = feat['properties']
+        nid = str(p.get('Woner_ID') or '').strip()
+        name = str(p.get('Name') or '').strip()
+        if nid and name:
+            names_by_id[nid][name].append(f"{p.get('Parcel')}-{p.get('Plan_No')}")
+
+    name_conflicts = {nid: names for nid, names in names_by_id.items() if len(names) > 1}
+    if name_conflicts:
+        print(f"  ⚠ رقم هوية بأكثر من اسم ({len(name_conflicts)}) — راجع المصدر:")
+        for nid, names in name_conflicts.items():
+            print(f"      {nid}:")
+            for name, geo_ids in names.items():
+                print(f"          \"{name}\" — {', '.join(geo_ids)}")
+
     # ── 4. استيراد ──────────────────────────────────────────────────────────
     stats = {
         'inserted': 0, 'updated': 0,
@@ -376,11 +404,16 @@ def run(source_path: str, layer: str = GDB_LAYER):
                 name        = fp['Name'].strip()          if fp.get('Name')     else 'غير معروف'
 
                 if national_id:
+                    # لا يُستبدل اسم مالك موجود مسبقًا: صف واحد خاطئ بالمصدر
+                    # (رقم هوية صحيح مع اسم شخص آخر بالخطأ) كافٍ ليطمس اسمًا
+                    # صحيحًا عبر كل قطع ذلك المالك دفعة واحدة — رأيناه فعليًا
+                    # بهذا الملف. تغيير الاسم فعل متعمّد يدوي، لا نتيجة جانبية
+                    # لمزامنة جغرافية.
                     cur.execute("""
                         INSERT INTO owners (name, national_id, created_at, updated_at)
                         VALUES (%s, %s, NOW(), NOW())
                         ON CONFLICT (national_id) WHERE national_id IS NOT NULL
-                        DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
+                        DO UPDATE SET updated_at = NOW()
                         RETURNING id, (xmax = 0) AS is_new
                     """, (name, national_id))
                 else:

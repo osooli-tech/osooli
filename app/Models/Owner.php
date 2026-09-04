@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\DeedStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -57,12 +58,41 @@ class Owner extends Authenticatable
         return ltrim($digits, '0');
     }
 
+    /** Every deed this owner has ever been linked to — includes a deed a
+     *  parcel has since been re-issued past (e.g. a sale or gift transfer),
+     *  so this alone cannot answer "what does this owner hold today". */
     /** @return BelongsToMany<Deed, $this> */
     public function deeds(): BelongsToMany
     {
         return $this->belongsToMany(Deed::class, 'deed_owners')
             ->withPivot('ownership_share', 'source_gdb_id')
             ->withTimestamps();
+    }
+
+    /**
+     * This owner's deeds, restricted to the ones that are still each
+     * parcel's active deed. A parcel can carry more than one deed over time
+     * (Deed_No changes on a sale, gift, or re-registration); once a newer
+     * deed supersedes it, the old one stays in `deeds()` for history but
+     * must drop out here, or a transferred-away parcel would still count as
+     * held by its old owner.
+     *
+     * @return BelongsToMany<Deed, $this>
+     */
+    public function currentDeeds(): BelongsToMany
+    {
+        $relation = $this->deeds();
+
+        // Query\Builder, not Eloquent\Builder: "d2" is a bare SQL alias for
+        // the subquery, not a model Larastan can check columns against.
+        $relation->getQuery()->whereIn('deeds.id', function (\Illuminate\Database\Query\Builder $query): void {
+            $query->selectRaw('MAX(d2.id)')
+                ->from('deeds as d2')
+                ->whereColumn('d2.parcel_id', 'deeds.parcel_id')
+                ->where('d2.deed_status', DeedStatus::Updated->value);
+        });
+
+        return $relation;
     }
 
     /** @return HasMany<OwnerPortfolio, $this> */
@@ -84,7 +114,9 @@ class Owner extends Authenticatable
     }
 
     /**
-     * Parcels this owner holds, reached through their deeds.
+     * Parcels this owner currently holds, reached through each parcel's
+     * active deed (not just any deed they have ever been linked to) — a
+     * parcel re-issued to a new owner must stop counting toward the old one.
      *
      * Every API read must start from here so an owner can only ever see
      * their own parcels.
@@ -94,7 +126,7 @@ class Owner extends Authenticatable
     public function parcels(): Builder
     {
         return Parcel::whereHas(
-            'deeds.owners',
+            'currentDeed.owners',
             fn (Builder $query) => $query->whereKey($this->getKey())
         );
     }

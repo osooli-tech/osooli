@@ -29,7 +29,7 @@ class OwnerExportController extends Controller
     {
         $stats = new OwnerStatisticsService($owner);
 
-        $deeds = $owner->deeds()
+        $deeds = $owner->currentDeeds()
             ->with('parcel.plan.district')
             ->get()
             ->sortBy(fn ($deed) => $deed->parcel?->parcel_no)

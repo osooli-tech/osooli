@@ -34,7 +34,7 @@ class OwnerIndex extends Component
     private function owners(): LengthAwarePaginator
     {
         return Owner::query()
-            ->withCount(['deeds as parcel_count' => fn ($q) => $q->selectRaw('count(distinct parcel_id)')])
+            ->withCount('currentDeeds as parcel_count')
             ->withCount('deeds')
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
