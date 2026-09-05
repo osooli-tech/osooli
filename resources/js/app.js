@@ -1,9 +1,13 @@
 import './bootstrap';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
+import { uploadImport } from './import-upload';
 
 window.ApexCharts = ApexCharts;
 window.Swal = Swal;
+
+// ── Dashboard import wizard — called from resources/views/livewire/imports/import-wizard.blade.php ─
+window.uploadImport = uploadImport;
 
 // ── Toast notifications (dispatched from Livewire via $this->dispatch('toast')) ─
 window.addEventListener('toast', (e) => {

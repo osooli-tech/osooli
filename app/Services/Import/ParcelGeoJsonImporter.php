@@ -88,7 +88,7 @@ final class ParcelGeoJsonImporter implements Importer
         $warnings = [];
 
         if ($blank > 0) {
-            $warnings[] = __(':count features have no Geo_ID and will be skipped.', ['count' => $blank]);
+            $warnings[] = __('imports.warnings.no_geo_id', ['count' => $blank]);
         }
 
         // Read-only: this single lookup is the only query analyze() is allowed
@@ -174,7 +174,7 @@ final class ParcelGeoJsonImporter implements Importer
         }
 
         if ($skipped > 0) {
-            $warnings[] = __(':count features have no Geo_ID and were skipped.', ['count' => $skipped]);
+            $warnings[] = __('imports.warnings.no_geo_id', ['count' => $skipped]);
         }
 
         $created = count(array_filter($outcomes));

@@ -9,6 +9,7 @@ return [
     'parcels' => 'الأراضي',
     'survey_decisions' => 'القرارات المساحية',
     'documents' => 'المستندات',
+    'imports' => 'استيراد البيانات',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
     'presentation_requests' => 'طلبات العروض التقديمية',

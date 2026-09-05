@@ -29,6 +29,7 @@ return [
         'requests' => 'Modification Requests',
         'users' => 'Users',
         'admin' => 'Administration',
+        'imports' => 'Imports',
     ],
 
     'perm' => [
@@ -45,5 +46,6 @@ return [
         'roles_manage' => 'Manage roles',
         'audit_logs_view' => 'View audit log',
         'sync_view' => 'View sync',
+        'imports_create' => 'Import data',
     ],
 ];

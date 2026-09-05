@@ -10,6 +10,7 @@ return [
     'owners' => 'Owners',
     'survey_decisions' => 'Survey Decisions',
     'documents' => 'Documents',
+    'imports' => 'Data import',
     'modification_requests' => 'Modification Requests',
     'presentation_requests' => 'Demo Requests',
     'notifications' => 'Notifications',

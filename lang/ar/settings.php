@@ -29,6 +29,7 @@ return [
         'requests' => 'طلبات التعديل',
         'users' => 'المستخدمون',
         'admin' => 'الإدارة',
+        'imports' => 'الاستيراد',
     ],
 
     'perm' => [
@@ -45,5 +46,6 @@ return [
         'roles_manage' => 'إدارة الأدوار',
         'audit_logs_view' => 'عرض سجل العمليات',
         'sync_view' => 'عرض التزامن',
+        'imports_create' => 'استيراد البيانات',
     ],
 ];

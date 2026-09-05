@@ -60,6 +60,12 @@ class Sidebar extends Component
             'permission' => 'audit_logs.view',
         ],
         [
+            'route' => 'imports.index',
+            'label' => 'nav.imports',
+            'icon' => 'upload_file',
+            'permission' => 'imports.create',
+        ],
+        [
             'route' => 'settings.index',
             'label' => 'nav.settings',
             'icon' => 'settings',

@@ -18,6 +18,7 @@ return [
     'parcels.view_map' => 'عرض الخريطة الجغرافية',
     'documents.download' => 'تنزيل المستندات',
     'exports.create' => 'تصدير البيانات',
+    'imports.create' => 'استيراد البيانات',
     'modification_requests.view' => 'مشاهدة طلبات التعديل',
     'modification_requests.manage' => 'إدارة طلبات التعديل',
     'presentation_requests.view' => 'مشاهدة طلبات العروض التقديمية',
