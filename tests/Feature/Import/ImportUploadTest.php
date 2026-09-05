@@ -282,10 +282,10 @@ final class ImportUploadTest extends TestCase
         $this->assertSame(ImportStatus::Failed, ImportBatch::where('uuid', $uuid)->first()->status);
     }
 
-    public function test_completing_invalid_geojson_content_fails_the_batch(): void
+    public function test_completing_non_json_content_as_geojson_fails_the_batch(): void
     {
         $user = $this->admin();
-        $content = '{"type":"NotAFeatureCollection"}';
+        $content = 'not even the start of a json document';
 
         $uuid = $this->actingAs($user)->postJson(route('imports.upload.create'), [
             'kind' => 'gdb', 'filename' => 'parcels.geojson', 'byte_size' => strlen($content),
@@ -298,6 +298,32 @@ final class ImportUploadTest extends TestCase
         $this->actingAs($user)->postJson(route('imports.upload.complete', $uuid))->assertStatus(422);
 
         $this->assertSame(ImportStatus::Failed, ImportBatch::where('uuid', $uuid)->first()->status);
+    }
+
+    public function test_a_geojson_larger_than_the_sniff_window_still_completes(): void
+    {
+        Bus::fake();
+
+        $user = $this->admin();
+        // "features" sits well past any bounded prefix a memory-safe check
+        // could afford to read — proving completion does not depend on
+        // finding it within that window, only on the file starting with '{'
+        // and being valid UTF-8. The real "features" check happens later, in
+        // the queued analyze job.
+        $padding = str_repeat('x', 20000);
+        $content = '{"type":"FeatureCollection","note":"'.$padding.'","features":[]}';
+
+        $uuid = $this->actingAs($user)->postJson(route('imports.upload.create'), [
+            'kind' => 'gdb', 'filename' => 'parcels.geojson', 'byte_size' => strlen($content),
+        ])->json('uuid');
+
+        $this->actingAs($user)->post(route('imports.upload.chunk', $uuid), [
+            'index' => 0, 'chunk' => UploadedFile::fake()->createWithContent('c0', $content),
+        ])->assertOk();
+
+        $this->actingAs($user)->postJson(route('imports.upload.complete', $uuid))
+            ->assertOk()
+            ->assertJson(['status' => 'uploaded']);
     }
 
     public function test_completing_twice_dispatches_analysis_only_once(): void

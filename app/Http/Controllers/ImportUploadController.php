@@ -40,6 +40,9 @@ use ZipArchive;
  */
 final class ImportUploadController extends Controller
 {
+    /** Bytes read from a .geojson/.json upload to sanity-check it — see looksLikeGeoJson(). */
+    private const GEOJSON_SNIFF_BYTES = 8192;
+
     public function create(Request $request): JsonResponse
     {
         $this->authorize('imports.create');
@@ -203,11 +206,12 @@ final class ImportUploadController extends Controller
 
             // The only content-level check before the queued analyze job
             // runs: a .zip must actually open as an archive, and a
-            // .geojson/.json must decode to something with a features array.
-            // Without this, an upload that cleared create()'s extension
-            // whitelist but is not really that format fails asynchronously
-            // and opaquely in the queued job instead of here, synchronously,
-            // with a message the operator sees immediately.
+            // .geojson/.json must at least look like a JSON document (see
+            // looksLikeGeoJson() for why this is a bounded sniff, not a
+            // parse). Without this, an upload that cleared create()'s
+            // extension whitelist but is not really that format fails
+            // asynchronously and opaquely in the queued job instead of here,
+            // synchronously, with a message the operator sees immediately.
             if (! $this->archiveIsReadable($absolute)) {
                 $message = __('imports.errors.invalid_archive');
                 $batch->markFailed($message);
@@ -286,8 +290,8 @@ final class ImportUploadController extends Controller
 
     /**
      * Confirms the assembled upload actually contains what its extension
-     * claims: a .zip must open as an archive, a .geojson/.json must decode to
-     * something with a features array.
+     * claims: a .zip must open as an archive, a .geojson/.json must at least
+     * look like a JSON document.
      */
     private function archiveIsReadable(string $absolute): bool
     {
@@ -304,9 +308,62 @@ final class ImportUploadController extends Controller
             return $opened;
         }
 
-        $decoded = json_decode((string) file_get_contents($absolute), true);
+        return $this->looksLikeGeoJson($absolute);
+    }
 
-        return is_array($decoded) && isset($decoded['features']) && is_array($decoded['features']);
+    /**
+     * A cheap, bounded sanity check — not a parse. Only the first
+     * GEOJSON_SNIFF_BYTES of the file are ever read, regardless of its real
+     * size (up to imports.max_upload_bytes, 512 MB by default): reading the
+     * whole thing and json_decode()-ing it into a PHP array here, inside a
+     * synchronous HTTP request, would risk an uncatchable OOM fatal on a
+     * large but entirely legitimate GeoJSON — precisely the file this
+     * whitelisted format exists to accept (GdbConverter's GDAL-less
+     * passthrough).
+     *
+     * This deliberately does not require a "features" key to appear within
+     * the window. "type" and "features" may legitimately appear in either
+     * order, and a large crs/bbox block ahead of "features" is exactly the
+     * kind of document most likely to both be huge and push "features" past
+     * any prefix window affordable here — the biggest files are the ones a
+     * "features"-in-window check would most often reject. So this only
+     * confirms the upload opens as a JSON object (first non-space byte is
+     * '{') and that what was read decodes as valid UTF-8. The real
+     * structural validation — a genuine features array, well-formed
+     * geometries — happens in the queued analyze job via
+     * ParcelGeoJsonImporter::readFeatures(), where a failure is recoverable
+     * instead of fataling this request.
+     */
+    private function looksLikeGeoJson(string $absolute): bool
+    {
+        $prefix = file_get_contents($absolute, false, null, 0, self::GEOJSON_SNIFF_BYTES);
+
+        if ($prefix === false || $prefix === '') {
+            return false;
+        }
+
+        // A leading UTF-8 BOM is not whitespace as far as ltrim() is
+        // concerned, but GeoJSON exports occasionally carry one.
+        if (str_starts_with($prefix, "\xEF\xBB\xBF")) {
+            $prefix = substr($prefix, 3);
+        }
+
+        $trimmed = ltrim($prefix);
+
+        if ($trimmed === '' || $trimmed[0] !== '{') {
+            return false;
+        }
+
+        // The read above is cut at a fixed byte offset, which can land in the
+        // middle of a multi-byte UTF-8 character — very plausible here, since
+        // this app's GeoJSON exports carry Arabic property values. The last 3
+        // bytes are dropped before validating encoding so a genuine
+        // mid-character cut at that boundary is never mistaken for invalid
+        // UTF-8: the longest UTF-8 sequence is 4 bytes, so trimming 3 always
+        // clears any incomplete trailing sequence.
+        $safeForEncodingCheck = strlen($prefix) > 3 ? substr($prefix, 0, -3) : $prefix;
+
+        return mb_check_encoding($safeForEncodingCheck, 'UTF-8');
     }
 
     /**
