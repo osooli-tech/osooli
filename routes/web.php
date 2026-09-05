@@ -129,8 +129,15 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::middleware('can:imports.create')->group(function () {
         Route::get('/imports', fn () => view('imports.index'))->name('imports.index');
         Route::post('/imports/upload', [ImportUploadController::class, 'create'])->name('imports.upload.create');
-        Route::post('/imports/upload/{uuid}/chunk', [ImportUploadController::class, 'chunk'])->name('imports.upload.chunk');
-        Route::post('/imports/upload/{uuid}/complete', [ImportUploadController::class, 'complete'])->name('imports.upload.complete');
+        // {uuid} is constrained to the uuid shape so a malformed value 404s
+        // at the router instead of reaching the "uuid" column's native
+        // Postgres uuid type as a raw comparison value, which raises a SQL
+        // error (visible to the client whenever APP_DEBUG is on) rather than
+        // simply finding no match.
+        Route::post('/imports/upload/{uuid}/chunk', [ImportUploadController::class, 'chunk'])
+            ->name('imports.upload.chunk')->whereUuid('uuid');
+        Route::post('/imports/upload/{uuid}/complete', [ImportUploadController::class, 'complete'])
+            ->name('imports.upload.complete')->whereUuid('uuid');
     });
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');

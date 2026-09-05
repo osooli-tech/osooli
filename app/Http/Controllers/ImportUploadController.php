@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use RuntimeException;
+use ZipArchive;
 
 /**
  * Chunked upload for import archives.
@@ -25,13 +26,16 @@ use RuntimeException;
  *
  * Every request in this controller is treated as hostile: the {uuid} route
  * parameter is attacker-controlled, so every batch lookup is scoped to the
- * authenticated owner (ownedBatch()). The stored file's path is always
- * derived from the server-generated batch uuid, never from the client-supplied
- * original_filename, which is stored only for display. And because a client
- * decides how many chunks it sends and how big each one is, chunk() verifies
- * the running total against the batch's declared byte_size before writing
- * anything further to disk, so a malformed or malicious client cannot inflate
- * the file past what was declared (and, by construction, past
+ * authenticated owner (ownedBatch()) — a batch that does not exist and one
+ * owned by someone else are both reported as 404, matching how this app's
+ * mobile API already collapses that distinction elsewhere (bootstrap.php).
+ * The stored file's path is always derived from the server-generated batch
+ * uuid and a validated (never client-freeform) extension, never from the
+ * client-supplied original_filename, which is stored only for display. And
+ * because a client decides how many chunks it sends and how big each one is,
+ * chunk() verifies the running total against the batch's declared byte_size
+ * before writing anything further to disk, so a malformed or malicious client
+ * cannot inflate the file past what was declared (and, by construction, past
  * imports.max_upload_bytes).
  */
 final class ImportUploadController extends Controller
@@ -56,8 +60,19 @@ final class ImportUploadController extends Controller
             ], 422);
         }
 
+        $uuid = (string) Str::uuid();
+
+        // $extension is one of the literals in $allowed above — never the raw
+        // original_filename — so it is safe to use here, and it is the only
+        // client-influenced value that ever reaches a filesystem path. The
+        // stored file must keep this real extension (not a generic name):
+        // GdbConverter's .geojson/.json passthrough decides whether to run
+        // GDAL at all by testing this same path's suffix, so a batch that
+        // loses its extension here is unprocessable no matter what it holds.
+        $storedPath = Storage::disk('local')->path('imports/'.$uuid.'/source.'.$extension);
+
         $batch = ImportBatch::create([
-            'uuid' => (string) Str::uuid(),
+            'uuid' => $uuid,
             'user_id' => $request->user()->id,
             'kind' => $kind,
             'status' => ImportStatus::Uploading,
@@ -65,6 +80,13 @@ final class ImportUploadController extends Controller
             // build a filesystem path.
             'original_filename' => $validated['filename'],
             'byte_size' => $validated['byte_size'],
+            // Set immediately, before a single byte exists on disk, so an
+            // abandoned or failed upload is visible to
+            // ImportBatch::scopeStale(), which filters on
+            // whereNotNull('stored_path'). Leaving this null until completion
+            // would hide exactly the uploads that never finish — the ones
+            // most likely to leak disk space.
+            'stored_path' => $storedPath,
         ]);
 
         return response()->json([
@@ -85,20 +107,19 @@ final class ImportUploadController extends Controller
 
         abort_if($chunkPath === false, 422, __('imports.errors.invalid_chunk'));
 
-        // Measured with the same filesize() used everywhere else in this class
-        // (never UploadedFile::getSize()) so the number that gates the write
-        // below is the exact byte count appendChunk() will stream from — no
-        // room for the two to disagree.
+        // Measured with the same filesize() used everywhere else in this
+        // class (never UploadedFile::getSize()) so the number that gates the
+        // write below is the exact byte count appendChunk() will stream from
+        // — no room for the two to disagree.
         $chunkSize = filesize($chunkPath);
 
         abort_if($chunkSize === false, 422, __('imports.errors.invalid_chunk'));
 
-        // The read (received_chunks / current file size), the decision, and the
-        // write are locked together for the lifetime of this batch row so two
-        // concurrent requests for the same {uuid} (a crafted double-submit, not
-        // just a dropped connection) cannot both pass the same check and each
-        // append their chunk — the second one blocks until the first commits,
-        // then sees the updated state.
+        // The read (received_chunks / current file size), the decision, and
+        // the write are locked together for the lifetime of this batch row
+        // so two concurrent requests for the same {uuid} (a crafted
+        // double-submit, not just a dropped connection) cannot both pass the
+        // same check and each append their chunk.
         return DB::transaction(function () use ($request, $uuid, $index, $chunkPath, $chunkSize): JsonResponse {
             $batch = $this->ownedBatch($request, $uuid, lockForUpdate: true);
 
@@ -111,28 +132,35 @@ final class ImportUploadController extends Controller
                 ], 409);
             }
 
-            $partial = $this->partialPath($batch);
-            $absolute = Storage::disk('local')->path($partial);
+            $absolute = (string) $batch->stored_path;
             $currentSize = is_file($absolute) ? (int) filesize($absolute) : 0;
 
-            // The client's declared byte_size is the hard ceiling for what this
-            // batch may ever write to disk (and byte_size itself was already
-            // capped at imports.max_upload_bytes when the batch was created).
-            // Without this check, a client that keeps sending well-formed,
-            // correctly-indexed chunks past the declared size — or a single
-            // oversized chunk — would grow the file without bound.
+            // The client's declared byte_size is the hard ceiling for what
+            // this batch may ever write to disk (and byte_size itself was
+            // already capped at imports.max_upload_bytes when the batch was
+            // created). Without this check, a client that keeps sending
+            // well-formed, correctly-indexed chunks past the declared size —
+            // or a single oversized chunk — would grow the file without
+            // bound.
             if ($currentSize + $chunkSize > $batch->byte_size) {
                 $batch->markFailed(__('imports.errors.size_exceeded'));
+                $this->deleteUpload($batch);
 
                 return response()->json([
                     'message' => __('imports.errors.size_exceeded'),
                 ], 422);
             }
 
-            Storage::disk('local')->makeDirectory(dirname($partial));
-            $this->appendChunk($absolute, $chunkPath);
+            Storage::disk('local')->makeDirectory($this->uploadDirectory($batch));
 
+            // Incremented before the chunk is appended: filesystem writes are
+            // not part of this DB transaction, so if appendChunk() throws
+            // (an I/O error, a full disk) this increment rolls back with
+            // everything else in the transaction, and the client's retry of
+            // the same index lands on a file whose length still matches what
+            // the (rolled-back) counter says was received.
             $batch->increment('received_chunks');
+            $this->appendChunk($absolute, $chunkPath, $chunkSize);
 
             return response()->json(['next_index' => $batch->received_chunks]);
         });
@@ -140,40 +168,79 @@ final class ImportUploadController extends Controller
 
     public function complete(Request $request, string $uuid): JsonResponse
     {
-        $batch = $this->ownedBatch($request, $uuid);
+        // $batch is captured by reference from inside the transaction so it
+        // can be inspected once the lock below is released — dispatching the
+        // (potentially slow) analyze job while still holding the row lock
+        // would keep every other request against this batch blocked for no
+        // reason.
+        $batch = null;
 
-        abort_unless($batch->status === ImportStatus::Uploading, 409, __('imports.errors.not_uploading'));
+        $response = DB::transaction(function () use ($request, $uuid, &$batch): JsonResponse {
+            $batch = $this->ownedBatch($request, $uuid, lockForUpdate: true);
 
-        $partial = $this->partialPath($batch);
-        $absolute = Storage::disk('local')->path($partial);
-        $actual = is_file($absolute) ? (int) filesize($absolute) : 0;
+            abort_unless($batch->status === ImportStatus::Uploading, 409, __('imports.errors.not_uploading'));
 
-        if ($actual !== (int) $batch->byte_size) {
-            $batch->markFailed(__('imports.errors.size_mismatch', ['expected' => $batch->byte_size, 'actual' => $actual]));
+            $absolute = (string) $batch->stored_path;
+            $actual = is_file($absolute) ? (int) filesize($absolute) : 0;
 
-            return response()->json(['message' => $batch->error_message], 422);
+            if ($actual !== (int) $batch->byte_size) {
+                $message = __('imports.errors.size_mismatch', ['expected' => $batch->byte_size, 'actual' => $actual]);
+                $batch->markFailed($message);
+                $this->deleteUpload($batch);
+
+                return response()->json(['message' => $message], 422);
+            }
+
+            $checksum = hash_file('sha256', $absolute);
+
+            if ($checksum === false) {
+                $message = __('imports.errors.invalid_archive');
+                $batch->markFailed($message);
+                $this->deleteUpload($batch);
+
+                return response()->json(['message' => $message], 422);
+            }
+
+            // The only content-level check before the queued analyze job
+            // runs: a .zip must actually open as an archive, and a
+            // .geojson/.json must decode to something with a features array.
+            // Without this, an upload that cleared create()'s extension
+            // whitelist but is not really that format fails asynchronously
+            // and opaquely in the queued job instead of here, synchronously,
+            // with a message the operator sees immediately.
+            if (! $this->archiveIsReadable($absolute)) {
+                $message = __('imports.errors.invalid_archive');
+                $batch->markFailed($message);
+                $this->deleteUpload($batch);
+
+                return response()->json(['message' => $message], 422);
+            }
+
+            $transitioned = $batch->transitionTo(ImportStatus::Uploaded, [
+                'stored_path' => $absolute,
+                'checksum' => $checksum,
+            ]);
+
+            // False means the batch was no longer Uploading by the time this
+            // write raced another request for the same {uuid} (a replayed or
+            // double-submitted complete()) — do not dispatch analysis twice.
+            abort_unless($transitioned, 409, __('imports.errors.not_uploading'));
+
+            return response()->json(['uuid' => $batch->uuid, 'status' => $batch->status->value]);
+        });
+
+        if ($batch instanceof ImportBatch && $batch->status === ImportStatus::Uploaded) {
+            $batch->dispatchAnalysis();
         }
 
-        $transitioned = $batch->transitionTo(ImportStatus::Uploaded, [
-            'stored_path' => $absolute,
-            'checksum' => hash_file('sha256', $absolute),
-        ]);
-
-        // A false result means the batch was no longer Uploading by the time the
-        // write raced against another request for the same {uuid} (a replayed
-        // or double-submitted complete()) — do not dispatch analysis twice.
-        abort_unless($transitioned, 409, __('imports.errors.not_uploading'));
-
-        $batch->dispatchAnalysis();
-
-        return response()->json(['uuid' => $batch->uuid, 'status' => $batch->status->value]);
+        return $response;
     }
 
     /**
      * Loads the batch for {uuid} and enforces that it belongs to the
-     * authenticated user. {uuid} is an attacker-controlled route parameter, so
-     * every endpoint that accepts one must go through here rather than loading
-     * the batch directly.
+     * authenticated user. {uuid} is an attacker-controlled route parameter,
+     * so every endpoint that accepts one must go through here rather than
+     * loading the batch directly.
      */
     private function ownedBatch(Request $request, string $uuid, bool $lockForUpdate = false): ImportBatch
     {
@@ -187,28 +254,73 @@ final class ImportUploadController extends Controller
 
         $batch = $query->firstOrFail();
 
-        abort_unless($batch->user_id === $request->user()->id, 403);
+        // A missing batch and one owned by someone else are both reported as
+        // 404 — a caller must not be able to tell "does not exist" apart
+        // from "exists but is not yours".
+        abort_unless($batch->user_id === $request->user()->id, 404);
 
         return $batch;
     }
 
     /**
-     * The on-disk path for a batch's in-progress upload, derived only from the
-     * server-generated uuid — never from the client-supplied original_filename,
-     * which must not be able to influence a filesystem path.
+     * The on-disk directory for a batch's upload, derived only from the
+     * server-generated uuid — never from the client-supplied
+     * original_filename, which must not be able to influence a filesystem
+     * path.
      */
-    private function partialPath(ImportBatch $batch): string
+    private function uploadDirectory(ImportBatch $batch): string
     {
-        return 'imports/'.$batch->uuid.'/source.part';
+        return 'imports/'.$batch->uuid;
     }
 
     /**
-     * Appends the chunk to the partial file via a stream copy rather than
+     * Removes a batch's uploaded bytes immediately once it has failed, so a
+     * closed-tab upload is the only thing left for the retention job to find
+     * — a size-exceeded or size-mismatch failure does not additionally sit
+     * on disk until that job runs.
+     */
+    private function deleteUpload(ImportBatch $batch): void
+    {
+        Storage::disk('local')->deleteDirectory($this->uploadDirectory($batch));
+    }
+
+    /**
+     * Confirms the assembled upload actually contains what its extension
+     * claims: a .zip must open as an archive, a .geojson/.json must decode to
+     * something with a features array.
+     */
+    private function archiveIsReadable(string $absolute): bool
+    {
+        $extension = strtolower(pathinfo($absolute, PATHINFO_EXTENSION));
+
+        if ($extension === 'zip') {
+            $zip = new ZipArchive;
+            $opened = $zip->open($absolute) === true;
+
+            if ($opened) {
+                $zip->close();
+            }
+
+            return $opened;
+        }
+
+        $decoded = json_decode((string) file_get_contents($absolute), true);
+
+        return is_array($decoded) && isset($decoded['features']) && is_array($decoded['features']);
+    }
+
+    /**
+     * Appends the chunk to the destination via a stream copy rather than
      * reading it into a PHP string with file_get_contents(): the caller has
      * already bounded the chunk against the batch's remaining allowance, but
      * streaming keeps memory use flat regardless of chunk size.
+     *
+     * stream_copy_to_stream()'s and fclose()'s return values are checked
+     * rather than trusted: on a full disk or another I/O error, a short or
+     * failed write would otherwise leave received_chunks claiming more bytes
+     * landed than actually did, silently corrupting the file.
      */
-    private function appendChunk(string $destination, string $source): void
+    private function appendChunk(string $destination, string $source, int $expectedBytes): void
     {
         $in = fopen($source, 'rb');
         $out = fopen($destination, 'ab');
@@ -224,11 +336,12 @@ final class ImportUploadController extends Controller
             throw new RuntimeException('Unable to open upload chunk stream.');
         }
 
-        try {
-            stream_copy_to_stream($in, $out);
-        } finally {
-            fclose($in);
-            fclose($out);
+        $copied = stream_copy_to_stream($in, $out);
+        $sourceClosed = fclose($in);
+        $destClosed = fclose($out);
+
+        if ($copied !== $expectedBytes || ! $sourceClosed || ! $destClosed) {
+            throw new RuntimeException('Failed to write the full upload chunk to disk.');
         }
     }
 }
