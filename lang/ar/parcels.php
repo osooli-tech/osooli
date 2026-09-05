@@ -182,4 +182,5 @@ return [
     'geodetic_utm' => 'مسقط ميركاتور المستعرض العالمي (U.T.M)',
     'geodetic_datum' => 'المجسم الناقص الدوراني العالمي (WGS-84)',
     'location' => 'الموقع',
+    'old_deed_badge' => 'صك قديم',
 ];

@@ -182,4 +182,5 @@ return [
     'geodetic_utm' => 'Universal Transverse Mercator (U.T.M)',
     'geodetic_datum' => 'World Geodetic System (WGS-84)',
     'location' => 'Location',
+    'old_deed_badge' => 'Old deed',
 ];

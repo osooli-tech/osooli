@@ -18,6 +18,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'parcels.view_map',
         'documents.download',
         'exports.create',
+        'owners.edit',
         'modification_requests.view',
         'modification_requests.manage',
         'presentation_requests.view',

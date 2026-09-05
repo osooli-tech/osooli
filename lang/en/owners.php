@@ -48,4 +48,10 @@ return [
     'valuation_section' => 'Estimated Valuation',
     'valuation_coverage_note' => 'Value computed from :priced of :total priced parcels',
     'deeds_table_heading' => 'Parcels & Deeds',
+
+    // ── Owner data editing ──────────────────────────────────────
+    'owner_data' => 'Owner Data',
+    'edit_owner' => 'Edit data',
+    'save' => 'Save',
+    'cancel' => 'Cancel',
 ];

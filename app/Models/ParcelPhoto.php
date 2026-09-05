@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $parcel_id
+ * @property int|null $deed_id
  * @property string $photo_url
  * @property PhotoType|null $photo_type
  */
@@ -20,6 +21,7 @@ class ParcelPhoto extends Model
 
     protected $fillable = [
         'parcel_id',
+        'deed_id',
         'photo_url',
         'photo_type',
     ];
@@ -35,5 +37,15 @@ class ParcelPhoto extends Model
     public function parcel(): BelongsTo
     {
         return $this->belongsTo(Parcel::class);
+    }
+
+    /**
+     * Only set on a Deed-type photo — which specific deed record this scan documents.
+     *
+     * @return BelongsTo<Deed, $this>
+     */
+    public function deed(): BelongsTo
+    {
+        return $this->belongsTo(Deed::class);
     }
 }

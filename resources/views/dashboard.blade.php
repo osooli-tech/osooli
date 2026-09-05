@@ -383,6 +383,21 @@
         <livewire:dashboard.city-portfolios />
     </section>
 
+    {{-- Portfolios owners defined themselves — a different grouping from the
+         one above: this is each owner's own split of their holdings (e.g. by
+         project), not derived from geography. --}}
+    <section>
+        <h2 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest
+                   text-on-surface-variant dark:text-on-primary-container mb-4">
+            <span class="material-symbols-outlined text-[16px] text-secondary"
+                  style="font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;">
+                folder_special
+            </span>
+            {{ __('dashboard.section_owner_portfolios') }}
+        </h2>
+        <livewire:dashboard.owner-portfolios />
+    </section>
+
     {{-- Section 3: operational widgets --}}
     <section>
         <h2 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest

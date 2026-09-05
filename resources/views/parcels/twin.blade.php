@@ -383,17 +383,37 @@
                     border border-outline-variant dark:border-white/10 shadow-sm">
             <h2 class="font-semibold text-on-surface dark:text-white text-sm mb-4">{{ __('parcels.documents_section') }}</h2>
 
-            @php $files = $docs['deed']->concat($docs['survey']); @endphp
+            @php
+                // Deed scans sort current-first: the file someone actually
+                // needs is the one for the deed that's still valid.
+                $files = $docs['deed']
+                    ->sortByDesc(fn ($file) => $file->deed_id === $parcel->currentDeed?->id)
+                    ->concat($docs['survey']);
+            @endphp
 
             @forelse ($files as $file)
+                @php
+                    $isOldDeedScan = $file->photo_type === \App\Enums\PhotoType::Deed
+                        && $file->deed_id !== null
+                        && $file->deed_id !== $parcel->currentDeed?->id;
+                @endphp
                 <a href="{{ $file->photo_url }}" target="_blank" rel="noopener"
                    class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container dark:hover:bg-white/5
                           border border-outline-variant dark:border-white/10 mb-2 last:mb-0 transition-colors">
                     <span class="material-symbols-outlined text-[20px] text-error shrink-0">picture_as_pdf</span>
                     <span class="flex-1 min-w-0 text-sm text-on-surface dark:text-white truncate">
                         {{ $file->photo_type?->value }}
+                        @if ($file->deed?->deed_no)
+                            <span class="text-on-surface-variant dark:text-on-primary-container font-normal">— {{ $file->deed->deed_no }}</span>
+                        @endif
                     </span>
-                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container">
+                    @if ($isOldDeedScan)
+                        <span class="shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full
+                                     bg-tertiary-container/20 text-tertiary-container dark:bg-tertiary-container/30">
+                            {{ __('parcels.old_deed_badge') }}
+                        </span>
+                    @endif
+                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">
                         download
                     </span>
                 </a>

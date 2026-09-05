@@ -57,8 +57,13 @@ class LinkDeedDocuments extends Command
                 continue;
             }
 
+            // Keyed by deed_id, not just parcel_id + type: a parcel can carry
+            // more than one deed (a sale or gift transfer keeps the old one on
+            // record), and each deed has its own scan. Keying on parcel_id
+            // alone made a second deed's scan silently overwrite the first's
+            // row instead of adding a second one.
             ParcelPhoto::updateOrCreate(
-                ['parcel_id' => $deed->parcel_id, 'photo_type' => PhotoType::Deed->value],
+                ['parcel_id' => $deed->parcel_id, 'deed_id' => $deed->id, 'photo_type' => PhotoType::Deed->value],
                 ['photo_url' => '/storage/'.$path]
             );
             $linked++;

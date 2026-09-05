@@ -28,7 +28,8 @@ class DigitalTwinService
             'deeds.deedOwners.owner',
             'boundary.engineeringOffice',
             'surveyDecisions',
-            'photos',
+            'photos.deed',
+            'currentDeed',
         ]);
 
         $computedArea = $this->computedArea($parcel);

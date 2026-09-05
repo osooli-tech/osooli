@@ -48,4 +48,10 @@ return [
     'valuation_section' => 'التقييم التقديري',
     'valuation_coverage_note' => 'القيمة محسوبة من :priced من أصل :total قطعة مسعّرة',
     'deeds_table_heading' => 'القطع والصكوك',
+
+    // ── تعديل بيانات المالك ─────────────────────────────────────
+    'owner_data' => 'بيانات المالك',
+    'edit_owner' => 'تعديل البيانات',
+    'save' => 'حفظ',
+    'cancel' => 'إلغاء',
 ];

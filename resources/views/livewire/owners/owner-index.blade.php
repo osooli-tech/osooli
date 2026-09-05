@@ -186,6 +186,10 @@
                             @endphp
                             <tr>
                                 <td colspan="6" class="bg-surface-container dark:bg-[#161f2e] px-4 py-4">
+                                    @can('owners.edit')
+                                        <livewire:owners.owner-edit-form :owner-id="$owner->id" :key="'edit-'.$owner->id" />
+                                    @endcan
+
                                     <p class="text-xs font-semibold text-on-surface-variant dark:text-on-primary-container mb-3 uppercase tracking-wide">
                                         {{ __('owners.parcels_of') }} {{ $owner->name }}
                                     </p>
