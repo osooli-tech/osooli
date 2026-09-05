@@ -20,6 +20,18 @@ use Illuminate\Support\Facades\Storage;
  * and Completed alike — and this command treats them identically: it only
  * cares about "is there a staging directory for this uuid", never about
  * status.
+ *
+ * stale() only looks at created_at. On top of it, this command additionally
+ * requires updated_at to also be outside the retention window, because
+ * ImportUploadController::chunk() touches updated_at on every appended
+ * chunk. Without that second condition, a batch old enough to be stale by
+ * created_at but still actively receiving chunks right now would have its
+ * staging directory deleted out from under the open file handle still
+ * writing to it. That is self-healing — complete()'s size check catches the
+ * mismatch and fails that one batch — but skipping it here is free and
+ * avoids the failure entirely. This is deliberately a condition added here,
+ * not a change to ImportBatch::scopeStale() itself, whose behaviour is
+ * pinned by Task 6's tests.
  */
 class PruneImportBatches extends Command
 {
@@ -38,20 +50,50 @@ class PruneImportBatches extends Command
         $importsRoot = realpath($disk->path('imports'));
 
         $pruned = 0;
+        $alreadyMissing = 0;
+        $failed = 0;
 
-        foreach (ImportBatch::query()->stale($days)->get() as $batch) {
-            $this->deleteStagingDirectory($disk, $importsRoot, $batch->uuid);
+        // See the class docblock for why updated_at is filtered here rather
+        // than in scopeStale().
+        $notTouchedSince = now()->subDays($days);
+
+        foreach (ImportBatch::query()->stale($days)->where('updated_at', '<', $notTouchedSince)->get() as $batch) {
+            $result = $this->deleteStagingDirectory($disk, $importsRoot, $batch->uuid);
+
+            if ($result === false) {
+                // A directory was found but was not actually removed (a
+                // permission error, a Windows file lock, or the containment
+                // guard refusing an unexpected path) — or deleteDirectory()
+                // simply reported failure. The local disk is configured with
+                // 'throw' => false and 'report' => false (config/
+                // filesystems.php), so this return value is the *only*
+                // signal such a failure produces: no exception, no log
+                // entry. stored_path is deliberately left set so
+                // scopeStale()'s whereNotNull('stored_path') hands this row
+                // back to the very next run instead of losing track of it
+                // forever. One failed batch must not stop the rest of the
+                // run, so processing continues.
+                $failed++;
+
+                continue;
+            }
+
+            $result === null ? $alreadyMissing++ : $pruned++;
 
             // The row itself is kept as history (see the command
-            // description) — only stored_path is cleared, both because the
-            // file it named is gone and so scopeStale()'s
+            // description) — only stored_path is cleared, and only now that
+            // the directory is genuinely gone (deleted just above, or
+            // already gone before this run), so scopeStale()'s
             // whereNotNull('stored_path') does not hand this row back to a
             // later run.
             $batch->forceFill(['stored_path' => null])->save();
-            $pruned++;
         }
 
-        $this->info("Staged import archives pruned: {$pruned}");
+        $this->info("Staged import archives pruned: {$pruned} (already missing: {$alreadyMissing})");
+
+        if ($failed > 0) {
+            $this->warn("Staged import archives that failed to delete: {$failed} — left in place, stored_path kept, for the next run to retry.");
+        }
 
         return self::SUCCESS;
     }
@@ -78,24 +120,35 @@ class PruneImportBatches extends Command
      * all for a batch that failed before its first chunk) is the normal,
      * expected case for many stale rows, not an error — it is simply
      * skipped.
+     *
+     * @return bool|null true if a directory was found and deleteDirectory()
+     *                   reported it was actually removed; null if there was
+     *                   nothing to remove (no staging directory ever
+     *                   existed, or it was already gone); false if a
+     *                   directory was found but was not removed — either
+     *                   deleteDirectory() itself reported failure, or the
+     *                   containment guard refused to touch a path that did
+     *                   not resolve inside $importsRoot. Callers must treat
+     *                   null and false differently: null means the caller's
+     *                   stored_path is safe to clear, false means it is not.
      */
-    private function deleteStagingDirectory(Filesystem $disk, string|false $importsRoot, string $uuid): void
+    private function deleteStagingDirectory(Filesystem $disk, string|false $importsRoot, string $uuid): ?bool
     {
         if ($importsRoot === false || $uuid === '') {
-            return;
+            return null;
         }
 
         $relative = 'imports/'.$uuid;
         $real = realpath($disk->path($relative));
 
         if ($real === false) {
-            return;
+            return null;
         }
 
         if (! str_starts_with($real, $importsRoot.DIRECTORY_SEPARATOR)) {
-            return;
+            return false;
         }
 
-        $disk->deleteDirectory($relative);
+        return $disk->deleteDirectory($relative);
     }
 }
