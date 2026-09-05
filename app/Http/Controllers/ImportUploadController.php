@@ -342,6 +342,16 @@ final class ImportUploadController extends Controller
             return false;
         }
 
+        // A short read means file_get_contents() hit EOF before filling the
+        // sniff window — $prefix is the *entire* file, so its last bytes are
+        // real content, not a truncation artifact, and must not be trimmed
+        // below. Only a full-length read can possibly have been cut
+        // mid-character at the window boundary (a file exactly
+        // GEOJSON_SNIFF_BYTES long reads as full-length too and is
+        // indistinguishable from a longer one cut at the same point — trimming
+        // in that exact-length case is the conservative, correct choice).
+        $mayBeTruncated = strlen($prefix) === self::GEOJSON_SNIFF_BYTES;
+
         // A leading UTF-8 BOM is not whitespace as far as ltrim() is
         // concerned, but GeoJSON exports occasionally carry one.
         if (str_starts_with($prefix, "\xEF\xBB\xBF")) {
@@ -354,14 +364,19 @@ final class ImportUploadController extends Controller
             return false;
         }
 
-        // The read above is cut at a fixed byte offset, which can land in the
-        // middle of a multi-byte UTF-8 character — very plausible here, since
-        // this app's GeoJSON exports carry Arabic property values. The last 3
-        // bytes are dropped before validating encoding so a genuine
-        // mid-character cut at that boundary is never mistaken for invalid
-        // UTF-8: the longest UTF-8 sequence is 4 bytes, so trimming 3 always
-        // clears any incomplete trailing sequence.
-        $safeForEncodingCheck = strlen($prefix) > 3 ? substr($prefix, 0, -3) : $prefix;
+        // Only drop the last 3 bytes when the read may actually have been cut
+        // mid-character at the window boundary (see $mayBeTruncated above) —
+        // very plausible there, since this app's GeoJSON exports carry Arabic
+        // property values, and the longest UTF-8 sequence is 4 bytes, so
+        // trimming 3 always clears an incomplete trailing sequence. On a short
+        // read those same trailing bytes are genuine file content (e.g. a
+        // closing Arabic value or an emoji right before the final "}"), and
+        // trimming them would cut a real character in half instead of an
+        // artifact — exactly the false rejection an earlier version of this
+        // check produced.
+        $safeForEncodingCheck = $mayBeTruncated && strlen($prefix) > 3
+            ? substr($prefix, 0, -3)
+            : $prefix;
 
         return mb_check_encoding($safeForEncodingCheck, 'UTF-8');
     }

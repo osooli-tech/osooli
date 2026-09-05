@@ -326,6 +326,53 @@ final class ImportUploadTest extends TestCase
             ->assertJson(['status' => 'uploaded']);
     }
 
+    public function test_a_small_geojson_ending_in_arabic_content_completes(): void
+    {
+        Bus::fake();
+
+        // The whole file is well under the sniff window, so it is read in
+        // full (no truncation is possible) — a naive fixed trim of the tail
+        // before the encoding check would cut this real Arabic text in half
+        // and reject a perfectly valid, small upload.
+        $user = $this->admin();
+        $content = '{"type":"FeatureCollection","features":[],"city":"الدرعية"}';
+
+        $uuid = $this->actingAs($user)->postJson(route('imports.upload.create'), [
+            'kind' => 'gdb', 'filename' => 'parcels.geojson', 'byte_size' => strlen($content),
+        ])->json('uuid');
+
+        $this->actingAs($user)->post(route('imports.upload.chunk', $uuid), [
+            'index' => 0, 'chunk' => UploadedFile::fake()->createWithContent('c0', $content),
+        ])->assertOk();
+
+        $this->actingAs($user)->postJson(route('imports.upload.complete', $uuid))
+            ->assertOk()
+            ->assertJson(['status' => 'uploaded']);
+    }
+
+    public function test_a_small_geojson_ending_in_an_emoji_completes(): void
+    {
+        Bus::fake();
+
+        // Same reasoning as the Arabic case above, with a 4-byte UTF-8
+        // character (an emoji) right before the closing brace instead of a
+        // 2-byte one — the largest possible sequence a bad trim could split.
+        $user = $this->admin();
+        $content = '{"type":"FeatureCollection","features":[],"note":"😀"}';
+
+        $uuid = $this->actingAs($user)->postJson(route('imports.upload.create'), [
+            'kind' => 'gdb', 'filename' => 'parcels.geojson', 'byte_size' => strlen($content),
+        ])->json('uuid');
+
+        $this->actingAs($user)->post(route('imports.upload.chunk', $uuid), [
+            'index' => 0, 'chunk' => UploadedFile::fake()->createWithContent('c0', $content),
+        ])->assertOk();
+
+        $this->actingAs($user)->postJson(route('imports.upload.complete', $uuid))
+            ->assertOk()
+            ->assertJson(['status' => 'uploaded']);
+    }
+
     public function test_completing_twice_dispatches_analysis_only_once(): void
     {
         Bus::fake();

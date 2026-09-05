@@ -7,6 +7,7 @@ namespace Tests\Feature\Import;
 use App\Services\Import\ParcelGeoJsonImporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 use Tests\TestCase;
 
 final class ParcelGeoJsonImporterTest extends TestCase
@@ -54,6 +55,29 @@ final class ParcelGeoJsonImporterTest extends TestCase
 
         $this->assertSame(0, $preview->willCreate);
         $this->assertSame(5, $preview->willUpdate);
+    }
+
+    /**
+     * The dashboard upload flow's complete() endpoint only sniffs the first
+     * few KB of a .geojson upload for "looks like JSON" (see
+     * ImportUploadController::looksLikeGeoJson()) precisely so that the real
+     * "does this actually have features" check happens here instead, where a
+     * failure is a recoverable job outcome rather than an OOM risk in an HTTP
+     * request. Valid JSON with no features key at all must land here.
+     */
+    public function test_analyze_throws_when_there_is_no_features_key(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'no-features-geojson');
+        file_put_contents($path, json_encode(['type' => 'FeatureCollection']));
+
+        try {
+            $this->expectException(RuntimeException::class);
+            $this->expectExceptionMessage('No features found in the GeoJSON file.');
+
+            $this->importer()->analyze($path);
+        } finally {
+            @unlink($path);
+        }
     }
 
     public function test_commit_creates_parcels_deeds_and_owners(): void
