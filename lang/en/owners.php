@@ -11,6 +11,8 @@ return [
     'email' => 'Email',
     'parcel_count' => 'Parcels',
     'deed_count' => 'Deeds',
+    'deed_count_hint' => 'Every deed this owner has ever been linked to, including old ones since replaced by a new deed',
+    'deed_count_historical_note' => ':count currently active',
     'view_parcels' => 'Parcels',
     'parcels_of' => 'Parcels of',
     'no_results' => 'No results found',

@@ -79,6 +79,8 @@ return [
     'deed_document' => 'ملف الصك',
     'view_deed' => 'عرض الصك',
     'download_deed' => 'تنزيل الصك',
+    'view_document' => 'عرض',
+    'download_document' => 'تنزيل',
     'deed_not_available' => 'الصك غير متوفر',
     'colour_by' => 'تلوين القطع حسب',
     'colour_none' => 'بلا تلوين',

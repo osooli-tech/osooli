@@ -304,17 +304,30 @@
                             <template x-if="! documentsLoading && otherDocuments().length === 0">
                                 <p class="text-on-surface-variant dark:text-on-primary-container text-xs">{{ __('dashboard.no_documents') }}</p>
                             </template>
-                            <ul class="space-y-1.5" x-show="! documentsLoading && otherDocuments().length > 0">
+                            <div class="space-y-2" x-show="! documentsLoading && otherDocuments().length > 0">
                                 <template x-for="doc in otherDocuments()" :key="doc.id">
-                                    <li>
-                                        <a :href="doc.download_url"
-                                           class="flex items-center gap-2 text-primary hover:underline underline-offset-2 text-xs">
-                                            <span class="material-symbols-outlined text-[15px]">description</span>
+                                    <div class="flex items-center justify-between gap-2 rounded-xl bg-surface-container dark:bg-white/5 px-2.5 py-2">
+                                        <span class="flex items-center gap-1.5 text-xs font-medium text-on-surface dark:text-white min-w-0 truncate">
+                                            <span class="material-symbols-outlined text-[15px] shrink-0">description</span>
                                             <span x-text="doc.type ?? '—'"></span>
-                                        </a>
-                                    </li>
+                                        </span>
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <a :href="doc.download_url" target="_blank"
+                                               class="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium
+                                                      bg-primary text-white hover:opacity-90 transition-opacity">
+                                                <span class="material-symbols-outlined text-[13px]">visibility</span>
+                                                {{ __('dashboard.view_document') }}
+                                            </a>
+                                            <a :href="doc.download_url" download
+                                               class="flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium
+                                                      bg-secondary text-white hover:opacity-90 transition-opacity">
+                                                <span class="material-symbols-outlined text-[13px]">download</span>
+                                                {{ __('dashboard.download_document') }}
+                                            </a>
+                                        </div>
+                                    </div>
                                 </template>
-                            </ul>
+                            </div>
                         </div>
 
                         {{-- Link to full detail page --}}

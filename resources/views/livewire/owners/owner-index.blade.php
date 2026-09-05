@@ -112,12 +112,22 @@
                                 </span>
                             </td>
 
-                            {{-- Deed count --}}
+                            {{-- Deed count — every deed this owner has ever been linked to,
+                                 which is not the same as parcel_count: a sale or gift transfer
+                                 keeps the old deed on record for history after a new one
+                                 replaces it, so this total can run well ahead of what they
+                                 currently hold. --}}
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium
-                                             bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-white/90">
+                                             bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-white/90"
+                                      title="{{ __('owners.deed_count_hint') }}">
                                     {{ $owner->deeds_count }}
                                 </span>
+                                @if ($owner->deeds_count !== $owner->parcel_count)
+                                    <span class="block text-[10px] text-on-surface-variant dark:text-on-primary-container mt-0.5">
+                                        {{ __('owners.deed_count_historical_note', ['count' => $owner->parcel_count]) }}
+                                    </span>
+                                @endif
                             </td>
 
                             {{-- Actions --}}

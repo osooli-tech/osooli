@@ -79,6 +79,8 @@ return [
     'deed_document' => 'Deed Document',
     'view_deed' => 'View Deed',
     'download_deed' => 'Download Deed',
+    'view_document' => 'View',
+    'download_document' => 'Download',
     'deed_not_available' => 'Deed not available',
     'colour_by' => 'Colour parcels by',
     'colour_none' => 'No colouring',

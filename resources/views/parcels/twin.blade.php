@@ -96,7 +96,6 @@
             'deed'      => ['label' => 'parcels.tab_deed',      'icon' => 'description'],
             'boundary'  => ['label' => 'parcels.tab_boundary',  'icon' => 'straighten'],
             'documents' => ['label' => 'parcels.tab_documents', 'icon' => 'folder'],
-            'location'  => ['label' => 'parcels.tab_location',  'icon' => 'map'],
         ] as $key => $meta)
             <button type="button" @click="tab = '{{ $key }}'"
                     :class="tab === '{{ $key }}'
@@ -198,6 +197,34 @@
                 </div>
             </div>
         @endif
+
+        {{-- Map — lives on this tab directly (it used to be its own "الموقع"
+             tab holding nothing else); "overview" is the tab active on page
+             load, so Mapbox measures a real container size at init. --}}
+        <div class="xl:col-span-3 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl overflow-hidden
+                    border border-outline-variant dark:border-white/10 shadow-sm h-[420px] relative"
+             @if ($parcelGeojson && config('services.mapbox.token'))
+                 x-data="parcelMiniMap(@js($parcelGeojson), @js(json_encode(['type' => 'FeatureCollection', 'features' => []])), @js($parcel->parcel_no))"
+                 x-init="init()"
+             @endif>
+
+            @if ($parcelGeojson && config('services.mapbox.token'))
+                <div id="parcel-mini-map" class="absolute inset-0 w-full h-full"></div>
+
+                @if ($centroid)
+                    <div class="absolute bottom-3 start-3 z-10 bg-surface-container-lowest/90 dark:bg-[#1a1f2e]/90
+                                backdrop-blur rounded-lg px-3 py-2 text-xs data-tabular ltr" dir="ltr">
+                        {{ number_format($centroid['lat'], 6) }}, {{ number_format($centroid['lng'], 6) }}
+                    </div>
+                @endif
+            @else
+                <div class="flex flex-col items-center justify-center h-full gap-3
+                            text-on-surface-variant dark:text-on-primary-container">
+                    <span class="material-symbols-outlined text-[40px] opacity-30">map</span>
+                    <p class="text-sm">{{ __('dashboard.mapbox_missing') }}</p>
+                </div>
+            @endif
+        </div>
 
         <p class="xl:col-span-3 text-xs text-on-surface-variant dark:text-on-primary-container">
             {{ __('parcels.twin_source_note') }}
@@ -327,6 +354,25 @@
             @empty
                 <p class="text-sm text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.not_recorded') }}</p>
             @endforelse
+
+            {{-- The decision's reference numbers are often blank (not entered
+                 at the source), but the survey card itself may still be on
+                 file — link to it here rather than only under "الوثائق". --}}
+            @if ($docs['survey']->isNotEmpty())
+                <div class="mt-4 pt-3 border-t border-outline-variant dark:border-white/10">
+                    @foreach ($docs['survey'] as $file)
+                        <a href="{{ $file->photo_url }}" target="_blank" rel="noopener"
+                           class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container dark:hover:bg-white/5
+                                  border border-outline-variant dark:border-white/10 mb-2 last:mb-0 transition-colors">
+                            <span class="material-symbols-outlined text-[20px] text-error shrink-0">picture_as_pdf</span>
+                            <span class="flex-1 min-w-0 text-sm text-on-surface dark:text-white truncate">
+                                {{ $file->photo_type?->value }}
+                            </span>
+                            <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">open_in_new</span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 

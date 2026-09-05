@@ -11,6 +11,8 @@ return [
     'email' => 'البريد الإلكتروني',
     'parcel_count' => 'عدد القطع',
     'deed_count' => 'عدد الصكوك',
+    'deed_count_hint' => 'كل الصكوك اللي ارتبط فيها هذا المالك تاريخيًا، شامل الصكوك القديمة اللي استُبدلت بصك جديد',
+    'deed_count_historical_note' => 'منها :count حاليًا',
     'view_parcels' => 'القطع',
     'parcels_of' => 'قطع',
     'no_results' => 'لا توجد نتائج',

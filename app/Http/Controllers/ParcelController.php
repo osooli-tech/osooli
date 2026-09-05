@@ -11,6 +11,7 @@ use App\Services\Parcel\DigitalTwinService;
 use App\Services\Parcel\ParcelDocumentRenderService;
 use App\Services\Parcel\ParcelMapSvgService;
 use App\Services\Parcel\ParcelQrCodeService;
+use App\Services\Parcel\ParcelSatelliteImageService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -86,9 +87,10 @@ class ParcelController extends Controller
         Parcel $parcel,
         DigitalTwinService $twin,
         ParcelMapSvgService $mapSvg,
-        ParcelDocumentRenderService $documentRender
+        ParcelDocumentRenderService $documentRender,
+        ParcelSatelliteImageService $satelliteImage
     ): Response {
-        $parcel->loadMissing(['photos', 'currentDeed']);
+        $parcel->loadMissing(['photos', 'currentDeed', 'boundary']);
 
         // A document that cannot be rendered (no Imagick locally, or an
         // unsupported file type) is listed without a preview rather than
@@ -98,16 +100,29 @@ class ParcelController extends Controller
             'preview' => $documentRender->dataUri($photo),
         ]);
 
-        // A ground-level shot reads as "the parcel" more than an aerial one;
-        // aerial is the fallback rather than left out.
-        $sitePhoto = $parcel->photos->firstWhere('photo_type', PhotoType::Ground)
-            ?? $parcel->photos->firstWhere('photo_type', PhotoType::Aerial);
-
         /** @var \stdClass|null $geoRow */
         $geoRow = DB::selectOne(
             'SELECT ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM parcels WHERE id = ?',
             [$parcel->id]
         );
+        $centroid = $geoRow?->lat === null ? null : ['lat' => (float) $geoRow->lat, 'lng' => (float) $geoRow->lng];
+
+        // A real satellite photo reads as "the parcel" more honestly than an
+        // uploaded ground shot (rarely on file, and easy to mix up with a
+        // neighbouring lot) — preferred whenever the centroid is known, with
+        // an actual uploaded photo only as the fallback.
+        $sitePhoto = $centroid !== null
+            ? $satelliteImage->dataUriFor($centroid['lat'], $centroid['lng'])
+            : null;
+
+        if ($sitePhoto === null) {
+            $groundPhoto = $parcel->photos->firstWhere('photo_type', PhotoType::Ground)
+                ?? $parcel->photos->firstWhere('photo_type', PhotoType::Aerial);
+            $sitePhoto = $groundPhoto ? $documentRender->dataUri($groundPhoto) : null;
+        }
+
+        /** @return list<array{easting: float, northing: float}> */
+        $corners = $this->parcelCorners($parcel);
 
         return Pdf::loadView('exports.parcel-print', [
             'parcel' => $parcel,
@@ -115,11 +130,45 @@ class ParcelController extends Controller
             'qrImage' => app(ParcelQrCodeService::class)->pngDataUriFor($parcel),
             'mapImage' => $mapSvg->render($parcel),
             'documents' => $documents,
-            'sitePhoto' => $sitePhoto ? $documentRender->dataUri($sitePhoto) : null,
+            'sitePhoto' => $sitePhoto,
             'reportNumber' => sprintf('SK-%s-%04d', now()->format('Y-m-d'), $parcel->id),
-            'centroid' => $geoRow?->lat === null ? null : ['lat' => (float) $geoRow->lat, 'lng' => (float) $geoRow->lng],
+            'centroid' => $centroid,
+            'corners' => $corners,
         ])->setPaper('a4', 'portrait')
             ->download("parcel-{$parcel->parcel_no}.pdf");
+    }
+
+    /**
+     * Corner coordinates in UTM (zone 38N, EPSG:32638 — the zone covering the
+     * Riyadh region, where every parcel on record currently sits), matching
+     * the easting/northing pair a licensed surveyor's plan states rather than
+     * raw lat/lng degrees.
+     *
+     * @return list<array{easting: float, northing: float}>
+     */
+    private function parcelCorners(Parcel $parcel): array
+    {
+        /** @var \stdClass|null $row */
+        $row = DB::selectOne(
+            'SELECT ST_AsGeoJSON(ST_Transform(geom, 32638)) AS geom_json FROM parcels WHERE id = ?',
+            [$parcel->id]
+        );
+
+        if ($row?->geom_json === null) {
+            return [];
+        }
+
+        $geometry = json_decode($row->geom_json, true);
+        $rings = $geometry['type'] === 'MultiPolygon' ? $geometry['coordinates'][0] : $geometry['coordinates'];
+        $ring = $rings[0] ?? [];
+
+        // The ring closes back on its first point — that repeat is not a
+        // distinct corner.
+        return collect($ring)
+            ->slice(0, -1)
+            ->map(fn (array $point): array => ['easting' => (float) $point[0], 'northing' => (float) $point[1]])
+            ->values()
+            ->all();
     }
 
     public function documents(Parcel $parcel): JsonResponse
