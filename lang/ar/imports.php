@@ -60,8 +60,19 @@ return [
         'size_exceeded' => 'تجاوز حجم الملف المرسل الحجم المصرح به لهذه العملية.',
         'size_mismatch' => 'حجم الملف المستلم (:actual) لا يطابق الحجم المتوقع (:expected).',
         'invalid_archive' => 'الملف تالف أو لا يطابق النوع المتوقع.',
+        // Both purely client-side: the JS never receives a server response
+        // for these, so unlike the keys above they are read through
+        // @js(__(...)) in import-wizard.blade.php and handed to
+        // uploadImport() rather than coming back in a JSON body.
+        'stuck_resync' => 'يبدو أن عملية الرفع متوقفة. يرجى المحاولة مرة أخرى.',
+        'unexpected_response' => 'استجاب الخادم بردٍّ غير متوقع. يرجى المحاولة مرة أخرى.',
     ],
     'warnings' => [
-        'no_geo_id' => 'يتم تجاهل :count عنصر بلا رقم تعريف الأرض (Geo_ID).',
+        // Arabic noun-number agreement needs more than :count substitution
+        // (singular/dual/few/many/other all take a different noun form), so
+        // this is a trans_choice() string with explicit count branches
+        // rather than a plain __() placeholder — see
+        // ParcelGeoJsonImporter::previewFeatures()/importFeatures().
+        'no_geo_id' => '{0} جميع العناصر تحمل رقم تعريف الأرض (Geo_ID)، ولا يوجد ما يتم تجاهله.|{1} يتم تجاهل عنصر واحد بلا رقم تعريف الأرض (Geo_ID).|{2} يتم تجاهل عنصرين بلا رقم تعريف الأرض (Geo_ID).|[3,10] يتم تجاهل :count عناصر بلا رقم تعريف الأرض (Geo_ID).|[11,99] يتم تجاهل :count عنصرًا بلا رقم تعريف الأرض (Geo_ID).|[100,*] يتم تجاهل :count عنصر بلا رقم تعريف الأرض (Geo_ID).',
     ],
 ];

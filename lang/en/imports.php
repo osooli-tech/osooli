@@ -60,8 +60,18 @@ return [
         'size_exceeded' => 'The uploaded file exceeds the size declared for this import.',
         'size_mismatch' => 'The received file size (:actual) does not match the expected size (:expected).',
         'invalid_archive' => 'The file is corrupt or does not match the expected type.',
+        // Both purely client-side: the JS never receives a server response
+        // for these, so unlike the keys above they are read through
+        // @js(__(...)) in import-wizard.blade.php and handed to
+        // uploadImport() rather than coming back in a JSON body.
+        'stuck_resync' => 'The upload appears to be stuck. Please try again.',
+        'unexpected_response' => 'The server returned an unexpected response. Please try again.',
     ],
     'warnings' => [
-        'no_geo_id' => ':count feature(s) with no Geo_ID are skipped.',
+        // Mirrors the Arabic file's explicit count branches (see
+        // lang/ar/imports.php) even though English grammar only needs
+        // singular vs. plural — kept structurally parallel so both files
+        // branch on the same count ranges via trans_choice().
+        'no_geo_id' => '{0} All features have a Geo_ID; none are skipped.|{1} :count feature with no Geo_ID is skipped.|{2} :count features with no Geo_ID are skipped.|[3,10] :count features with no Geo_ID are skipped.|[11,99] :count features with no Geo_ID are skipped.|[100,*] :count features with no Geo_ID are skipped.',
     ],
 ];

@@ -91,6 +91,22 @@ final class ImportWizardTest extends TestCase
         $this->assertNotSame(ImportStatus::Previewed, $batch->fresh()->status);
     }
 
+    public function test_mounting_with_another_users_batch_uuid_does_not_render_its_detail(): void
+    {
+        $owner = $this->admin();
+        $batch = $this->batch($owner, ImportStatus::Previewed);
+
+        // batchUuid is a public, client-settable Livewire property. Pointing
+        // it at another user's batch must not render that batch's preview —
+        // the component should fall back to its "no batch yet" upload state
+        // instead of leaking preview counts/warnings for a batch this user
+        // does not own.
+        Livewire::actingAs($this->admin())
+            ->test(ImportWizard::class, ['batchUuid' => $batch->uuid])
+            ->assertDontSee('27')
+            ->assertSee(__('imports.choose_file'));
+    }
+
     public function test_confirming_someone_elses_batch_is_forbidden(): void
     {
         $owner = $this->admin();

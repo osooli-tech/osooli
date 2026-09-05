@@ -41,7 +41,11 @@
                         busy = true; error = null;
                         try {
                             const uuid = await window.uploadImport($refs.file.files[0], kind, {
-                                onProgress: p => progress = Math.round(p * 100)
+                                onProgress: p => progress = Math.round(p * 100),
+                                messages: {
+                                    stuckResync: @js(__('imports.errors.stuck_resync')),
+                                    invalidResponse: @js(__('imports.errors.unexpected_response')),
+                                },
                             });
                             $wire.set('batchUuid', uuid);
                         } catch (e) { error = e.message } finally { busy = false }
