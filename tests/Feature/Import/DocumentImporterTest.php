@@ -201,6 +201,24 @@ final class DocumentImporterTest extends TestCase
         $this->assertSame(['abc.pdf'], $result->details['unmatched_files']);
     }
 
+    /**
+     * Regression test for I1 in the final review: analyze() used to hardcode
+     * willUpdate to 0 no matter what, so a second analyze of an
+     * already-imported archive still previewed every link as a create even
+     * though commit() would report them all as updates.
+     */
+    public function test_a_second_analyze_of_an_already_committed_archive_previews_updates_not_creates(): void
+    {
+        $this->makeParcel('91-25', '91', '25', '311608002898');
+        $zip = $this->zipOf(['311608002898.pdf']);
+
+        $this->importer()->commit($zip);
+        $preview = $this->importer()->analyze($zip);
+
+        $this->assertSame(0, $preview->willCreate);
+        $this->assertSame(1, $preview->willUpdate);
+    }
+
     public function test_a_second_commit_never_sees_the_first_archives_extracted_files(): void
     {
         $first = $this->makeParcel('91-25', '91', '25', '311608002898');

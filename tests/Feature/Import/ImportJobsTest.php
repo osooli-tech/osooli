@@ -12,6 +12,7 @@ use App\Models\ImportBatch;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Tests\TestCase;
@@ -26,6 +27,18 @@ final class ImportJobsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // CommitImportBatch's documents path ends up calling
+        // DocumentImporter::commit(), which writes through
+        // Storage::disk('public')->put(...) — without this fake,
+        // test_commit_writes_and_completes() and
+        // test_commit_runs_only_once_for_a_batch() below write a real
+        // "%PDF-1.4 fake" file into storage/app/public/documents/deeds,
+        // under the exact deed number (311608002898) this class borrows from
+        // the client's real dataset, and the exact directory production
+        // serves from. See DocumentImporterTest, which already fakes this.
+        Storage::fake('public');
+
         $this->tmp = sys_get_temp_dir().'/jobs_'.uniqid();
         mkdir($this->tmp, 0777, true);
     }

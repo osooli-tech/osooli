@@ -30,6 +30,16 @@ return [
         'rule' => 'Matching rule',
         'warnings' => 'Warnings',
     ],
+    'result' => [
+        // Distinct from 'failed' below on purpose: this counts per-feature
+        // errors inside an otherwise-completed batch (rendered in the
+        // Completed panel), while 'failed' labels the batch's own terminal
+        // state (rendered in the Failed panel) — see import-wizard.blade.php.
+        // Before this key existed, the Completed panel rendered a per-feature
+        // error count under the 'failed' label itself, so "Import complete"
+        // sat directly above "Import failed: 6".
+        'errors' => 'Features with errors',
+    ],
     'confirm' => 'Confirm import',
     'cancel' => 'Cancel',
     'completed' => 'Import complete',
@@ -60,6 +70,11 @@ return [
         'size_exceeded' => 'The uploaded file exceeds the size declared for this import.',
         'size_mismatch' => 'The received file size (:actual) does not match the expected size (:expected).',
         'invalid_archive' => 'The file is corrupt or does not match the expected type.',
+        // Shown instead of dispatching a commit when the staged archive has
+        // already been pruned (PruneImportBatches reaps any status,
+        // including a still-Previewed batch, past the retention window and
+        // nulls stored_path) — see ImportWizard::confirm().
+        'staged_file_missing' => 'The staged file for this import is no longer available. Please start a new import.',
         // Both purely client-side: the JS never receives a server response
         // for these, so unlike the keys above they are read through
         // @js(__(...)) in import-wizard.blade.php and handed to

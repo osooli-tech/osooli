@@ -30,6 +30,11 @@ return [
         'rule' => 'قاعدة المطابقة',
         'warnings' => 'تنبيهات',
     ],
+    'result' => [
+        // See lang/en/imports.php for why this is a separate key from
+        // 'failed' below rather than reusing it.
+        'errors' => 'عناصر بها أخطاء',
+    ],
     'confirm' => 'تأكيد الاستيراد',
     'cancel' => 'إلغاء',
     'completed' => 'اكتمل الاستيراد',
@@ -60,6 +65,8 @@ return [
         'size_exceeded' => 'تجاوز حجم الملف المرسل الحجم المصرح به لهذه العملية.',
         'size_mismatch' => 'حجم الملف المستلم (:actual) لا يطابق الحجم المتوقع (:expected).',
         'invalid_archive' => 'الملف تالف أو لا يطابق النوع المتوقع.',
+        // See lang/en/imports.php for why this key exists.
+        'staged_file_missing' => 'الملف المرحّل لهذا الاستيراد لم يعد متوفراً. يرجى بدء عملية استيراد جديدة.',
         // Both purely client-side: the JS never receives a server response
         // for these, so unlike the keys above they are read through
         // @js(__(...)) in import-wizard.blade.php and handed to

@@ -28,10 +28,13 @@ final class DocumentImporter implements Importer
         [$rule, $matched, $unmatched, $dir] = $this->inspect($sourcePath);
 
         try {
+            $totalLinks = array_sum(array_map(fn (array $m): int => count($m['parcel_ids']), $matched));
+            $willUpdate = $rule === null ? 0 : $this->countExistingLinks($rule, $matched);
+
             return new ImportPreview(
                 totalItems: count($matched) + count($unmatched),
-                willCreate: array_sum(array_map(fn (array $m): int => count($m['parcel_ids']), $matched)),
-                willUpdate: 0,
+                willCreate: $totalLinks - $willUpdate,
+                willUpdate: $willUpdate,
                 unmatched: count($unmatched),
                 details: [
                     'rule' => $rule?->value,
@@ -43,6 +46,39 @@ final class DocumentImporter implements Importer
         } finally {
             $this->removeDirectory($dir);
         }
+    }
+
+    /**
+     * Predicts how many of the parcel–file links analyze() is about to report
+     * as willCreate are actually going to land as updates once commit() runs
+     * — mirroring exactly what commit()'s ParcelPhoto::updateOrCreate() will
+     * decide for each (parcel_id, photo_type) pair, via a single read-only
+     * existence lookup rather than one query per link. Without this,
+     * analyze() and commit() report the same batch under the same labels
+     * with different numbers (I1 in the final review) — e.g. a re-uploaded
+     * archive previews "31 to create" and then reports "0 created, 31
+     * updated" once confirmed.
+     *
+     * @param  list<array{filename: string, path: string, parcel_ids: list<int>}>  $matched
+     */
+    private function countExistingLinks(DocumentRule $rule, array $matched): int
+    {
+        $parcelIds = [];
+
+        foreach ($matched as $entry) {
+            foreach ($entry['parcel_ids'] as $parcelId) {
+                $parcelIds[] = $parcelId;
+            }
+        }
+
+        if ($parcelIds === []) {
+            return 0;
+        }
+
+        return DB::table('parcel_photos')
+            ->where('photo_type', $rule->photoType()->value)
+            ->whereIn('parcel_id', $parcelIds)
+            ->count();
     }
 
     public function commit(string $sourcePath): ImportResult

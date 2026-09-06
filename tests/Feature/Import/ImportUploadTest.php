@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 use ZipArchive;
@@ -18,6 +19,21 @@ use ZipArchive;
 final class ImportUploadTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // ImportUploadController::create()/chunk() resolve stored_path
+        // through Storage::disk('local')->path(...) and write the assembled
+        // upload there. Without this fake, every test below that actually
+        // sends chunks (start()+chunk()+complete()) writes real files under
+        // storage/app/private/imports/<uuid>/source.<ext> — the exact
+        // directory production stages uploads in. PruneImportBatchesTest
+        // already fakes 'local' for the same reason; this test class never
+        // did.
+        Storage::fake('local');
+    }
 
     private function admin(): User
     {

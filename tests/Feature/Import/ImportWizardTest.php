@@ -91,6 +91,30 @@ final class ImportWizardTest extends TestCase
         $this->assertNotSame(ImportStatus::Previewed, $batch->fresh()->status);
     }
 
+    /**
+     * Regression test for I6 in the final review: PruneImportBatches reaps a
+     * staged batch's file after the retention window regardless of status —
+     * including a still-Previewed one — and nulls stored_path. Before this
+     * fix, confirm() only checked the status and would dispatch a commit
+     * that immediately failed to find the file, reporting
+     * CommitImportBatch's "some records may already be committed" notice for
+     * a write that never started.
+     */
+    public function test_confirming_a_pruned_batch_refuses_instead_of_reporting_a_false_partial_write(): void
+    {
+        $user = $this->admin();
+        $batch = $this->batch($user, ImportStatus::Previewed);
+        $batch->forceFill(['stored_path' => null])->save();
+
+        Livewire::actingAs($user)
+            ->test(ImportWizard::class, ['batchUuid' => $batch->uuid])
+            ->call('confirm');
+
+        $batch->refresh();
+        $this->assertSame(ImportStatus::Failed, $batch->status);
+        $this->assertSame(__('imports.errors.staged_file_missing'), $batch->error_message);
+    }
+
     public function test_mounting_with_another_users_batch_uuid_does_not_render_its_detail(): void
     {
         $owner = $this->admin();

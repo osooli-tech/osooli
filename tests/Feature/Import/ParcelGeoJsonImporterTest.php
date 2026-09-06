@@ -58,6 +58,25 @@ final class ParcelGeoJsonImporterTest extends TestCase
     }
 
     /**
+     * Regression test for I2 in the final review: previewFeatures() used to
+     * hardcode unmatched to 0 even though it had already counted $blank a
+     * few lines above — the confirm screen promised "0 unmatched" for a
+     * batch the result screen would then reveal had skipped features, which
+     * is exactly the warning the runbook tells the operator to stop on.
+     */
+    public function test_analyze_reports_features_with_no_geo_id_as_unmatched(): void
+    {
+        $features = $this->fixtureFeatures();
+        $good = $features[0];
+        $blank = $features[1];
+        $blank['properties']['Geo_ID'] = '';
+
+        $preview = $this->importer()->previewFeatures([$good, $blank]);
+
+        $this->assertSame(1, $preview->unmatched);
+    }
+
+    /**
      * The dashboard upload flow's complete() endpoint only sniffs the first
      * few KB of a .geojson upload for "looks like JSON" (see
      * ImportUploadController::looksLikeGeoJson()) precisely so that the real

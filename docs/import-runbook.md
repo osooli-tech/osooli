@@ -429,7 +429,7 @@ that matter for diagnosis:
 | `status` | One of the `ImportStatus` enum values — `uploading`, `analyzing`, `previewed`, `committing`, `completed`, `failed` |
 | `error_message` | Set only on `failed`; the exception message, plus (for a commit failure specifically) an appended notice about partial writes — see below |
 | `preview` / `result` | JSON blobs the wizard renders; `result` is only populated after a successful commit |
-| `stored_path` | Where the staged archive lives on disk (`storage/app/private/<stored_path>`), or `null` once pruned |
+| `stored_path` | Absolute path to the staged archive on disk (since Task 8 this is a full path, not one relative to `storage/app/private/`), or `null` once pruned |
 
 To inspect a failed batch directly:
 
@@ -508,7 +508,7 @@ log on its own.
 | GDB upload fails with "ogr2ogr binary ... was not found" | GDAL not installed, or `IMPORT_OGR2OGR_PATH` wrong | §1.1; confirm with `ogr2ogr --version` |
 | GDB upload fails with "No layer carrying both Geo_ID and Deed_No" | `ogrinfo` could not enumerate layers, or genuinely no matching layer | §4.1; check the listed layer names in the error message |
 | Batch stuck in `analyzing`/`committing` indefinitely | No queue worker running, and `IMPORT_QUEUE_SYNC` is `false` | Start `php artisan queue:work`, or set `IMPORT_QUEUE_SYNC=true` for small imports |
-| Same import appears to run twice / duplicate-looking activity | `DB_QUEUE_RETRY_AFTER` lower than a job's `$timeout` | §2.3 — confirm `.env` has `DB_QUEUE_RETRY_AFTER=1900` |
+| A batch shows `status = failed` with **no** `result`, even though the file was actually committed (check the target tables directly) | `DB_QUEUE_RETRY_AFTER` lower than a job's `$timeout` — this is a FALSE FAILURE (a still-running job got redelivered, exhausted retries, and `failed()` won the race against the original worker's own successful completion), not duplicate work | §2.3 — confirm `.env` has `DB_QUEUE_RETRY_AFTER=1900`; as of this fix, a mismatch also logs a warning naming both values at the start of every analyze/commit job run |
 | 403/404 immediately on `/imports` | Account lacks `imports.create` | §3 |
 | Document upload reports unmatched files | Filenames don't match the deed (`^\d{10,14}$`) or `<left> - <right>` survey-map pattern | Re-check the archive's filenames against §5 |
 | `deeds` count doesn't match `parcels` count after a GDB import | **Expected on this dataset** — read §4.4 before assuming a bug | §4.4 |

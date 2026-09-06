@@ -114,4 +114,84 @@ final class ArchiveExtractorTest extends TestCase
 
         (new ArchiveExtractor)->extract($path, $this->tmp.'/out');
     }
+
+    /**
+     * Builds a ZIP whose one entry decompresses to $realSize real bytes, but
+     * whose declared uncompressed size — in both the local file header and
+     * the central directory record, the only two places libzip's own
+     * statIndex() ever reads it from — has been patched down to $declaredSize
+     * after the fact. Deflate compression (ZipArchive's default) is what
+     * makes this realistic: a large run of zero bytes compresses to a small
+     * fraction of its real size, exactly the shape of an actual zip bomb, so
+     * the compressed-size field (left untouched) differs from the
+     * uncompressed-size field being patched and the two can be told apart
+     * unambiguously by value alone.
+     */
+    private function makeZipBombWithLyingDeclaredSize(string $name, int $realSize, int $declaredSize): string
+    {
+        $path = $this->tmp.'/'.$name;
+        $zip = new ZipArchive;
+        $zip->open($path, ZipArchive::CREATE);
+        $zip->addFromString('bomb.txt', str_repeat("\0", $realSize));
+        $zip->close();
+
+        $contents = (string) file_get_contents($path);
+        $needle = pack('V', $realSize);
+        $replacement = pack('V', $declaredSize);
+
+        $occurrences = substr_count($contents, $needle);
+
+        // Exactly two occurrences are expected: the local file header's
+        // uncompressed-size field and the central directory's uncompressed-size
+        // field for this one entry. Asserting this here (rather than silently
+        // patching however many matches turn up) keeps the test honest about
+        // what it is actually proving — that both copies of the declared size
+        // were lies, not just one.
+        $this->assertSame(2, $occurrences, 'expected exactly 2 occurrences of the declared size to patch');
+
+        file_put_contents($path, str_replace($needle, $replacement, $contents));
+
+        return $path;
+    }
+
+    public function test_it_rejects_an_archive_whose_declared_size_understates_the_real_bytes(): void
+    {
+        // 5 MB of real, decompressible content, declared as just 1 byte —
+        // exactly the shape of the reviewer's proof-of-concept zip bomb.
+        $zip = $this->makeZipBombWithLyingDeclaredSize('bomb1.zip', 5 * 1024 * 1024, 1);
+
+        $this->expectException(ArchiveException::class);
+        $this->expectExceptionMessageMatches('/size/i');
+
+        (new ArchiveExtractor(maxTotalBytes: 1024))->extract($zip, $this->tmp.'/out');
+    }
+
+    public function test_a_rejected_zip_bomb_leaves_nothing_in_the_destination(): void
+    {
+        $zip = $this->makeZipBombWithLyingDeclaredSize('bomb2.zip', 5 * 1024 * 1024, 1);
+        $dest = $this->tmp.'/out';
+
+        try {
+            (new ArchiveExtractor(maxTotalBytes: 1024))->extract($zip, $dest);
+            $this->fail('Expected an ArchiveException for the oversized archive.');
+        } catch (ArchiveException) {
+            // expected — assertions happen below, once extraction has aborted.
+        }
+
+        $this->assertDirectoryDoesNotExist($dest, 'a rejected archive must not leave a partial extraction behind');
+    }
+
+    public function test_a_legitimate_archive_comfortably_under_the_cap_still_extracts(): void
+    {
+        // Guards against over-tightening: a real archive whose entries are
+        // nowhere near the cap must still extract normally once the cap is
+        // enforced against actual bytes instead of declared ones.
+        $zip = $this->makeZip('fine.zip', ['a.txt' => str_repeat('y', 500), 'sub/b.txt' => 'hello']);
+        $dest = $this->tmp.'/out';
+
+        (new ArchiveExtractor(maxTotalBytes: 10_000))->extract($zip, $dest);
+
+        $this->assertSame(str_repeat('y', 500), file_get_contents($dest.'/a.txt'));
+        $this->assertSame('hello', file_get_contents($dest.'/sub/b.txt'));
+    }
 }

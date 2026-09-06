@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\ImportStatus;
+use App\Jobs\Concerns\WarnsAboutLowRetryAfter;
 use App\Models\ImportBatch;
 use App\Services\Import\ImporterFactory;
 use Illuminate\Bus\Queueable;
@@ -16,7 +17,7 @@ use Throwable;
 
 final class CommitImportBatch implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, WarnsAboutLowRetryAfter;
 
     public int $timeout = 1800;
 
@@ -37,6 +38,8 @@ final class CommitImportBatch implements ShouldQueue
 
     public function handle(): void
     {
+        $this->warnIfRetryAfterIsTooLow();
+
         $batch = ImportBatch::find($this->batchId);
 
         // Only Previewed may become Committing, so a batch that was never

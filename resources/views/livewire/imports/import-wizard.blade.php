@@ -170,7 +170,7 @@
                         <dd class="text-2xl font-bold text-on-surface dark:text-white">{{ $currentBatch->result['skipped'] }}</dd>
                     </div>
                     <div class="rounded-xl bg-surface-container dark:bg-[#252b3b] p-3">
-                        <dt class="text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('imports.failed') }}</dt>
+                        <dt class="text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('imports.result.errors') }}</dt>
                         <dd class="text-2xl font-bold text-on-surface dark:text-white">{{ $currentBatch->result['errors'] }}</dd>
                     </div>
                 </dl>

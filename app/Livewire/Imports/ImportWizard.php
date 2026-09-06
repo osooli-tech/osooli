@@ -62,6 +62,22 @@ final class ImportWizard extends Component
             return;
         }
 
+        if ($batch->stored_path === null) {
+            // PruneImportBatches reaps a staged batch's file after the
+            // retention window regardless of status — including Previewed —
+            // and nulls stored_path when it does. Without this check, a
+            // stale confirm click would dispatch a commit that immediately
+            // fails to find the file and reports CommitImportBatch's partial
+            // -write notice ("Some records may already be committed") for a
+            // write that never even started. Refusing here, with its own
+            // terminal Failed status and a message that says what actually
+            // happened, is markedly better than that false alarm — see I6 in
+            // the final review.
+            $batch->markFailed(__('imports.errors.staged_file_missing'));
+
+            return;
+        }
+
         $batch->dispatchCommit();
     }
 

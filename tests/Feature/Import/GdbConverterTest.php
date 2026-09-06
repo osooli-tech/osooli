@@ -87,7 +87,12 @@ final class GdbConverterTest extends TestCase
         $fixture = base_path('tests/fixtures/import/Sakuki.gdb.zip');
 
         if (! is_file($fixture)) {
-            $this->markTestSkipped('The geodatabase fixture is not present.');
+            $this->markTestSkipped(
+                'The geodatabase fixture is intentionally not committed to the repository — '
+                .'it would be the client\'s real geodatabase (168 land records, including owner '
+                .'names and national IDs). See docs/import-runbook.md §4 ("Step 1 — Import the '
+                .'parcels GDB") for the intended manual end-to-end verification of this path.'
+            );
         }
 
         $out = $converter->convert($fixture, $this->tmp.'/work');
@@ -97,6 +102,93 @@ final class GdbConverterTest extends TestCase
         $this->assertSame('FeatureCollection', $decoded['type']);
         $this->assertNotEmpty($decoded['features']);
         $this->assertArrayHasKey('Geo_ID', $decoded['features'][0]['properties']);
+    }
+
+    /**
+     * Regression test for I4 in the final review: GdbImporter::analyze() and
+     * commit() both call convert() with the same ($sourcePath, $workDir) for
+     * one batch, and convert() used to re-extract and re-run ogr2ogr on
+     * every single call with no -overwrite and nothing cleaning up. This
+     * proves the fix — a second convert() call for the same $workDir must
+     * not invoke ogr2ogr (or even check isAvailable(), which also shells
+     * out) again — with a stub binary that appends a line to a counter file
+     * on every invocation, so "did it run again" is a fact on disk rather
+     * than something inferred from timing or output content.
+     */
+    public function test_a_second_convert_for_the_same_work_dir_does_not_re_invoke_ogr2ogr(): void
+    {
+        $counter = $this->tmp.'/ogr2ogr_calls.log';
+        config(['imports.ogr2ogr_path' => $this->stubCountingOgr2Ogr($counter)]);
+
+        $json = '{"layers":[{"name":"sakoki_with_deed","fields":[{"name":"Geo_ID"},{"name":"Deed_No"}]}]}';
+        config(['imports.ogrinfo_path' => $this->stubOgrinfoJson($json)]);
+
+        $zip = $this->tmp.'/gdb.zip';
+        $archive = new ZipArchive;
+        $archive->open($zip, ZipArchive::CREATE);
+        $archive->addEmptyDir('Fake.gdb');
+        $archive->close();
+
+        $converter = app(GdbConverter::class);
+        $workDir = $this->tmp.'/work';
+
+        $first = $converter->convert($zip, $workDir);
+        $callsAfterFirst = $this->countLines($counter);
+
+        $second = $converter->convert($zip, $workDir);
+        $callsAfterSecond = $this->countLines($counter);
+
+        $this->assertSame($first, $second);
+        $this->assertFileExists($first);
+        $this->assertGreaterThan(0, $callsAfterFirst, 'the first call must have invoked the stub at least once');
+        $this->assertSame(
+            $callsAfterFirst,
+            $callsAfterSecond,
+            'a second convert() for the same work dir must not invoke ogr2ogr again'
+        );
+    }
+
+    private function countLines(string $path): int
+    {
+        return is_file($path) ? count(array_filter(explode("\n", (string) file_get_contents($path)))) : 0;
+    }
+
+    /** A stub ogr2ogr that logs every invocation to $counterFile before responding. */
+    private function stubCountingOgr2Ogr(string $counterFile): string
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            $path = $this->tmp.'/ogr2ogr_counting.bat';
+            $counter = str_replace('/', '\\', $counterFile);
+            $body = <<<BAT
+@echo off
+echo called>>"{$counter}"
+if "%1"=="--version" (
+  echo GDAL 3.0
+  exit /b 0
+)
+echo stub>"%~6"
+exit /b 0
+BAT;
+            file_put_contents($path, $body."\r\n");
+
+            return $path;
+        }
+
+        $path = $this->tmp.'/ogr2ogr_counting.sh';
+        $body = <<<SH
+#!/bin/sh
+echo called >> "{$counterFile}"
+if [ "\$1" = "--version" ]; then
+  echo "GDAL 3.0"
+  exit 0
+fi
+echo stub > "\$6"
+exit 0
+SH;
+        file_put_contents($path, $body."\n");
+        chmod($path, 0755);
+
+        return $path;
     }
 
     public function test_layer_picker_picks_the_layer_carrying_geo_id_and_deed_no(): void

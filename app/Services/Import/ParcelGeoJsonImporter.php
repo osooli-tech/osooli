@@ -111,7 +111,13 @@ final class ParcelGeoJsonImporter implements Importer
             totalItems: count($features),
             willCreate: count($geoIds) - $update,
             willUpdate: $update,
-            unmatched: 0,
+            // $blank is already computed above and importFeatures() reports
+            // the exact same features as `skipped` once it runs — hardcoding
+            // 0 here (I2 in the final review) let the confirm screen promise
+            // "0 unmatched" for a batch the result screen would immediately
+            // reveal had skipped some, even though the runbook tells the
+            // operator to stop and investigate on exactly this warning.
+            unmatched: $blank,
             details: [
                 'parcels' => count($geoIds),
                 'deeds' => $deedGroups,

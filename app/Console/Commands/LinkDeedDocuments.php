@@ -39,10 +39,6 @@ class LinkDeedDocuments extends Command
             return self::FAILURE;
         }
 
-        $zipPath = storage_path('app/private/link-deeds-'.uniqid().'.zip');
-        $zip = new ZipArchive;
-        $zip->open($zipPath, ZipArchive::CREATE);
-
         // glob('*.pdf') is case-sensitive, which would silently drop a
         // "*.PDF" scan (real scans routinely carry an upper-case extension).
         // DocumentImporter::inspect() already matches case-insensitively via
@@ -54,11 +50,38 @@ class LinkDeedDocuments extends Command
             static fn (string $path): bool => is_file($path) && preg_match('/\.pdf$/i', $path) === 1
         );
 
+        if ($pdfs === []) {
+            $this->info("No PDF files found in {$dir}; nothing to link.");
+
+            return self::SUCCESS;
+        }
+
+        $zipPath = storage_path('app/private/link-deeds-'.uniqid().'.zip');
+        $zip = new ZipArchive;
+
+        // ZipArchive::close() is documented to fail (and, on some libzip
+        // versions, simply never write the file) for a zero-entry archive —
+        // guarded against above by the empty-$pdfs check — but open() itself
+        // can also fail (a permission error, a full disk under storage/app/
+        // private). Ignoring that return value used to mean $zipPath might
+        // not exist at all by the time it reached commit() below, which then
+        // threw an uncaught ArchiveException instead of a clean command
+        // failure.
+        if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+            $this->error("Could not create a temporary archive at: {$zipPath}");
+
+            return self::FAILURE;
+        }
+
         foreach ($pdfs as $pdf) {
             $zip->addFile($pdf, basename($pdf));
         }
 
-        $zip->close();
+        if (! $zip->close()) {
+            $this->error("Could not write the temporary archive at: {$zipPath}");
+
+            return self::FAILURE;
+        }
 
         try {
             $result = $importer->commit($zipPath);
