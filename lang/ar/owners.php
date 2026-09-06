@@ -11,6 +11,8 @@ return [
     'email' => 'البريد الإلكتروني',
     'parcel_count' => 'عدد القطع',
     'deed_count' => 'عدد الصكوك',
+    'deed_count_hint' => 'كل الصكوك اللي ارتبط فيها هذا المالك تاريخيًا، شامل الصكوك القديمة اللي استُبدلت بصك جديد',
+    'deed_count_historical_note' => 'منها :count حاليًا',
     'view_parcels' => 'القطع',
     'parcels_of' => 'قطع',
     'no_results' => 'لا توجد نتائج',
@@ -46,4 +48,10 @@ return [
     'valuation_section' => 'التقييم التقديري',
     'valuation_coverage_note' => 'القيمة محسوبة من :priced من أصل :total قطعة مسعّرة',
     'deeds_table_heading' => 'القطع والصكوك',
+
+    // ── تعديل بيانات المالك ─────────────────────────────────────
+    'owner_data' => 'بيانات المالك',
+    'edit_owner' => 'تعديل البيانات',
+    'save' => 'حفظ',
+    'cancel' => 'إلغاء',
 ];

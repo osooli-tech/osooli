@@ -312,8 +312,20 @@
             </dl>
         </div>
 
+        @php
+            // Ground/Aerial are real photographs; Deed/BoundarySurvey are PDF
+            // scans — an <img> tag can render the former but not the latter,
+            // so they need their own section rather than one shared gallery.
+            $images = $parcel->photos->whereIn('photo_type', [
+                \App\Enums\PhotoType::Aerial, \App\Enums\PhotoType::Ground,
+            ]);
+            $documents = $parcel->photos->whereIn('photo_type', [
+                \App\Enums\PhotoType::Deed, \App\Enums\PhotoType::BoundarySurvey,
+            ]);
+        @endphp
+
         {{-- Photos --}}
-        @if ($parcel->photos->isNotEmpty())
+        @if ($images->isNotEmpty())
             <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
                         border border-outline-variant dark:border-white/10 shadow-sm">
                 <div class="flex items-center gap-2 mb-4">
@@ -326,9 +338,9 @@
                     </h2>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    @foreach ($parcel->photos as $photo)
+                    @foreach ($images as $photo)
                         <div class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ $photo->url ?? '#' }}"
+                            <img src="{{ $photo->photo_url }}"
                                  alt="{{ __('parcels.photos_section') }}"
                                  class="w-full h-full object-cover" />
                         </div>
@@ -336,6 +348,38 @@
                 </div>
             </div>
         @endif
+
+        {{-- Documents (deed scans, boundary survey cards) --}}
+        @can('documents.download')
+            @if ($documents->isNotEmpty())
+                <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
+                            border border-outline-variant dark:border-white/10 shadow-sm">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-[18px] text-tertiary-container"
+                              style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
+                            description
+                        </span>
+                        <h2 class="font-semibold text-on-surface dark:text-white text-sm">
+                            {{ __('parcels.documents_section') }}
+                        </h2>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach ($documents as $doc)
+                            <a href="{{ route('documents.download', $doc) }}"
+                               target="_blank" rel="noopener"
+                               class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant dark:border-white/10
+                                      hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                                <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">picture_as_pdf</span>
+                                <span class="text-sm font-medium text-on-surface dark:text-white flex-1 min-w-0 truncate">
+                                    {{ $doc->photo_type?->value }}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">download</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        @endcan
 
     </div>
 

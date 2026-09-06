@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\DeedStatus;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Deed;
@@ -131,7 +132,15 @@ class OwnerPortfolioTest extends TestCase
             [$parcel->id]
         );
 
-        $deed = Deed::create(['parcel_id' => $parcel->id, 'deed_no' => 'deed-'.$parcelNo, 'deed_area' => 1000]);
+        // Owner::parcels() only counts a parcel's active deed (deed_status =
+        // Updated) as currently held — a superseded deed stays on record for
+        // history but must not count toward the owner who no longer holds it.
+        $deed = Deed::create([
+            'parcel_id' => $parcel->id,
+            'deed_no' => 'deed-'.$parcelNo,
+            'deed_area' => 1000,
+            'deed_status' => DeedStatus::Updated->value,
+        ]);
         $deed->owners()->attach($owner->id);
 
         return $parcel->refresh();

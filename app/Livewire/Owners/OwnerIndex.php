@@ -7,6 +7,7 @@ namespace App\Livewire\Owners;
 use App\Models\Owner;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -25,6 +26,11 @@ class OwnerIndex extends Component
         $this->expanded = [];
     }
 
+    /** Re-renders this list so a name/national_id/phone edit made in the
+     *  nested OwnerEditForm shows up in the collapsed row immediately. */
+    #[On('owner-updated')]
+    public function refreshOwners(): void {}
+
     public function toggleExpand(int $ownerId): void
     {
         $this->expanded[$ownerId] = ! ($this->expanded[$ownerId] ?? false);
@@ -34,7 +40,7 @@ class OwnerIndex extends Component
     private function owners(): LengthAwarePaginator
     {
         return Owner::query()
-            ->withCount(['deeds as parcel_count' => fn ($q) => $q->selectRaw('count(distinct parcel_id)')])
+            ->withCount('currentDeeds as parcel_count')
             ->withCount('deeds')
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
