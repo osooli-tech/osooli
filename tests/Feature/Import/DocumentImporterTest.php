@@ -120,6 +120,111 @@ final class DocumentImporterTest extends TestCase
         $this->assertDatabaseHas('parcel_photos', ['parcel_id' => $parcelId]);
     }
 
+    /**
+     * Regression test for the actual data-loss bug this branch reintroduced:
+     * master's 79f6621 added deed_id to parcel_photos specifically because
+     * keying only on (parcel_id, photo_type) meant a second deed's scan on
+     * the same parcel silently overwrote the first's row. This uses the
+     * client's real geo_id (28-112 carries two deeds in the production
+     * geodatabase) so the scenario is unambiguous, not a synthetic edge case.
+     */
+    public function test_a_parcel_with_two_deeds_gets_two_parcel_photos_rows_not_one_overwriting_the_other(): void
+    {
+        $parcelId = $this->makeParcel('28-112', '28', '112', '100000000001');
+        DB::table('deeds')->insert([
+            'parcel_id' => $parcelId, 'deed_no' => '100000000002',
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $result = $this->importer()->commit($this->zipOf(['100000000001.pdf', '100000000002.pdf']));
+
+        $this->assertSame(2, $result->created, 'each deed scan is a genuine create, not an overwrite of the other');
+        $this->assertSame(0, $result->updated);
+        $this->assertSame(
+            2,
+            DB::table('parcel_photos')->where('parcel_id', $parcelId)->count(),
+            'the parcel must end up with two distinct parcel_photos rows, one per deed — not one row clobbered by the second import'
+        );
+
+        $deedIds = DB::table('deeds')->where('parcel_id', $parcelId)->pluck('id', 'deed_no');
+
+        $this->assertDatabaseHas('parcel_photos', [
+            'parcel_id' => $parcelId,
+            'deed_id' => $deedIds['100000000001'],
+            'photo_type' => PhotoType::Deed->value,
+        ]);
+        $this->assertDatabaseHas('parcel_photos', [
+            'parcel_id' => $parcelId,
+            'deed_id' => $deedIds['100000000002'],
+            'photo_type' => PhotoType::Deed->value,
+        ]);
+    }
+
+    public function test_a_survey_map_links_with_a_null_deed_id(): void
+    {
+        $parcelId = $this->makeParcel('29-623', '29', '623');
+
+        $this->importer()->commit($this->zipOf(['29 - 623.pdf']));
+
+        $this->assertDatabaseHas('parcel_photos', [
+            'parcel_id' => $parcelId,
+            'photo_type' => PhotoType::BoundarySurvey->value,
+            'deed_id' => null,
+        ]);
+    }
+
+    /**
+     * The NULL-key hazard: WHERE deed_id = NULL never matches in raw SQL, so
+     * if commit() naively passed deed_id => null through to a plain equality
+     * search, every re-import of a survey map would find nothing, decide the
+     * row does not exist, and insert a duplicate. Eloquent's query builder
+     * actually converts a null search value into whereNull() automatically,
+     * so this must stay idempotent.
+     */
+    public function test_reimporting_the_same_survey_map_archive_does_not_duplicate_the_row(): void
+    {
+        $parcelId = $this->makeParcel('29-623', '29', '623');
+        $zip = $this->zipOf(['29 - 623.pdf']);
+
+        $first = $this->importer()->commit($zip);
+        $second = $this->importer()->commit($zip);
+
+        $this->assertSame(1, $first->created);
+        $this->assertSame(0, $first->updated);
+        $this->assertSame(0, $second->created, 'the null deed_id key must still be recognised as the same row, not a fresh insert');
+        $this->assertSame(1, $second->updated);
+        $this->assertSame(1, DB::table('parcel_photos')->where('parcel_id', $parcelId)->count());
+    }
+
+    /**
+     * Regression test for the parked analyze()/commit() discrepancy (point 4
+     * of the fix): before deed_id was part of the key, two deed scans for the
+     * same parcel both keyed on (parcel_id, photo_type) alone, so analyze()
+     * predicted 2 creates while commit() actually produced 1 create + 1
+     * update (the second write "updated" the row the first write had just
+     * created). With deed_id in the key both files key differently and both
+     * predictions must agree that both are genuine creates. Uses the
+     * client's other real two-deed parcel (34-82) for concreteness.
+     */
+    public function test_analyzing_two_deed_scans_for_the_same_parcel_predicts_two_creates_not_a_create_and_an_update(): void
+    {
+        $parcelId = $this->makeParcel('34-82', '34', '82', '200000000001');
+        DB::table('deeds')->insert([
+            'parcel_id' => $parcelId, 'deed_no' => '200000000002',
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        $zip = $this->zipOf(['200000000001.pdf', '200000000002.pdf']);
+
+        $preview = $this->importer()->analyze($zip);
+        $this->assertSame(2, $preview->willCreate, 'two distinct deeds on one parcel are two genuine creates, not a create/update collision');
+        $this->assertSame(0, $preview->willUpdate);
+
+        $result = $this->importer()->commit($zip);
+        $this->assertSame(2, $result->created, 'the preview must match what commit() actually does');
+        $this->assertSame(0, $result->updated);
+    }
+
     public function test_one_deed_number_on_two_parcels_links_both(): void
     {
         $first = $this->makeParcel('401-61', '401', '61', '911605004832');

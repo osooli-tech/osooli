@@ -28,7 +28,7 @@ final class DocumentImporter implements Importer
         [$rule, $matched, $unmatched, $dir] = $this->inspect($sourcePath);
 
         try {
-            $totalLinks = array_sum(array_map(fn (array $m): int => count($m['parcel_ids']), $matched));
+            $totalLinks = array_sum(array_map(fn (array $m): int => count($m['links']), $matched));
             $willUpdate = $rule === null ? 0 : $this->countExistingLinks($rule, $matched);
 
             return new ImportPreview(
@@ -52,33 +52,61 @@ final class DocumentImporter implements Importer
      * Predicts how many of the parcel–file links analyze() is about to report
      * as willCreate are actually going to land as updates once commit() runs
      * — mirroring exactly what commit()'s ParcelPhoto::updateOrCreate() will
-     * decide for each (parcel_id, photo_type) pair, via a single read-only
-     * existence lookup rather than one query per link. Without this,
-     * analyze() and commit() report the same batch under the same labels
-     * with different numbers (I1 in the final review) — e.g. a re-uploaded
-     * archive previews "31 to create" and then reports "0 created, 31
-     * updated" once confirmed.
+     * decide for each (parcel_id, deed_id, photo_type) triple, via a single
+     * read-only existence lookup rather than one query per link. Without
+     * this, analyze() and commit() report the same batch under the same
+     * labels with different numbers (I1 in the final review) — e.g. a
+     * re-uploaded archive previews "31 to create" and then reports "0
+     * created, 31 updated" once confirmed.
      *
-     * @param  list<array{filename: string, path: string, parcel_ids: list<int>}>  $matched
+     * Counting must key on the same (parcel_id, deed_id) pair commit() will
+     * write on, not on parcel_id alone: a plain "parcel_id IN (...) AND
+     * photo_type = X" count would tell two different deeds on the same
+     * parcel apart from an actual pre-existing row for either of them,
+     * mispredicting a genuine create as an update whenever that parcel
+     * already had a scan for its *other* deed.
+     *
+     * @param  list<array{filename: string, path: string, links: list<array{parcel_id: int, deed_id: int|null}>}>  $matched
      */
     private function countExistingLinks(DocumentRule $rule, array $matched): int
     {
-        $parcelIds = [];
+        $links = [];
 
         foreach ($matched as $entry) {
-            foreach ($entry['parcel_ids'] as $parcelId) {
-                $parcelIds[] = $parcelId;
+            foreach ($entry['links'] as $link) {
+                $links[] = $link;
             }
         }
 
-        if ($parcelIds === []) {
+        if ($links === []) {
             return 0;
         }
 
-        return DB::table('parcel_photos')
-            ->where('photo_type', $rule->photoType()->value)
-            ->whereIn('parcel_id', $parcelIds)
-            ->count();
+        $parcelIds = array_unique(array_column($links, 'parcel_id'));
+
+        $existingCounts = [];
+
+        foreach (
+            DB::table('parcel_photos')
+                ->where('photo_type', $rule->photoType()->value)
+                ->whereIn('parcel_id', $parcelIds)
+                ->get(['parcel_id', 'deed_id']) as $row
+        ) {
+            $key = $row->parcel_id.':'.($row->deed_id ?? 'null');
+            $existingCounts[$key] = ($existingCounts[$key] ?? 0) + 1;
+        }
+
+        $willUpdate = 0;
+
+        foreach ($links as $link) {
+            $key = $link['parcel_id'].':'.($link['deed_id'] ?? 'null');
+
+            if (($existingCounts[$key] ?? 0) > 0) {
+                $willUpdate++;
+            }
+        }
+
+        return $willUpdate;
     }
 
     public function commit(string $sourcePath): ImportResult
@@ -117,7 +145,7 @@ final class DocumentImporter implements Importer
                 // file out of the extracted tree now, not lazily.
                 $disk->put($stored, (string) file_get_contents($entry['path']));
 
-                foreach ($entry['parcel_ids'] as $parcelId) {
+                foreach ($entry['links'] as $link) {
                     // parcel_photos.photo_type is a native Postgres enum
                     // (photo_type_enum), not a varchar — going through the model
                     // (whose photo_type cast is App\Enums\PhotoType) gives Postgres a
@@ -125,8 +153,24 @@ final class DocumentImporter implements Importer
                     // with a plain string risks "column photo_type is of type
                     // photo_type_enum but expression is of type text". This also
                     // avoids updateOrInsert clobbering created_at on an update.
+                    //
+                    // deed_id is part of the search key, not just parcel_id: a
+                    // parcel can carry more than one deed, and keying only on
+                    // (parcel_id, photo_type) meant a second deed's scan
+                    // silently overwrote the first's row instead of adding a
+                    // second one. A survey map's link always carries a null
+                    // deed_id here — Eloquent's query builder turns a null
+                    // value in an updateOrCreate() search array into
+                    // `whereNull()` (not a literal `= NULL`, which would never
+                    // match in SQL), so re-importing the same survey map still
+                    // finds and updates its existing row instead of creating a
+                    // duplicate.
                     $photo = ParcelPhoto::updateOrCreate(
-                        ['parcel_id' => $parcelId, 'photo_type' => $rule->photoType()->value],
+                        [
+                            'parcel_id' => $link['parcel_id'],
+                            'deed_id' => $link['deed_id'],
+                            'photo_type' => $rule->photoType()->value,
+                        ],
                         ['photo_url' => '/storage/'.$stored]
                     );
 
@@ -163,7 +207,7 @@ final class DocumentImporter implements Importer
      * caller (analyze()/commit()) is responsible for deleting the returned
      * directory once it is done reading from it.
      *
-     * @return array{0: DocumentRule|null, 1: list<array{filename: string, path: string, parcel_ids: list<int>}>, 2: list<string>, 3: string}
+     * @return array{0: DocumentRule|null, 1: list<array{filename: string, path: string, links: list<array{parcel_id: int, deed_id: int|null}>}>, 2: list<string>, 3: string}
      */
     private function inspect(string $sourcePath): array
     {
@@ -192,15 +236,15 @@ final class DocumentImporter implements Importer
                 continue;
             }
 
-            $parcelIds = $this->parcelIdsFor($rule, $stem);
+            $links = $this->linksFor($rule, $stem);
 
-            if ($parcelIds === []) {
+            if ($links === []) {
                 $unmatched[] = $filename;
 
                 continue;
             }
 
-            $matched[] = ['filename' => $filename, 'path' => $path, 'parcel_ids' => $parcelIds];
+            $matched[] = ['filename' => $filename, 'path' => $path, 'links' => $links];
         }
 
         return [$rule, $matched, $unmatched, $dir];
@@ -236,14 +280,26 @@ final class DocumentImporter implements Importer
 
     /**
      * A deed number can sit on more than one parcel, so this returns every
-     * match rather than the first one.
+     * match rather than the first one. Each match carries the specific deed
+     * row it came from: a Deed-type scan is keyed on (parcel_id, deed_id),
+     * not parcel_id alone, so two deeds on the same parcel each get their
+     * own parcel_photos row instead of the second silently overwriting the
+     * first. A survey map belongs to the parcel itself, not to any deed, so
+     * every link it produces carries a null deed_id.
      *
-     * @return list<int>
+     * @return list<array{parcel_id: int, deed_id: int|null}>
      */
-    private function parcelIdsFor(DocumentRule $rule, string $stem): array
+    private function linksFor(DocumentRule $rule, string $stem): array
     {
         if ($rule === DocumentRule::Deed) {
-            return DB::table('deeds')->where('deed_no', $stem)->pluck('parcel_id')->unique()->values()->all();
+            return DB::table('deeds')
+                ->where('deed_no', $stem)
+                ->get(['id', 'parcel_id'])
+                ->map(fn (object $deed): array => [
+                    'parcel_id' => (int) $deed->parcel_id,
+                    'deed_id' => (int) $deed->id,
+                ])
+                ->all();
         }
 
         preg_match('/^(.+?)\s*-\s*(.+?)$/u', $stem, $m);
@@ -253,6 +309,7 @@ final class DocumentImporter implements Importer
             ->where('parcels.parcel_no', trim($m[1]))
             ->where('plans.plan_no', trim($m[2]))
             ->pluck('parcels.id')
+            ->map(fn (int|string $id): array => ['parcel_id' => (int) $id, 'deed_id' => null])
             ->all();
     }
 
