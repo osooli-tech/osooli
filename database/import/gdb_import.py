@@ -62,7 +62,7 @@ DEFAULT_CITY    = 'الدرعية'
 
 # ─── مساعدات ────────────────────────────────────────────────────────────────────
 
-def load_features(path: str, layer: str = GDB_LAYER) -> list:
+def load_features(path: str, layer: str = GDB_LAYER, encoding: str = 'cp1256') -> list:
     """
     يقرأ GDB أو GeoJSON ويُرجع list من:
       {'geometry': dict, 'properties': dict}
@@ -72,10 +72,15 @@ def load_features(path: str, layer: str = GDB_LAYER) -> list:
 
     if os.path.isdir(path) or ext == '.gdb':
         print(f"  نوع المصدر : GDB (طبقة: {layer})")
-        # هذا الـ GDB يخزّن الحقول النصية بترميز cp1256 (Windows Arabic) لا UTF-8،
-        # وGDAL يفشل بصمت ويستبدل كل حرف بـ U+FFFD بدون هذا الترميز الصريح —
-        # لا يوجد تعويض لاحق بعد القراءة، الفقد نهائي.
-        with fiona.open(path, layer=layer, encoding='cp1256') as src:
+        # ترميز حقول النص يختلف بين ملفات GDB (رأينا cp1256 و UTF-8 كلاهما من
+        # مصادر مختلفة) — GDAL يفشل بصمت ويستبدل كل حرف بـ U+FFFD مع الترميز
+        # الخطأ، والفقد نهائي بلا تعويض لاحق. --encoding none يترك GDAL يقرر
+        # (صحيح لملفات UTF-8 الأصلية)؛ التمرير الافتراضي cp1256 يطابق السلوك
+        # القديم لملفات GDB الأقدم.
+        open_kwargs = {'layer': layer}
+        if encoding and encoding.lower() != 'none':
+            open_kwargs['encoding'] = encoding
+        with fiona.open(path, **open_kwargs) as src:
             crs  = src.crs
             raw  = list(src)
         needs_proj = crs and '32638' in str(crs)
@@ -133,7 +138,9 @@ ENUM_VALUES = {
     'deed_class':        ['زراعي', 'سكني', 'صناعي'],
     'qrar_source':       ['بلدي', 'مكتب هندسي', 'بدون'],
     'allocation_method': ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
-    'fall_in':           ['مخطط زراعي', 'مخطط بلدية'],
+    # 'طلبات احكام' / 'حجة استحكام' / 'مخطط' added for the دواجن الوطنية
+    # source, which uses these three in addition to the original two.
+    'fall_in':           ['مخطط زراعي', 'مخطط بلدية', 'طلبات احكام', 'حجة استحكام', 'مخطط'],
 }
 
 
@@ -150,6 +157,52 @@ def code_to_enum(field: str, code):
     if not values or idx < 1 or idx > len(values):
         return None
     return values[idx - 1]
+
+
+def resolve_enum(field: str, raw):
+    """
+    يقبل صيغتين مختلفتين حسب مصدر الـGDB: كود رقمي (ملف الأمير — '1'، '2')
+    أو نص عربي مباشر (ملف دواجن الوطنية — 'قديم'، 'أرض'). كود رقمي يُحوَّل
+    بالترتيب عبر code_to_enum كالمعتاد؛ نص غير رقمي يُقبل مباشرة فقط إذا
+    كان من القيم المعتمدة بـENUM_VALUES — نص غير معروف يُرجع None ويُطبع
+    تحذير بدل ما يُستورد بصمت كقيمة غير موثّقة.
+    """
+    raw = v(raw)
+    if raw is None:
+        return None
+
+    text = str(raw).strip()
+    try:
+        float(text)
+    except ValueError:
+        # نص، لا رقم — يُقبل فقط إذا معتمد مسبقاً
+        if text in ENUM_VALUES.get(field, []):
+            return text
+        print(f"  ⚠ قيمة غير معتمدة لحقل {field}: \"{text}\" — تُركت فارغة")
+        return None
+
+    return code_to_enum(field, text)
+
+
+def resolve_qrar(raw):
+    """
+    حقل Qrar يخدم غرضين مختلفين حسب المصدر: كود قصير (1-3) يرمز لجهة إصدار
+    القرار (qrar_source) بملف الأمير، أو رقم القرار نفسه (qrar_no) بملف
+    دواجن الوطنية. قيمة تُحل كـكود جهة إصدار صالح تُعامل كذلك؛ أي قيمة أخرى
+    غير فارغة تُعامل كرقم قرار مع qrar_source = 'بدون' (مؤكَّد مع العميل)
+    بدل ما تُترك مجهولة.
+
+    @return (qrar_no, qrar_source)
+    """
+    raw = v(raw)
+    if raw is None:
+        return None, None
+
+    source = code_to_enum('qrar_source', raw)
+    if source is not None:
+        return None, source
+
+    return str(raw).strip(), 'بدون'
 
 
 def ensure_geo_chain(cur):
@@ -212,7 +265,7 @@ def get_or_create_district(cur, name, city_id):
 
 # ─── الاستيراد ──────────────────────────────────────────────────────────────────
 
-def run(source_path: str, layer: str = GDB_LAYER):
+def run(source_path: str, layer: str = GDB_LAYER, encoding: str = 'cp1256'):
     started_at = datetime.now()
 
     # ── 1. الاتصال بقاعدة البيانات ──────────────────────────────────────────
@@ -245,7 +298,7 @@ def run(source_path: str, layer: str = GDB_LAYER):
     print(f"\nقراءة البيانات...")
     print(f"  المسار     : {source_path}")
     try:
-        features = load_features(source_path, layer)
+        features = load_features(source_path, layer, encoding)
         print(f"  ✓ {len(features)} قطعة")
     except Exception as e:
         conn.close()
@@ -325,10 +378,10 @@ def run(source_path: str, layer: str = GDB_LAYER):
             parcel_no = str(p['Parcel']).strip() if p.get('Parcel') else None
             m_price      = float(p['M_price'])      if p.get('M_price')      else None
             parcel_price = float(p['Parcel_price']) if p.get('Parcel_price') else None
-            asset_type       = code_to_enum('asset_type',       p.get('Owner_Type'))
-            land_transaction = code_to_enum('land_transaction', p.get('Land_Trasaction'))
-            allocation_method = code_to_enum('allocation_method', p.get('Allocation_Method'))
-            fall_in          = code_to_enum('fall_in',          p.get('Fall_In'))
+            asset_type       = resolve_enum('asset_type',       p.get('Owner_Type'))
+            land_transaction = resolve_enum('land_transaction', p.get('Land_Trasaction'))
+            allocation_method = resolve_enum('allocation_method', p.get('Allocation_Method'))
+            fall_in          = resolve_enum('fall_in',          p.get('Fall_In'))
 
             cur.execute("""
                 INSERT INTO parcels (parcel_no, geo_id, plan_id, m_price, parcel_price,
@@ -365,8 +418,8 @@ def run(source_path: str, layer: str = GDB_LAYER):
                 stats['updated'] += 1
 
             # ── 4c. Deed ─────────────────────────────────────────────────
-            deed_status = code_to_enum('deed_status', p.get('Deed_Status'))
-            deed_class  = code_to_enum('deed_class',  p.get('Deed_Class'))
+            deed_status = resolve_enum('deed_status', p.get('Deed_Status'))
+            deed_class  = resolve_enum('deed_class',  p.get('Deed_Class'))
 
             cur.execute(
                 "SELECT id FROM deeds WHERE parcel_id = %s AND deed_no = %s LIMIT 1",
@@ -471,9 +524,10 @@ def run(source_path: str, layer: str = GDB_LAYER):
             stats['boundaries'] += 1
 
             # ── 4f. Survey Decision ──────────────────────────────────────
-            # نُدرج فقط إذا وُجد Folder. Qrar = كود جهة القرار (qrar_source)، وليس رقم القرار.
-            if p.get('Folder'):
-                qrar_source = code_to_enum('qrar_source', p.get('Qrar'))
+            # نُدرج إذا وُجد Folder أو Qrar — بعض المصادر (دواجن الوطنية)
+            # تعطي رقم قرار حقيقي بدون Folder على الإطلاق.
+            if p.get('Folder') or p.get('Qrar'):
+                qrar_no, qrar_source = resolve_qrar(p.get('Qrar'))
                 report_no   = str(p['Report_No']) if p.get('Report_No') else None
                 cur.execute(
                     "SELECT id FROM survey_decisions WHERE parcel_id = %s LIMIT 1",
@@ -484,21 +538,23 @@ def run(source_path: str, layer: str = GDB_LAYER):
                     cur.execute("""
                         INSERT INTO survey_decisions
                             (parcel_id, qrar_no, report_no, qrar_source, folder, created_at, updated_at)
-                        VALUES (%s, NULL, %s, %s, %s, NOW(), NOW())
-                    """, (parcel_id, report_no, qrar_source, p['Folder']))
+                        VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+                    """, (parcel_id, qrar_no, report_no, qrar_source, v(p.get('Folder'))))
                     stats['decisions'] += 1
                 else:
                     cur.execute("""
                         UPDATE survey_decisions
-                        SET qrar_source = %s, report_no = COALESCE(%s, report_no), updated_at = NOW()
+                        SET qrar_no = COALESCE(%s, qrar_no), qrar_source = %s,
+                            report_no = COALESCE(%s, report_no), updated_at = NOW()
                         WHERE id = %s
-                    """, (qrar_source, report_no, existing_decision[0]))
+                    """, (qrar_no, qrar_source, report_no, existing_decision[0]))
 
             cur.execute("RELEASE SAVEPOINT sp_group")
 
             label  = '🆕' if is_new else '🔄'
             owners = len(group)
-            print(f"  [{idx:02d}/{len(groups)}] {label} {geo_id:<12} صك:{deed_no:<10} "
+            deed_no_display = deed_no or '-'
+            print(f"  [{idx:02d}/{len(groups)}] {label} {geo_id:<12} صك:{deed_no_display:<10} "
                   f"ملاك:{owners}")
 
         except Exception as e:
@@ -570,5 +626,10 @@ if __name__ == '__main__':
         default=GDB_LAYER,
         help=f'اسم الطبقة داخل GDB (افتراضي: {GDB_LAYER})'
     )
+    parser.add_argument(
+        '--encoding', '-e',
+        default='cp1256',
+        help='ترميز حقول النص في GDB (افتراضي: cp1256). مرّر "none" لملفات UTF-8 الأصلية.'
+    )
     args = parser.parse_args()
-    run(args.source, args.layer)
+    run(args.source, args.layer, args.encoding)
