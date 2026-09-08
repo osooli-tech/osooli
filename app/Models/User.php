@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -46,6 +48,21 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Login looks a user up by exact email match, and Postgres string
+     * equality is case-sensitive — an account saved as "Name@x.com" could
+     * never sign in by typing "name@x.com", the way almost everyone types
+     * an email. Normalising here, once, covers every write path (admin
+     * create/edit, seeders, factories) rather than trusting each of them
+     * to remember it individually.
+     */
+    protected function email(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => Str::lower(trim($value)),
+        );
     }
 
     public function auditLogs(): HasMany

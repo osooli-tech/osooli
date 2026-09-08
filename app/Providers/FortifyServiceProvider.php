@@ -25,7 +25,10 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::loginView(fn () => view('auth.login'));
 
         Fortify::authenticateUsing(function (Request $request) {
-            $user = User::where('email', $request->email)->first();
+            // The User::email mutator lowercases on write, but this also
+            // has to tolerate whatever case a user types in — not only
+            // whatever ended up stored.
+            $user = User::where('email', Str::lower(trim((string) $request->email)))->first();
 
             if (! $user || ! Hash::check($request->password, $user->password)) {
                 return null;

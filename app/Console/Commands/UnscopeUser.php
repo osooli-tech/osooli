@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 class UnscopeUser extends Command
 {
@@ -25,7 +26,7 @@ class UnscopeUser extends Command
 
     public function handle(): int
     {
-        $user = User::where('email', $this->argument('email'))->first();
+        $user = User::where('email', Str::lower(trim($this->argument('email'))))->first();
 
         if ($user === null) {
             $this->error("No user found with email {$this->argument('email')}.");
