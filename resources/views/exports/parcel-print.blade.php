@@ -134,8 +134,9 @@
     .qr-strip .qr-box p { font-size: 7.5px; color: #777; margin: 2px 0 0; }
     .qr-strip .disclaimer {
         margin-{{ app()->isLocale('ar') ? 'right' : 'left' }}: 78px;
-        font-size: 8px; color: #888; line-height: 1.6;
     }
+    .qr-strip .disclaimer p { font-size: 8px; color: #888; margin: 0 0 3px; }
+    .qr-strip .disclaimer p:last-child { margin-bottom: 0; }
 </style>
 </head>
 <body>
@@ -386,7 +387,16 @@
                 @endif
                 <p dir="ltr">{{ $twin['identity']['spatial_id'] ?? $parcel->geo_id }}</p>
             </div>
-            <p class="disclaimer">@ar(__('parcels.print_footer_note'))</p>
+            {{-- Each sentence is its own shaped line rather than one long
+                 shaped block dompdf then wraps itself: shaping reorders the
+                 whole string into RTL visual order before dompdf's own
+                 word-wrap ever sees it, and wrapping that already-reordered
+                 text split the paragraph across lines in the wrong order. --}}
+            <div class="disclaimer">
+                @foreach (__('parcels.print_footer_lines') as $line)
+                    <p>@ar($line)</p>
+                @endforeach
+            </div>
         </div>
 
         {{-- Reviewer + brand mark --}}

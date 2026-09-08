@@ -142,7 +142,12 @@ return [
     'map_not_rendered' => 'The map could not be rendered',
     'valuation_section' => 'Estimated valuation',
     'valuation_derived_note' => 'Derived from the price per metre and the deed area',
-    'print_footer_note' => 'This report was prepared by Sukooki Spatial based on the data and sources available at the time of issue. The platform bears no responsibility for any data errors after the report date. For official use, please refer to the competent authorities. Scan the QR code to reach the parcel\'s full digital file.',
+    'print_footer_lines' => [
+        'This report was prepared by Sukooki Spatial based on the data and sources available at the time of issue.',
+        'The platform bears no responsibility for any data errors after the report date.',
+        'For official use, please refer to the competent authorities.',
+        'Scan the QR code to reach the parcel\'s full digital file.',
+    ],
     'map_section' => 'Location among neighbouring parcels',
     'map_unit_metres' => 'm',
     'map_legend_target' => 'This parcel',
