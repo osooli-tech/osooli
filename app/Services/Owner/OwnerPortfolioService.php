@@ -84,24 +84,29 @@ class OwnerPortfolioService
      */
     public function summary(OwnerPortfolio $portfolio): array
     {
-        /** @var \stdClass|null $row */
-        $row = DB::selectOne(
-            'SELECT
-                 COUNT(p.id) AS parcels,
-                 COALESCE(SUM(ST_Area(p.geom::geography)), 0) AS area,
-                 COUNT(p.m_price) AS priced,
-                 SUM(p.m_price * ST_Area(p.geom::geography)) AS value
-             FROM owner_portfolio_parcels opp
-             JOIN parcels p ON p.id = opp.parcel_id AND p.geom IS NOT NULL
-             WHERE opp.owner_portfolio_id = ?',
-            [$portfolio->id]
-        );
+        // Not $portfolio->parcels() here: a BelongsToMany relation always
+        // appends its own pivot columns to the select list, which Postgres
+        // then refuses next to a bare aggregate with no GROUP BY. A plain
+        // join sidesteps that entirely.
+        $row = Parcel::query()
+            ->join('owner_portfolio_parcels', 'owner_portfolio_parcels.parcel_id', '=', 'parcels.id')
+            ->where('owner_portfolio_parcels.owner_portfolio_id', $portfolio->id)
+            ->whereNotNull('parcels.geom')
+            ->selectRaw('
+                COUNT(parcels.id) AS parcels,
+                COALESCE(SUM(ST_Area(parcels.geom::geography)), 0) AS area,
+                COUNT(parcels.m_price) AS priced,
+                SUM(parcels.m_price * ST_Area(parcels.geom::geography)) AS value
+            ')
+            ->first();
+
+        $value = $row?->getAttribute('value');
 
         return [
-            'parcels' => (int) ($row->parcels ?? 0),
-            'area' => round((float) ($row->area ?? 0), 2),
-            'priced' => (int) ($row->priced ?? 0),
-            'value' => $row === null || $row->value === null ? null : round((float) $row->value, 2),
+            'parcels' => (int) ($row?->getAttribute('parcels') ?? 0),
+            'area' => round((float) ($row?->getAttribute('area') ?? 0), 2),
+            'priced' => (int) ($row?->getAttribute('priced') ?? 0),
+            'value' => $value === null ? null : round((float) $value, 2),
         ];
     }
 

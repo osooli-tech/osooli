@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Dashboard;
 
 use App\Models\OwnerPortfolio;
+use App\Models\User;
 use App\Services\Owner\OwnerPortfolioService;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 /**
@@ -26,7 +29,14 @@ class OwnerPortfolios extends Component
 
     public function mount(OwnerPortfolioService $service): void
     {
-        $all = OwnerPortfolio::with('owner')->withCount('parcels')->get();
+        /** @var User|null $user */
+        $user = Auth::user();
+        $ownerIds = OwnerScope::ownerIds($user);
+
+        $all = OwnerPortfolio::with('owner')
+            ->withCount('parcels')
+            ->when($ownerIds !== null, fn ($q) => $q->whereIn('owner_id', $ownerIds))
+            ->get();
         $this->totalCount = $all->count();
 
         $this->portfolios = $all

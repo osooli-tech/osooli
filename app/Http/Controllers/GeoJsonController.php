@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Parcel;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class GeoJsonController extends Controller
 {
@@ -15,65 +18,61 @@ class GeoJsonController extends Controller
             return response()->json(['type' => 'FeatureCollection', 'features' => []]);
         }
 
-        /** @var list<\stdClass> $rows */
-        $rows = DB::select(
-            'SELECT
-                 p.id, p.parcel_no, p.geo_id, p.asset_type, p.m_price, p.fall_in,
-                 pl.plan_no,
-                 d.name_ar AS district_name,
-                 deed.deed_no, deed.deed_date_hijri, deed.deed_area, deed.deed_status,
-                 ST_AsGeoJSON(p.geom, 6) AS geom_json,
-                 ST_Y(ST_Centroid(p.geom)) AS centroid_lat,
-                 ST_X(ST_Centroid(p.geom)) AS centroid_lng,
-                 (SELECT COUNT(*) FROM parcel_photos WHERE parcel_id = p.id) AS documents_count,
-                 -- A parcel can be co-owned, so owners are aggregated rather than joined
-                 owners.names AS owner_names,
-                 owners.ids AS owner_ids
-             FROM parcels p
-             LEFT JOIN plans pl ON pl.id = p.plan_id
-             LEFT JOIN districts d ON d.id = pl.district_id
-             LEFT JOIN LATERAL (
-                 SELECT deed_no, deed_date_hijri, deed_area, deed_status
-                 FROM deeds
-                 WHERE parcel_id = p.id
-                 ORDER BY id DESC
-                 LIMIT 1
-             ) deed ON true
-             LEFT JOIN LATERAL (
-                 SELECT string_agg(DISTINCT o.name, \' ، \') AS names,
-                        string_agg(DISTINCT o.id::text, \',\') AS ids
-                 FROM deeds dd
-                 JOIN deed_owners dow ON dow.deed_id = dd.id
-                 JOIN owners o ON o.id = dow.owner_id
-                 WHERE dd.parcel_id = p.id
-             ) owners ON true
-             WHERE p.geom IS NOT NULL'
-        );
+        /** @var User|null $user */
+        $user = Auth::user();
+        $parcelIds = OwnerScope::parcelIds($user);
 
-        $features = array_map(static fn (\stdClass $row): array => [
-            'type' => 'Feature',
-            'geometry' => json_decode((string) ($row->geom_json ?? ''), false),
-            'properties' => [
-                'id' => $row->id,
-                'parcel_no' => $row->parcel_no,
-                'geo_id' => $row->geo_id,
-                'asset_type' => $row->asset_type,
-                'fall_in' => $row->fall_in,
-                'plan_no' => $row->plan_no,
-                'district_name' => $row->district_name,
-                'deed_no' => $row->deed_no,
-                'deed_date_hijri' => $row->deed_date_hijri,
-                'deed_area' => $row->deed_area,
-                'deed_status' => $row->deed_status,
-                'centroid_lat' => $row->centroid_lat,
-                'centroid_lng' => $row->centroid_lng,
-                'documents_count' => (int) $row->documents_count,
-                // Drives the priced/unpriced colouring; the amount itself stays out.
-                'is_priced' => $row->m_price !== null,
-                'owner_names' => $row->owner_names,
-                'owner_ids' => $row->owner_ids,
-            ],
-        ], $rows);
+        // Eager-loading deeds.deedOwners.owner covers both the "latest deed"
+        // fields and the owner-name aggregation below from the same rows —
+        // one extra query total, not one per parcel.
+        $parcels = Parcel::query()
+            ->with(['plan.district', 'deeds.deedOwners.owner'])
+            ->withCount('photos')
+            ->whereNotNull('geom')
+            ->when($parcelIds !== null, fn ($q) => $q->whereIn('id', $parcelIds))
+            ->selectRaw('parcels.*, ST_AsGeoJSON(geom, 6) AS geom_json, ST_Y(ST_Centroid(geom)) AS centroid_lat, ST_X(ST_Centroid(geom)) AS centroid_lng')
+            ->get();
+
+        $features = $parcels->map(function (Parcel $parcel): array {
+            // Most recently recorded deed, whatever its status — matches
+            // what a parcel's own detail page treats as "the" deed to show
+            // a headline for, not only ones marked as currently valid.
+            $latestDeed = $parcel->deeds->sortByDesc('id')->first();
+
+            // A parcel can be co-owned, and ownership can also change hands
+            // across several deeds, so owners are aggregated across every
+            // deed on record rather than just the latest one.
+            $owners = $parcel->deeds
+                ->flatMap(fn ($deed) => $deed->deedOwners)
+                ->pluck('owner')
+                ->filter()
+                ->unique('id');
+
+            return [
+                'type' => 'Feature',
+                'geometry' => json_decode((string) $parcel->getAttribute('geom_json'), false),
+                'properties' => [
+                    'id' => $parcel->id,
+                    'parcel_no' => $parcel->parcel_no,
+                    'geo_id' => $parcel->geo_id,
+                    'asset_type' => $parcel->asset_type,
+                    'fall_in' => $parcel->fall_in,
+                    'plan_no' => $parcel->plan?->plan_no,
+                    'district_name' => $parcel->plan?->district?->name_ar,
+                    'deed_no' => $latestDeed?->deed_no,
+                    'deed_date_hijri' => $latestDeed?->deed_date_hijri,
+                    'deed_area' => $latestDeed?->deed_area,
+                    'deed_status' => $latestDeed?->deed_status,
+                    'centroid_lat' => (float) $parcel->getAttribute('centroid_lat'),
+                    'centroid_lng' => (float) $parcel->getAttribute('centroid_lng'),
+                    'documents_count' => $parcel->photos_count,
+                    // Drives the priced/unpriced colouring; the amount itself stays out.
+                    'is_priced' => $parcel->m_price !== null,
+                    'owner_names' => $owners->pluck('name')->implode('، ') ?: null,
+                    'owner_ids' => $owners->pluck('id')->implode(',') ?: null,
+                ],
+            ];
+        })->values()->all();
 
         return response()->json(['type' => 'FeatureCollection', 'features' => $features]);
     }

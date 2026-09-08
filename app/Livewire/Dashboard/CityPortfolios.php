@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\Parcel;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 /**
@@ -23,30 +26,34 @@ class CityPortfolios extends Component
 
     public function mount(): void
     {
-        /** @var list<\stdClass> $rows */
-        $rows = DB::select(
-            "SELECT
-                 COALESCE(c.name_ar, 'غير محدد') AS name,
-                 COUNT(p.id) AS parcels,
-                 COALESCE(SUM(ST_Area(p.geom::geography)), 0) AS area,
-                 COUNT(p.m_price) AS priced,
-                 SUM(p.m_price * ST_Area(p.geom::geography)) AS value
-             FROM parcels p
-             LEFT JOIN plans pl ON pl.id = p.plan_id
-             LEFT JOIN districts d ON d.id = pl.district_id
-             LEFT JOIN cities c ON c.id = d.city_id
-             WHERE p.geom IS NOT NULL
-             GROUP BY c.name_ar
-             ORDER BY parcels DESC"
-        );
+        /** @var User|null $user */
+        $user = Auth::user();
+        $parcelIds = OwnerScope::parcelIds($user);
 
-        $this->portfolios = array_map(static fn (\stdClass $r): array => [
-            'name' => (string) $r->name,
-            'parcels' => (int) $r->parcels,
-            'area' => round((float) $r->area, 2),
-            'priced' => (int) $r->priced,
-            'value' => $r->value === null ? null : round((float) $r->value, 2),
-        ], $rows);
+        $rows = Parcel::query()
+            ->leftJoin('plans', 'plans.id', '=', 'parcels.plan_id')
+            ->leftJoin('districts', 'districts.id', '=', 'plans.district_id')
+            ->leftJoin('cities', 'cities.id', '=', 'districts.city_id')
+            ->whereNotNull('parcels.geom')
+            ->when($parcelIds !== null, fn ($q) => $q->whereIn('parcels.id', $parcelIds))
+            ->selectRaw("
+                COALESCE(cities.name_ar, 'غير محدد') AS name,
+                COUNT(parcels.id) AS parcels,
+                COALESCE(SUM(ST_Area(parcels.geom::geography)), 0) AS area,
+                COUNT(parcels.m_price) AS priced,
+                SUM(parcels.m_price * ST_Area(parcels.geom::geography)) AS value
+            ")
+            ->groupBy('cities.name_ar')
+            ->orderByDesc('parcels')
+            ->get();
+
+        $this->portfolios = $rows->map(static fn (Parcel $r): array => [
+            'name' => (string) $r->getAttribute('name'),
+            'parcels' => (int) $r->getAttribute('parcels'),
+            'area' => round((float) $r->getAttribute('area'), 2),
+            'priced' => (int) $r->getAttribute('priced'),
+            'value' => $r->getAttribute('value') === null ? null : round((float) $r->getAttribute('value'), 2),
+        ])->all();
     }
 
     public function render(): View

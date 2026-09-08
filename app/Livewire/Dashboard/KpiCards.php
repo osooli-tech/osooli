@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace App\Livewire\Dashboard;
 
 use App\Enums\DeedStatus;
+use App\Models\Deed;
+use App\Models\DeedOwner;
 use App\Models\ModificationRequest;
+use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\Plan;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -74,68 +80,98 @@ class KpiCards extends Component
 
     public function mount(): void
     {
-        $this->totalParcels = Parcel::count();
-        $this->totalPlans = Plan::count();
-        $this->pendingRequests = ModificationRequest::where('status', 'pending')->count();
+        /** @var User|null $user */
+        $user = Auth::user();
+        $ownerIds = OwnerScope::ownerIds($user);
+        $parcelIds = OwnerScope::parcelIds($user);
+        $restricted = $parcelIds !== null;
+
+        $this->totalParcels = Parcel::query()
+            ->when($restricted, fn ($q) => $q->whereIn('id', $parcelIds))
+            ->count();
+
+        $this->totalPlans = Plan::query()
+            ->when(
+                $restricted,
+                fn ($q) => $q->whereHas('parcels', fn ($p) => $p->whereIn('id', $parcelIds))
+            )
+            ->count();
+
+        $this->pendingRequests = ModificationRequest::query()
+            ->where('status', 'pending')
+            ->when(
+                $restricted,
+                fn ($q) => $q->whereHas('parcel', fn ($p) => $p->whereIn('id', $parcelIds))
+            )
+            ->count();
 
         // Distinct owners that actually appear in deed_owners
-        $this->totalOwners = DB::table('deed_owners')->distinct('owner_id')->count('owner_id');
+        $this->totalOwners = DeedOwner::query()
+            ->when($restricted, fn ($q) => $q->whereIn('owner_id', $ownerIds))
+            ->distinct('owner_id')
+            ->count('owner_id');
 
-        $this->totalDeeds = DB::table('deeds')->count();
-        $this->updatedDeeds = DB::table('deeds')->where('deed_status', DeedStatus::Updated->value)->count();
-        $this->nonUpdatedDeeds = DB::table('deeds')->where('deed_status', DeedStatus::Old->value)->count();
+        $deeds = Deed::query()->when($restricted, fn ($q) => $q->whereIn('parcel_id', $parcelIds));
+        $this->totalDeeds = (clone $deeds)->count();
+        $this->updatedDeeds = (clone $deeds)->where('deed_status', DeedStatus::Updated->value)->count();
+        $this->nonUpdatedDeeds = (clone $deeds)->where('deed_status', DeedStatus::Old->value)->count();
         $this->activeAlerts = $this->pendingRequests + $this->nonUpdatedDeeds;
 
-        // Deeds with more than one owner — single subquery
-        $this->multiOwnerDeeds = (int) DB::scalar(
-            'SELECT COUNT(*) FROM (
-                SELECT deed_id FROM deed_owners GROUP BY deed_id HAVING COUNT(*) > 1
-             ) sub'
-        );
+        // Deeds with more than one owner — COUNT computed in the database
+        // over a small grouped subquery, not pulled into PHP to be counted there.
+        $multiOwnerSub = DeedOwner::query()
+            ->when($restricted, fn ($q) => $q->whereIn('owner_id', $ownerIds))
+            ->select('deed_id')
+            ->groupBy('deed_id')
+            ->havingRaw('COUNT(*) > 1');
+        $this->multiOwnerDeeds = DB::query()->fromSub($multiOwnerSub, 'sub')->count();
 
         // All four area aggregates in one query
-        /** @var object{total: string, avg: string, max_v: string, min_v: string}|null $area */
-        $area = DB::selectOne(
-            'SELECT COALESCE(SUM(deed_area), 0) AS total,
-                    COALESCE(AVG(deed_area), 0) AS avg,
-                    COALESCE(MAX(deed_area), 0) AS max_v,
-                    COALESCE(MIN(deed_area), 0) AS min_v
-             FROM deeds'
-        );
+        $area = (clone $deeds)
+            ->selectRaw('
+                COALESCE(SUM(deed_area), 0) AS total,
+                COALESCE(AVG(deed_area), 0) AS avg,
+                COALESCE(MAX(deed_area), 0) AS max_v,
+                COALESCE(MIN(deed_area), 0) AS min_v
+            ')
+            ->first();
 
-        $this->totalArea = $this->fmtArea((float) ($area->total ?? 0));
-        $this->avgArea = $this->fmtArea((float) ($area->avg ?? 0));
-        $this->maxArea = $this->fmtArea((float) ($area->max_v ?? 0));
-        $this->minArea = $this->fmtArea((float) ($area->min_v ?? 0));
+        $this->totalArea = $this->fmtArea((float) ($area?->getAttribute('total') ?? 0));
+        $this->avgArea = $this->fmtArea((float) ($area?->getAttribute('avg') ?? 0));
+        $this->maxArea = $this->fmtArea((float) ($area?->getAttribute('max_v') ?? 0));
+        $this->minArea = $this->fmtArea((float) ($area?->getAttribute('min_v') ?? 0));
 
         // Owner with the most deeds (one JOIN query, no N+1)
-        /** @var object{name: string, deed_cnt: int}|null $top */
-        $top = DB::selectOne(
-            'SELECT o.name, COUNT(dw.deed_id) AS deed_cnt
-             FROM deed_owners dw
-             JOIN owners o ON dw.owner_id = o.id
-             GROUP BY o.id, o.name
-             ORDER BY deed_cnt DESC
-             LIMIT 1'
-        );
+        $top = Owner::query()
+            ->join('deed_owners', 'deed_owners.owner_id', '=', 'owners.id')
+            ->when($restricted, fn ($q) => $q->whereIn('owners.id', $ownerIds))
+            ->selectRaw('owners.name AS name, COUNT(deed_owners.deed_id) AS deed_cnt')
+            ->groupBy('owners.id', 'owners.name')
+            ->orderByDesc('deed_cnt')
+            ->first();
 
         if ($top !== null) {
-            $this->topOwnerName = $top->name;
-            $this->topOwnerDeedCount = (int) $top->deed_cnt;
+            $this->topOwnerName = (string) $top->getAttribute('name');
+            $this->topOwnerDeedCount = (int) $top->getAttribute('deed_cnt');
         }
 
         // AVG/SUM ignore NULL rows on their own — a parcel without a
         // recorded price just does not count toward either figure.
-        /** @var object{avg_price: string|null, total_value: string|null}|null $pricing */
-        $pricing = DB::selectOne('SELECT AVG(m_price) AS avg_price, SUM(parcel_price) AS total_value FROM parcels');
+        $pricing = Parcel::query()
+            ->when($restricted, fn ($q) => $q->whereIn('id', $parcelIds))
+            ->selectRaw('AVG(m_price) AS avg_price, SUM(parcel_price) AS total_value')
+            ->first();
 
-        $this->avgPricePerMetre = $pricing?->avg_price === null
-            ? '—'
-            : number_format((float) $pricing->avg_price, 0).' '.__('parcels.sar');
+        $avgPrice = $pricing?->getAttribute('avg_price');
+        $totalValue = $pricing?->getAttribute('total_value');
 
-        $this->totalEstimatedValue = $pricing?->total_value === null
+        $this->avgPricePerMetre = $avgPrice === null
             ? '—'
-            : number_format((float) $pricing->total_value, 0).' '.__('parcels.sar');
+            : number_format((float) $avgPrice, 0).' '.__('parcels.sar');
+
+        $this->totalEstimatedValue = $totalValue === null
+            ? '—'
+            : number_format((float) $totalValue, 0).' '.__('parcels.sar');
     }
 
     private function fmtArea(float $v): string

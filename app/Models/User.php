@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -50,6 +51,17 @@ class User extends Authenticatable
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    /**
+     * The owners this user is restricted to, if any. An empty relation
+     * means unrestricted (sees every owner/parcel) — see App\Support\OwnerScope.
+     *
+     * @return BelongsToMany<Owner, $this>
+     */
+    public function scopedOwners(): BelongsToMany
+    {
+        return $this->belongsToMany(Owner::class, 'user_owner_scopes');
     }
 
     /**

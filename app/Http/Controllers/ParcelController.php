@@ -7,21 +7,26 @@ namespace App\Http\Controllers;
 use App\Enums\PhotoType;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
+use App\Models\User;
 use App\Services\Parcel\DigitalTwinService;
 use App\Services\Parcel\ParcelDocumentRenderService;
 use App\Services\Parcel\ParcelMapSvgService;
 use App\Services\Parcel\ParcelQrCodeService;
 use App\Services\Parcel\ParcelSatelliteImageService;
+use App\Support\OwnerScope;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ParcelController extends Controller
 {
     public function show(Parcel $parcel): View
     {
+        $this->authorizeVisible($parcel);
+
         $parcel->load([
             'plan.district',
             'deeds.owners',
@@ -44,6 +49,8 @@ class ParcelController extends Controller
     /** The unified property file: every record we hold on one parcel, in one view. */
     public function twin(Parcel $parcel, DigitalTwinService $twin): View
     {
+        $this->authorizeVisible($parcel);
+
         /** @var \stdClass|null $geoRow */
         $geoRow = DB::selectOne(
             'SELECT ST_AsGeoJSON(geom, 6) AS geom_json, ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng
@@ -98,6 +105,8 @@ class ParcelController extends Controller
         ParcelDocumentRenderService $documentRender,
         ParcelSatelliteImageService $satelliteImage
     ): Response {
+        $this->authorizeVisible($parcel);
+
         $parcel->loadMissing(['photos', 'currentDeed', 'boundary']);
 
         // A document that cannot be rendered (no Imagick locally, or an
@@ -181,6 +190,8 @@ class ParcelController extends Controller
 
     public function documents(Parcel $parcel): JsonResponse
     {
+        $this->authorizeVisible($parcel);
+
         $documents = $parcel->photos()->get()->map(fn (ParcelPhoto $photo) => [
             'id' => $photo->id,
             'type' => $photo->photo_type ? __('documents.photo_types.'.$photo->photo_type->value) : null,
@@ -188,5 +199,14 @@ class ParcelController extends Controller
         ]);
 
         return response()->json(['documents' => $documents]);
+    }
+
+    /** A user restricted to specific owners cannot reach a parcel outside that set by URL. */
+    private function authorizeVisible(Parcel $parcel): void
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        abort_unless(OwnerScope::canSeeParcel($user, $parcel->id), 403);
     }
 }

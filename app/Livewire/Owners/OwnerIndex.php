@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Owners;
 
 use App\Models\Owner;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -39,9 +42,14 @@ class OwnerIndex extends Component
     /** @return LengthAwarePaginator<Owner> */
     private function owners(): LengthAwarePaginator
     {
+        /** @var User|null $user */
+        $user = Auth::user();
+        $ownerIds = OwnerScope::ownerIds($user);
+
         return Owner::query()
             ->withCount('currentDeeds as parcel_count')
             ->withCount('deeds')
+            ->when($ownerIds !== null, fn ($q) => $q->whereIn('id', $ownerIds))
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
                 $q->where(function ($inner) use ($term): void {
