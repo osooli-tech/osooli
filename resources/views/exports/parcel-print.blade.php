@@ -365,7 +365,12 @@
                 <div class="card-title">@ar(__('parcels.map_section'))</div>
                 <div class="card-body" style="padding: 0;">
                     @if ($mapImage)
-                        <img class="card-image" style="height: 230px;" src="{{ $mapImage }}">
+                        {{-- dompdf does not support object-fit — width:100% with a
+                             fixed height on this square source image stretched it
+                             non-uniformly. Sized as a square instead (matching the
+                             source canvas) and centred, so it scales without
+                             distortion. --}}
+                        <img style="display: block; width: 230px; height: 230px; margin: 0 auto;" src="{{ $mapImage }}">
                     @else
                         <p class="placeholder">@ar(__('parcels.map_not_rendered'))</p>
                     @endif
@@ -418,7 +423,7 @@
                 <h2 style="background-color:#002444;color:#fff;padding:6px 10px;border-radius:3px;">@ar(__('parcels.documents_page_title'))</h2>
                 @foreach ($documents as $doc)
                     <div class="doc-block" style="{{ ! $loop->first ? 'page-break-before: always;' : '' }}">
-                        <p class="doc-title">@ar($doc['photo']->photo_type?->value ?? '—')</p>
+                        <p class="doc-title">@ar($doc['photo']->photo_type ? __('documents.photo_types.'.$doc['photo']->photo_type->value) : '—')</p>
                         @if ($doc['preview'])
                             <img src="{{ $doc['preview'] }}">
                         @else

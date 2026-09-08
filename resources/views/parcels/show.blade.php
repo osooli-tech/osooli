@@ -64,9 +64,18 @@
                 <h2 class="font-semibold text-on-surface dark:text-white text-sm">
                     {{ __('parcels.deeds_section') }}
                 </h2>
-                <span class="ms-auto text-xs text-on-surface-variant dark:text-on-primary-container">
-                    {{ $parcel->deeds->count() }}
-                </span>
+                <div class="ms-auto flex items-center gap-2">
+                    @if ($parcel->fall_in)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                     bg-secondary-container/40 text-on-surface dark:text-white/80"
+                              title="{{ __('parcels.ownership_basis') }}">
+                            {{ $parcel->fall_in }}
+                        </span>
+                    @endif
+                    <span class="text-xs text-on-surface-variant dark:text-on-primary-container">
+                        {{ $parcel->deeds->count() }}
+                    </span>
+                </div>
             </div>
 
             @if ($parcel->deeds->isEmpty())
@@ -371,7 +380,7 @@
                                       hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
                                 <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">picture_as_pdf</span>
                                 <span class="text-sm font-medium text-on-surface dark:text-white flex-1 min-w-0 truncate">
-                                    {{ $doc->photo_type?->value }}
+                                    {{ $doc->photo_type ? __('documents.photo_types.'.$doc->photo_type->value) : '—' }}
                                 </span>
                                 <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">download</span>
                             </a>

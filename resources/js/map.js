@@ -190,6 +190,16 @@ if (! container) {
                 stops: [[true, '#00b386'], [false, '#8a8f98']],
                 labels: { true: 'مسعّرة', false: 'غير مسعّرة' },
             },
+            fall_in: {
+                property: 'fall_in',
+                stops: [
+                    ['مخطط زراعي', '#00b386'],
+                    ['مخطط بلدية', '#d9534f'],
+                    ['طلبات احكام', '#c9a84c'],
+                    ['حجة استحكام', '#4a90d9'],
+                    ['مخطط', '#9b6dd6'],
+                ],
+            },
         };
 
         let colourMode = 'none';

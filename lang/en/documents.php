@@ -14,9 +14,9 @@ return [
     'upload_date' => 'Upload date',
     'download' => 'Download',
     'photo_types' => [
-        'جوية' => 'Aerial',
+        'جوية' => 'Agricultural Sheet',
         'أرضية' => 'Ground',
-        'كروكي مساحي' => 'Boundary Survey',
+        'كروكي مساحي' => 'Approved Plan',
         'صك' => 'Deed',
     ],
 ];

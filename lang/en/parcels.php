@@ -18,6 +18,7 @@ return [
     'land_transaction' => 'Transaction Status',
     'allocation_method' => 'Allocation Method',
     'fall_in' => 'Falls Within',
+    'ownership_basis' => 'Ownership Basis',
     'deed_area' => 'Deed Area',
     'area_deed' => 'Deed Area',
     'area_measured' => 'Measured Area',

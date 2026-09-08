@@ -204,7 +204,7 @@
         <div class="xl:col-span-3 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl overflow-hidden
                     border border-outline-variant dark:border-white/10 shadow-sm h-[420px] relative"
              @if ($parcelGeojson && config('services.mapbox.token'))
-                 x-data="parcelMiniMap(@js($parcelGeojson), @js(json_encode(['type' => 'FeatureCollection', 'features' => []])), @js($parcel->parcel_no))"
+                 x-data="parcelMiniMap(@js($parcelGeojson), @js($neighboursGeojson), @js($parcel->parcel_no))"
                  x-init="init()"
              @endif>
 
@@ -366,7 +366,7 @@
                                   border border-outline-variant dark:border-white/10 mb-2 last:mb-0 transition-colors">
                             <span class="material-symbols-outlined text-[20px] text-error shrink-0">picture_as_pdf</span>
                             <span class="flex-1 min-w-0 text-sm text-on-surface dark:text-white truncate">
-                                {{ $file->photo_type?->value }}
+                                {{ $file->photo_type ? __('documents.photo_types.'.$file->photo_type->value) : '—' }}
                             </span>
                             <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">open_in_new</span>
                         </a>
@@ -402,7 +402,7 @@
                           border border-outline-variant dark:border-white/10 mb-2 last:mb-0 transition-colors">
                     <span class="material-symbols-outlined text-[20px] text-error shrink-0">picture_as_pdf</span>
                     <span class="flex-1 min-w-0 text-sm text-on-surface dark:text-white truncate">
-                        {{ $file->photo_type?->value }}
+                        {{ $file->photo_type ? __('documents.photo_types.'.$file->photo_type->value) : '—' }}
                         @if ($file->deed?->deed_no)
                             <span class="text-on-surface-variant dark:text-on-primary-container font-normal">— {{ $file->deed->deed_no }}</span>
                         @endif
@@ -431,7 +431,7 @@
                     @foreach ($docs['images'] as $image)
                         <a href="{{ $image->photo_url }}" target="_blank" rel="noopener"
                            class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ $image->photo_url }}" alt="{{ $image->photo_type?->value }}"
+                            <img src="{{ $image->photo_url }}" alt="{{ $image->photo_type ? __('documents.photo_types.'.$image->photo_type->value) : '' }}"
                                  loading="lazy" class="w-full h-full object-cover" />
                         </a>
                     @endforeach
@@ -450,7 +450,7 @@
         <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl overflow-hidden
                     border border-outline-variant dark:border-white/10 shadow-sm h-[520px] relative"
              @if ($parcelGeojson && config('services.mapbox.token'))
-                 x-data="parcelMiniMap(@js($parcelGeojson), @js(json_encode(['type' => 'FeatureCollection', 'features' => []])), @js($parcel->parcel_no))"
+                 x-data="parcelMiniMap(@js($parcelGeojson), @js($neighboursGeojson), @js($parcel->parcel_no))"
              @endif>
 
             @if ($parcelGeojson && config('services.mapbox.token'))

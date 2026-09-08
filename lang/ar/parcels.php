@@ -18,6 +18,7 @@ return [
     'land_transaction' => 'حالة التصرف',
     'allocation_method' => 'طريقة التملك',
     'fall_in' => 'يقع في',
+    'ownership_basis' => 'أساس الملكية',
     'deed_area' => 'المساحة في الصك',
     'area_deed' => 'المساحة في الصك',
     'area_measured' => 'المساحة المساحية',

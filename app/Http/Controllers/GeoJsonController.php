@@ -18,7 +18,7 @@ class GeoJsonController extends Controller
         /** @var list<\stdClass> $rows */
         $rows = DB::select(
             'SELECT
-                 p.id, p.parcel_no, p.geo_id, p.asset_type, p.m_price,
+                 p.id, p.parcel_no, p.geo_id, p.asset_type, p.m_price, p.fall_in,
                  pl.plan_no,
                  d.name_ar AS district_name,
                  deed.deed_no, deed.deed_date_hijri, deed.deed_area, deed.deed_status,
@@ -58,6 +58,7 @@ class GeoJsonController extends Controller
                 'parcel_no' => $row->parcel_no,
                 'geo_id' => $row->geo_id,
                 'asset_type' => $row->asset_type,
+                'fall_in' => $row->fall_in,
                 'plan_no' => $row->plan_no,
                 'district_name' => $row->district_name,
                 'deed_no' => $row->deed_no,

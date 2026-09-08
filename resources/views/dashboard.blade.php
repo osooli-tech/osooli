@@ -93,6 +93,7 @@
                                 'none' => 'dashboard.colour_none',
                                 'deed_status' => 'parcels.deed_status',
                                 'asset_type' => 'parcels.asset_type',
+                                'fall_in' => 'parcels.ownership_basis',
                                 'priced' => 'dashboard.colour_priced',
                             ] as $mode => $label)
                                 <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
