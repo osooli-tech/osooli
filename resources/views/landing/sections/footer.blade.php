@@ -4,7 +4,6 @@
             <div>
                 <x-landing.logo />
                 <p class="foot-about">{{ __('landing.foot_about') }}</p>
-                <p class="foot-supervision">{{ __('landing.foot_supervision') }}</p>
             </div>
 
             <div>
@@ -34,7 +33,10 @@
         </div>
 
         <div class="foot-bot">
-            <span>{{ __('landing.foot_rights', ['year' => date('Y')]) }}</span>
+            <div class="foot-legal">
+                <span>{{ __('landing.foot_rights', ['year' => date('Y')]) }}</span>
+                <span class="foot-supervision">{{ __('landing.foot_supervision') }}</span>
+            </div>
             <nav>
                 <a href="{{ route('privacy.policy') }}">{{ __('landing.foot_privacy_short') }}</a>
                 <a href="{{ route('terms.of.use') }}">{{ __('landing.foot_terms_short') }}</a>
