@@ -4,6 +4,7 @@
             <div>
                 <x-landing.logo />
                 <p class="foot-about">{{ __('landing.foot_about') }}</p>
+                <p class="foot-supervision">{{ __('landing.foot_supervision') }}</p>
             </div>
 
             <div>

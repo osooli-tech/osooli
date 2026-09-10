@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'contact_email' => env('LANDING_CONTACT_EMAIL', 'sales@sakuki.sa'),
+    'contact_email' => env('LANDING_CONTACT_EMAIL', 'Info@eliaa.sa'),
 
     'contact_phone' => env('LANDING_CONTACT_PHONE', '+966597535359'),
     'contact_whatsapp' => env('LANDING_CONTACT_WHATSAPP', '+966597535359'),

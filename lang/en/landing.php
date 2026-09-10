@@ -229,6 +229,7 @@ return [
     // ── Footer ──────────────────────────────────────────────────
     'foot_about' => 'Spatial data for real estate — we turn your deeds and plans into one map '
         .'that decisions get made on.',
+    'foot_supervision' => 'Sakuki operates under the umbrella and supervision of Elaa Al-Khaleej Investment Company.',
     'foot_platform' => 'Platform',
     'foot_app' => 'Mobile app',
     'foot_company' => 'Company',
