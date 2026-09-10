@@ -117,7 +117,9 @@
         </div>
 
         @can('parcels.view_map')
-            <a href="#"
+            {{-- The dashboard is the map: it hosts #sakuki-map, and there is no
+                 separate map route — only the GeoJSON feed it reads. --}}
+            <a href="{{ route('dashboard') }}"
                class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl
                       bg-secondary hover:brightness-110 text-white text-sm font-medium transition-all">
                 <span class="material-symbols-outlined text-[18px]">public</span>
