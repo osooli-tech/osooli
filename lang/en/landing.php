@@ -226,6 +226,23 @@ return [
     'request_form_success' => 'Your request was received — we will be in touch soon.',
     'request_form_error' => 'Could not send the request. Check the details and try again.',
 
+    // Sent to the sales inbox the moment a request lands.
+    'request_mail_subject' => 'New demo request — :name',
+    'request_mail_body' => "A new demo request came in from the website.
+
+"
+        ."Name: :name
+"
+        ."Phone: :phone
+"
+        ."WhatsApp: :whatsapp
+"
+        ."Message: :message
+
+"
+        ."Received: :date",
+    'request_mail_no_message' => '—',
+
     // ── Footer ──────────────────────────────────────────────────
     'foot_about' => 'Spatial data for real estate — we turn your deeds and plans into one map '
         .'that decisions get made on.',

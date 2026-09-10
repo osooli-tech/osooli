@@ -74,8 +74,14 @@
 @endsection
 
 @section('brand-panel')
-    <img src="{{ asset('images/logo-full.png') }}" alt="{{ __('nav.app_name') }}"
-         style="height:auto;width:280px;display:block;">
+    {{-- The wordmark is navy on navy here: most of its artwork sits within a
+         shade of this panel's background, so it needs the same light plate the
+         landing header gives the mark. logo-full-sm.png is the 500px cut of the
+         same art — ample for a 280px render, and 1.4 MB lighter to download. --}}
+    <span style="display:block;background:#fff;border-radius:22px;padding:24px 28px;">
+        <img src="{{ asset('images/logo-full-sm.png') }}" alt="{{ __('nav.app_name') }}"
+             style="height:auto;width:280px;display:block;">
+    </span>
     <p class="text-primary-fixed-dim text-lg max-w-xs leading-relaxed mt-6">
         {{ __('auth.brand_tagline') }}
     </p>

@@ -217,6 +217,23 @@ return [
     'request_form_success' => 'تم استلام طلبك، سنتواصل معك قريباً.',
     'request_form_error' => 'تعذّر إرسال الطلب. تحقق من البيانات وحاول مرة أخرى.',
 
+    // Sent to the sales inbox the moment a request lands.
+    'request_mail_subject' => 'طلب عرض تقديمي جديد — :name',
+    'request_mail_body' => "وصل طلب عرض تقديمي جديد من الموقع.
+
+"
+        ."الاسم: :name
+"
+        ."الجوال: :phone
+"
+        ."واتساب: :whatsapp
+"
+        ."الرسالة: :message
+
+"
+        ."تاريخ الطلب: :date",
+    'request_mail_no_message' => '—',
+
     // ── Footer ──────────────────────────────────────────────────
     'foot_about' => 'منصة البيانات المكانية العقارية — نحوّل صكوكك ومخططاتك إلى خريطة واحدة '
         .'تُتخذ عليها القرارات.',

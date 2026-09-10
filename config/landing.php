@@ -17,6 +17,14 @@ return [
 
     'contact_email' => env('LANDING_CONTACT_EMAIL', 'Info@eliaa.sa'),
 
+    /*
+    | Where demo requests raised on the landing page are announced. Separate
+    | from contact_email so the inbox visitors write to and the inbox sales
+    | watches can diverge later without a code change.
+    */
+    'request_notify_email' => env('LANDING_REQUEST_NOTIFY_EMAIL')
+        ?: env('LANDING_CONTACT_EMAIL', 'Info@eliaa.sa'),
+
     'contact_phone' => env('LANDING_CONTACT_PHONE', '+966597535359'),
     'contact_whatsapp' => env('LANDING_CONTACT_WHATSAPP', '+966597535359'),
 

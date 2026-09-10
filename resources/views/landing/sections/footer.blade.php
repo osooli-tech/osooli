@@ -26,6 +26,9 @@
             <div>
                 <h2>{{ __('landing.foot_company') }}</h2>
                 <a href="mailto:{{ config('landing.contact_email') }}">{{ __('landing.foot_contact') }}</a>
+                {{-- dir="ltr" so the digits keep their order inside the RTL column. --}}
+                <a href="tel:{{ config('landing.contact_phone') }}" dir="ltr"
+                   class="foot-phone">{{ config('landing.contact_phone') }}</a>
                 <a href="{{ route('privacy.policy') }}">{{ __('landing.foot_privacy') }}</a>
                 <a href="{{ route('terms.of.use') }}">{{ __('landing.foot_terms') }}</a>
                 <a href="{{ route('login') }}">{{ __('landing.nav_login') }}</a>
