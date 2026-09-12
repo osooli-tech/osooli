@@ -7,8 +7,12 @@ namespace App\Livewire\Notifications;
 use App\Enums\ModificationRequestStatus;
 use App\Models\ModificationRequest;
 use App\Models\PresentationRequest;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -37,8 +41,8 @@ class NotificationBell extends Component
     #[Computed]
     public function count(): int
     {
-        return PresentationRequest::whereNull('read_at')->count()
-            + ModificationRequest::where('status', ModificationRequestStatus::Pending)->count();
+        return ($this->presentationRequests()?->count() ?? 0)
+            + ($this->modificationRequests()?->count() ?? 0);
     }
 
     /**
@@ -49,10 +53,7 @@ class NotificationBell extends Component
     #[Computed]
     public function items(): array
     {
-        $presentationRequests = PresentationRequest::whereNull('read_at')
-            ->latest()
-            ->limit(5)
-            ->get()
+        $presentationRequests = collect($this->presentationRequests()?->latest()->limit(5)->get())
             ->map(fn (PresentationRequest $r) => [
                 'type' => 'presentation_request',
                 'title' => $r->name,
@@ -61,16 +62,13 @@ class NotificationBell extends Component
                 'created_at' => $r->created_at,
             ]);
 
-        $modificationRequests = ModificationRequest::where('status', ModificationRequestStatus::Pending)
-            ->with('parcel')
-            ->latest()
-            ->limit(5)
-            ->get()
+        $modificationRequests = collect($this->modificationRequests()?->with('parcel')->latest()->limit(5)->get())
             ->map(fn (ModificationRequest $r) => [
                 'type' => 'modification_request',
                 'title' => $r->parcel->parcel_no,
                 'subtitle' => $r->fieldLabel(),
-                'url' => route('modification-requests.index'),
+                // Opens this request's detail straight away, not just the list
+                'url' => route('modification-requests.index', ['request' => $r->id]),
                 'created_at' => $r->created_at,
             ]);
 
@@ -80,6 +78,50 @@ class NotificationBell extends Component
             ->take(8)
             ->values()
             ->all();
+    }
+
+    /**
+     * Unread demo requests — or null when this user may not open the page a
+     * notification links to, so the bell never leads anyone to a refusal.
+     *
+     * @return Builder<PresentationRequest>|null
+     */
+    private function presentationRequests(): ?Builder
+    {
+        if (! $this->user()?->can('presentation_requests.view')) {
+            return null;
+        }
+
+        return PresentationRequest::query()->whereNull('read_at');
+    }
+
+    /**
+     * Pending modification requests on parcels this user can see — or null
+     * without permission to open the requests page.
+     *
+     * @return Builder<ModificationRequest>|null
+     */
+    private function modificationRequests(): ?Builder
+    {
+        $user = $this->user();
+
+        if (! $user?->can('modification_requests.view')) {
+            return null;
+        }
+
+        $parcelIds = OwnerScope::parcelIds($user);
+
+        return ModificationRequest::query()
+            ->where('status', ModificationRequestStatus::Pending)
+            ->when($parcelIds !== null, fn (Builder $q) => $q->whereIn('parcel_id', $parcelIds));
+    }
+
+    private function user(): ?User
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        return $user;
     }
 
     public function render(): View

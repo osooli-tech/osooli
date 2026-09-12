@@ -15,11 +15,15 @@ use Maatwebsite\Excel\Concerns\WithMapping;
  */
 class ParcelsExport implements FromQuery, WithHeadings, WithMapping
 {
+    /**
+     * @param  list<int>|null  $parcelIds  the parcels the user may see; null means unrestricted (see App\Support\OwnerScope)
+     */
     public function __construct(
         private readonly string $search = '',
         private readonly string $assetType = '',
         private readonly string $landTransaction = '',
         private readonly string $deedStatus = '',
+        private readonly ?array $parcelIds = null,
     ) {}
 
     /** @return Builder<Parcel> */
@@ -27,6 +31,7 @@ class ParcelsExport implements FromQuery, WithHeadings, WithMapping
     {
         return Parcel::query()
             ->with(['plan.district', 'latestDeed'])
+            ->when($this->parcelIds !== null, fn (Builder $q) => $q->whereIn('parcels.id', $this->parcelIds))
             ->filtered($this->search, $this->assetType, $this->landTransaction, $this->deedStatus)
             ->orderBy('parcel_no');
     }

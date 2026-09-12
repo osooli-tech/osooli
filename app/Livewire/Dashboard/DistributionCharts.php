@@ -7,7 +7,10 @@ namespace App\Livewire\Dashboard;
 use App\Enums\AssetType;
 use App\Enums\DeedStatus;
 use App\Enums\QrarSource;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -33,6 +36,13 @@ class DistributionCharts extends Component
 
     public function mount(): void
     {
+        /** @var User|null $user */
+        $user = Auth::user();
+        // A user restricted to specific owners sees only their own parcels in
+        // every chart, same as the KPI cards.
+        $parcelIds = OwnerScope::parcelIds($user);
+        $restricted = $parcelIds !== null;
+
         // 1 — Deed status (ensure both enum labels always appear)
         $deedDefaults = array_fill_keys(
             array_map(fn (DeedStatus $e) => $e->value, DeedStatus::cases()),
@@ -41,6 +51,7 @@ class DistributionCharts extends Component
         $deedFromDb = DB::table('deeds')
             ->selectRaw('deed_status, COUNT(*) as cnt')
             ->whereNotNull('deed_status')
+            ->when($restricted, fn ($q) => $q->whereIn('parcel_id', $parcelIds))
             ->groupBy('deed_status')
             ->pluck('cnt', 'deed_status')
             ->map(fn ($v) => (int) $v)
@@ -55,6 +66,7 @@ class DistributionCharts extends Component
         $assetFromDb = DB::table('parcels')
             ->selectRaw('asset_type, COUNT(*) as cnt')
             ->whereNotNull('asset_type')
+            ->when($restricted, fn ($q) => $q->whereIn('id', $parcelIds))
             ->groupBy('asset_type')
             ->pluck('cnt', 'asset_type')
             ->map(fn ($v) => (int) $v)
@@ -66,6 +78,7 @@ class DistributionCharts extends Component
             ->join('plans', 'parcels.plan_id', '=', 'plans.id')
             ->join('districts', 'plans.district_id', '=', 'districts.id')
             ->join('cities', 'districts.city_id', '=', 'cities.id')
+            ->when($restricted, fn ($q) => $q->whereIn('parcels.id', $parcelIds))
             ->selectRaw('cities.name_ar, COUNT(parcels.id) as cnt')
             ->groupBy('cities.name_ar')
             ->orderByDesc('cnt')
@@ -78,6 +91,7 @@ class DistributionCharts extends Component
         $this->byDistrict = DB::table('parcels')
             ->join('plans', 'parcels.plan_id', '=', 'plans.id')
             ->join('districts', 'plans.district_id', '=', 'districts.id')
+            ->when($restricted, fn ($q) => $q->whereIn('parcels.id', $parcelIds))
             ->selectRaw('districts.name_ar, COUNT(parcels.id) as cnt')
             ->groupBy('districts.name_ar')
             ->orderByDesc('cnt')
@@ -89,6 +103,7 @@ class DistributionCharts extends Component
         // 6 — By engineering office (parcel_boundaries → engineering_offices)
         $this->byEngineeringOffice = DB::table('parcel_boundaries')
             ->join('engineering_offices', 'parcel_boundaries.engineering_office_id', '=', 'engineering_offices.id')
+            ->when($restricted, fn ($q) => $q->whereIn('parcel_boundaries.parcel_id', $parcelIds))
             ->selectRaw('engineering_offices.name, COUNT(parcel_boundaries.parcel_id) as cnt')
             ->groupBy('engineering_offices.name')
             ->orderByDesc('cnt')
@@ -105,6 +120,7 @@ class DistributionCharts extends Component
         $sourceFromDb = DB::table('survey_decisions')
             ->selectRaw('qrar_source::text AS src, COUNT(*) as cnt')
             ->whereNotNull('qrar_source')
+            ->when($restricted, fn ($q) => $q->whereIn('parcel_id', $parcelIds))
             ->groupBy('qrar_source')
             ->pluck('cnt', 'src')
             ->map(fn ($v) => (int) $v)

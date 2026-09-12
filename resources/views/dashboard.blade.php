@@ -10,13 +10,18 @@
     <livewire:dashboard.kpi-cards :only="['total_parcels', 'total_deeds', 'total_area', 'total_owners', 'avg_price_per_metre', 'total_estimated_value']" />
 
     {{-- Map + parcel detail panel. The panel only takes room once a parcel is
-         picked (then ≈30%); until then the map has the whole row. --}}
-    <div class="flex flex-col xl:flex-row gap-5"
+         picked (then ≈30%); until then the map has the whole row. #map is the
+         header's map button target; scroll-mt keeps it clear of the fixed
+         header. Documents need documents.download to open, so without it the
+         panel neither shows nor fetches them. --}}
+    <div id="map" class="flex flex-col xl:flex-row gap-5 scroll-mt-24"
          x-data="{
             parcel: null,
             documents: [],
             documentsLoading: false,
+            canViewDocuments: @js((bool) auth()->user()?->can('documents.download')),
             fetchDocuments(id) {
+                if (! this.canViewDocuments) return;
                 this.documentsLoading = true;
                 this.documents = [];
                 fetch(`/parcels/${id}/documents`)
@@ -321,6 +326,7 @@
                             </template>
                         </div>
 
+                        @can('documents.download')
                         {{-- ملف الصك --}}
                         <div class="pt-4 border-t border-outline-variant dark:border-white/10">
                             <p class="text-xs font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
@@ -384,6 +390,8 @@
                                 </template>
                             </div>
                         </div>
+
+                        @endcan
 
                         {{-- Link to full detail page --}}
                         <a :href="parcel.id ? '/parcels/' + parcel.id : '#'"

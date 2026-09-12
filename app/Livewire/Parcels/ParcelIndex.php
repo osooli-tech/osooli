@@ -8,9 +8,13 @@ use App\Enums\AssetType;
 use App\Enums\DeedStatus;
 use App\Enums\LandTransaction;
 use App\Models\Parcel;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -24,6 +28,8 @@ class ParcelIndex extends Component
 
     public string $filterLandTransaction = '';
 
+    /** In the URL as ?deed_status=, so the dashboard's deed alerts can link straight to the old-deed list. */
+    #[Url(as: 'deed_status', except: '')]
     public string $filterDeedStatus = '';
 
     /** '' (all), 'priced', or 'unpriced' — whether the parcel carries any price. */
@@ -95,8 +101,15 @@ class ParcelIndex extends Component
     /** @return LengthAwarePaginator<Parcel> */
     public function parcels(): LengthAwarePaginator
     {
+        /** @var User|null $user */
+        $user = Auth::user();
+        // Each row links to the parcel page, which refuses a parcel outside a
+        // restricted user's scope — so the list must not offer one either.
+        $parcelIds = OwnerScope::parcelIds($user);
+
         return Parcel::query()
             ->with(['plan.district', 'latestDeed'])
+            ->when($parcelIds !== null, fn ($query) => $query->whereIn('parcels.id', $parcelIds))
             ->filtered($this->search, $this->filterAssetType, $this->filterLandTransaction, $this->filterDeedStatus)
             ->when($this->filterPricing === 'priced', fn ($query) => $query->where(
                 fn ($q) => $q->whereNotNull('m_price')->orWhereNotNull('parcel_price')

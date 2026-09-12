@@ -12,6 +12,7 @@ use App\Models\PresentationRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class NotificationBellTest extends TestCase
@@ -53,6 +54,32 @@ class NotificationBellTest extends TestCase
             ->assertSee('1');
     }
 
+    public function test_it_counts_nothing_for_a_user_who_cannot_open_either_page(): void
+    {
+        PresentationRequest::create(['name' => 'سالم', 'phone' => '0512345678']);
+        $this->createModificationRequest();
+
+        $user = User::create([
+            'name' => 'مستخدم',
+            'email' => 'viewer@bell.test',
+            'password' => bcrypt('password'),
+            'is_active' => true,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(NotificationBell::class)
+            ->assertSet('lastKnownCount', 0);
+    }
+
+    public function test_a_modification_request_notification_opens_that_request(): void
+    {
+        $request = $this->createModificationRequest();
+
+        Livewire::actingAs($this->admin())
+            ->test(NotificationBell::class)
+            ->assertSeeHtml('href="'.route('modification-requests.index', ['request' => $request->id]).'"');
+    }
+
     public function test_polling_dispatches_a_sound_event_when_the_count_increases(): void
     {
         $component = Livewire::actingAs($this->admin())->test(NotificationBell::class);
@@ -84,13 +111,21 @@ class NotificationBellTest extends TestCase
         ]);
     }
 
+    /** The bell only lists what its links can open, and both pages are permission-gated. */
     private function admin(): User
     {
-        return User::create([
+        $user = User::create([
             'name' => 'مدير',
             'email' => 'admin@bell.test',
             'password' => bcrypt('password'),
             'is_active' => true,
         ]);
+
+        foreach (['presentation_requests.view', 'modification_requests.view'] as $permission) {
+            Permission::findOrCreate($permission, 'web');
+            $user->givePermissionTo($permission);
+        }
+
+        return $user;
     }
 }

@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 {{ $showActiveUsers ? 'sm:grid-cols-3' : 'sm:grid-cols-2' }} gap-4">
 
     {{-- Pending modification requests --}}
     <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5 shadow-sm
@@ -62,7 +62,8 @@
         </div>
     </div>
 
-    {{-- Active users --}}
+    {{-- Active users — system-wide, so only for someone who manages users --}}
+    @if ($showActiveUsers)
     <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5 shadow-sm
                 border border-outline-variant dark:border-white/10 flex items-start gap-4">
         <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center shrink-0">
@@ -83,5 +84,6 @@
             </p>
         </div>
     </div>
+    @endif
 
 </div>

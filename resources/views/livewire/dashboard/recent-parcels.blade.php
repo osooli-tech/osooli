@@ -3,10 +3,12 @@
         <h3 class="text-sm font-semibold text-on-surface dark:text-white">
             {{ __('dashboard.recent_parcels') }}
         </h3>
-        <a href="{{ route('dashboard') }}"
-           class="text-xs text-secondary hover:underline font-medium">
-            {{ __('dashboard.view_all') }}
-        </a>
+        @can('parcels.view')
+            <a href="{{ route('parcels.index') }}"
+               class="text-xs text-secondary hover:underline font-medium">
+                {{ __('dashboard.view_all') }}
+            </a>
+        @endcan
     </div>
 
     @if ($parcels->isEmpty())
@@ -28,9 +30,13 @@
                 <tbody class="divide-y divide-outline-variant dark:divide-white/5">
                     @foreach ($parcels as $parcel)
                         @php $latestDeed = $parcel->deeds->sortByDesc('id')->first(); @endphp
-                        <tr class="hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                        {{-- The parcel link's ::after is stretched over this row, so a click anywhere on it opens the parcel --}}
+                        <tr class="relative hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
                             <td class="px-5 py-3 font-medium text-on-surface dark:text-white data-tabular">
-                                {{ $parcel->parcel_no ?? '—' }}
+                                <a href="{{ route('parcels.show', $parcel) }}"
+                                   class="after:absolute after:inset-0 hover:underline">
+                                    {{ $parcel->parcel_no ?? '—' }}
+                                </a>
                             </td>
                             <td class="px-3 py-3 text-on-surface-variant dark:text-on-primary-container">
                                 {{ $parcel->asset_type ?? '—' }}

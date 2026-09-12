@@ -5,12 +5,21 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\DeedStatus;
+use App\Exports\ParcelsExport;
+use App\Livewire\Dashboard\DistributionCharts;
 use App\Livewire\Dashboard\KpiCards;
+use App\Livewire\Dashboard\OperationalWidgets;
+use App\Livewire\Dashboard\RecentAlerts;
+use App\Livewire\Dashboard\RecentParcels;
+use App\Livewire\ModificationRequests\RequestIndex;
+use App\Livewire\Notifications\NotificationBell;
 use App\Livewire\Owners\OwnerIndex;
+use App\Livewire\Parcels\ParcelIndex;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Deed;
 use App\Models\District;
+use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\Plan;
@@ -21,6 +30,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 /**
@@ -176,6 +187,54 @@ class OwnerScopeTest extends TestCase
             ->assertForbidden();
     }
 
+    // ── Parcel list and its exports ────────────────────────────────
+
+    public function test_the_parcel_list_shows_every_parcel_to_an_unrestricted_user(): void
+    {
+        $ids = Livewire::actingAs($this->unrestrictedUser)
+            ->test(ParcelIndex::class)
+            ->viewData('parcels')
+            ->pluck('id');
+
+        $this->assertEqualsCanonicalizing([$this->scopedParcel->id, $this->otherParcel->id], $ids->all());
+    }
+
+    public function test_the_parcel_list_shows_only_the_scoped_parcel_to_a_restricted_user(): void
+    {
+        $ids = Livewire::actingAs($this->restrictedUser)
+            ->test(ParcelIndex::class)
+            ->viewData('parcels')
+            ->pluck('id');
+
+        $this->assertSame([$this->scopedParcel->id], $ids->all());
+    }
+
+    public function test_the_parcel_excel_export_holds_every_parcel_for_an_unrestricted_user(): void
+    {
+        Excel::fake();
+        $this->grant($this->unrestrictedUser, 'exports.create');
+
+        $this->actingAs($this->unrestrictedUser)->get(route('parcels.export.excel'));
+
+        Excel::assertDownloaded(
+            'parcels-'.now()->format('Y-m-d').'.xlsx',
+            fn (ParcelsExport $export) => $export->query()->count() === 2
+        );
+    }
+
+    public function test_the_parcel_excel_export_holds_only_the_scoped_parcel_for_a_restricted_user(): void
+    {
+        Excel::fake();
+        $this->grant($this->restrictedUser, 'exports.create');
+
+        $this->actingAs($this->restrictedUser)->get(route('parcels.export.excel'));
+
+        Excel::assertDownloaded(
+            'parcels-'.now()->format('Y-m-d').'.xlsx',
+            fn (ParcelsExport $export) => $export->query()->pluck('id')->all() === [$this->scopedParcel->id]
+        );
+    }
+
     // ── Dashboard KPI counts ───────────────────────────────────────
 
     public function test_the_kpi_cards_count_only_the_scoped_parcel_for_a_restricted_user(): void
@@ -192,6 +251,142 @@ class OwnerScopeTest extends TestCase
             ->test(KpiCards::class)
             ->assertSet('totalParcels', 2)
             ->assertSet('totalOwners', 2);
+    }
+
+    // ── Dashboard lists, charts and widgets ────────────────────────
+
+    public function test_recent_parcels_list_every_parcel_for_an_unrestricted_user(): void
+    {
+        Livewire::actingAs($this->unrestrictedUser)
+            ->test(RecentParcels::class)
+            ->assertSeeHtml('href="'.route('parcels.show', $this->scopedParcel).'"')
+            ->assertSeeHtml('href="'.route('parcels.show', $this->otherParcel).'"');
+    }
+
+    public function test_recent_parcels_list_only_the_scoped_parcel_for_a_restricted_user(): void
+    {
+        Livewire::actingAs($this->restrictedUser)
+            ->test(RecentParcels::class)
+            ->assertSeeHtml('href="'.route('parcels.show', $this->scopedParcel).'"')
+            ->assertDontSeeHtml('href="'.route('parcels.show', $this->otherParcel).'"');
+    }
+
+    public function test_deed_alerts_cover_every_parcel_for_an_unrestricted_user(): void
+    {
+        Deed::query()->update(['deed_status' => DeedStatus::Old->value]);
+
+        Livewire::actingAs($this->unrestrictedUser)
+            ->test(RecentAlerts::class)
+            ->assertSet('totalCount', 2);
+    }
+
+    public function test_deed_alerts_cover_only_the_scoped_parcel_for_a_restricted_user(): void
+    {
+        Deed::query()->update(['deed_status' => DeedStatus::Old->value]);
+
+        Livewire::actingAs($this->restrictedUser)
+            ->test(RecentAlerts::class)
+            ->assertSet('totalCount', 1)
+            ->assertSeeHtml('href="'.route('parcels.show', $this->scopedParcel).'"')
+            ->assertDontSeeHtml('href="'.route('parcels.show', $this->otherParcel).'"');
+    }
+
+    public function test_the_distribution_charts_count_everything_for_an_unrestricted_user(): void
+    {
+        Livewire::actingAs($this->unrestrictedUser)
+            ->test(DistributionCharts::class)
+            ->assertSet('byDeedStatus.'.DeedStatus::Updated->value, 2)
+            ->assertSet('byCity', ['الدرعية' => 2]);
+    }
+
+    public function test_the_distribution_charts_count_only_the_scoped_parcel_for_a_restricted_user(): void
+    {
+        Livewire::actingAs($this->restrictedUser)
+            ->test(DistributionCharts::class)
+            ->assertSet('byDeedStatus.'.DeedStatus::Updated->value, 1)
+            ->assertSet('byCity', ['الدرعية' => 1]);
+    }
+
+    public function test_operational_widgets_count_every_pending_request_for_an_unrestricted_user(): void
+    {
+        $this->makeModificationRequest($this->scopedParcel);
+        $this->makeModificationRequest($this->otherParcel);
+
+        Livewire::actingAs($this->unrestrictedUser)
+            ->test(OperationalWidgets::class)
+            ->assertSet('pendingModRequests', 2);
+    }
+
+    public function test_operational_widgets_count_only_scoped_pending_requests_for_a_restricted_user(): void
+    {
+        $this->makeModificationRequest($this->scopedParcel);
+        $this->makeModificationRequest($this->otherParcel);
+
+        Livewire::actingAs($this->restrictedUser)
+            ->test(OperationalWidgets::class)
+            ->assertSet('pendingModRequests', 1)
+            ->assertSet('showActiveUsers', false);
+    }
+
+    // ── Modification requests: notification bell and page ─────────
+
+    public function test_the_notification_bell_counts_every_pending_request_for_an_unrestricted_user(): void
+    {
+        $this->makeModificationRequest($this->scopedParcel);
+        $this->makeModificationRequest($this->otherParcel);
+        $this->grant($this->unrestrictedUser, 'modification_requests.view');
+
+        Livewire::actingAs($this->unrestrictedUser)
+            ->test(NotificationBell::class)
+            ->assertSet('lastKnownCount', 2);
+    }
+
+    public function test_the_notification_bell_counts_only_scoped_pending_requests_for_a_restricted_user(): void
+    {
+        $this->makeModificationRequest($this->scopedParcel);
+        $this->makeModificationRequest($this->otherParcel);
+        $this->grant($this->restrictedUser, 'modification_requests.view');
+
+        Livewire::actingAs($this->restrictedUser)
+            ->test(NotificationBell::class)
+            ->assertSet('lastKnownCount', 1);
+    }
+
+    public function test_the_modification_requests_page_lists_every_request_for_an_unrestricted_user(): void
+    {
+        $this->makeModificationRequest($this->scopedParcel);
+        $this->makeModificationRequest($this->otherParcel);
+
+        $ids = Livewire::actingAs($this->unrestrictedUser)
+            ->test(RequestIndex::class)
+            ->viewData('requests')
+            ->pluck('id');
+
+        $this->assertCount(2, $ids);
+    }
+
+    public function test_the_modification_requests_page_lists_only_scoped_requests_for_a_restricted_user(): void
+    {
+        $scoped = $this->makeModificationRequest($this->scopedParcel);
+        $this->makeModificationRequest($this->otherParcel);
+
+        $ids = Livewire::actingAs($this->restrictedUser)
+            ->test(RequestIndex::class)
+            ->viewData('requests')
+            ->pluck('id');
+
+        $this->assertSame([$scoped->id], $ids->all());
+    }
+
+    public function test_a_restricted_user_cannot_open_a_request_outside_their_scope_by_url(): void
+    {
+        $other = $this->makeModificationRequest($this->otherParcel);
+
+        $component = Livewire::withQueryParams(['request' => $other->id])
+            ->actingAs($this->restrictedUser)
+            ->test(RequestIndex::class);
+
+        $this->assertNull($component->instance()->viewing());
     }
 
     // ── Artisan commands ───────────────────────────────────────────
@@ -255,5 +450,21 @@ class OwnerScopeTest extends TestCase
         $deed->owners()->attach($owner->id);
 
         return $parcel->refresh();
+    }
+
+    private function makeModificationRequest(Parcel $parcel): ModificationRequest
+    {
+        return ModificationRequest::create([
+            'parcel_id' => $parcel->id,
+            'requested_by' => $this->scopedOwner->id,
+            'field_name' => 'asset_type',
+            'new_value' => 'سكني',
+        ]);
+    }
+
+    private function grant(User $user, string $permission): void
+    {
+        Permission::findOrCreate($permission, 'web');
+        $user->givePermissionTo($permission);
     }
 }

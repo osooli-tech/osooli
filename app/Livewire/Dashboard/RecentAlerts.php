@@ -6,8 +6,11 @@ namespace App\Livewire\Dashboard;
 
 use App\Enums\DeedStatus;
 use App\Models\Deed;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class RecentAlerts extends Component
@@ -19,10 +22,21 @@ class RecentAlerts extends Component
 
     public function mount(): void
     {
-        $this->totalCount = Deed::where('deed_status', DeedStatus::Old->value)->count();
+        /** @var User|null $user */
+        $user = Auth::user();
+        // Each alert links to its parcel's page, which refuses a parcel outside
+        // a restricted user's scope — so neither the list nor the count may
+        // include one.
+        $parcelIds = OwnerScope::parcelIds($user);
 
-        $this->alerts = Deed::with('parcel')
+        $oldDeeds = Deed::query()
             ->where('deed_status', DeedStatus::Old->value)
+            ->when($parcelIds !== null, fn ($q) => $q->whereIn('parcel_id', $parcelIds));
+
+        $this->totalCount = (clone $oldDeeds)->count();
+
+        $this->alerts = (clone $oldDeeds)
+            ->with('parcel')
             ->latest()
             ->limit(5)
             ->get();

@@ -7,10 +7,14 @@ namespace App\Livewire\ModificationRequests;
 use App\Enums\ModificationRequestStatus;
 use App\Models\AuditLog;
 use App\Models\ModificationRequest;
+use App\Models\User;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -24,9 +28,17 @@ class RequestIndex extends Component
 
     public bool $showModal = false;
 
+    /** In the URL as ?request=, so a notification can open one request directly. */
+    #[Url(as: 'request')]
     public ?int $viewingId = null;
 
     public string $managerNote = '';
+
+    public function mount(): void
+    {
+        // Arriving from a notification link: #[Url] has already set the id.
+        $this->showModal = $this->viewingId !== null;
+    }
 
     public function updatingSearch(): void
     {
@@ -60,7 +72,7 @@ class RequestIndex extends Component
             return;
         }
 
-        $request = ModificationRequest::findOrFail($this->viewingId);
+        $request = $this->visibleRequests()->findOrFail($this->viewingId);
         $transition = ModificationRequestStatus::from($newStatus);
 
         // Guard: only allow valid transitions
@@ -96,13 +108,13 @@ class RequestIndex extends Component
             return null;
         }
 
-        return ModificationRequest::with(['parcel', 'owner'])->find($this->viewingId);
+        return $this->visibleRequests()->with(['parcel', 'owner'])->find($this->viewingId);
     }
 
     #[Computed]
     public function counts(): array
     {
-        $base = ModificationRequest::query();
+        $base = $this->visibleRequests();
 
         return [
             'all' => (clone $base)->count(),
@@ -116,7 +128,8 @@ class RequestIndex extends Component
     public function render(): View
     {
         /** @var LengthAwarePaginator $requests */
-        $requests = ModificationRequest::with(['parcel', 'owner'])
+        $requests = $this->visibleRequests()
+            ->with(['parcel', 'owner'])
             ->when(
                 $this->statusFilter !== 'all',
                 fn ($q) => $q->where('status', ModificationRequestStatus::from($this->statusFilter))
@@ -135,5 +148,21 @@ class RequestIndex extends Component
             'requests' => $requests,
             'statuses' => ModificationRequestStatus::cases(),
         ]);
+    }
+
+    /**
+     * Requests on parcels this user can see — a user restricted to specific
+     * owners must not read or act on anyone else's.
+     *
+     * @return Builder<ModificationRequest>
+     */
+    private function visibleRequests(): Builder
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+        $parcelIds = OwnerScope::parcelIds($user);
+
+        return ModificationRequest::query()
+            ->when($parcelIds !== null, fn (Builder $q) => $q->whereIn('parcel_id', $parcelIds));
     }
 }

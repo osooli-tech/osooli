@@ -10,6 +10,15 @@
                 </span>
             @endif
         </div>
+        {{-- The full set behind the count: the parcel list filtered to old deeds --}}
+        @if ($totalCount > 0)
+            @can('parcels.view')
+                <a href="{{ route('parcels.index', ['deed_status' => \App\Enums\DeedStatus::Old->value]) }}"
+                   class="text-xs text-secondary hover:underline font-medium">
+                    {{ __('dashboard.view_all') }}
+                </a>
+            @endcan
+        @endif
     </div>
 
     @if ($alerts->isEmpty())
@@ -20,7 +29,8 @@
     @else
         <ul class="divide-y divide-outline-variant dark:divide-white/5">
             @foreach ($alerts as $alert)
-                <li class="flex items-start gap-3 px-5 py-3.5">
+                <li class="relative flex items-start gap-3 px-5 py-3.5
+                           {{ $alert->parcel ? 'hover:bg-surface-container dark:hover:bg-white/5 transition-colors' : '' }}">
                     <span class="material-symbols-outlined text-[18px] text-error mt-0.5 shrink-0"
                           style="font-variation-settings: 'FILL' 1;">
                         warning
@@ -36,6 +46,12 @@
                     <span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-error-container text-error">
                         {{ __('parcels.deed_statuses.قديم') }}
                     </span>
+                    @if ($alert->parcel)
+                        {{-- Covers the whole item, so a click anywhere on it opens the parcel --}}
+                        <a href="{{ route('parcels.show', $alert->parcel) }}"
+                           class="absolute inset-0"
+                           aria-label="{{ __('parcels.deed_no') }}: {{ $alert->deed_no ?? '—' }}"></a>
+                    @endif
                 </li>
             @endforeach
         </ul>
