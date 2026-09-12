@@ -228,19 +228,19 @@ return [
 
     // Sent to the sales inbox the moment a request lands.
     'request_mail_subject' => 'New demo request — :name',
-    'request_mail_body' => "A new demo request came in from the website.
+    'request_mail_body' => 'A new demo request came in from the website.
 
-"
-        ."Name: :name
-"
-        ."Phone: :phone
-"
-        ."WhatsApp: :whatsapp
-"
-        ."Message: :message
+'
+        .'Name: :name
+'
+        .'Phone: :phone
+'
+        .'WhatsApp: :whatsapp
+'
+        .'Message: :message
 
-"
-        ."Received: :date",
+'
+        .'Received: :date',
     'request_mail_no_message' => '—',
 
     // ── Footer ──────────────────────────────────────────────────

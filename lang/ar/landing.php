@@ -219,19 +219,19 @@ return [
 
     // Sent to the sales inbox the moment a request lands.
     'request_mail_subject' => 'طلب عرض تقديمي جديد — :name',
-    'request_mail_body' => "وصل طلب عرض تقديمي جديد من الموقع.
+    'request_mail_body' => 'وصل طلب عرض تقديمي جديد من الموقع.
 
-"
-        ."الاسم: :name
-"
-        ."الجوال: :phone
-"
-        ."واتساب: :whatsapp
-"
-        ."الرسالة: :message
+'
+        .'الاسم: :name
+'
+        .'الجوال: :phone
+'
+        .'واتساب: :whatsapp
+'
+        .'الرسالة: :message
 
-"
-        ."تاريخ الطلب: :date",
+'
+        .'تاريخ الطلب: :date',
     'request_mail_no_message' => '—',
 
     // ── Footer ──────────────────────────────────────────────────
