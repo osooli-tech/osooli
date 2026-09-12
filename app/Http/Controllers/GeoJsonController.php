@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Building;
 use App\Models\Parcel;
+use App\Models\Project;
 use App\Models\User;
 use App\Support\OwnerScope;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -73,6 +76,49 @@ class GeoJsonController extends Controller
                 ],
             ];
         })->values()->all();
+
+        return response()->json(['type' => 'FeatureCollection', 'features' => $features]);
+    }
+
+    /**
+     * A pure identification/display layer, per the client's own description
+     * of it — name and shape only, no ownership or scoping: unlike parcels,
+     * a project zone or building routinely overlaps more than one parcel,
+     * so it isn't tied to a single owner to filter by in the first place.
+     */
+    public function projects(): JsonResponse
+    {
+        return $this->displayLayer(Project::class);
+    }
+
+    public function buildings(): JsonResponse
+    {
+        return $this->displayLayer(Building::class);
+    }
+
+    /** @param class-string<Project|Building> $modelClass */
+    private function displayLayer(string $modelClass): JsonResponse
+    {
+        if (config('database.default') !== 'pgsql') {
+            return response()->json(['type' => 'FeatureCollection', 'features' => []]);
+        }
+
+        $rows = $modelClass::query()
+            ->whereNotNull('geom')
+            ->selectRaw('id, name, code, area, length, ST_AsGeoJSON(geom, 6) AS geom_json')
+            ->get();
+
+        $features = $rows->map(static fn (Model $row): array => [
+            'type' => 'Feature',
+            'geometry' => json_decode((string) $row->getAttribute('geom_json'), false),
+            'properties' => [
+                'id' => $row->getAttribute('id'),
+                'name' => $row->getAttribute('name'),
+                'code' => $row->getAttribute('code'),
+                'area' => $row->getAttribute('area'),
+                'length' => $row->getAttribute('length'),
+            ],
+        ])->values()->all();
 
         return response()->json(['type' => 'FeatureCollection', 'features' => $features]);
     }

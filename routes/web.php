@@ -7,11 +7,13 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MapAppearanceSettingsController;
 use App\Http\Controllers\OwnerExportController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
 use App\Http\Controllers\PresentationRequestController;
 use App\Http\Controllers\ServiceController;
+use App\Models\MapAppearanceSetting;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
@@ -46,7 +48,9 @@ Route::middleware('set.locale')->group(function () {
 
 // Authenticated routes
 Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
-    Route::get('/dashboard', fn () => view('dashboard'))->name('dashboard');
+    Route::get('/dashboard', fn () => view('dashboard', [
+        'mapColors' => MapAppearanceSetting::current(),
+    ]))->name('dashboard');
 
     // Parcels
     Route::get('/parcels', fn () => view('parcels.index'))->name('parcels.index');
@@ -123,6 +127,13 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // GeoJSON API for map
     Route::get('/geo/parcels', [GeoJsonController::class, 'parcels'])->name('geo.parcels');
+    Route::get('/geo/projects', [GeoJsonController::class, 'projects'])->name('geo.projects');
+    Route::get('/geo/buildings', [GeoJsonController::class, 'buildings'])->name('geo.buildings');
+
+    // Client-editable map colours (base layer fills + colour-by legend)
+    Route::patch('/map-colors', [MapAppearanceSettingsController::class, 'update'])
+        ->middleware('can:roles.manage')
+        ->name('map-colors.update');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

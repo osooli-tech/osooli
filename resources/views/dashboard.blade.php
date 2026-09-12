@@ -38,7 +38,18 @@
             <div id="sakuki-map"
                  class="w-full h-full bg-surface-container-lowest dark:bg-[#1a1f2e]"
                  data-token="{{ config('services.mapbox.token') }}"
-                 data-geojson-url="{{ route('geo.parcels') }}">
+                 data-geojson-url="{{ route('geo.parcels') }}"
+                 data-projects-url="{{ route('geo.projects') }}"
+                 data-buildings-url="{{ route('geo.buildings') }}"
+                 data-colors="{{ json_encode($mapColors) }}"
+                 data-colors-update-url="{{ route('map-colors.update') }}"
+                 data-can-edit-colors="{{ auth()->user()?->can('roles.manage') ? '1' : '0' }}"
+                 data-base-color-labels="{{ json_encode([
+                     'parcels_fill' => __('dashboard.layer_parcels'),
+                     'parcels_outline' => __('dashboard.layer_outlines'),
+                     'projects_fill' => __('dashboard.layer_projects'),
+                     'buildings_fill' => __('dashboard.layer_buildings'),
+                 ]) }}">
                 @if (! config('services.mapbox.token'))
                     <div class="flex flex-col items-center justify-center h-full gap-3
                                 text-on-surface-variant dark:text-on-primary-container">
@@ -127,6 +138,8 @@
                                 'parcels-fill' => ['dashboard.layer_parcels', 'category'],
                                 'parcels-outline' => ['dashboard.layer_outlines', 'pentagon'],
                                 'parcels-labels' => ['dashboard.show_labels', 'label'],
+                                'projects-fill' => ['dashboard.layer_projects', 'agriculture'],
+                                'buildings-fill' => ['dashboard.layer_buildings', 'home_work'],
                             ] as $layer => [$label, $icon])
                                 <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
                                               text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
@@ -138,6 +151,49 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Colour customisation — advanced, admin-only: lets the
+                         client pick the map's colours themselves instead of
+                         a developer hardcoding them. Changes preview live on
+                         the map immediately; "حفظ" persists them for everyone. --}}
+                    @can('roles.manage')
+                        <div class="pt-1 border-t border-outline-variant dark:border-white/10" x-data="{ colorsOpen: false }">
+                            <button type="button" @click="colorsOpen = ! colorsOpen"
+                                    class="flex items-center gap-2 w-full px-1.5 py-1.5 rounded-lg text-xs font-medium
+                                           text-on-surface dark:text-white hover:bg-surface-container
+                                           dark:hover:bg-white/5 transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">palette</span>
+                                {{ __('dashboard.customise_colours') }}
+                                <span class="material-symbols-outlined text-[16px] ms-auto"
+                                      x-text="colorsOpen ? 'expand_less' : 'expand_more'"></span>
+                            </button>
+
+                            <div x-show="colorsOpen" x-cloak class="space-y-2 mt-1 px-1.5">
+                                <p class="text-[10px] text-on-surface-variant dark:text-on-primary-container">
+                                    {{ __('dashboard.customise_colours_hint') }}
+                                </p>
+
+                                <div id="base-color-pickers" class="space-y-1"></div>
+
+                                <div class="flex items-center gap-2 pt-1">
+                                    <button id="save-map-colors" type="button"
+                                            data-saved-label="{{ __('dashboard.colours_saved') }}"
+                                            data-failed-label="{{ __('dashboard.colours_save_failed') }}"
+                                            class="flex-1 px-2 py-1.5 rounded-lg text-xs font-medium
+                                                   bg-secondary text-white hover:opacity-90 transition-opacity">
+                                        {{ __('dashboard.save_colours') }}
+                                    </button>
+                                    <button id="reset-map-colors" type="button"
+                                            class="px-2 py-1.5 rounded-lg text-xs font-medium
+                                                   text-on-surface dark:text-white hover:bg-surface-container
+                                                   dark:hover:bg-white/5 transition-colors">
+                                        {{ __('dashboard.reset_colours') }}
+                                    </button>
+                                </div>
+                                <p id="save-map-colors-status" class="text-[10px] hidden"></p>
+                            </div>
+                        </div>
+                    @endcan
 
                     {{-- Basemap --}}
                     <div class="pt-1 border-t border-outline-variant dark:border-white/10">
