@@ -75,6 +75,9 @@ if (! container) {
         let allFeatures = [];
         let hoveredId = null;
         let selectedId = null;
+        // Where the selected parcel is, so it can be kept in view when the
+        // details panel opens and narrows the map.
+        let selectedLngLat = null;
 
         // Extract the parcel's corner coordinates from its polygon geometry.
         // Returns [{ lat, lng }] for the exterior ring, dropping the closing
@@ -179,6 +182,7 @@ if (! container) {
                     map.setFeatureState({ source: 'parcels', id: selectedId }, { selected: false });
                 }
                 selectedId = feature.id;
+                selectedLngLat = e.lngLat;
                 map.setFeatureState({ source: 'parcels', id: selectedId }, { selected: true });
 
                 window.dispatchEvent(new CustomEvent('parcel-selected', {
@@ -269,6 +273,27 @@ if (! container) {
         }
 
         map.on('load', addAllLayers);
+
+        // The details panel opens beside the map and narrows the container
+        // without the window resizing, which is all Mapbox watches for. The
+        // strip that gets cut off may hold the selected parcel, so bring it
+        // back — unless a search is still flying there.
+        new ResizeObserver(() => {
+            map.resize();
+            if (selectedLngLat && ! map.isMoving() && ! map.getBounds().contains(selectedLngLat)) {
+                map.easeTo({ center: selectedLngLat });
+            }
+        }).observe(container);
+
+        // Closing the panel drops the highlight with it, so the map never
+        // shows a selection that has no details beside it.
+        window.addEventListener('parcel-cleared', () => {
+            if (selectedId !== null && map.getSource('parcels')) {
+                map.setFeatureState({ source: 'parcels', id: selectedId }, { selected: false });
+            }
+            selectedId = null;
+            selectedLngLat = null;
+        });
 
         // ── Layer controls ──────────────────────────────────────
 
@@ -510,6 +535,7 @@ if (! container) {
                 const flat = match.geometry?.type === 'Polygon' ? coords[0] : coords.flat(2);
                 const bounds = new mapboxgl.LngLatBounds();
                 flat.forEach((c) => bounds.extend(c));
+                selectedLngLat = bounds.getCenter();
                 map.fitBounds(bounds, { padding: 120, maxZoom: 18 });
                 window.dispatchEvent(new CustomEvent('parcel-selected', {
                     detail: { ...match.properties, corners: extractCorners(match.geometry) },

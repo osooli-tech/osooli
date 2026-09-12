@@ -58,7 +58,6 @@ return [
     // ── Map & recent ────────────────────────────────────────────
     'mapbox_missing' => 'Add MAPBOX_TOKEN to .env to enable the map',
     'parcel_details' => 'Parcel Details',
-    'click_parcel' => 'Click a parcel on the map to view details',
     'recent_parcels' => 'Recent Parcels',
     'recent_alerts' => 'Outdated Deed Alerts',
     'no_alerts' => 'No alerts',

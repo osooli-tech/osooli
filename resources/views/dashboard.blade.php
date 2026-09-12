@@ -9,8 +9,9 @@
     {{-- The figures that answer "what do we hold", ahead of the map. --}}
     <livewire:dashboard.kpi-cards :only="['total_parcels', 'total_deeds', 'total_area', 'total_owners', 'avg_price_per_metre', 'total_estimated_value']" />
 
-    {{-- Map + parcel detail panel (map ≈70%, panel ≈30%) --}}
-    <div class="grid grid-cols-1 xl:grid-cols-10 gap-5"
+    {{-- Map + parcel detail panel. The panel only takes room once a parcel is
+         picked (then ≈30%); until then the map has the whole row. --}}
+    <div class="flex flex-col xl:flex-row gap-5"
          x-data="{
             parcel: null,
             documents: [],
@@ -32,7 +33,7 @@
          }"
          @parcel-selected.window="parcel = $event.detail; fetchDocuments(parcel.id)">
 
-        <div class="xl:col-span-7 relative rounded-2xl overflow-hidden shadow-sm
+        <div class="flex-1 min-w-0 relative rounded-2xl overflow-hidden shadow-sm
                     border border-outline-variant dark:border-white/10"
              style="height: 620px;">
             <div id="sakuki-map"
@@ -211,7 +212,8 @@
             </div>
         </div>
 
-        <div class="xl:col-span-3 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl shadow-sm
+        <div x-show="parcel" x-cloak
+             class="xl:w-[30%] shrink-0 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl shadow-sm
                     border border-outline-variant dark:border-white/10 flex flex-col overflow-hidden"
              style="height: 620px;">
             <div class="flex items-center justify-between gap-2 px-5 py-4 border-b border-outline-variant dark:border-white/10 shrink-0">
@@ -222,21 +224,13 @@
                         {{ __('dashboard.parcel_details') }}
                     </h3>
                 </div>
-                <button type="button" x-show="parcel" @click="parcel = null"
+                <button type="button" @click="parcel = null; $dispatch('parcel-cleared')"
                         class="text-on-surface-variant dark:text-on-primary-container hover:text-error transition-colors">
                     <span class="material-symbols-outlined text-[18px]">close</span>
                 </button>
             </div>
 
             <div class="flex-1 overflow-y-auto p-5">
-                <template x-if="! parcel">
-                    <div class="h-full flex flex-col items-center justify-center gap-3
-                                text-on-surface-variant dark:text-on-primary-container text-sm text-center">
-                        <span class="material-symbols-outlined text-[40px] opacity-30">touch_app</span>
-                        <p>{{ __('dashboard.click_parcel') }}</p>
-                    </div>
-                </template>
-
                 <template x-if="parcel">
                     <div class="space-y-6 text-sm">
 

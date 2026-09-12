@@ -58,7 +58,6 @@ return [
     // ── Map & recent ────────────────────────────────────────────
     'mapbox_missing' => 'أضف MAPBOX_TOKEN في .env لتفعيل الخريطة',
     'parcel_details' => 'تفاصيل القطعة',
-    'click_parcel' => 'انقر على قطعة في الخريطة لعرض تفاصيلها',
     'recent_parcels' => 'آخر القطع المضافة',
     'recent_alerts' => 'تنبيهات الصكوك القديمة',
     'no_alerts' => 'لا توجد تنبيهات',

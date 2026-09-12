@@ -1,6 +1,6 @@
-<aside class="fixed inset-y-0 start-0 w-[280px] bg-primary z-50 flex flex-col select-none shadow-2xl lg:shadow-none
-              transition-transform duration-300 ease-in-out"
-       :class="sidebarOpen ? 'translate-x-0' : 'rtl:translate-x-full ltr:-translate-x-full'">
+{{-- Slides only once toggled — see sidebarAnimate in layouts/app.blade.php --}}
+<aside class="fixed inset-y-0 start-0 w-[280px] bg-primary z-50 flex flex-col select-none shadow-2xl lg:shadow-none"
+       :class="{ 'translate-x-0': sidebarOpen, 'rtl:translate-x-full ltr:-translate-x-full': ! sidebarOpen, 'transition-transform duration-300 ease-in-out': sidebarAnimate }">
 
     {{-- Logo — sidebar is always navy so the transparent-background mark is used directly --}}
     <div class="flex items-center gap-2 px-4 h-16 border-b border-white/10 shrink-0">

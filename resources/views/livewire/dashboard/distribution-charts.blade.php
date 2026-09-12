@@ -8,8 +8,8 @@
 
 <div class="space-y-4">
 
-    {{-- Row 1: 3 small donuts ─────────────────────────────────── --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {{-- Row 1: 2 small donuts ─────────────────────────────────── --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
         {{-- 1 · Deed status --}}
         <div class="{{ $cardCls }}">

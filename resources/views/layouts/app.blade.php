@@ -14,7 +14,14 @@
         sidebarOpen: window.matchMedia('(min-width: 1024px)').matches
             ? localStorage.getItem('sidebarOpen') !== 'false'
             : false,
+        // The layout only animates once someone toggles the sidebar. Alpine
+        // applies the saved state after the first paint, and sliding into it
+        // on page load hands charts a width that is about to change —
+        // ApexCharts ignores a resize during its intro animation, so they
+        // stayed wider than their cards.
+        sidebarAnimate: false,
         toggleSidebar () {
+            this.sidebarAnimate = true;
             this.sidebarOpen = ! this.sidebarOpen;
             if (window.matchMedia('(min-width: 1024px)').matches) {
                 localStorage.setItem('sidebarOpen', this.sidebarOpen);
@@ -59,9 +66,8 @@
     <header class="fixed top-0 end-0 start-0 h-16 z-30
                    bg-surface-container-lowest dark:bg-[#161b22]
                    border-b border-outline-variant dark:border-white/10
-                   flex items-center gap-4 px-4 sm:px-6
-                   transition-all duration-300 ease-in-out"
-            :class="sidebarOpen ? 'lg:start-[280px]' : 'lg:start-0'">
+                   flex items-center gap-4 px-4 sm:px-6"
+            :class="{ 'lg:start-[280px]': sidebarOpen, 'lg:start-0': ! sidebarOpen, 'transition-all duration-300 ease-in-out': sidebarAnimate }">
 
         {{-- Sidebar toggle --}}
         <button @click="toggleSidebar()"
@@ -134,8 +140,8 @@
     <x-toast />
 
     {{-- Content area — full width on mobile, offset by the sidebar on desktop --}}
-    <main class="mt-16 min-h-[calc(100vh-4rem)] p-4 sm:p-6 transition-all duration-300 ease-in-out ms-0"
-          :class="sidebarOpen ? 'lg:ms-[280px]' : 'lg:ms-0'">
+    <main class="mt-16 min-h-[calc(100vh-4rem)] p-4 sm:p-6 ms-0"
+          :class="{ 'lg:ms-[280px]': sidebarOpen, 'lg:ms-0': ! sidebarOpen, 'transition-all duration-300 ease-in-out': sidebarAnimate }">
         @yield('content')
     </main>
 
