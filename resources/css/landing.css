@@ -52,6 +52,8 @@ a{color:inherit;text-decoration:none}
 .band--surface{background:var(--surface);color:var(--ink)}
 .inner{max-width:1200px;margin-inline:auto;width:100%}
 .pad{padding-block:clamp(64px,9vw,112px)}
+/* In-page links land below the sticky header rather than under it. */
+.band[id],.row[id]{scroll-margin-top:90px}
 
 /* Faint plat grid, faded at the edges so it reads as paper texture. */
 .band--navy::before,.band--navy-grad::before{content:"";position:absolute;inset:0;pointer-events:none;
@@ -336,6 +338,9 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
 .store{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;border-radius:11px;
   border:1px solid rgba(255,255,255,.22);color:#fff;transition:border-color .16s}
 .store:hover{border-color:var(--gold)}
+/* Not listed yet: shown, but visibly not a link. */
+.store--soon{opacity:.6;cursor:default}
+.store--soon:hover{border-color:rgba(255,255,255,.22)}
 .store svg{width:22px;height:22px;flex:none}
 .store u{text-decoration:none;display:block;line-height:1.25}
 .store small{font-size:9.5px;color:#8FA6C0;display:block}
@@ -392,19 +397,41 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
 .legal-switch a[aria-current="page"]{background:var(--navy);border-color:var(--navy);color:#fff}
 
 /* ─────────────────────────── footer ─────────────────────────── */
-.foot{padding-block:clamp(52px,6vw,72px) 0}
-.foot-grid{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:clamp(26px,4vw,52px)}
-.foot-grid h2{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:0}
-.foot-grid a{display:block;font-size:13.5px;color:#96AAC2;padding:6px 0;transition:color .16s}
-.foot-grid a:hover{color:var(--gold)}
-.foot-phone{font-variant-numeric:tabular-nums;letter-spacing:.02em;width:fit-content}
-.foot-about{font-size:13.5px;line-height:2;color:#96AAC2;font-weight:300;max-width:34ch;margin-top:18px}
-.foot-bot{margin-top:clamp(38px,5vw,56px);border-top:1px solid var(--line-navy);
-  padding-block:24px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
-  font-size:12.5px;color:#7F95AE}
-.foot-legal{display:flex;flex-direction:column;gap:6px}
-.foot-supervision{font-size:11.5px;color:#6b7d94}
-.foot-bot nav{display:flex;gap:20px}
+.foot{padding-block:clamp(56px,7vw,84px) 0}
+.foot-main{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,1fr);
+  gap:clamp(32px,5vw,72px)}
+.foot-about{font-size:14px;line-height:1.95;color:#A9BDD4;font-weight:300;max-width:40ch;margin-top:20px}
+.foot-app{margin-top:28px}
+.foot-app p{font-size:12.5px;color:#7F95AE;margin-bottom:12px}
+.foot-stores{display:flex;gap:10px;flex-wrap:wrap}
+
+.foot-col h2{font-size:14px;font-weight:700;color:#fff;letter-spacing:0;margin-bottom:16px}
+.foot-links{list-style:none;display:grid;gap:4px}
+.foot-links a{display:inline-block;font-size:14px;color:#A9BDD4;padding-block:5px;transition:color .16s}
+.foot-links a:hover{color:var(--gold)}
+
+/* Phone and email are shown, not hidden behind a "contact us" link: on a B2B
+   site they are what a visitor scrolls to the footer for. */
+.foot-contact{font-style:normal;display:grid;gap:18px}
+.foot-contact a{display:block;width:fit-content}
+.foot-contact small{display:block;font-size:12.5px;color:#7F95AE;margin-bottom:5px}
+.foot-contact b{display:inline-block;font-family:var(--num);font-size:16.5px;font-weight:500;
+  color:#fff;transition:color .16s}
+.foot-contact a:hover b{color:var(--gold)}
+
+/* The divider is a survey dimension line — a rule between two end ticks, the
+   plat motif under every heading on this page. */
+.foot-bot{position:relative;margin-top:clamp(44px,5vw,60px);padding-block:24px 28px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:14px 32px;flex-wrap:wrap;
+  font-size:12.5px;line-height:1.8;color:#7F95AE}
+.foot-bot::before{content:"";position:absolute;inset-inline:0;top:0;height:1px;
+  background:rgba(230,195,100,.28)}
+.foot-bot::after{content:"";position:absolute;inset-inline:0;top:-5px;height:11px;
+  border-inline:1.5px solid var(--gold);pointer-events:none}
+.foot-supervision{font-size:12px}
+.foot-policies{display:flex;gap:24px}
+.foot-policies a{transition:color .16s}
+.foot-policies a:hover{color:var(--gold)}
 
 /* ─────────────────────────── illustrations ─────────────────────────── */
 /* text-anchor resolves against the inline direction, so under dir="rtl" every
@@ -439,7 +466,8 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
   .row--flip .row-art{order:0}
   .tiers,.quotes{grid-template-columns:1fr}
   .tier--hi{order:-1}
-  .foot-grid{grid-template-columns:1fr 1fr}
+  .foot-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .foot-brand{grid-column:1 / -1}
   .nav{display:none}
 }
 @media (max-width:760px){
@@ -452,7 +480,8 @@ h1,h2,h3{font-weight:800;letter-spacing:-.03em;line-height:1.22}
 @media (max-width:560px){
   .hdr .inner{height:64px}
   .hdr-cta .btn--wire-l{display:none}
-  .foot-grid{grid-template-columns:1fr}
+  .foot-main{grid-template-columns:minmax(0,1fr)}
+  .foot-bot{flex-direction:column}
   .hero-stats{gap:26px}
 }
 

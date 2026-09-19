@@ -48,11 +48,21 @@ class DistributionCharts extends Component
             array_map(fn (DeedStatus $e) => $e->value, DeedStatus::cases()),
             0
         );
+        /*
+         * Every chart below excludes archived rows by hand. These queries run
+         * on the query builder, not Eloquent, so the SoftDeletes global scope
+         * never touches them — an archived parcel would otherwise vanish from
+         * the parcel list while still being counted in every figure on this
+         * page. A silently wrong total is worse than a visible one.
+         */
         $deedFromDb = DB::table('deeds')
-            ->selectRaw('deed_status, COUNT(*) as cnt')
-            ->whereNotNull('deed_status')
-            ->when($restricted, fn ($q) => $q->whereIn('parcel_id', $parcelIds))
-            ->groupBy('deed_status')
+            ->join('parcels', 'parcels.id', '=', 'deeds.parcel_id')
+            ->selectRaw('deeds.deed_status, COUNT(*) as cnt')
+            ->whereNotNull('deeds.deed_status')
+            ->whereNull('deeds.deleted_at')
+            ->whereNull('parcels.deleted_at')
+            ->when($restricted, fn ($q) => $q->whereIn('deeds.parcel_id', $parcelIds))
+            ->groupBy('deeds.deed_status')
             ->pluck('cnt', 'deed_status')
             ->map(fn ($v) => (int) $v)
             ->toArray();
@@ -66,6 +76,7 @@ class DistributionCharts extends Component
         $assetFromDb = DB::table('parcels')
             ->selectRaw('asset_type, COUNT(*) as cnt')
             ->whereNotNull('asset_type')
+            ->whereNull('deleted_at')
             ->when($restricted, fn ($q) => $q->whereIn('id', $parcelIds))
             ->groupBy('asset_type')
             ->pluck('cnt', 'asset_type')
@@ -78,6 +89,7 @@ class DistributionCharts extends Component
             ->join('plans', 'parcels.plan_id', '=', 'plans.id')
             ->join('districts', 'plans.district_id', '=', 'districts.id')
             ->join('cities', 'districts.city_id', '=', 'cities.id')
+            ->whereNull('parcels.deleted_at')
             ->when($restricted, fn ($q) => $q->whereIn('parcels.id', $parcelIds))
             ->selectRaw('cities.name_ar, COUNT(parcels.id) as cnt')
             ->groupBy('cities.name_ar')
@@ -91,6 +103,7 @@ class DistributionCharts extends Component
         $this->byDistrict = DB::table('parcels')
             ->join('plans', 'parcels.plan_id', '=', 'plans.id')
             ->join('districts', 'plans.district_id', '=', 'districts.id')
+            ->whereNull('parcels.deleted_at')
             ->when($restricted, fn ($q) => $q->whereIn('parcels.id', $parcelIds))
             ->selectRaw('districts.name_ar, COUNT(parcels.id) as cnt')
             ->groupBy('districts.name_ar')
@@ -101,8 +114,12 @@ class DistributionCharts extends Component
             ->toArray();
 
         // 6 — By engineering office (parcel_boundaries → engineering_offices)
+        // Boundaries are not archivable themselves, so the parcel is joined
+        // purely to drop the ones whose parcel is out of circulation.
         $this->byEngineeringOffice = DB::table('parcel_boundaries')
             ->join('engineering_offices', 'parcel_boundaries.engineering_office_id', '=', 'engineering_offices.id')
+            ->join('parcels', 'parcels.id', '=', 'parcel_boundaries.parcel_id')
+            ->whereNull('parcels.deleted_at')
             ->when($restricted, fn ($q) => $q->whereIn('parcel_boundaries.parcel_id', $parcelIds))
             ->selectRaw('engineering_offices.name, COUNT(parcel_boundaries.parcel_id) as cnt')
             ->groupBy('engineering_offices.name')
@@ -118,10 +135,12 @@ class DistributionCharts extends Component
             0
         );
         $sourceFromDb = DB::table('survey_decisions')
-            ->selectRaw('qrar_source::text AS src, COUNT(*) as cnt')
-            ->whereNotNull('qrar_source')
-            ->when($restricted, fn ($q) => $q->whereIn('parcel_id', $parcelIds))
-            ->groupBy('qrar_source')
+            ->join('parcels', 'parcels.id', '=', 'survey_decisions.parcel_id')
+            ->selectRaw('survey_decisions.qrar_source::text AS src, COUNT(*) as cnt')
+            ->whereNotNull('survey_decisions.qrar_source')
+            ->whereNull('parcels.deleted_at')
+            ->when($restricted, fn ($q) => $q->whereIn('survey_decisions.parcel_id', $parcelIds))
+            ->groupBy('survey_decisions.qrar_source')
             ->pluck('cnt', 'src')
             ->map(fn ($v) => (int) $v)
             ->toArray();

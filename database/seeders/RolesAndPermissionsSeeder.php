@@ -16,7 +16,21 @@ class RolesAndPermissionsSeeder extends Seeder
     private const PERMISSIONS = [
         'parcels.view',
         'parcels.view_map',
+        'parcels.create',
+        'parcels.edit',
+        'deeds.create',
+        'deeds.edit',
+        'survey_decisions.edit',
+        'ownership.manage',
+        'reference.view',
+        'reference.create',
+        'reference.edit',
+        'reference.delete',
+        'archive.view',
+        'archive.restore',
         'documents.download',
+        'documents.upload',
+        'documents.review',
         'exports.create',
         'owners.edit',
         'modification_requests.view',
@@ -34,10 +48,28 @@ class RolesAndPermissionsSeeder extends Seeder
     private const ROLES = [
         'super_admin' => null,                  // كل الصلاحيات
         'manager' => ['except' => ['roles.manage']],
+
+        /*
+         * The engineer role is the surveying side of the work: it may correct
+         * a parcel, its boundaries and its survey decisions, and read the
+         * reference lists those screens pick from. Ownership stays out — who
+         * owns what is a registry decision, not a surveying one — as does
+         * creating reference records, which changes data every other screen
+         * depends on.
+         *
+         * It may add a document — a surveyor comes back from the field with
+         * the paperwork — but not approve one. Deciding that a deed scan is
+         * genuine is the manager's call, and letting the uploader also be the
+         * reviewer would make the review queue decorative.
+         */
         'engineer' => ['only' => [
             'parcels.view',
             'parcels.view_map',
+            'parcels.edit',
+            'survey_decisions.edit',
+            'reference.view',
             'documents.download',
+            'documents.upload',
             'exports.create',
             'modification_requests.view',
         ]],

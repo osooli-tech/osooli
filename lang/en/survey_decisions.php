@@ -29,4 +29,19 @@ return [
         'مكتب هندسي' => 'Engineering office',
         'بدون' => 'None',
     ],
+
+    // Decision + boundary edit dialog
+    'create_title' => 'Add Survey Decision',
+    'edit_title' => 'Edit Survey Decision',
+    'decision_section' => 'Decision Details',
+    'n_dim' => 'North Length (m)',
+    's_dim' => 'South Length (m)',
+    'e_dim' => 'East Length (m)',
+    'w_dim' => 'West Length (m)',
+    'measured_area_hint' => 'In square metres',
+    'engineering_office' => 'Engineering Office',
+    'survey_date' => 'Survey Date',
+    'survey_date_hint' => 'Plain text as YYYY-MM-DD, e.g. 1446-03-12',
+    'boundary_missing_hint' => 'This parcel has no boundary record yet; one will be created on save.',
+    'saved' => 'Survey decision saved',
 ];

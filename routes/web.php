@@ -106,6 +106,16 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     // Users
     Route::get('/users', fn () => view('users.index'))->name('users.index');
 
+    // Reference data (plans, districts, cities, regions, countries, offices)
+    Route::get('/reference', fn () => view('reference.index'))
+        ->middleware('can:reference.view')
+        ->name('reference.index');
+
+    // Archive — archived parcels, deeds and owners, and restoring them
+    Route::get('/archive', fn () => view('archive.index'))
+        ->middleware('can:archive.view')
+        ->name('archive.index');
+
     // Settings (Role Manager)
     Route::get('/settings', fn () => view('settings.index'))
         ->middleware('can:roles.manage')

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\DeedStatus;
+use App\Support\Concerns\Archivable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Parcel extends Model
 {
+    use Archivable;
+
     protected $fillable = [
         'parcel_no',
         'geo_id',

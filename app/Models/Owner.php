@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\DeedStatus;
+use App\Support\Concerns\Archivable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -25,7 +26,7 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class Owner extends Authenticatable
 {
-    use HasApiTokens;
+    use Archivable, HasApiTokens;
 
     protected $fillable = ['name', 'national_id', 'phone', 'email', 'whatsapp'];
 

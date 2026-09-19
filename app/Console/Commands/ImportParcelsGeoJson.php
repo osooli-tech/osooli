@@ -133,7 +133,19 @@ class ImportParcelsGeoJson extends Command
         $districtId = $this->districtId($this->str($p['District'] ?? null), $cityId);
         $planId = $this->planId((string) $p['Plan_No'], $districtId);
 
-        // Parcel
+        /*
+         * Archiving is deliberately invisible to this importer. Raw SQL never
+         * sees the SoftDeletes scope, so ON CONFLICT (geo_id) still matches an
+         * archived parcel and updates it in place — which is what we want:
+         * filtering archived rows out here would make the insert collide with
+         * the unique geo_id instead, and the import would fail on a row it can
+         * plainly see.
+         *
+         * Note what it does NOT do: an archived parcel stays archived even when
+         * the source file still contains it. Archiving is a decision a person
+         * made, and a nightly import should not quietly undo it. Restoring is
+         * done from the archive screen, on purpose, by someone accountable.
+         */
         $parcelRow = DB::selectOne(
             'INSERT INTO parcels (parcel_no, geo_id, plan_id, m_price, parcel_price,
                                   asset_type, land_transaction, allocation_method, fall_in,

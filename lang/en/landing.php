@@ -211,6 +211,7 @@ return [
         .'mapped within 48 hours — no commitment.',
     'cta_button' => 'Book a demo',
     'store_from' => 'Download on',
+    'store_soon' => 'Coming soon to',
 
     // ── Demo request modal ──────────────────────────────────────
     'request_form_title' => 'Book a demo',
@@ -248,12 +249,13 @@ return [
         .'that decisions get made on.',
     'foot_supervision' => 'Sakuki operates under the umbrella and supervision of Elaa Al-Khaleej Investment Company.',
     'foot_platform' => 'Platform',
-    'foot_app' => 'Mobile app',
+    'foot_app' => 'Get the owner app',
     'foot_company' => 'Company',
     'foot_contact' => 'Contact us',
+    'foot_phone' => 'Phone',
+    'foot_email' => 'Email',
+    'foot_legal' => 'Policies',
     'foot_privacy' => 'Privacy policy',
     'foot_terms' => 'Terms of use',
-    'foot_privacy_short' => 'Privacy',
-    'foot_terms_short' => 'Terms',
     'foot_rights' => '© :year Sakuki Almkaniyah. All rights reserved.',
 ];

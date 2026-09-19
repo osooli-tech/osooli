@@ -3,7 +3,7 @@
 <section class="band band--paper pad" id="platform">
     <div class="inner">
 
-        <div class="row rv">
+        <div class="row rv" id="parcels">
             <div class="row-copy">
                 <span class="eyebrow">{{ __('landing.parcels_eyebrow') }}</span>
                 <h2 class="h-section">
@@ -24,7 +24,7 @@
             <div class="row-art">@include('landing.art.parcels')</div>
         </div>
 
-        <div class="row row--flip rv">
+        <div class="row row--flip rv" id="deeds">
             <div class="row-copy">
                 <span class="eyebrow">{{ __('landing.deeds_eyebrow') }}</span>
                 <h2 class="h-section">

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\Concerns\Archivable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Deed extends Model
 {
+    use Archivable;
+
     protected $fillable = [
         'parcel_id',
         'deed_no',

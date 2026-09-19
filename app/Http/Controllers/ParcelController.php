@@ -75,12 +75,18 @@ class ParcelController extends Controller
     private function neighboursGeojson(Parcel $parcel, ?string $parcelGeojson): string
     {
         /** @var list<\stdClass> $neighbourRows */
+        // `n.deleted_at IS NULL` is the only archiving predicate this controller
+        // needs. Its other queries all read the bound parcel by id, and route
+        // model binding has already applied the SoftDeletes scope by then — an
+        // archived parcel 404s before it reaches them. This one is different:
+        // it selects *other* parcels, which nothing has filtered.
         $neighbourRows = $parcelGeojson === null ? [] : DB::select(
             'SELECT n.parcel_no, ST_AsGeoJSON(n.geom, 6) AS geom_json
              FROM parcels n, parcels self
              WHERE self.id = ?
                AND n.id <> self.id
                AND n.geom IS NOT NULL
+               AND n.deleted_at IS NULL
                AND ST_Intersects(n.geom, ST_Expand(self.geom, 0.004))
              LIMIT 60',
             [$parcel->id]

@@ -122,10 +122,16 @@ class OwnerStatisticsService
     {
         return [
             'parcels_count' => $this->parcelIds()->count(),
+            // Joined to deeds only to drop archived ones: this counter reads
+            // deed_owners directly, so it is the one place here the SoftDeletes
+            // scope cannot reach. The other figures all narrow by parcelIds(),
+            // which comes from an Eloquent relation and is already filtered.
             'deeds_count' => DB::table('deed_owners')
-                ->where('owner_id', $this->owner->getKey())
+                ->join('deeds', 'deeds.id', '=', 'deed_owners.deed_id')
+                ->where('deed_owners.owner_id', $this->owner->getKey())
+                ->whereNull('deeds.deleted_at')
                 ->distinct()
-                ->count('deed_id'),
+                ->count('deed_owners.deed_id'),
             'documents_count' => $this->countIn('parcel_photos'),
         ];
     }

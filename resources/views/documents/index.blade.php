@@ -10,6 +10,21 @@
 @section('page-title', __('documents.title'))
 
 @section('content')
+    {{-- Review queue first: a reviewer opening this page is here to clear
+         pending documents, and burying the queue under the archive makes it
+         easy to forget a submission is waiting. --}}
+    @can('documents.review')
+        <div class="mb-6">
+            <livewire:documents.document-review />
+        </div>
+    @endcan
+
+    @can('documents.upload')
+        <div class="mb-6">
+            <livewire:documents.document-upload />
+        </div>
+    @endcan
+
     @can('documents.download')
         <livewire:documents.document-index />
     @else

@@ -55,9 +55,17 @@ class OwnerScope
         if (! array_key_exists($user->id, self::$parcelIdsCache)) {
             $ownerIds = self::ownerIds($user);
 
+            // Archived deeds are excluded explicitly. This query goes through
+            // the query builder rather than Eloquent, so the SoftDeletes global
+            // scope never runs on it — without these two predicates a user
+            // would keep seeing a parcel whose ownership record was archived,
+            // which is an access-control failure, not a stale report.
             self::$parcelIdsCache[$user->id] = $ownerIds === null ? null : DB::table('deed_owners')
                 ->join('deeds', 'deeds.id', '=', 'deed_owners.deed_id')
+                ->join('parcels', 'parcels.id', '=', 'deeds.parcel_id')
                 ->whereIn('deed_owners.owner_id', $ownerIds)
+                ->whereNull('deeds.deleted_at')
+                ->whereNull('parcels.deleted_at')
                 ->distinct()
                 ->pluck('deeds.parcel_id')
                 ->all();

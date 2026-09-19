@@ -49,6 +49,24 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Uploaded deed scans and supporting paperwork.
+         *
+         * Private, and outside public/ with no symlink pointing at it, so no
+         * request ever reaches a file here without passing through
+         * DocumentController — which checks the permission, the owner scope and
+         * the review status, and records the access. The `public` disk above is
+         * left untouched for the files already linked there; see
+         * ParcelPhoto::storageLocation() for how a row picks its disk.
+         */
+        'documents' => [
+            'driver' => 'local',
+            'root' => storage_path('app/documents'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
