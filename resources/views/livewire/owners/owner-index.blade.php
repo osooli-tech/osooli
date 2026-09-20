@@ -1,6 +1,20 @@
 <div class="space-y-4">
 
     {{-- Search bar --}}
+    @can('owners.create')
+        <div class="flex justify-end mb-4">
+            {{-- The modal is mounted once on the page wrapper, outside this
+                 component, so the global dispatcher is what reaches it. --}}
+            <button type="button"
+                    onclick="Livewire.dispatch('owner-create')"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+                           bg-primary text-white hover:bg-primary/90 transition">
+                <span class="material-symbols-outlined text-[18px]">person_add</span>
+                {{ __('owners.create_title') }}
+            </button>
+        </div>
+    @endcan
+
     <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-4
                 border border-outline-variant dark:border-white/10 shadow-sm">
         <div class="flex flex-wrap gap-3 items-end">
@@ -173,7 +187,7 @@
                         @if (isset($expanded[$owner->id]) && $expanded[$owner->id])
                             @php
                                 $ownerParcels = $owner->currentDeeds()
-                                    ->with('parcel.plan')
+                                    ->with(['parcel.plan', 'deedOwners' => fn ($q) => $q->where('owner_id', $owner->id)])
                                     ->get()
                                     ->map(fn ($deed) => [
                                         'parcel_no'       => $deed->parcel?->parcel_no,
@@ -182,12 +196,27 @@
                                         'deed_date_hijri' => $deed->deed_date_hijri,
                                         'deed_area'       => $deed->deed_area,
                                         'parcel_id'       => $deed->parcel?->id,
+                                        // This owner's own share of this deed. NULL is a real
+                                        // value — the deed states the share in prose — so it is
+                                        // shown as "—" rather than collapsed to zero.
+                                        'share'           => $deed->deedOwners->first()?->ownership_share,
                                     ]);
                             @endphp
                             <tr>
                                 <td colspan="6" class="bg-surface-container dark:bg-[#161f2e] px-4 py-4">
+                                    {{-- Opens the shared modal instead of an inline editor
+                                         per row: the modal covers all five columns, while
+                                         the inline form only ever reached three. --}}
                                     @can('owners.edit')
-                                        <livewire:owners.owner-edit-form :owner-id="$owner->id" :key="'edit-'.$owner->id" />
+                                        <div class="mb-4">
+                                            <button type="button"
+                                                    onclick="Livewire.dispatch('owner-edit', { ownerId: {{ $owner->id }} })"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+                                                           bg-primary text-white hover:bg-primary/90 transition">
+                                                <span class="material-symbols-outlined text-[16px]">edit</span>
+                                                {{ __('owners.edit_title') }}
+                                            </button>
+                                        </div>
                                     @endcan
 
                                     <p class="text-xs font-semibold text-on-surface-variant dark:text-on-primary-container mb-3 uppercase tracking-wide">
@@ -202,6 +231,7 @@
                                                     <th class="text-start px-3 py-2 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.deed_no') }}</th>
                                                     <th class="text-start px-3 py-2 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.deed_date') }}</th>
                                                     <th class="text-start px-3 py-2 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.area_deed') }}</th>
+                                                    <th class="text-start px-3 py-2 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('owners.ownership_share') }}</th>
                                                     <th class="px-3 py-2"></th>
                                                 </tr>
                                             </thead>
@@ -215,13 +245,38 @@
                                                         <td class="px-3 py-2 text-on-surface-variant dark:text-on-primary-container data-tabular">
                                                             {{ $op['deed_area'] ? number_format((float) $op['deed_area'], 0).' '.__('dashboard.area_unit_sqm') : '—' }}
                                                         </td>
+                                                        <td class="px-3 py-2 data-tabular">
+                                                            @if ($op['share'] === null)
+                                                                <span class="text-on-surface-variant dark:text-on-primary-container/70">—</span>
+                                                            @else
+                                                                <span class="font-medium text-secondary">
+                                                                    {{ rtrim(rtrim(number_format((float) $op['share'], 2), '0'), '.') }}%
+                                                                </span>
+                                                            @endif
+                                                        </td>
                                                         <td class="px-3 py-2">
                                                             @if ($op['parcel_id'])
-                                                                <a href="{{ route('parcels.show', $op['parcel_id']) }}"
-                                                                   class="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline underline-offset-2">
-                                                                    <span class="material-symbols-outlined text-[14px]">arrow_back_ios</span>
-                                                                    {{ __('parcels.show') }}
-                                                                </a>
+                                                                <div class="flex items-center gap-3">
+                                                                    <a href="{{ route('parcels.show', $op['parcel_id']) }}"
+                                                                       class="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline underline-offset-2">
+                                                                        <span class="material-symbols-outlined text-[14px]">arrow_back_ios</span>
+                                                                        {{ __('parcels.show') }}
+                                                                    </a>
+
+                                                                    {{-- Ownership is edited on the parcel page, inside the
+                                                                         deed it belongs to: the editor needs every co-owner
+                                                                         of that deed in view to keep the 100% ceiling
+                                                                         meaningful, which a single owner's row cannot show. --}}
+                                                                    @can('ownership.manage')
+                                                                        <a href="{{ route('parcels.show', $op['parcel_id']) }}#deeds"
+                                                                           class="inline-flex items-center gap-1 text-xs font-medium
+                                                                                  text-on-surface-variant dark:text-on-primary-container
+                                                                                  hover:text-primary transition-colors">
+                                                                            <span class="material-symbols-outlined text-[14px]">percent</span>
+                                                                            {{ __('owners.ownership_edit') }}
+                                                                        </a>
+                                                                    @endcan
+                                                                </div>
                                                             @endif
                                                         </td>
                                                     </tr>

@@ -14,6 +14,12 @@
 
         <livewire:owners.owner-index />
 
+        {{-- One modal serves every row and the add button alike; it listens on
+             Livewire's event bus rather than being nested per owner. --}}
+        @canany(['owners.create', 'owners.edit'])
+            <livewire:owners.owner-form-modal />
+        @endcanany
+
         {{-- Owner parcels map — filters to a single owner when one is picked in the table --}}
         <div x-data="ownersMap()" x-init="init()"
              class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl shadow-sm

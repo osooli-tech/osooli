@@ -73,9 +73,11 @@
     {{-- ── Main column (deeds + survey decisions + photos) ───────────── --}}
     <div class="xl:col-span-2 space-y-5">
 
-        {{-- Deeds --}}
-        <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl
-                    border border-outline-variant dark:border-white/10 shadow-sm overflow-hidden">
+        {{-- Deeds. The id is the landing point for "edit share" links coming
+             from the owners list, which arrive as /parcels/{id}#deeds. --}}
+        <div id="deeds"
+             class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl
+                    border border-outline-variant dark:border-white/10 shadow-sm overflow-hidden scroll-mt-24">
             <div class="flex items-center gap-2 px-5 py-4
                         border-b border-outline-variant dark:border-white/10">
                 <span class="material-symbols-outlined text-[18px] text-secondary"

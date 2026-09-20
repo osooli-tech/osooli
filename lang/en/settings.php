@@ -55,6 +55,7 @@ return [
         'archive_view' => 'View the archive',
         'archive_restore' => 'Restore archived records',
         'exports_create' => 'Export data',
+        'owners_create' => 'Add an owner',
         'owners_edit' => 'Edit owner details',
         'presentation_requests_view' => 'View presentation requests',
         'modification_requests_view' => 'View modification requests',
