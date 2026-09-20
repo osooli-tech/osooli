@@ -345,12 +345,39 @@
 
                             {{-- Actions --}}
                             <td class="px-4 py-3">
-                                <a href="{{ route('parcels.show', $parcel) }}"
-                                   class="inline-flex items-center gap-1 text-xs font-medium text-primary
-                                          hover:underline underline-offset-2 transition-colors">
-                                    <span class="material-symbols-outlined text-[15px]">arrow_back_ios</span>
-                                    {{ __('parcels.show') }}
-                                </a>
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('parcels.show', $parcel) }}"
+                                       class="inline-flex items-center gap-1 text-xs font-medium text-primary
+                                              hover:underline underline-offset-2 transition-colors">
+                                        <span class="material-symbols-outlined text-[15px]">arrow_back_ios</span>
+                                        {{ __('parcels.show') }}
+                                    </a>
+
+                                    @can('parcels.edit')
+                                        {{-- The modal lives in the page wrapper, outside this
+                                             component, so the global dispatcher is what reaches
+                                             its #[On('parcel-edit')] listener. --}}
+                                        <button type="button"
+                                                onclick="Livewire.dispatch('parcel-edit', { parcelId: {{ $parcel->id }} })"
+                                                class="inline-flex items-center gap-1 text-xs font-medium
+                                                       text-on-surface-variant dark:text-on-primary-container
+                                                       hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[15px]">edit</span>
+                                            {{ __('common.edit') }}
+                                        </button>
+                                    @endcan
+
+                                    @can('deeds.create')
+                                        <button type="button"
+                                                onclick="Livewire.dispatch('deed-create', { parcelId: {{ $parcel->id }} })"
+                                                class="inline-flex items-center gap-1 text-xs font-medium
+                                                       text-on-surface-variant dark:text-on-primary-container
+                                                       hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[15px]">note_add</span>
+                                            {{ __('parcels.add_deed') }}
+                                        </button>
+                                    @endcan
+                                </div>
                             </td>
 
                         </tr>

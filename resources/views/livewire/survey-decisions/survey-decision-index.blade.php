@@ -184,6 +184,21 @@
                                             </a>
                                         @endif
                                     @endcan
+
+                                    @can('survey_decisions.edit')
+                                        @if ($decision->parcel)
+                                            {{-- Reaches the modal mounted in the page wrapper,
+                                                 which sits outside this component. --}}
+                                            <button type="button"
+                                                    onclick="Livewire.dispatch('open-survey-decision', { parcelId: {{ $decision->parcel->id }}, decisionId: {{ $decision->id }} })"
+                                                    class="inline-flex items-center gap-1 text-xs font-medium
+                                                           text-on-surface-variant dark:text-on-primary-container
+                                                           hover:text-primary transition-colors">
+                                                <span class="material-symbols-outlined text-[15px]">edit</span>
+                                                {{ __('common.edit') }}
+                                            </button>
+                                        @endif
+                                    @endcan
                                 </div>
                             </td>
 

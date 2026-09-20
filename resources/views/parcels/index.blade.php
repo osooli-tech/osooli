@@ -7,10 +7,13 @@
 @can('parcels.view')
     @can('parcels.create')
         <div class="flex justify-end mb-4">
-            {{-- Dispatches to the modal below rather than navigating: the list
-                 keeps its filters and scroll position while a parcel is added. --}}
+            {{-- Livewire.dispatch, not Alpine's $dispatch: this button sits in
+                 the page wrapper, outside any component, so it needs the global
+                 API to reach the modal's #[On('parcel-create')] listener.
+                 Dispatching rather than navigating keeps the list's filters and
+                 scroll position while a parcel is added. --}}
             <button type="button"
-                    x-on:click="$dispatch('parcel-create')"
+                    onclick="Livewire.dispatch('parcel-create')"
                     class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
                            bg-primary text-white hover:bg-primary/90 transition">
                 <span class="material-symbols-outlined text-[18px]">add</span>

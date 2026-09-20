@@ -31,6 +31,27 @@
         {{ __('parcels.print_report') }}
     </a>
 
+    @can('parcels.edit')
+        <button type="button"
+                onclick="Livewire.dispatch('parcel-edit', { parcelId: {{ $parcel->id }} })"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+                       bg-primary text-white hover:bg-primary/90 transition-opacity">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+            {{ __('parcels.edit_title') }}
+        </button>
+    @endcan
+
+    @can('survey_decisions.edit')
+        <button type="button"
+                onclick="Livewire.dispatch('open-survey-decision', { parcelId: {{ $parcel->id }} })"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
+                       border border-outline-variant dark:border-white/10
+                       text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">straighten</span>
+            {{ __('survey_decisions.boundaries') }}
+        </button>
+    @endcan
+
     <div class="flex items-center gap-2 flex-wrap">
         @if ($parcel->asset_type)
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -178,6 +199,16 @@
                                     </div>
                                 </div>
                             @endif
+
+                            {{-- Ownership editing sits inside the deed card because
+                                 ownership attaches to the deed, not to the parcel:
+                                 a parcel with two deeds has two separate owner
+                                 lists, and one shared editor would blur them. --}}
+                            @can('ownership.manage')
+                                <div class="px-4 pb-4">
+                                    <livewire:owners.ownership-manager :deed-id="$deed->id" :key="'ownership-'.$deed->id" />
+                                </div>
+                            @endcan
                         </div>
                     @endforeach
                 </div>
@@ -508,6 +539,16 @@
 @push('scripts')
 @include('parcels.partials.mini-map-script')
 @endpush
+
+{{-- Both modals listen on Livewire's event bus, so one instance each serves
+     every trigger on the page — the header buttons and the deed cards alike. --}}
+@canany(['parcels.edit', 'deeds.create', 'deeds.edit'])
+    <livewire:parcels.parcel-form-modal />
+@endcanany
+
+@can('survey_decisions.edit')
+    <livewire:survey-decisions.survey-decision-form-modal />
+@endcan
 
 @else
     <div class="flex flex-col items-center justify-center py-32 gap-4
