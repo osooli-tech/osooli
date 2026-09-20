@@ -14,12 +14,24 @@ use Spatie\Permission\Models\Role;
 
 class RoleManager extends Component
 {
-    /** Permissions grouped for display */
+    /**
+     * Permissions grouped for display.
+     *
+     * A permission missing from this list exists in the database and is
+     * enforced, but never appears on this screen — so it can only be granted
+     * by the seeder, never by a person. Anything added to the seeder belongs
+     * here too, and in lang/*/permissions.php for its label.
+     */
     private const GROUPS = [
-        'parcels' => ['parcels.view', 'parcels.view_map'],
-        'documents' => ['documents.download'],
+        'parcels' => ['parcels.view', 'parcels.view_map', 'parcels.create', 'parcels.edit'],
+        'deeds' => ['deeds.create', 'deeds.edit', 'ownership.manage'],
+        'survey' => ['survey_decisions.edit'],
+        'reference' => ['reference.view', 'reference.create', 'reference.edit', 'reference.delete'],
+        'documents' => ['documents.download', 'documents.upload', 'documents.review'],
+        'archive' => ['archive.view', 'archive.restore'],
         'exports' => ['exports.create'],
-        'requests' => ['modification_requests.view', 'modification_requests.manage'],
+        'requests' => ['modification_requests.view', 'modification_requests.manage', 'presentation_requests.view'],
+        'owners' => ['owners.edit'],
         'users' => ['users.view', 'users.create', 'users.edit', 'users.delete'],
         'admin' => ['roles.manage', 'audit_logs.view', 'sync.view'],
     ];
