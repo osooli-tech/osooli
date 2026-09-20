@@ -20,7 +20,7 @@ class RoleManager extends Component
      * A permission missing from this list exists in the database and is
      * enforced, but never appears on this screen — so it can only be granted
      * by the seeder, never by a person. Anything added to the seeder belongs
-     * here too, and in lang/*/permissions.php for its label.
+     * here too, and needs a label under `perm` in the settings language files.
      */
     private const GROUPS = [
         'parcels' => ['parcels.view', 'parcels.view_map', 'parcels.create', 'parcels.edit'],
