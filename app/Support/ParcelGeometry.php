@@ -307,6 +307,6 @@ final class ParcelGeometry
             throw new InvalidArgumentException(__('parcels.geometry_errors.empty'));
         }
 
-        return ['type' => 'MultiPolygon', 'coordinates' => array_values($polygons)];
+        return ['type' => 'MultiPolygon', 'coordinates' => $polygons];
     }
 }
