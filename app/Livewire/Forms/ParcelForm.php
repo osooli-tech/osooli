@@ -14,11 +14,11 @@ use Livewire\Form;
 /**
  * Every parcel column a person may correct — the geometry excepted.
  *
- * `geom` is authored in QGIS against the survey source and is the one column
- * this dashboard must never touch: a MultiPolygon cannot be typed into a form,
- * and writing one back from here would replace surveyed coordinates with
- * whatever round-tripped through a browser. It is absent from attributes() on
- * purpose, not by oversight.
+ * `geom` is absent from attributes() on purpose, not by oversight. A
+ * MultiPolygon cannot be typed into a form field, and a polygon needs checks
+ * this form has no business making — validity, plausible area, overlap — plus
+ * a revision kept of the one it replaces. All of that lives in
+ * Parcels\GeometryEditor and App\Support\ParcelGeometry.
  */
 class ParcelForm extends Form
 {

@@ -711,6 +711,33 @@
          x-init="init()">
         @if ($parcelGeojson && config('services.mapbox.token'))
             <div id="parcel-mini-map" class="absolute inset-0 w-full h-full rounded-2xl"></div>
+
+            @can('parcels.edit_geometry')
+                <button type="button"
+                        onclick="Livewire.dispatch('parcel-geometry-edit', { parcelId: {{ $parcel->id }} })"
+                        class="absolute top-3 end-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                               text-xs font-medium shadow-md bg-white/95 text-primary hover:bg-white transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">edit_location_alt</span>
+                    {{ __('parcels.geometry_edit') }}
+                </button>
+            @endcan
+        @elseif (! $parcelGeojson)
+            {{-- No polygon yet — a parcel added from the dashboard, or one the
+                 import could not map. It gets its first one drawn from here. --}}
+            <div class="flex flex-col items-center justify-center h-full gap-3 py-12 px-6 text-center
+                        text-on-surface-variant dark:text-on-primary-container">
+                <span class="material-symbols-outlined text-[40px] opacity-30">pentagon</span>
+                <p class="text-sm">{{ __('parcels.geometry_missing') }}</p>
+                @can('parcels.edit_geometry')
+                    <button type="button"
+                            onclick="Livewire.dispatch('parcel-geometry-edit', { parcelId: {{ $parcel->id }} })"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium
+                                   bg-primary text-white hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">add_location_alt</span>
+                        {{ __('parcels.geometry_add') }}
+                    </button>
+                @endcan
+            </div>
         @else
             <div class="flex flex-col items-center justify-center h-full gap-3 py-12
                         text-on-surface-variant dark:text-on-primary-container">
@@ -733,6 +760,7 @@
         const events = [
             'parcel-saved', 'deed-saved', 'deed-archived',
             'survey-decision-saved', 'survey-decision-deleted', 'documents-uploaded',
+            'parcel-geometry-saved',
         ];
         const register = () => events.forEach((name) => window.Livewire.on(name, () => {
             setTimeout(() => window.location.reload(), 900);
@@ -754,6 +782,10 @@
 @canany(['survey_decisions.edit', 'parcels.edit'])
     <livewire:survey-decisions.survey-decision-form-modal />
 @endcanany
+
+@can('parcels.edit_geometry')
+    <livewire:parcels.geometry-editor />
+@endcan
 
 @else
     <div class="flex flex-col items-center justify-center py-32 gap-4

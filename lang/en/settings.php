@@ -41,6 +41,7 @@ return [
         'parcels_view_map' => 'View map',
         'parcels_create' => 'Add a parcel',
         'parcels_edit' => 'Edit parcels and boundaries',
+        'parcels_edit_geometry' => 'Draw and edit parcel polygons',
         'parcels_archive' => 'Archive parcels',
         'deeds_create' => 'Add a deed',
         'deeds_edit' => 'Edit deeds',

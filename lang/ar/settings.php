@@ -41,6 +41,7 @@ return [
         'parcels_view_map' => 'عرض الخريطة',
         'parcels_create' => 'إضافة قطعة',
         'parcels_edit' => 'تعديل القطع والحدود',
+        'parcels_edit_geometry' => 'تعديل مضلعات القطع ورسمها',
         'parcels_archive' => 'أرشفة القطع',
         'deeds_create' => 'إضافة صك',
         'deeds_edit' => 'تعديل الصكوك',

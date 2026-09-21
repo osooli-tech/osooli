@@ -23,7 +23,7 @@ class RoleManager extends Component
      * here too, and needs a label under `perm` in the settings language files.
      */
     private const GROUPS = [
-        'parcels' => ['parcels.view', 'parcels.view_map', 'parcels.create', 'parcels.edit', 'parcels.archive'],
+        'parcels' => ['parcels.view', 'parcels.view_map', 'parcels.create', 'parcels.edit', 'parcels.edit_geometry', 'parcels.archive'],
         'deeds' => ['deeds.create', 'deeds.edit', 'deeds.archive', 'ownership.manage'],
         'survey' => ['survey_decisions.edit'],
         'reference' => ['reference.view', 'reference.create', 'reference.edit', 'reference.delete'],
