@@ -197,6 +197,18 @@
                                                 <span class="material-symbols-outlined text-[15px]">edit</span>
                                                 {{ __('common.edit') }}
                                             </button>
+                                            <button type="button"
+                                                    data-event="survey-decision-delete"
+                                                    data-params='@json(['parcelId' => $decision->parcel->id, 'decisionId' => $decision->id])'
+                                                    data-confirm="{{ __('survey_decisions.delete_confirm') }}"
+                                                    data-confirm-button="{{ __('common.delete') }}"
+                                                    onclick="confirmDispatch(this)"
+                                                    class="inline-flex items-center gap-1 text-xs font-medium
+                                                           text-on-surface-variant dark:text-on-primary-container
+                                                           hover:text-error transition-colors">
+                                                <span class="material-symbols-outlined text-[15px]">delete</span>
+                                                {{ __('common.delete') }}
+                                            </button>
                                         @endif
                                     @endcan
                                 </div>

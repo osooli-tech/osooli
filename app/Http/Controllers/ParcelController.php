@@ -29,6 +29,7 @@ class ParcelController extends Controller
 
         $parcel->load([
             'plan.district',
+            'parent',
             'deeds.owners',
             'boundary.engineeringOffice',
             'surveyDecisions',

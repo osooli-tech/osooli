@@ -148,7 +148,43 @@
     </main>
 
     @livewireScripts
+
+    <script>
+        // Destructive buttons carry their Livewire event and payload as data
+        // attributes, so the confirmation text never has to be escaped into JS.
+        window.confirmDispatch = function (button) {
+            const params = JSON.parse(button.dataset.params || '{}');
+            const fire = () => window.Livewire.dispatch(button.dataset.event, params);
+
+            if (! window.Swal) {
+                if (window.confirm(button.dataset.confirm)) fire();
+                return;
+            }
+
+            window.Swal.fire({
+                title: button.dataset.confirm,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: button.dataset.confirmButton,
+                cancelButtonText: @js(__('common.cancel')),
+                reverseButtons: true,
+            }).then((result) => { if (result.isConfirmed) fire(); });
+        };
+    </script>
+
     @stack('scripts')
+
+    {{-- A toast flashed before a redirect (a parcel created or archived) has no
+         Livewire component left to dispatch it, so the next page raises it. --}}
+    @if (is_array(session('toast')))
+        <script>
+            window.addEventListener('load', () => window.dispatchEvent(new CustomEvent('toast', {
+                detail: @js(session('toast')),
+            })));
+        </script>
+    @endif
 
 </body>
 </html>

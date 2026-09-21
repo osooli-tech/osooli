@@ -29,9 +29,13 @@ class OwnerIndex extends Component
         $this->expanded = [];
     }
 
-    /** Re-renders this list so a name/national_id/phone edit made in the
-     *  nested OwnerEditForm shows up in the collapsed row immediately. */
+    /**
+     * Re-renders this list so an owner added or edited in the modal — or a
+     * share changed in a deed — shows up in the rows immediately.
+     */
     #[On('owner-updated')]
+    #[On('owner-saved')]
+    #[On('ownership-updated')]
     public function refreshOwners(): void {}
 
     public function toggleExpand(int $ownerId): void

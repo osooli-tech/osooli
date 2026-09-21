@@ -44,4 +44,10 @@ return [
     'survey_date_hint' => 'Plain text as YYYY-MM-DD, e.g. 1446-03-12',
     'boundary_missing_hint' => 'This parcel has no boundary record yet; one will be created on save.',
     'saved' => 'Survey decision saved',
+    'boundary_edit_title' => 'Edit parcel boundary',
+    'boundary_saved' => 'Parcel boundary saved',
+    'boundary_empty' => 'Enter at least one border or dimension before saving.',
+    'decision_empty' => 'Enter at least a decision number, report number, folder or source.',
+    'deleted' => 'Survey decision deleted',
+    'delete_confirm' => 'Permanently delete this survey decision? This cannot be undone.',
 ];

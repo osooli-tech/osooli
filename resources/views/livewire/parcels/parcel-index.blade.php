@@ -377,6 +377,21 @@
                                             {{ __('parcels.add_deed') }}
                                         </button>
                                     @endcan
+
+                                    @can('parcels.archive')
+                                        <button type="button"
+                                                data-event="parcel-archive"
+                                                data-params='@json(['parcelId' => $parcel->id])'
+                                                data-confirm="{{ __('parcels.archive_parcel_confirm') }}"
+                                                data-confirm-button="{{ __('parcels.archive_parcel') }}"
+                                                onclick="confirmDispatch(this)"
+                                                class="inline-flex items-center gap-1 text-xs font-medium
+                                                       text-on-surface-variant dark:text-on-primary-container
+                                                       hover:text-error transition-colors">
+                                            <span class="material-symbols-outlined text-[15px]">inventory_2</span>
+                                            {{ __('common.archive') }}
+                                        </button>
+                                    @endcan
                                 </div>
                             </td>
 

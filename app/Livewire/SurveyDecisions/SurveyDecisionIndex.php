@@ -8,6 +8,7 @@ use App\Enums\QrarSource;
 use App\Models\SurveyDecision;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -33,6 +34,11 @@ class SurveyDecisionIndex extends Component
             'value'
         );
     }
+
+    /** Re-renders the list so a decision saved or deleted in the modal shows at once. */
+    #[On('survey-decision-saved')]
+    #[On('survey-decision-deleted')]
+    public function refreshDecisions(): void {}
 
     public function updatingSearch(): void
     {

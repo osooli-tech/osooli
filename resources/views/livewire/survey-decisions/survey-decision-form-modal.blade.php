@@ -13,12 +13,17 @@
                         border border-outline-variant dark:border-white/10 p-6 space-y-5 outline-none">
 
                 <h2 class="text-base font-semibold text-on-surface dark:text-white">
-                    {{ $decision->decisionId ? __('survey_decisions.edit_title') : __('survey_decisions.create_title') }}
+                    @if ($boundaryOnly)
+                        {{ __('survey_decisions.boundary_edit_title') }}
+                    @else
+                        {{ $decision->decisionId ? __('survey_decisions.edit_title') : __('survey_decisions.create_title') }}
+                    @endif
                 </h2>
 
                 <form wire:submit="save" class="space-y-6">
 
-                    {{-- Decision --}}
+                    {{-- Decision — absent when the dialog was opened for the boundary alone --}}
+                    @unless ($boundaryOnly)
                     <section class="space-y-4">
                         <p class="text-[11px] font-semibold uppercase tracking-wide
                                   text-on-surface-variant dark:text-on-primary-container">
@@ -42,11 +47,12 @@
                                                 column="qrar_source" />
                         </div>
                     </section>
+                    @endunless
 
                     {{-- Boundary — a second table behind a second permission, so it is
                          only offered to a user who may edit the parcel itself. --}}
                     @if ($canEditBoundary)
-                        <section class="space-y-4 pt-5 border-t border-outline-variant dark:border-white/10">
+                        <section @class(['space-y-4', 'pt-5 border-t border-outline-variant dark:border-white/10' => ! $boundaryOnly])>
                             <p class="text-[11px] font-semibold uppercase tracking-wide
                                       text-on-surface-variant dark:text-on-primary-container">
                                 {{ __('survey_decisions.boundaries') }}

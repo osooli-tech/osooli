@@ -24,7 +24,7 @@
 
     <livewire:parcels.parcel-index />
 
-    @canany(['parcels.create', 'parcels.edit'])
+    @canany(['parcels.create', 'parcels.edit', 'parcels.archive', 'deeds.create'])
         <livewire:parcels.parcel-form-modal />
     @endcanany
 @else

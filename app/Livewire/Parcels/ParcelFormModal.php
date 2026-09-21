@@ -9,6 +9,7 @@ use App\Livewire\Forms\ParcelForm;
 use App\Models\Deed;
 use App\Models\Parcel;
 use App\Models\Plan;
+use App\Support\Concerns\WritesSafely;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;
@@ -25,6 +26,8 @@ use RuntimeException;
  */
 class ParcelFormModal extends Component
 {
+    use WritesSafely;
+
     public ParcelForm $form;
 
     public DeedForm $deedForm;
@@ -86,8 +89,57 @@ class ParcelFormModal extends Component
         }
 
         $this->showParcelModal = false;
-        $this->dispatch('toast', type: 'success', message: __($creating ? 'common.created' : 'common.updated'));
+
+        // A new parcel is an empty shell until its deeds, owners and boundary
+        // are added, and all of that happens on its own page — so creating one
+        // goes straight there instead of back to a list it is buried in.
+        if ($creating) {
+            session()->flash('toast', ['type' => 'success', 'message' => __('parcels.created_next_steps')]);
+            $this->redirectRoute('parcels.show', ['parcel' => $parcel->id]);
+
+            return;
+        }
+
+        $this->dispatch('toast', type: 'success', message: __('common.updated'));
         $this->dispatch('parcel-saved', parcelId: $parcel->id);
+    }
+
+    /**
+     * Archive a parcel — never a hard delete.
+     *
+     * The row keeps its deeds, owners and history and can be brought back from
+     * the archive screen; a delete would cascade through every deed and share
+     * hanging off it. The parcel page it was archived from no longer resolves,
+     * so the user is sent back to the list.
+     */
+    #[On('parcel-archive')]
+    public function archiveParcel(int $parcelId): void
+    {
+        abort_unless(auth()->user()?->can('parcels.archive'), 403);
+
+        $parcel = Parcel::findOrFail($parcelId);
+
+        $this->writeSafely('parcel.archive', 'parcel', $parcel->id, fn (): bool => $parcel->archive());
+
+        session()->flash('toast', ['type' => 'success', 'message' => __('parcels.archived')]);
+        $this->redirectRoute('parcels.index');
+    }
+
+    /**
+     * Archive one deed of a parcel. Its ownership shares stay attached to it,
+     * so restoring the deed restores its owners with it.
+     */
+    #[On('deed-archive')]
+    public function archiveDeed(int $deedId): void
+    {
+        abort_unless(auth()->user()?->can('deeds.archive'), 403);
+
+        $deed = Deed::findOrFail($deedId);
+
+        $this->writeSafely('deed.archive', 'deed', $deed->id, fn (): bool => $deed->archive());
+
+        $this->dispatch('deed-archived', deedId: $deed->id);
+        $this->dispatch('toast', type: 'success', message: __('parcels.deed_archived'));
     }
 
     public function closeParcel(): void
@@ -103,7 +155,6 @@ class ParcelFormModal extends Component
             return;
         }
 
-        $this->resumeParcelModal = $this->showParcelModal;
         $this->createDeed($this->form->parcelId);
     }
 
@@ -112,6 +163,10 @@ class ParcelFormModal extends Component
     {
         abort_unless(auth()->user()?->can('deeds.create'), 403);
 
+        // Set on every entry, not only from addDeed(): a value left over from
+        // an earlier dialog would otherwise reopen the parcel editor when a
+        // deed added straight from the parcel page is closed.
+        $this->resumeParcelModal = $this->showParcelModal;
         $this->resetValidation();
         $this->deedForm->setParcel(Parcel::findOrFail($parcelId));
         $this->showParcelModal = false;

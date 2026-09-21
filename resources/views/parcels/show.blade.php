@@ -7,7 +7,7 @@
 @can('parcels.view')
 
 {{-- Back + header -------------------------------------------------------- --}}
-<div class="flex items-center gap-4 mb-6">
+<div class="flex flex-wrap items-center gap-4 mb-6">
     <a href="{{ route('parcels.index') }}"
        class="flex items-center gap-1.5 text-sm text-on-surface-variant dark:text-on-primary-container
               hover:text-primary transition-colors">
@@ -41,14 +41,19 @@
         </button>
     @endcan
 
-    @can('survey_decisions.edit')
+    @can('parcels.archive')
         <button type="button"
-                onclick="Livewire.dispatch('open-survey-decision', { parcelId: {{ $parcel->id }} })"
+                data-event="parcel-archive"
+                data-params='@json(['parcelId' => $parcel->id])'
+                data-confirm="{{ __('parcels.archive_parcel_confirm') }}"
+                data-confirm-button="{{ __('parcels.archive_parcel') }}"
+                onclick="confirmDispatch(this)"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
                        border border-outline-variant dark:border-white/10
-                       text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
-            <span class="material-symbols-outlined text-[18px]">straighten</span>
-            {{ __('survey_decisions.boundaries') }}
+                       text-on-surface-variant dark:text-on-primary-container
+                       hover:bg-error/10 hover:text-error hover:border-error/30 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+            {{ __('parcels.archive_parcel') }}
         </button>
     @endcan
 
@@ -98,6 +103,15 @@
                     <span class="text-xs text-on-surface-variant dark:text-on-primary-container">
                         {{ $parcel->deeds->count() }}
                     </span>
+                    @can('deeds.create')
+                        <button type="button"
+                                onclick="Livewire.dispatch('deed-create', { parcelId: {{ $parcel->id }} })"
+                                class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                                       text-primary hover:bg-primary/10 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">add</span>
+                            {{ __('parcels.add_deed') }}
+                        </button>
+                    @endcan
                 </div>
             </div>
 
@@ -133,6 +147,33 @@
                                         {{ $deed->deed_class }}
                                     </span>
                                 @endif
+
+                                <div class="ms-auto flex items-center gap-1">
+                                    @can('deeds.edit')
+                                        <button type="button"
+                                                onclick="Livewire.dispatch('deed-edit', { deedId: {{ $deed->id }} })"
+                                                class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                                                       text-on-surface-variant dark:text-on-primary-container
+                                                       hover:bg-primary/10 hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[16px]">edit</span>
+                                            {{ __('parcels.edit_deed') }}
+                                        </button>
+                                    @endcan
+                                    @can('deeds.archive')
+                                        <button type="button"
+                                                data-event="deed-archive"
+                                                data-params='@json(['deedId' => $deed->id])'
+                                                data-confirm="{{ __('parcels.archive_deed_confirm') }}"
+                                                data-confirm-button="{{ __('parcels.archive_deed') }}"
+                                                onclick="confirmDispatch(this)"
+                                                title="{{ __('parcels.archive_deed') }}"
+                                                class="p-1.5 rounded-lg
+                                                       text-on-surface-variant dark:text-on-primary-container
+                                                       hover:bg-error/10 hover:text-error transition-colors">
+                                            <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+                                        </button>
+                                    @endcan
+                                </div>
                             </div>
 
                             {{-- Deed meta --}}
@@ -168,7 +209,10 @@
                                 </div>
                             </dl>
 
-                            {{-- Owners --}}
+                            {{-- Owners, read-only. A user who may manage ownership gets
+                                 the editor below instead, which lists the same owners
+                                 with their shares — showing both would duplicate them. --}}
+                            @cannot('ownership.manage')
                             @if ($deed->owners->isNotEmpty())
                                 <div class="bg-surface-container dark:bg-white/5 rounded-xl p-3">
                                     <p class="text-xs font-semibold text-on-surface-variant dark:text-on-primary-container mb-2">
@@ -201,13 +245,14 @@
                                     </div>
                                 </div>
                             @endif
+                            @endcannot
 
                             {{-- Ownership editing sits inside the deed card because
                                  ownership attaches to the deed, not to the parcel:
                                  a parcel with two deeds has two separate owner
                                  lists, and one shared editor would blur them. --}}
                             @can('ownership.manage')
-                                <div class="px-4 pb-4">
+                                <div>
                                     <livewire:owners.ownership-manager :deed-id="$deed->id" :key="'ownership-'.$deed->id" />
                                 </div>
                             @endcan
@@ -229,9 +274,20 @@
                 <h2 class="font-semibold text-on-surface dark:text-white text-sm">
                     {{ __('parcels.survey_decisions_section') }}
                 </h2>
-                <span class="ms-auto text-xs text-on-surface-variant dark:text-on-primary-container">
-                    {{ $parcel->surveyDecisions->count() }}
-                </span>
+                <div class="ms-auto flex items-center gap-2">
+                    <span class="text-xs text-on-surface-variant dark:text-on-primary-container">
+                        {{ $parcel->surveyDecisions->count() }}
+                    </span>
+                    @can('survey_decisions.edit')
+                        <button type="button"
+                                onclick="Livewire.dispatch('open-survey-decision', { parcelId: {{ $parcel->id }} })"
+                                class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                                       text-primary hover:bg-primary/10 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">add</span>
+                            {{ __('parcels.add_decision') }}
+                        </button>
+                    @endcan
+                </div>
             </div>
 
             @if ($parcel->surveyDecisions->isEmpty())
@@ -258,6 +314,11 @@
                                 <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                                     {{ __('parcels.qrar_source') }}
                                 </th>
+                                @can('survey_decisions.edit')
+                                    <th class="text-end px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
+                                        {{ __('parcels.actions') }}
+                                    </th>
+                                @endcan
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-outline-variant dark:divide-white/10">
@@ -275,6 +336,30 @@
                                     <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
                                         {{ $decision->qrar_source ?? '—' }}
                                     </td>
+                                    @can('survey_decisions.edit')
+                                        <td class="px-4 py-3">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <button type="button"
+                                                        onclick="Livewire.dispatch('open-survey-decision', { parcelId: {{ $parcel->id }}, decisionId: {{ $decision->id }} })"
+                                                        title="{{ __('common.edit') }}"
+                                                        class="p-1.5 rounded-lg text-on-surface-variant dark:text-on-primary-container
+                                                               hover:bg-primary/10 hover:text-primary transition-colors">
+                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                                                </button>
+                                                <button type="button"
+                                                        data-event="survey-decision-delete"
+                                                        data-params='@json(['parcelId' => $parcel->id, 'decisionId' => $decision->id])'
+                                                        data-confirm="{{ __('survey_decisions.delete_confirm') }}"
+                                                        data-confirm-button="{{ __('common.delete') }}"
+                                                        onclick="confirmDispatch(this)"
+                                                        title="{{ __('common.delete') }}"
+                                                        class="p-1.5 rounded-lg text-on-surface-variant dark:text-on-primary-container
+                                                               hover:bg-error/10 hover:text-error transition-colors">
+                                                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    @endcan
                                 </tr>
                             @endforeach
                         </tbody>
@@ -335,6 +420,27 @@
                         </dd>
                     </div>
                 @endif
+                @if ($parcel->parent)
+                    <div class="flex justify-between gap-2">
+                        <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">
+                            {{ __('parcels.parent_parcel') }}
+                        </dt>
+                        <dd class="font-medium text-end">
+                            <a href="{{ route('parcels.show', $parcel->parent) }}"
+                               class="text-primary hover:underline underline-offset-2 data-tabular">
+                                {{ $parcel->parent->parcel_no ?: $parcel->parent->geo_id }}
+                            </a>
+                        </dd>
+                    </div>
+                @endif
+                <div class="flex justify-between gap-2">
+                    <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">
+                        {{ __('parcels.allocation_method') }}
+                    </dt>
+                    <dd class="font-medium text-on-surface dark:text-white text-end">
+                        {{ $parcel->allocation_method ?? '—' }}
+                    </dd>
+                </div>
                 <div class="flex justify-between gap-2">
                     <dt class="text-on-surface-variant dark:text-on-primary-container shrink-0">
                         {{ __('parcels.m_price') }}
@@ -442,6 +548,15 @@
             <h2 class="font-semibold text-on-surface dark:text-white text-sm">
                 {{ __('parcels.boundary_section') }}
             </h2>
+            @can('parcels.edit')
+                <button type="button"
+                        onclick="Livewire.dispatch('open-parcel-boundary', { parcelId: {{ $parcel->id }} })"
+                        class="ms-auto flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                               text-primary hover:bg-primary/10 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">{{ $parcel->boundary ? 'edit' : 'add' }}</span>
+                    {{ __('parcels.edit_boundary') }}
+                </button>
+            @endcan
         </div>
 
         @if (! $parcel->boundary)
@@ -540,17 +655,33 @@
 
 @push('scripts')
 @include('parcels.partials.mini-map-script')
+<script>
+    // This page is rendered by a controller, not a Livewire component, so a
+    // save made in one of the modals would otherwise leave stale values on
+    // screen. Reloading once the toast has had a moment to show is the
+    // simplest way to redraw every card the change could touch.
+    (() => {
+        const events = ['parcel-saved', 'deed-saved', 'deed-archived', 'survey-decision-saved', 'survey-decision-deleted'];
+        const register = () => events.forEach((name) => window.Livewire.on(name, () => {
+            setTimeout(() => window.location.reload(), 900);
+        }));
+
+        window.Livewire ? register() : document.addEventListener('livewire:init', register);
+    })();
+</script>
 @endpush
 
 {{-- Both modals listen on Livewire's event bus, so one instance each serves
      every trigger on the page — the header buttons and the deed cards alike. --}}
-@canany(['parcels.edit', 'deeds.create', 'deeds.edit'])
+@canany(['parcels.edit', 'parcels.archive', 'deeds.create', 'deeds.edit', 'deeds.archive'])
     <livewire:parcels.parcel-form-modal />
 @endcanany
 
-@can('survey_decisions.edit')
+{{-- Also serves the boundary card, which needs parcels.edit rather than
+     survey_decisions.edit — so either permission mounts it. --}}
+@canany(['survey_decisions.edit', 'parcels.edit'])
     <livewire:survey-decisions.survey-decision-form-modal />
-@endcan
+@endcanany
 
 @else
     <div class="flex flex-col items-center justify-center py-32 gap-4

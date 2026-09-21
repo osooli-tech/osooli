@@ -14,6 +14,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -66,6 +67,12 @@ class ParcelIndex extends Component
             'value'
         );
     }
+
+    /** Re-renders the list so a parcel or deed saved in the modal shows at once. */
+    #[On('parcel-saved')]
+    #[On('deed-saved')]
+    #[On('deed-archived')]
+    public function refreshParcels(): void {}
 
     public function updatingSearch(): void
     {
