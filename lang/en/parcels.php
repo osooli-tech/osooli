@@ -225,4 +225,5 @@ return [
     'edit_boundary' => 'Edit boundary',
     'add_decision' => 'Add decision',
     'actions' => 'Actions',
+    'document_pending' => 'Awaiting review',
 ];

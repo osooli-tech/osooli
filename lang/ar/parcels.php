@@ -225,4 +225,5 @@ return [
     'edit_boundary' => 'تعديل الحدود',
     'add_decision' => 'إضافة قرار',
     'actions' => 'إجراءات',
+    'document_pending' => 'بانتظار المراجعة',
 ];

@@ -464,12 +464,17 @@
             // Ground/Aerial are real photographs; Deed/BoundarySurvey are PDF
             // scans — an <img> tag can render the former but not the latter,
             // so they need their own section rather than one shared gallery.
-            $images = $parcel->photos->whereIn('photo_type', [
+            //
+            // Only legacy photos go in the gallery: their photo_url is a public
+            // URL. An uploaded file sits on the private disk under a relative
+            // path no <img> can load, and serving it through the download route
+            // would write an audit entry on every page view — so an uploaded
+            // photo is listed with the files, behind the download permission.
+            $isGalleryImage = fn ($photo) => in_array($photo->photo_type, [
                 \App\Enums\PhotoType::Aerial, \App\Enums\PhotoType::Ground,
-            ]);
-            $documents = $parcel->photos->whereIn('photo_type', [
-                \App\Enums\PhotoType::Deed, \App\Enums\PhotoType::BoundarySurvey,
-            ]);
+            ], true) && blank($photo->storage_disk);
+            $images = $parcel->photos->filter($isGalleryImage);
+            $documents = $parcel->photos->reject($isGalleryImage);
         @endphp
 
         {{-- Photos --}}
@@ -497,37 +502,101 @@
             </div>
         @endif
 
-        {{-- Documents (deed scans, boundary survey cards) --}}
-        @can('documents.download')
-            @if ($documents->isNotEmpty())
-                <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
-                            border border-outline-variant dark:border-white/10 shadow-sm">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined text-[18px] text-tertiary-container"
-                              style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
-                            description
-                        </span>
-                        <h2 class="font-semibold text-on-surface dark:text-white text-sm">
-                            {{ __('parcels.documents_section') }}
-                        </h2>
-                    </div>
-                    <div class="space-y-2">
-                        @foreach ($documents as $doc)
-                            <a href="{{ route('documents.download', $doc) }}"
-                               target="_blank" rel="noopener"
-                               class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant dark:border-white/10
-                                      hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">picture_as_pdf</span>
-                                <span class="text-sm font-medium text-on-surface dark:text-white flex-1 min-w-0 truncate">
-                                    {{ $doc->photo_type ? __('documents.photo_types.'.$doc->photo_type->value) : '—' }}
-                                </span>
-                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">download</span>
-                            </a>
-                        @endforeach
-                    </div>
+        {{-- Documents (deed scans, boundary survey cards, uploaded files).
+             Shown to anyone who may download or upload: an uploader needs the
+             card — and its button — even while the parcel has no documents. --}}
+        @canany(['documents.download', 'documents.upload'])
+            <div x-data="{ uploadOpen: false }"
+                 x-on:documents-uploaded.window="uploadOpen = false"
+                 x-on:keydown.escape.window="uploadOpen = false"
+                 class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
+                        border border-outline-variant dark:border-white/10 shadow-sm">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-[18px] text-tertiary-container"
+                          style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
+                        description
+                    </span>
+                    <h2 class="font-semibold text-on-surface dark:text-white text-sm">
+                        {{ __('parcels.documents_section') }}
+                    </h2>
+                    @can('documents.upload')
+                        <button type="button" x-on:click="uploadOpen = true"
+                                class="ms-auto flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium
+                                       text-primary hover:bg-primary/10 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">upload_file</span>
+                            {{ __('documents.upload_title') }}
+                        </button>
+                    @endcan
                 </div>
-            @endif
-        @endcan
+
+                @can('documents.download')
+                    @if ($documents->isNotEmpty())
+                        <div class="space-y-2">
+                            @foreach ($documents as $doc)
+                                <a href="{{ route('documents.download', $doc) }}"
+                                   target="_blank" rel="noopener"
+                                   class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant dark:border-white/10
+                                          hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                                    <span class="material-symbols-outlined text-[20px] text-secondary shrink-0">
+                                        {{ str_starts_with((string) $doc->mime_type, 'image/') ? 'image' : 'picture_as_pdf' }}
+                                    </span>
+                                    <span class="flex-1 min-w-0">
+                                        <span class="block text-sm font-medium text-on-surface dark:text-white truncate">
+                                            {{ $doc->photo_type ? __('documents.photo_types.'.$doc->photo_type->value) : '—' }}
+                                        </span>
+                                        @if ($doc->original_name)
+                                            <span class="block text-xs text-on-surface-variant dark:text-on-primary-container truncate" dir="auto">
+                                                {{ $doc->original_name }}
+                                            </span>
+                                        @endif
+                                    </span>
+                                    {{-- Only a reviewer is ever shown a pending document
+                                         (the model's review scope), and it must not look
+                                         the same as one that has been approved. --}}
+                                    @if ($doc->isPending())
+                                        <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium
+                                                     bg-tertiary/10 text-tertiary dark:bg-tertiary/20 dark:text-white/90">
+                                            {{ __('parcels.document_pending') }}
+                                        </span>
+                                    @endif
+                                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant dark:text-on-primary-container shrink-0">download</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-on-surface-variant dark:text-on-primary-container py-2">
+                            {{ __('parcels.no_documents') }}
+                        </p>
+                    @endif
+                @else
+                    <p class="text-xs text-on-surface-variant dark:text-on-primary-container">
+                        {{ __('documents.pending_notice') }}
+                    </p>
+                @endcan
+
+                {{-- Upload dialog. The component is mounted locked to this
+                     parcel, so the parcel cannot be switched from inside it;
+                     the deed dropdown still lists this parcel's deeds. --}}
+                @can('documents.upload')
+                    <div x-show="uploadOpen" x-cloak
+                         class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+                        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" x-on:click="uploadOpen = false"></div>
+
+                        <div class="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                            <button type="button" x-on:click="uploadOpen = false"
+                                    aria-label="{{ __('common.cancel') }}"
+                                    class="absolute top-4 end-4 z-10 p-1.5 rounded-lg
+                                           text-on-surface-variant dark:text-on-primary-container
+                                           hover:bg-surface-container dark:hover:bg-white/10 transition-colors">
+                                <span class="material-symbols-outlined text-[20px]">close</span>
+                            </button>
+
+                            <livewire:documents.document-upload :parcel-id="$parcel->id" :key="'upload-'.$parcel->id" />
+                        </div>
+                    </div>
+                @endcan
+            </div>
+        @endcanany
 
     </div>
 
@@ -661,7 +730,10 @@
     // screen. Reloading once the toast has had a moment to show is the
     // simplest way to redraw every card the change could touch.
     (() => {
-        const events = ['parcel-saved', 'deed-saved', 'deed-archived', 'survey-decision-saved', 'survey-decision-deleted'];
+        const events = [
+            'parcel-saved', 'deed-saved', 'deed-archived',
+            'survey-decision-saved', 'survey-decision-deleted', 'documents-uploaded',
+        ];
         const register = () => events.forEach((name) => window.Livewire.on(name, () => {
             setTimeout(() => window.location.reload(), 900);
         }));
