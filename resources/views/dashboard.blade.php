@@ -38,7 +38,7 @@
          }"
          @parcel-selected.window="parcel = $event.detail; fetchDocuments(parcel.id)">
 
-        <div class="flex-1 min-w-0 relative rounded-2xl overflow-hidden shadow-sm
+        <div class="xl:flex-1 min-w-0 relative rounded-2xl overflow-hidden shadow-sm
                     border border-outline-variant dark:border-white/10"
              style="height: 620px;">
             <div id="sakuki-map"
