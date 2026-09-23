@@ -36,10 +36,10 @@
     }
     table { direction: {{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}; }
 
-    .page { padding: 16px 20px; }
+    .page { padding: 6px 20px; }
 
     {{-- Top header --}}
-    .top-header { border: 1px solid #e2e2e2; border-radius: 6px; padding: 10px 14px; }
+    .top-header { border: 1px solid #e2e2e2; border-radius: 6px; padding: 7px 14px; }
     .top-header table { width: 100%; }
     .top-header .logo-mark { width: 46px; height: auto; vertical-align: middle; }
     .top-header .brand-cell { vertical-align: middle; }
@@ -66,7 +66,7 @@
         border-radius: 4px;
     }
 
-    .section { margin-top: 10px; }
+    .section { margin-top: 6px; }
 
     {{-- The three-card rows: equal width AND equal height. dompdf has no
          flexbox, and a height:100% div nested in a table cell does not just
@@ -98,7 +98,7 @@
         padding: 6px 8px;
         text-align: center;
     }
-    .card-body { padding: 7px; }
+    .card-body { padding: 5px; }
     img.card-image { width: 100%; height: 118px; object-fit: cover; display: block; }
     .placeholder { color: #999; font-size: 9px; text-align: center; padding: 18px 6px; }
 
@@ -106,7 +106,7 @@
     .coords-line .value { display: block; font-weight: bold; color: #0b1c30; margin-top: 2px; }
 
     table.kv { width: 100%; border-collapse: collapse; }
-    table.kv td { padding: 2.5px 0; vertical-align: top; border-bottom: 1px solid #eee; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; font-size: 9px; }
+    table.kv td { padding: 2px 0; vertical-align: top; border-bottom: 1px solid #eee; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; font-size: 9px; }
     {{-- Shrink-to-content, not a fixed share: a fixed label width left long
          values (a long owner name, a long plan code) fighting for space that
          short labels didn't need, wrapping across three lines while shorter
@@ -120,36 +120,41 @@
     table.kv td.value { font-weight: bold; color: #0b1c30; }
 
     table.grid { width: 100%; border-collapse: collapse; }
-    table.grid th, table.grid td { border: 1px solid #e2e2e2; padding: 4px 6px; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; font-size: 8.5px; }
+    table.grid th, table.grid td { border: 1px solid #e2e2e2; padding: 3px 6px; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; font-size: 8.5px; }
     table.grid th { background-color: #002444; color: #fff; }
     table.grid tr:nth-child(even) td { background-color: #f8f9ff; }
     table.grid td.total-label { font-weight: bold; text-align: center; }
     table.grid td.total-value { font-weight: bold; text-align: center; }
-    .geodetic-note { font-size: 7.5px; color: #999; padding: 5px 7px 0; line-height: 1.5; }
+    .geodetic-note { font-size: 7.5px; color: #999; padding: 5px 7px 0; line-height: 1.0; }
 
-    .footer-bottom { margin-top: 10px; }
+    .footer-bottom { margin-top: 6px; }
     .footer-bottom table { width: 100%; }
-    .footer-bottom td { vertical-align: top; font-size: 8px; color: #888; line-height: 1.6; }
+    .footer-bottom td { vertical-align: top; font-size: 8px; color: #888; line-height: 1.0; }
     .footer-bottom .signature-cell { text-align: center; font-size: 9px; color: #002444; }
     .footer-bottom .signature-cell .role { color: #888; font-size: 8px; display: block; margin-bottom: 2px; }
     .footer-bottom .logo-cell { text-align: {{ app()->isLocale('ar') ? 'left' : 'right' }}; }
     .footer-bottom .logo-cell img { width: 34px; }
 
     .footer-bar {
-        margin-top: 8px;
+        margin-top: 0;
         background-color: #006c4e;
         color: #ffffff;
         border-radius: 4px;
-        padding: 7px 14px;
+        padding: 5px 14px;
     }
     .footer-bar table { width: 100%; }
-    .footer-bar td { font-size: 9px; vertical-align: middle; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; }
+    {{-- 8px looked identical to this on screen but dompdf reserves a table
+         row's height from the font's own metrics, not the CSS line-height —
+         Cairo's metrics alone were enough to push this row onto a second
+         page on a fuller report (many parcel corners, longer names). 7px
+         carries the same safety margin that made the rest of the report fit. --}}
+    .footer-bar td { font-size: 7px; line-height: 1.0; vertical-align: middle; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; }
 
     {{-- Float, not a table cell: an inline <svg> placed inside a dompdf table
          cell was measured at zero size repeatedly (a table-layout quirk),
          while this exact float pattern was already proven to work in the
          report's title-row QR box. --}}
-    .qr-strip { margin-top: 8px; overflow: hidden; }
+    .qr-strip { margin-top: 5px; overflow: hidden; }
     .qr-strip .qr-box { float: {{ app()->isLocale('ar') ? 'right' : 'left' }}; text-align: center; width: 66px; }
     .qr-strip .qr-box img, .qr-strip .qr-box svg { width: 66px; height: 66px; }
     .qr-strip .qr-box p { font-size: 7.5px; color: #777; margin: 2px 0 0; }
