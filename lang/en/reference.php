@@ -64,7 +64,7 @@ return [
     ],
 
     'blocked' => [
-        'plans' => 'This plan cannot be deleted: :count parcel(s) still reference it. Move them to another plan first.',
+        'plans' => 'This plan cannot be deleted: :count parcel(s), archived ones included, still reference it. Move them to another plan first.',
         'districts' => 'This district cannot be deleted: :count plan(s) still reference it. Move them to another district first.',
         'cities' => 'This city cannot be deleted: :count district(s) still reference it. Move them to another city first.',
         'regions' => 'This region cannot be deleted: :count city/cities still reference it. Move them to another region first.',

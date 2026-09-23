@@ -57,7 +57,7 @@ class DocumentIndex extends Component
             ->with(['parcel.plan'])
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
-                $q->whereHas('parcel', fn ($p) => $p->where('parcel_no', 'ilike', $term));
+                $q->whereHas('parcel', fn ($p) => $p->whereLike('parcel_no', $term));
             })
             ->when($this->filterPhotoType !== '', fn ($q) => $q->where('photo_type', $this->filterPhotoType))
             ->latest()

@@ -53,11 +53,11 @@ class OwnerDeedQuery
         $like = '%'.$term.'%';
 
         $query->where(function (Builder $query) use ($like): void {
-            $query->where('deed_no', 'ilike', $like)
-                ->orWhereHas('parcel', fn (Builder $parcel) => $parcel->where('parcel_no', 'ilike', $like))
-                ->orWhereHas('parcel.plan', fn (Builder $plan) => $plan->where('plan_no', 'ilike', $like))
-                ->orWhereHas('parcel.plan.district', fn (Builder $district) => $district->where('name_ar', 'ilike', $like))
-                ->orWhereHas('parcel.plan.district.city', fn (Builder $city) => $city->where('name_ar', 'ilike', $like));
+            $query->whereLike('deed_no', $like)
+                ->orWhereHas('parcel', fn (Builder $parcel) => $parcel->whereLike('parcel_no', $like))
+                ->orWhereHas('parcel.plan', fn (Builder $plan) => $plan->whereLike('plan_no', $like))
+                ->orWhereHas('parcel.plan.district', fn (Builder $district) => $district->whereLike('name_ar', $like))
+                ->orWhereHas('parcel.plan.district.city', fn (Builder $city) => $city->whereLike('name_ar', $like));
         });
     }
 }

@@ -13,6 +13,7 @@ use App\Services\Parcel\ParcelDocumentRenderService;
 use App\Services\Parcel\ParcelMapSvgService;
 use App\Services\Parcel\ParcelQrCodeService;
 use App\Services\Parcel\ParcelSatelliteImageService;
+use App\Support\Database\Spatial;
 use App\Support\OwnerScope;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
@@ -88,7 +89,7 @@ class ParcelController extends Controller
                AND n.id <> self.id
                AND n.geom IS NOT NULL
                AND n.deleted_at IS NULL
-               AND ST_Intersects(n.geom, ST_Expand(self.geom, 0.004))
+               AND '.Spatial::intersectsExpanded('n.geom', 'self.geom', 0.004).'
              LIMIT 60',
             [$parcel->id]
         );

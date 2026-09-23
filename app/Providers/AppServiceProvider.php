@@ -5,13 +5,26 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Http\Middleware\SetLocale;
+use App\Support\Database\DatabaseSettings;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->singleton(DatabaseSettings::class);
+
+        // Before anything opens a connection: the dashboard's database
+        // settings decide which database is primary and how to reach both.
+        // Tests always run against the connection phpunit.xml names — a
+        // settings file on a developer's machine must never point
+        // RefreshDatabase at a real database.
+        if (! $this->app->runningUnitTests()) {
+            $this->app->make(DatabaseSettings::class)->apply();
+        }
+    }
 
     public function boot(): void
     {

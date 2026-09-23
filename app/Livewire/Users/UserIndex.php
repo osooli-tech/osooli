@@ -228,9 +228,9 @@ class UserIndex extends Component
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
                 $q->where(function ($q2) use ($term): void {
-                    $q2->where('name', 'ilike', $term)
-                        ->orWhere('email', 'ilike', $term)
-                        ->orWhere('phone', 'ilike', $term);
+                    $q2->whereLike('name', $term)
+                        ->orWhereLike('email', $term)
+                        ->orWhereLike('phone', $term);
                 });
             })
             ->when($this->filterRole !== '', fn ($q) => $q->role($this->filterRole))

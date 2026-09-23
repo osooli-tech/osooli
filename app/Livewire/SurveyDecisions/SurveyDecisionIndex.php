@@ -64,9 +64,9 @@ class SurveyDecisionIndex extends Component
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
                 $q->where(function ($inner) use ($term): void {
-                    $inner->where('folder', 'ilike', $term)
-                        ->orWhere('qrar_no', 'ilike', $term)
-                        ->orWhereHas('parcel', fn ($p) => $p->where('parcel_no', 'ilike', $term));
+                    $inner->whereLike('folder', $term)
+                        ->orWhereLike('qrar_no', $term)
+                        ->orWhereHas('parcel', fn ($p) => $p->whereLike('parcel_no', $term));
                 });
             })
             ->when($this->filterQrarSource !== '', fn ($q) => $q->where('qrar_source', $this->filterQrarSource))

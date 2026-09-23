@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ return new class extends Migration
 
     public function up(): void
     {
-        $this->createStatusType();
+        PortableSchema::createEnumType(self::STATUS_TYPE, self::STATUSES);
 
         Schema::table('parcel_photos', function (Blueprint $table): void {
             // What the uploader called the file. The stored name is generated,
@@ -54,10 +55,7 @@ return new class extends Migration
          * which is the approval. Only the upload form, where a file arrives
          * from a browser, sets 'معلق' explicitly.
          */
-        DB::statement(
-            'ALTER TABLE parcel_photos ADD COLUMN status '.self::STATUS_TYPE
-            ." NOT NULL DEFAULT '".self::APPROVED."'"
-        );
+        PortableSchema::addEnumColumn('parcel_photos', 'status', self::STATUS_TYPE, nullable: false, default: self::APPROVED);
 
         // The review queue reads by status on every page load.
         DB::statement('CREATE INDEX IF NOT EXISTS '.self::STATUS_INDEX.' ON parcel_photos (status)');
@@ -65,7 +63,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement('DROP INDEX IF EXISTS '.self::STATUS_INDEX);
+        PortableSchema::dropIndex('parcel_photos', self::STATUS_INDEX);
 
         Schema::table('parcel_photos', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('uploaded_by');
@@ -82,23 +80,6 @@ return new class extends Migration
         });
 
         // Only safe once the column above is gone; nothing else uses the type.
-        DB::statement('DROP TYPE IF EXISTS '.self::STATUS_TYPE);
-    }
-
-    /**
-     * Postgres has no CREATE TYPE IF NOT EXISTS, and enum types survive the
-     * table drops RefreshDatabase performs — so swallow duplicates, exactly as
-     * create_enum_types.php does.
-     */
-    private function createStatusType(): void
-    {
-        $literals = implode(', ', array_map(
-            static fn (string $value): string => "'".str_replace("'", "''", $value)."'",
-            self::STATUSES
-        ));
-
-        DB::statement('DO $$ BEGIN
-            CREATE TYPE '.self::STATUS_TYPE." AS ENUM ({$literals});
-        EXCEPTION WHEN duplicate_object THEN NULL; END $$;");
+        PortableSchema::dropEnumType(self::STATUS_TYPE);
     }
 };

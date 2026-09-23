@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -27,24 +27,17 @@ return new class extends Migration
 
     public function up(): void
     {
+        // Named types exist only on PostgreSQL; on MariaDB the columns that
+        // use them are VARCHARs — see PortableSchema.
         foreach (self::TYPES as $type => $values) {
-            $literals = implode(', ', array_map(
-                static fn (string $value): string => "'".str_replace("'", "''", $value)."'",
-                $values
-            ));
-
-            // Postgres has no CREATE TYPE IF NOT EXISTS, and enum types survive
-            // the table drops RefreshDatabase performs — so swallow duplicates.
-            DB::statement("DO $$ BEGIN
-                CREATE TYPE {$type} AS ENUM ({$literals});
-            EXCEPTION WHEN duplicate_object THEN NULL; END $$;");
+            PortableSchema::createEnumType($type, $values);
         }
     }
 
     public function down(): void
     {
         foreach (array_reverse(array_keys(self::TYPES)) as $type) {
-            DB::statement("DROP TYPE IF EXISTS {$type}");
+            PortableSchema::dropEnumType($type);
         }
     }
 };

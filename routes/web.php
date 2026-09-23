@@ -121,6 +121,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:roles.manage')
         ->name('settings.index');
 
+    // Database connections, primary database and sync
+    Route::get('/settings/database', fn () => view('settings.database'))
+        ->middleware('can:database.manage')
+        ->name('settings.database');
+
     // Legal content editor
     Route::get('/settings/legal/{key}', [LegalDocumentController::class, 'edit'])
         ->middleware('can:roles.manage')->name('legal.edit');

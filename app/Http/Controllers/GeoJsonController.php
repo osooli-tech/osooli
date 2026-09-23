@@ -8,6 +8,7 @@ use App\Models\Building;
 use App\Models\Parcel;
 use App\Models\Project;
 use App\Models\User;
+use App\Support\Database\Dialect;
 use App\Support\OwnerScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -17,7 +18,7 @@ class GeoJsonController extends Controller
 {
     public function parcels(): JsonResponse
     {
-        if (config('database.default') !== 'pgsql') {
+        if (! Dialect::isSpatial()) {
             return response()->json(['type' => 'FeatureCollection', 'features' => []]);
         }
 
@@ -99,7 +100,7 @@ class GeoJsonController extends Controller
     /** @param class-string<Project|Building> $modelClass */
     private function displayLayer(string $modelClass): JsonResponse
     {
-        if (config('database.default') !== 'pgsql') {
+        if (! Dialect::isSpatial()) {
             return response()->json(['type' => 'FeatureCollection', 'features' => []]);
         }
 

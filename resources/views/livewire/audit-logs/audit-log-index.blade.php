@@ -26,7 +26,7 @@
         >
             <option value="all">{{ __('audit_logs.filter_all') }}</option>
             @foreach($actionOptions as $act)
-                <option value="{{ $act }}">{{ __('audit_logs.actions.'.$act, ['default' => $act]) }}</option>
+                <option value="{{ $act }}">{{ \App\Support\AuditActions::label($act) }}</option>
             @endforeach
         </select>
 
@@ -66,25 +66,34 @@
                             {{-- Action chip --}}
                             <td class="px-4 py-3">
                                 @php
-                                    $chip = match($log->action) {
+                                    $chip = match(\App\Support\AuditActions::kind($log->action)) {
                                         'login'    => ['bg-secondary-container text-on-secondary-container', 'login'],
                                         'logout'   => ['bg-surface-container text-on-surface-variant', 'logout'],
                                         'download' => ['bg-primary-fixed text-on-primary-fixed', 'download'],
                                         'export'   => ['bg-tertiary-container text-tertiary', 'table_chart'],
+                                        'create'   => ['bg-secondary/10 text-secondary', 'add_circle'],
+                                        'update'   => ['bg-primary/10 text-primary', 'edit'],
+                                        'geometry' => ['bg-primary/10 text-primary', 'pentagon'],
+                                        'archive'  => ['bg-tertiary/10 text-tertiary', 'inventory_2'],
+                                        'restore'  => ['bg-secondary/10 text-secondary', 'unarchive'],
+                                        'delete'   => ['bg-error/10 text-error', 'delete'],
+                                        'approve'  => ['bg-secondary/10 text-secondary', 'verified'],
+                                        'reject'   => ['bg-error/10 text-error', 'block'],
                                         default    => ['bg-surface-container-high text-on-surface-variant', 'info'],
                                     };
                                 @endphp
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ $chip[0] }}">
                                     <span class="material-symbols-outlined text-xs">{{ $chip[1] }}</span>
-                                    {{ __('audit_logs.actions.'.$log->action, ['default' => $log->action]) }}
+                                    {{ \App\Support\AuditActions::label($log->action) }}
                                 </span>
                             </td>
 
                             {{-- Target --}}
                             <td class="px-4 py-3 text-on-surface-variant">
                                 @if($log->target_type && $log->target_id)
-                                    <span class="font-mono text-xs bg-surface-container dark:bg-[#1a2e42] px-2 py-0.5 rounded">
-                                        {{ $log->target_type }}#{{ $log->target_id }}
+                                    <span class="text-xs bg-surface-container dark:bg-[#1a2e42] px-2 py-0.5 rounded">
+                                        {{ \App\Support\AuditActions::targetLabel($log->target_type) }}
+                                        <span class="font-mono" dir="ltr">#{{ $log->target_id }}</span>
                                     </span>
                                 @else
                                     {{ __('audit_logs.no_target') }}

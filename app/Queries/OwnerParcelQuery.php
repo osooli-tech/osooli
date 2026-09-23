@@ -75,11 +75,11 @@ class OwnerParcelQuery
         $like = '%'.$term.'%';
 
         return $this->base()->where(fn (Builder $query) => match ($type) {
-            'parcel' => $query->where('parcel_no', 'ilike', $like),
-            'plan' => $query->whereHas('plan', fn (Builder $plan) => $plan->where('plan_no', 'ilike', $like)),
+            'parcel' => $query->whereLike('parcel_no', $like),
+            'plan' => $query->whereHas('plan', fn (Builder $plan) => $plan->whereLike('plan_no', $like)),
             // Still owner-scoped by base(), so this never surfaces other owners.
-            'owner' => $query->whereHas('deeds.owners', fn (Builder $owner) => $owner->where('name', 'ilike', $like)),
-            default => $query->whereHas('deeds', fn (Builder $deed) => $deed->where('deed_no', 'ilike', $like)),
+            'owner' => $query->whereHas('deeds.owners', fn (Builder $owner) => $owner->whereLike('name', $like)),
+            default => $query->whereHas('deeds', fn (Builder $deed) => $deed->whereLike('deed_no', $like)),
         });
     }
 
@@ -95,9 +95,9 @@ class OwnerParcelQuery
         $like = '%'.$term.'%';
 
         $query->where(function (Builder $query) use ($like): void {
-            $query->where('parcel_no', 'ilike', $like)
-                ->orWhereHas('deeds', fn (Builder $deed) => $deed->where('deed_no', 'ilike', $like))
-                ->orWhereHas('plan', fn (Builder $plan) => $plan->where('plan_no', 'ilike', $like));
+            $query->whereLike('parcel_no', $like)
+                ->orWhereHas('deeds', fn (Builder $deed) => $deed->whereLike('deed_no', $like))
+                ->orWhereHas('plan', fn (Builder $plan) => $plan->whereLike('plan_no', $like));
         });
     }
 }

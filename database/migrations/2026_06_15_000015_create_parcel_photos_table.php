@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE parcel_photos ADD COLUMN photo_type photo_type_enum');
+        PortableSchema::addEnumColumn('parcel_photos', 'photo_type', 'photo_type_enum');
     }
 
     public function down(): void

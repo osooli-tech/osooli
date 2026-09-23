@@ -364,7 +364,7 @@ class OwnerApiTest extends TestCase
 
         DB::update(
             "UPDATE parcels
-             SET geom = ST_SetSRID(ST_GeomFromText('MULTIPOLYGON(((46.3 24.7, 46.4 24.7, 46.4 24.8, 46.3 24.8, 46.3 24.7)))'), 4326),
+             SET geom = ST_GeomFromText('MULTIPOLYGON(((46.3 24.7, 46.4 24.7, 46.4 24.8, 46.3 24.8, 46.3 24.7)))', 4326),
                  asset_type = 'أرض'
              WHERE id = ?",
             [$parcel->id]

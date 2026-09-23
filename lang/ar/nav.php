@@ -8,6 +8,8 @@ return [
     'dashboard' => 'الرئيسية',
     'parcels' => 'الأراضي',
     'survey_decisions' => 'القرارات المساحية',
+    'reference' => 'البيانات المرجعية',
+    'archive' => 'الأرشيف',
     'documents' => 'المستندات',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',

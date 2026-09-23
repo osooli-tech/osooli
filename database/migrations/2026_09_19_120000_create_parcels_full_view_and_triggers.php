@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\Dialect;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
@@ -62,6 +63,11 @@ return new class extends Migration
 
     public function up(): void
     {
+        // A view for ArcGIS/QGIS on the PostGIS database; MariaDB has no counterpart.
+        if (! Dialect::isPostgres()) {
+            return;
+        }
+
         // Functions first — the triggers below reference them by name.
         DB::statement(<<<'SQL'
             CREATE OR REPLACE FUNCTION public.parcels_full_insert()
@@ -245,6 +251,11 @@ return new class extends Migration
 
     public function down(): void
     {
+        // A view for ArcGIS/QGIS on the PostGIS database; MariaDB has no counterpart.
+        if (! Dialect::isPostgres()) {
+            return;
+        }
+
         // Dropping the view takes its triggers with it.
         DB::statement('DROP VIEW IF EXISTS public.parcels_full');
 

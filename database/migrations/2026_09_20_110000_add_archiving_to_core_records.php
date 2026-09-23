@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\Dialect;
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -39,16 +41,17 @@ return new class extends Migration
             // Every listing, report and scope filters on "not archived", and on
             // a table of any size that predicate is the first thing touched.
             // Partial index: only live rows are indexed, so it stays small.
-            DB::statement(
-                "CREATE INDEX idx_{$table}_live ON {$table} (id) WHERE deleted_at IS NULL"
-            );
+            // MariaDB has no partial indexes; deleted_at leading does the job.
+            DB::statement(Dialect::isPostgres()
+                ? "CREATE INDEX idx_{$table}_live ON {$table} (id) WHERE deleted_at IS NULL"
+                : "CREATE INDEX idx_{$table}_live ON {$table} (deleted_at, id)");
         }
     }
 
     public function down(): void
     {
         foreach (array_reverse(self::TABLES) as $table) {
-            DB::statement("DROP INDEX IF EXISTS idx_{$table}_live");
+            PortableSchema::dropIndex($table, "idx_{$table}_live");
 
             Schema::table($table, function (Blueprint $t): void {
                 $t->dropConstrainedForeignId('archived_by');

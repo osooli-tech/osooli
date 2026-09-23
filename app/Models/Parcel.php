@@ -41,6 +41,15 @@ class Parcel extends Model
         'parcel_price',
     ];
 
+    /**
+     * The raw geometry is never serialised: PostGIS hands it back as hex, but
+     * MariaDB as binary WKB, which would break any JSON it landed in. Code
+     * that needs the shape selects ST_AsGeoJSON(geom) explicitly.
+     */
+    protected $hidden = [
+        'geom',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -132,8 +141,8 @@ class Parcel extends Model
             ->when($search !== '', function (Builder $q) use ($search): void {
                 $term = '%'.$search.'%';
                 $q->where(function (Builder $inner) use ($term): void {
-                    $inner->where('parcel_no', 'ilike', $term)
-                        ->orWhereHas('deeds', fn (Builder $d) => $d->where('deed_no', 'ilike', $term));
+                    $inner->whereLike('parcel_no', $term)
+                        ->orWhereHas('deeds', fn (Builder $d) => $d->whereLike('deed_no', $term));
                 });
             })
             ->when($assetType !== '', fn (Builder $q) => $q->where('asset_type', $assetType))

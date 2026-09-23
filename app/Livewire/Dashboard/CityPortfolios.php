@@ -6,6 +6,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\Parcel;
 use App\Models\User;
+use App\Support\Database\Spatial;
 use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -39,10 +40,10 @@ class CityPortfolios extends Component
             ->selectRaw("
                 COALESCE(cities.name_ar, 'غير محدد') AS name,
                 COUNT(parcels.id) AS parcels,
-                COALESCE(SUM(ST_Area(parcels.geom::geography)), 0) AS area,
+                COALESCE(SUM(".Spatial::areaSqm('parcels.geom').'), 0) AS area,
                 COUNT(parcels.m_price) AS priced,
-                SUM(parcels.m_price * ST_Area(parcels.geom::geography)) AS value
-            ")
+                SUM(parcels.m_price * '.Spatial::areaSqm('parcels.geom').') AS value
+            ')
             ->groupBy('cities.name_ar')
             ->orderByDesc('parcels')
             ->get();

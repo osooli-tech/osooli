@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\Dialect;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // A view for ArcGIS/QGIS on the PostGIS database; MariaDB has no counterpart.
+        if (! Dialect::isPostgres()) {
+            return;
+        }
+
         // DELETE now archives. It also stamps archived_by from the mapping set
         // by the application; when QGIS connects directly there is no Laravel
         // user to name, so the column is left null rather than guessed at.
@@ -110,6 +116,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // A view for ArcGIS/QGIS on the PostGIS database; MariaDB has no counterpart.
+        if (! Dialect::isPostgres()) {
+            return;
+        }
+
         DB::statement(<<<'SQL'
             CREATE OR REPLACE FUNCTION public.parcels_full_delete()
                 RETURNS trigger

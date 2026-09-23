@@ -29,7 +29,7 @@ class DisplayLayerGeoJsonTest extends TestCase
         $project = Project::create(['name' => $name, 'code' => 'MF-1', 'area' => 100.0, 'length' => 40.0]);
 
         DB::update(
-            "UPDATE projects SET geom = ST_SetSRID(ST_Multi(ST_GeomFromText('POLYGON((46.5 24.5, 46.501 24.5, 46.501 24.501, 46.5 24.501, 46.5 24.5))')), 4326) WHERE id = ?",
+            "UPDATE projects SET geom = ST_GeomFromText('MULTIPOLYGON(((46.5 24.5, 46.501 24.5, 46.501 24.501, 46.5 24.501, 46.5 24.5)))', 4326) WHERE id = ?",
             [$project->id]
         );
 
@@ -41,7 +41,7 @@ class DisplayLayerGeoJsonTest extends TestCase
         $building = Building::create(['name' => $name, 'code' => 'B-1', 'area' => 50.0, 'length' => 20.0]);
 
         DB::update(
-            "UPDATE buildings SET geom = ST_SetSRID(ST_Multi(ST_GeomFromText('POLYGON((46.6 24.6, 46.601 24.6, 46.601 24.601, 46.6 24.601, 46.6 24.6))')), 4326) WHERE id = ?",
+            "UPDATE buildings SET geom = ST_GeomFromText('MULTIPOLYGON(((46.6 24.6, 46.601 24.6, 46.601 24.601, 46.6 24.601, 46.6 24.6)))', 4326) WHERE id = ?",
             [$building->id]
         );
 

@@ -35,8 +35,8 @@ class RequestIndex extends Component
             ->when(
                 $this->search !== '',
                 fn ($q) => $q->where(function ($inner) {
-                    $inner->where('name', 'ilike', '%'.$this->search.'%')
-                        ->orWhere('phone', 'ilike', '%'.$this->search.'%');
+                    $inner->whereLike('name', '%'.$this->search.'%')
+                        ->orWhereLike('phone', '%'.$this->search.'%');
                 })
             )
             ->latest()

@@ -28,6 +28,20 @@
                     </span>
                 </a>
             @endforeach
+
+            @can('database.manage')
+                <a href="{{ route('settings.database') }}"
+                   class="flex items-center gap-4 bg-white dark:bg-[#0b1a2b] rounded-2xl shadow-sm p-5
+                          hover:ring-2 hover:ring-secondary transition">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">database</span>
+                    <span>
+                        <span class="block font-semibold text-on-surface dark:text-white">{{ __('database_settings.title') }}</span>
+                        <span class="block text-xs text-on-surface-variant dark:text-on-primary-container mt-0.5">
+                            {{ __('database_settings.card_hint') }}
+                        </span>
+                    </span>
+                </a>
+            @endcan
         </div>
 
         <livewire:settings.role-manager />

@@ -47,11 +47,12 @@ class RolesAndPermissionsSeeder extends Seeder
         'roles.manage',
         'audit_logs.view',
         'sync.view',
+        'database.manage',
     ];
 
     private const ROLES = [
         'super_admin' => null,                  // كل الصلاحيات
-        'manager' => ['except' => ['roles.manage']],
+        'manager' => ['except' => ['roles.manage', 'database.manage']],
 
         /*
          * The engineer role is the surveying side of the work: it may correct

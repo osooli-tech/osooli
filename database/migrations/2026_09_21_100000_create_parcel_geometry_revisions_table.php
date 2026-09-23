@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->index(['parcel_id', 'created_at']);
         });
 
-        DB::statement('ALTER TABLE parcel_geometry_revisions ADD COLUMN geom geometry(MultiPolygon, 4326)');
+        PortableSchema::addGeometryColumn('parcel_geometry_revisions', index: false);
     }
 
     public function down(): void

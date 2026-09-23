@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -25,8 +26,8 @@ return new class extends Migration
             $table->index('requested_by');
         });
 
-        DB::statement(
-            "ALTER TABLE modification_requests ADD COLUMN status modification_request_status_enum NOT NULL DEFAULT 'pending'"
+        PortableSchema::addEnumColumn(
+            'modification_requests', 'status', 'modification_request_status_enum', nullable: false, default: 'pending'
         );
 
         DB::statement('CREATE INDEX idx_modification_requests_status ON modification_requests(status)');

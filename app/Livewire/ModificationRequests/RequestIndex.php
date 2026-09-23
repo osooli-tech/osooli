@@ -137,8 +137,8 @@ class RequestIndex extends Component
             ->when(
                 $this->search !== '',
                 fn ($q) => $q->where(function ($inner) {
-                    $inner->whereHas('parcel', fn ($p) => $p->where('parcel_no', 'ilike', '%'.$this->search.'%'))
-                        ->orWhere('field_name', 'ilike', '%'.$this->search.'%');
+                    $inner->whereHas('parcel', fn ($p) => $p->whereLike('parcel_no', '%'.$this->search.'%'))
+                        ->orWhereLike('field_name', '%'.$this->search.'%');
                 })
             )
             ->latest()

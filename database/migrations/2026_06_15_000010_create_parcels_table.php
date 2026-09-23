@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -28,15 +28,14 @@ return new class extends Migration
                 ->constrained('parcels')->cascadeOnDelete();
         });
 
-        // Enum columns using PostgreSQL native types
-        DB::statement('ALTER TABLE parcels ADD COLUMN asset_type asset_type_enum');
-        DB::statement('ALTER TABLE parcels ADD COLUMN land_transaction land_transaction_enum');
-        DB::statement('ALTER TABLE parcels ADD COLUMN allocation_method allocation_method_enum');
-        DB::statement('ALTER TABLE parcels ADD COLUMN fall_in fall_in_enum');
+        // Enum columns (PostgreSQL native types, VARCHAR on MariaDB)
+        PortableSchema::addEnumColumn('parcels', 'asset_type', 'asset_type_enum');
+        PortableSchema::addEnumColumn('parcels', 'land_transaction', 'land_transaction_enum');
+        PortableSchema::addEnumColumn('parcels', 'allocation_method', 'allocation_method_enum');
+        PortableSchema::addEnumColumn('parcels', 'fall_in', 'fall_in_enum');
 
-        // PostGIS geometry column — NULL for sub-units (apartments)
-        DB::statement('ALTER TABLE parcels ADD COLUMN geom geometry(MultiPolygon, 4326)');
-        DB::statement('CREATE INDEX idx_parcels_geom ON parcels USING GIST(geom)');
+        // Geometry column — NULL for sub-units (apartments)
+        PortableSchema::addGeometryColumn('parcels');
     }
 
     public function down(): void

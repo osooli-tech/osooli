@@ -136,7 +136,7 @@ class DistributionCharts extends Component
         );
         $sourceFromDb = DB::table('survey_decisions')
             ->join('parcels', 'parcels.id', '=', 'survey_decisions.parcel_id')
-            ->selectRaw('survey_decisions.qrar_source::text AS src, COUNT(*) as cnt')
+            ->selectRaw('survey_decisions.qrar_source AS src, COUNT(*) as cnt')
             ->whereNotNull('survey_decisions.qrar_source')
             ->whereNull('parcels.deleted_at')
             ->when($restricted, fn ($q) => $q->whereIn('survey_decisions.parcel_id', $parcelIds))

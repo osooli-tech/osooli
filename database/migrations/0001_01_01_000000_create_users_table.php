@@ -2,20 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        // Postgres has no CREATE TYPE IF NOT EXISTS, and enum types survive the
-        // table drops that RefreshDatabase performs — so guard on the catalog.
-        DB::statement("DO $$ BEGIN
-            CREATE TYPE user_role_enum AS ENUM ('admin', 'viewer');
-        EXCEPTION WHEN duplicate_object THEN NULL; END $$;");
+        PortableSchema::createEnumType('user_role_enum', ['admin', 'viewer']);
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
@@ -29,7 +25,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("ALTER TABLE users ADD COLUMN role user_role_enum NOT NULL DEFAULT 'viewer'");
+        PortableSchema::addEnumColumn('users', 'role', 'user_role_enum', nullable: false, default: 'viewer');
 
         // Kept for Laravel framework internals (session driver, password resets)
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -53,6 +49,6 @@ return new class extends Migration
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
-        DB::statement('DROP TYPE IF EXISTS user_role_enum');
+        PortableSchema::dropEnumType('user_role_enum');
     }
 };

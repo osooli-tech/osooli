@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Support\Database\Spatial;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,7 @@ use Throwable;
  * Imports parcels from a GeoJSON file (EPSG:4326) exported from the survey GDB.
  *
  * Mirrors database/import/gdb_import.py, but runs through Laravel so it works on
- * hosts without Python/GDAL and reads the database credentials from .env.
+ * hosts without Python/GDAL, against whichever database is primary.
  */
 class ImportParcelsGeoJson extends Command
 {
@@ -134,80 +135,63 @@ class ImportParcelsGeoJson extends Command
         $planId = $this->planId((string) $p['Plan_No'], $districtId);
 
         /*
-         * Archiving is deliberately invisible to this importer. Raw SQL never
-         * sees the SoftDeletes scope, so ON CONFLICT (geo_id) still matches an
-         * archived parcel and updates it in place — which is what we want:
-         * filtering archived rows out here would make the insert collide with
-         * the unique geo_id instead, and the import would fail on a row it can
-         * plainly see.
+         * Archiving is deliberately invisible to this importer. The query
+         * builder never sees the SoftDeletes scope, so the lookup by geo_id
+         * still finds an archived parcel and updates it in place — which is
+         * what we want: filtering archived rows out here would make the insert
+         * collide with the unique geo_id instead, and the import would fail on
+         * a row it can plainly see.
          *
          * Note what it does NOT do: an archived parcel stays archived even when
          * the source file still contains it. Archiving is a decision a person
          * made, and a nightly import should not quietly undo it. Restoring is
          * done from the archive screen, on purpose, by someone accountable.
+         *
+         * Written as find-then-write rather than a database upsert so it runs
+         * the same on PostgreSQL and MariaDB; each group is one transaction.
          */
-        $parcelRow = DB::selectOne(
-            'INSERT INTO parcels (parcel_no, geo_id, plan_id, m_price, parcel_price,
-                                  asset_type, land_transaction, allocation_method, fall_in,
-                                  created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?::asset_type_enum, ?::land_transaction_enum,
-                     ?::allocation_method_enum, ?::fall_in_enum, NOW(), NOW())
-             ON CONFLICT (geo_id) DO UPDATE SET
-                 parcel_no         = EXCLUDED.parcel_no,
-                 plan_id           = EXCLUDED.plan_id,
-                 m_price           = EXCLUDED.m_price,
-                 parcel_price      = EXCLUDED.parcel_price,
-                 asset_type        = EXCLUDED.asset_type,
-                 land_transaction  = EXCLUDED.land_transaction,
-                 allocation_method = EXCLUDED.allocation_method,
-                 fall_in           = EXCLUDED.fall_in,
-                 updated_at        = NOW()
-             RETURNING id, (xmax = 0) AS is_new',
-            [
-                $this->str($p['Parcel'] ?? null),
-                $geoId,
-                $planId,
-                $this->num($p['M_price'] ?? null),
-                $this->num($p['Parcel_price'] ?? null),
-                $this->enum('asset_type', $p['Owner_Type'] ?? null),
-                $this->enum('land_transaction', $p['Land_Trasaction'] ?? null),
-                $this->enum('allocation_method', $p['Allocation_Method'] ?? null),
-                $this->enum('fall_in', $p['Fall_In'] ?? null),
-            ]
-        );
+        [$parcelId, $isNew] = $this->upsert('parcels', ['geo_id' => $geoId], [
+            'parcel_no' => $this->str($p['Parcel'] ?? null),
+            'plan_id' => $planId,
+            'm_price' => $this->num($p['M_price'] ?? null),
+            'parcel_price' => $this->num($p['Parcel_price'] ?? null),
+            'asset_type' => $this->enum('asset_type', $p['Owner_Type'] ?? null),
+            'land_transaction' => $this->enum('land_transaction', $p['Land_Trasaction'] ?? null),
+            'allocation_method' => $this->enum('allocation_method', $p['Allocation_Method'] ?? null),
+            'fall_in' => $this->enum('fall_in', $p['Fall_In'] ?? null),
+        ]);
+        $isNew ? $stats['inserted']++ : $stats['updated']++;
 
-        $parcelId = (int) $parcelRow->id;
-        $parcelRow->is_new ? $stats['inserted']++ : $stats['updated']++;
-
-        // Geometry — ST_Multi guarantees MultiPolygon
+        // Geometry — always stored as MultiPolygon
         DB::update(
-            'UPDATE parcels SET geom = ST_SetSRID(ST_Multi(ST_GeomFromGeoJSON(?)), 4326) WHERE id = ?',
-            [json_encode($lead['geometry']), $parcelId]
+            'UPDATE parcels SET geom = '.Spatial::fromGeoJson().' WHERE id = ?',
+            [Spatial::multiPolygonJson($lead['geometry']), $parcelId]
         );
 
         // Deed
         $deedStatus = $this->enum('deed_status', $p['Deed_Status'] ?? null);
         $deedClass = $this->enum('deed_class', $p['Deed_Class'] ?? null);
-        $existing = DB::selectOne(
-            'SELECT id FROM deeds WHERE parcel_id = ? AND deed_no IS NOT DISTINCT FROM ? LIMIT 1',
-            [$parcelId, $deedNo]
-        );
+        $existingDeedId = DB::table('deeds')->where('parcel_id', $parcelId)->where('deed_no', $deedNo)->value('id');
 
-        if ($existing === null) {
-            $deed = DB::selectOne(
-                'INSERT INTO deeds (parcel_id, deed_no, deed_date_hijri, deed_area, deed_status, deed_class, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?::deed_status_enum, ?::deed_class_enum, NOW(), NOW())
-                 RETURNING id',
-                [$parcelId, $deedNo, $this->hijri($p['Deed_Date'] ?? null), $this->num($p['Area'] ?? null), $deedStatus, $deedClass]
-            );
-            $deedId = (int) $deed->id;
+        if ($existingDeedId === null) {
+            $deedId = (int) DB::table('deeds')->insertGetId([
+                'parcel_id' => $parcelId,
+                'deed_no' => $deedNo,
+                'deed_date_hijri' => $this->hijri($p['Deed_Date'] ?? null),
+                'deed_area' => $this->num($p['Area'] ?? null),
+                'deed_status' => $deedStatus,
+                'deed_class' => $deedClass,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             $stats['deeds']++;
         } else {
-            $deedId = (int) $existing->id;
-            DB::update(
-                'UPDATE deeds SET deed_status = ?::deed_status_enum, deed_class = ?::deed_class_enum, updated_at = NOW() WHERE id = ?',
-                [$deedStatus, $deedClass, $deedId]
-            );
+            $deedId = (int) $existingDeedId;
+            DB::table('deeds')->where('id', $deedId)->update([
+                'deed_status' => $deedStatus,
+                'deed_class' => $deedClass,
+                'updated_at' => now(),
+            ]);
         }
 
         // Owners (one feature per co-owner)
@@ -217,55 +201,52 @@ class ImportParcelsGeoJson extends Command
             $nationalId = $this->str($fp['Woner_ID'] ?? null);
 
             if ($nationalId !== null) {
-                $owner = DB::selectOne(
-                    'INSERT INTO owners (name, national_id, created_at, updated_at)
-                     VALUES (?, ?, NOW(), NOW())
-                     ON CONFLICT (national_id) WHERE national_id IS NOT NULL
-                     DO UPDATE SET name = EXCLUDED.name, updated_at = NOW()
-                     RETURNING id, (xmax = 0) AS is_new',
-                    [$name, $nationalId]
-                );
+                [$ownerId, $ownerIsNew] = $this->upsert('owners', ['national_id' => $nationalId], ['name' => $name]);
             } else {
-                $owner = DB::selectOne(
-                    'INSERT INTO owners (name, national_id, created_at, updated_at)
-                     VALUES (?, NULL, NOW(), NOW()) RETURNING id, TRUE AS is_new',
-                    [$name]
-                );
+                $ownerId = (int) DB::table('owners')->insertGetId([
+                    'name' => $name,
+                    'national_id' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $ownerIsNew = true;
             }
 
-            if ($owner->is_new) {
+            if ($ownerIsNew) {
                 $stats['owners']++;
             }
 
-            DB::statement(
-                'INSERT INTO deed_owners (deed_id, owner_id, created_at, updated_at)
-                 VALUES (?, ?, NOW(), NOW()) ON CONFLICT (deed_id, owner_id) DO NOTHING',
-                [$deedId, (int) $owner->id]
-            );
+            DB::table('deed_owners')->insertOrIgnore([
+                'deed_id' => $deedId,
+                'owner_id' => $ownerId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
 
         // Boundaries — engineering office set on insert only, never overwrites a manual assignment
-        DB::statement(
-            'INSERT INTO parcel_boundaries (parcel_id, n_border, s_border, e_border, w_border,
-                                            n_dim, s_dim, e_dim, w_dim, measured_area,
-                                            engineering_office_id, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NOW(), NOW())
-             ON CONFLICT (parcel_id) DO UPDATE SET
-                 n_border = EXCLUDED.n_border, s_border = EXCLUDED.s_border,
-                 e_border = EXCLUDED.e_border, w_border = EXCLUDED.w_border,
-                 n_dim = EXCLUDED.n_dim, s_dim = EXCLUDED.s_dim,
-                 e_dim = EXCLUDED.e_dim, w_dim = EXCLUDED.w_dim,
-                 engineering_office_id = COALESCE(parcel_boundaries.engineering_office_id, EXCLUDED.engineering_office_id),
-                 updated_at = NOW()',
-            [
-                $parcelId,
-                $this->str($p['N_Border'] ?? null), $this->str($p['S_Border'] ?? null),
-                $this->str($p['E_Border'] ?? null), $this->str($p['W_Border'] ?? null),
-                $this->num($p['N_Dim'] ?? null), $this->num($p['S_DIM'] ?? null),
-                $this->num($p['E_Dim'] ?? null), $this->num($p['W_Dim'] ?? null),
-                $officeId,
-            ]
-        );
+        $borders = [
+            'n_border' => $this->str($p['N_Border'] ?? null), 's_border' => $this->str($p['S_Border'] ?? null),
+            'e_border' => $this->str($p['E_Border'] ?? null), 'w_border' => $this->str($p['W_Border'] ?? null),
+            'n_dim' => $this->num($p['N_Dim'] ?? null), 's_dim' => $this->num($p['S_DIM'] ?? null),
+            'e_dim' => $this->num($p['E_Dim'] ?? null), 'w_dim' => $this->num($p['W_Dim'] ?? null),
+        ];
+        $boundary = DB::table('parcel_boundaries')->where('parcel_id', $parcelId)->first(['id', 'engineering_office_id']);
+
+        if ($boundary === null) {
+            DB::table('parcel_boundaries')->insert($borders + [
+                'parcel_id' => $parcelId,
+                'measured_area' => null,
+                'engineering_office_id' => $officeId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            DB::table('parcel_boundaries')->where('id', $boundary->id)->update($borders + [
+                'engineering_office_id' => $boundary->engineering_office_id ?? $officeId,
+                'updated_at' => now(),
+            ]);
+        }
         $stats['boundaries']++;
 
         // Survey decision — Qrar is the decision source code, not the decision number
@@ -273,64 +254,42 @@ class ImportParcelsGeoJson extends Command
         if ($folder !== null) {
             $qrarSource = $this->enum('qrar_source', $p['Qrar'] ?? null);
             $reportNo = $this->str($p['Report_No'] ?? null);
-            $decision = DB::selectOne('SELECT id FROM survey_decisions WHERE parcel_id = ? LIMIT 1', [$parcelId]);
+            $decision = DB::table('survey_decisions')->where('parcel_id', $parcelId)->first(['id', 'report_no']);
 
             if ($decision === null) {
-                DB::statement(
-                    'INSERT INTO survey_decisions (parcel_id, qrar_no, report_no, qrar_source, folder, created_at, updated_at)
-                     VALUES (?, NULL, ?, ?::qrar_source_enum, ?, NOW(), NOW())',
-                    [$parcelId, $reportNo, $qrarSource, $folder]
-                );
+                DB::table('survey_decisions')->insert([
+                    'parcel_id' => $parcelId,
+                    'qrar_no' => null,
+                    'report_no' => $reportNo,
+                    'qrar_source' => $qrarSource,
+                    'folder' => $folder,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
                 $stats['decisions']++;
             } else {
-                DB::update(
-                    'UPDATE survey_decisions SET qrar_source = ?::qrar_source_enum,
-                     report_no = COALESCE(?, report_no), updated_at = NOW() WHERE id = ?',
-                    [$qrarSource, $reportNo, (int) $decision->id]
-                );
+                DB::table('survey_decisions')->where('id', $decision->id)->update([
+                    'qrar_source' => $qrarSource,
+                    'report_no' => $reportNo ?? $decision->report_no,
+                    'updated_at' => now(),
+                ]);
             }
         }
     }
 
     private function engineeringOfficeId(): int
     {
-        $row = DB::selectOne('SELECT id FROM engineering_offices WHERE name = ?', [self::DEFAULT_ENGINEERING_OFFICE]);
-
-        if ($row !== null) {
-            return (int) $row->id;
-        }
-
-        $created = DB::selectOne(
-            'INSERT INTO engineering_offices (name, created_at, updated_at) VALUES (?, NOW(), NOW()) RETURNING id',
-            [self::DEFAULT_ENGINEERING_OFFICE]
-        );
-
-        return (int) $created->id;
+        return $this->findOrCreate('engineering_offices', ['name' => self::DEFAULT_ENGINEERING_OFFICE]);
     }
 
     /** Ensures country → region → city and returns the city id. */
     private function cityId(): int
     {
-        $countryId = $this->findOrCreate(
-            'SELECT id FROM countries WHERE name_ar = ?',
-            [self::DEFAULT_COUNTRY],
-            'INSERT INTO countries (name_ar, created_at, updated_at) VALUES (?, NOW(), NOW()) RETURNING id',
-            [self::DEFAULT_COUNTRY]
-        );
+        $countryId = $this->findOrCreate('countries', ['name_ar' => self::DEFAULT_COUNTRY]);
 
-        $regionId = $this->findOrCreate(
-            'SELECT id FROM regions WHERE name_ar = ?',
-            [self::DEFAULT_REGION],
-            'INSERT INTO regions (country_id, name_ar, created_at, updated_at) VALUES (?, ?, NOW(), NOW()) RETURNING id',
-            [$countryId, self::DEFAULT_REGION]
-        );
+        $regionId = $this->findOrCreate('regions', ['name_ar' => self::DEFAULT_REGION], ['country_id' => $countryId]);
 
-        return $this->findOrCreate(
-            'SELECT id FROM cities WHERE name_ar = ?',
-            [self::DEFAULT_CITY],
-            'INSERT INTO cities (region_id, name_ar, created_at, updated_at) VALUES (?, ?, NOW(), NOW()) RETURNING id',
-            [$regionId, self::DEFAULT_CITY]
-        );
+        return $this->findOrCreate('cities', ['name_ar' => self::DEFAULT_CITY], ['region_id' => $regionId]);
     }
 
     private function districtId(?string $name, ?int $cityId): ?int
@@ -339,44 +298,68 @@ class ImportParcelsGeoJson extends Command
             return null;
         }
 
-        return $this->findOrCreate(
-            'SELECT id FROM districts WHERE name_ar = ? AND city_id = ?',
-            [$name, $cityId],
-            'INSERT INTO districts (city_id, name_ar, created_at, updated_at) VALUES (?, ?, NOW(), NOW()) RETURNING id',
-            [$cityId, $name]
-        );
+        return $this->findOrCreate('districts', ['name_ar' => $name, 'city_id' => $cityId]);
     }
 
     private function planId(string $planNo, ?int $districtId): int
     {
         $planNo = trim($planNo);
+        $plan = DB::table('plans')->where('plan_no', $planNo)->first(['id', 'district_id']);
 
-        // COALESCE keeps a previously linked district instead of nulling it
-        DB::statement(
-            'INSERT INTO plans (plan_no, district_id, created_at, updated_at)
-             VALUES (?, ?, NOW(), NOW())
-             ON CONFLICT (plan_no) DO UPDATE SET
-                 district_id = COALESCE(EXCLUDED.district_id, plans.district_id),
-                 updated_at = NOW()',
-            [$planNo, $districtId]
-        );
+        if ($plan === null) {
+            return (int) DB::table('plans')->insertGetId([
+                'plan_no' => $planNo,
+                'district_id' => $districtId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
-        return (int) DB::selectOne('SELECT id FROM plans WHERE plan_no = ?', [$planNo])->id;
+        // Keeps a previously linked district instead of nulling it
+        DB::table('plans')->where('id', $plan->id)->update([
+            'district_id' => $districtId ?? $plan->district_id,
+            'updated_at' => now(),
+        ]);
+
+        return (int) $plan->id;
     }
 
     /**
-     * @param  list<mixed>  $findBindings
-     * @param  list<mixed>  $createBindings
+     * The id of the row matching `$match`, inserting it (with `$extra`) first
+     * when there is none.
+     *
+     * @param  array<string, mixed>  $match
+     * @param  array<string, mixed>  $extra
      */
-    private function findOrCreate(string $findSql, array $findBindings, string $createSql, array $createBindings): int
+    private function findOrCreate(string $table, array $match, array $extra = []): int
     {
-        $row = DB::selectOne($findSql, $findBindings);
+        $id = DB::table($table)->where($match)->value('id');
 
-        if ($row !== null) {
-            return (int) $row->id;
+        if ($id !== null) {
+            return (int) $id;
         }
 
-        return (int) DB::selectOne($createSql, $createBindings)->id;
+        return (int) DB::table($table)->insertGetId($match + $extra + ['created_at' => now(), 'updated_at' => now()]);
+    }
+
+    /**
+     * Update the row matching `$match` with `$values`, or insert it.
+     *
+     * @param  array<string, mixed>  $match
+     * @param  array<string, mixed>  $values
+     * @return array{0: int, 1: bool} the row id, and whether it was inserted
+     */
+    private function upsert(string $table, array $match, array $values): array
+    {
+        $id = DB::table($table)->where($match)->value('id');
+
+        if ($id !== null) {
+            DB::table($table)->where('id', $id)->update($values + ['updated_at' => now()]);
+
+            return [(int) $id, false];
+        }
+
+        return [(int) DB::table($table)->insertGetId($match + $values + ['created_at' => now(), 'updated_at' => now()]), true];
     }
 
     /** Maps a 1-based numeric code to its enum value. */

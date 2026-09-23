@@ -57,9 +57,9 @@ class OwnerIndex extends Component
             ->when($this->search !== '', function ($q): void {
                 $term = '%'.$this->search.'%';
                 $q->where(function ($inner) use ($term): void {
-                    $inner->where('name', 'ilike', $term)
-                        ->orWhere('national_id', 'ilike', $term)
-                        ->orWhere('phone', 'ilike', $term);
+                    $inner->whereLike('name', $term)
+                        ->orWhereLike('national_id', $term)
+                        ->orWhereLike('phone', $term);
                 });
             })
             ->orderBy('name')

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\Dialect;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,23 @@ return new class extends Migration
 
         // Backfill mirroring Owner::normalisePhone(): digits only, drop a
         // 00966/966 country prefix, trim leading zeros.
+        if (! Dialect::isPostgres()) {
+            DB::statement(<<<'SQL'
+                UPDATE owners
+                SET phone_normalized = NULLIF(
+                    TRIM(LEADING '0' FROM
+                        REGEXP_REPLACE(
+                            REGEXP_REPLACE(COALESCE(phone, ''), '[^0-9]', ''),
+                            '^(00966|966)', ''
+                        )
+                    ),
+                    ''
+                )
+            SQL);
+
+            return;
+        }
+
         DB::statement(<<<'SQL'
             UPDATE owners
             SET phone_normalized = NULLIF(

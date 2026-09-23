@@ -206,9 +206,9 @@ class OwnershipManager extends Component
             // The same three columns the owners list searches, so an owner is
             // found the same way on both screens.
             $owners->where(function (Builder $inner) use ($like): void {
-                $inner->where('name', 'ilike', $like)
-                    ->orWhere('national_id', 'ilike', $like)
-                    ->orWhere('phone', 'ilike', $like);
+                $inner->whereLike('name', $like)
+                    ->orWhereLike('national_id', $like)
+                    ->orWhereLike('phone', $like);
             });
         }
 

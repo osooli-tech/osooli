@@ -274,8 +274,11 @@ class ReferenceIndex extends Component
         return match ($this->tab) {
             'plans' => Plan::query()
                 ->with('district.city')
-                ->withCount(['parcels as dependents_count'])
-                ->when($searching, fn ($q) => $q->where('plan_no', 'ilike', $term))
+                // Archived parcels count: the foreign key still points at the
+                // plan, so Postgres refuses the delete while any exist, and a
+                // restored parcel needs its plan back.
+                ->withCount(['parcels as dependents_count' => fn ($q) => $q->withTrashed()])
+                ->when($searching, fn ($q) => $q->whereLike('plan_no', $term))
                 ->orderBy('plan_no')
                 ->paginate(self::PER_PAGE),
 
@@ -309,9 +312,9 @@ class ReferenceIndex extends Component
             'offices' => EngineeringOffice::query()
                 ->withCount(['parcelBoundaries as dependents_count'])
                 ->when($searching, fn ($q) => $q->where(fn ($inner) => $inner
-                    ->where('name', 'ilike', $term)
-                    ->orWhere('license_no', 'ilike', $term)
-                    ->orWhere('phone', 'ilike', $term)))
+                    ->whereLike('name', $term)
+                    ->orWhereLike('license_no', $term)
+                    ->orWhereLike('phone', $term)))
                 ->orderBy('name')
                 ->paginate(self::PER_PAGE),
 
@@ -326,8 +329,8 @@ class ReferenceIndex extends Component
     private function nameFilter(mixed $query, string $term): mixed
     {
         return $query->where(fn ($inner) => $inner
-            ->where('name_ar', 'ilike', $term)
-            ->orWhere('name_en', 'ilike', $term));
+            ->whereLike('name_ar', $term)
+            ->orWhereLike('name_en', $term));
     }
 
     /**
@@ -456,7 +459,8 @@ class ReferenceIndex extends Component
     private function dependentCount(Model $record): int
     {
         return match (true) {
-            $record instanceof Plan => $record->parcels()->count(),
+            // withTrashed(): see records() — archived parcels still block.
+            $record instanceof Plan => $record->parcels()->withTrashed()->count(),
             $record instanceof District => $record->plans()->count(),
             $record instanceof City => $record->districts()->count(),
             $record instanceof Region => $record->cities()->count(),

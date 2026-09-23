@@ -9,6 +9,8 @@ return [
     'parcels' => 'Parcels',
     'owners' => 'Owners',
     'survey_decisions' => 'Survey Decisions',
+    'reference' => 'Reference Data',
+    'archive' => 'Archive',
     'documents' => 'Documents',
     'modification_requests' => 'Modification Requests',
     'presentation_requests' => 'Demo Requests',

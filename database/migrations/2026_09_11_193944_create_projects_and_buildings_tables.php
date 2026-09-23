@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -28,8 +28,7 @@ return new class extends Migration
             $table->double('length')->nullable();
             $table->timestamps();
         });
-        DB::statement('ALTER TABLE projects ADD COLUMN geom geometry(MultiPolygon, 4326)');
-        DB::statement('CREATE INDEX idx_projects_geom ON projects USING GIST(geom)');
+        PortableSchema::addGeometryColumn('projects');
 
         Schema::create('buildings', function (Blueprint $table) {
             $table->id();
@@ -39,8 +38,7 @@ return new class extends Migration
             $table->double('length')->nullable();
             $table->timestamps();
         });
-        DB::statement('ALTER TABLE buildings ADD COLUMN geom geometry(MultiPolygon, 4326)');
-        DB::statement('CREATE INDEX idx_buildings_geom ON buildings USING GIST(geom)');
+        PortableSchema::addGeometryColumn('buildings');
     }
 
     /**

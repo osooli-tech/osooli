@@ -7,6 +7,7 @@ namespace App\Services\Owner;
 use App\Models\Owner;
 use App\Models\OwnerPortfolio;
 use App\Models\Parcel;
+use App\Support\Database\Spatial;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -94,9 +95,9 @@ class OwnerPortfolioService
             ->whereNotNull('parcels.geom')
             ->selectRaw('
                 COUNT(parcels.id) AS parcels,
-                COALESCE(SUM(ST_Area(parcels.geom::geography)), 0) AS area,
+                COALESCE(SUM('.Spatial::areaSqm('parcels.geom').'), 0) AS area,
                 COUNT(parcels.m_price) AS priced,
-                SUM(parcels.m_price * ST_Area(parcels.geom::geography)) AS value
+                SUM(parcels.m_price * '.Spatial::areaSqm('parcels.geom').') AS value
             ')
             ->first();
 

@@ -180,8 +180,8 @@ class DocumentReview extends Component
             ->when($this->search !== '', function (Builder $query): void {
                 $term = '%'.$this->search.'%';
                 $query->where(function (Builder $inner) use ($term): void {
-                    $inner->where('original_name', 'ilike', $term)
-                        ->orWhereHas('parcel', fn (Builder $p) => $p->where('parcel_no', 'ilike', $term));
+                    $inner->whereLike('original_name', $term)
+                        ->orWhereHas('parcel', fn (Builder $p) => $p->whereLike('parcel_no', $term));
                 });
             })
             ->latest()

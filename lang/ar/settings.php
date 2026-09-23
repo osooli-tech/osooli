@@ -70,5 +70,6 @@ return [
         'roles_manage' => 'إدارة الأدوار',
         'audit_logs_view' => 'عرض سجل العمليات',
         'sync_view' => 'عرض التزامن',
+        'database_manage' => 'إدارة قواعد البيانات والمزامنة',
     ],
 ];

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Database\Dialect;
+use App\Support\Database\Spatial;
+use App\Support\Geo\GeometryMath;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,9 +16,11 @@ use InvalidArgumentException;
  * Reading, checking and replacing a parcel's polygon.
  *
  * Everything that touches `parcels.geom` from the dashboard goes through here,
- * so the rules a drawn polygon must meet are written once. PostGIS does the
- * judging — validity, area, bounds — rather than a hand-rolled PHP check that
- * would disagree with it on the edge cases.
+ * so the rules a drawn polygon must meet are written once. On PostgreSQL,
+ * PostGIS does the judging — validity, area, bounds — rather than a hand-rolled
+ * PHP check that would disagree with it on the edge cases. MariaDB can give
+ * neither an area in square metres nor a reason for invalidity, so there
+ * GeometryMath takes the same measurements in PHP.
  */
 final class ParcelGeometry
 {
@@ -66,7 +71,7 @@ final class ParcelGeometry
                AND n.geom IS NOT NULL
                AND n.deleted_at IS NULL
                AND (
-                    (self.geom IS NOT NULL AND ST_Intersects(n.geom, ST_Expand(self.geom, 0.004)))
+                    (self.geom IS NOT NULL AND '.Spatial::intersectsExpanded('n.geom', 'self.geom', 0.004).')
                  OR (self.geom IS NULL AND self.plan_id IS NOT NULL AND n.plan_id = self.plan_id)
                )
              LIMIT 200',
@@ -92,16 +97,17 @@ final class ParcelGeometry
     public static function fallbackBounds(int $parcelId): ?array
     {
         $row = DB::selectOne(
-            'SELECT ST_XMin(e) AS x1, ST_YMin(e) AS y1, ST_XMax(e) AS x2, ST_YMax(e) AS y2
-             FROM (
-                SELECT COALESCE(
-                    (SELECT ST_Extent(n.geom) FROM parcels n JOIN parcels self ON self.id = ?
-                      WHERE n.plan_id = self.plan_id AND n.geom IS NOT NULL AND n.deleted_at IS NULL),
-                    (SELECT ST_Extent(geom) FROM parcels WHERE geom IS NOT NULL AND deleted_at IS NULL)
-                )::geometry AS e
-             ) s',
+            'SELECT '.Spatial::extentSelect('n.geom').'
+             FROM parcels n JOIN parcels self ON self.id = ?
+             WHERE n.plan_id = self.plan_id AND n.geom IS NOT NULL AND n.deleted_at IS NULL',
             [$parcelId]
         );
+
+        if ($row === null || $row->x1 === null) {
+            $row = DB::selectOne(
+                'SELECT '.Spatial::extentSelect('geom').' FROM parcels WHERE geom IS NOT NULL AND deleted_at IS NULL'
+            );
+        }
 
         if ($row === null || $row->x1 === null) {
             return null;
@@ -130,39 +136,23 @@ final class ParcelGeometry
 
         $geojson = (string) json_encode($geometry);
 
-        try {
-            $row = DB::selectOne(
-                'SELECT ST_IsValid(g) AS valid,
-                        ST_IsValidReason(g) AS reason,
-                        ST_Area(g::geography) AS area,
-                        ST_NPoints(g) AS points,
-                        ST_XMin(g) AS x1, ST_YMin(g) AS y1, ST_XMax(g) AS x2, ST_YMax(g) AS y2
-                 FROM (SELECT ST_SetSRID(ST_Multi(ST_GeomFromGeoJSON(?)), 4326) AS g) s',
-                [$geojson]
-            );
-        } catch (QueryException) {
-            // ST_GeomFromGeoJSON rejects what json_decode accepted — an
-            // unclosed ring, a ring of fewer than four positions.
-            throw new InvalidArgumentException(__('parcels.geometry_errors.malformed'));
-        }
+        $row = Dialect::isPostgres() ? self::measureInPostgis($geojson) : self::measureInPhp($geometry);
 
-        if ($row === null) {
-            throw new InvalidArgumentException(__('parcels.geometry_errors.malformed'));
+        // Checked before validity: the PHP validity check is quadratic in the
+        // vertex count, and an oversized polygon is refused either way.
+        if ((int) $row->points > self::MAX_POINTS) {
+            throw new InvalidArgumentException(__('parcels.geometry_errors.too_many_points', ['max' => self::MAX_POINTS]));
         }
 
         if (! $row->valid) {
             // Self-intersection is by far the common case — a vertex dragged
             // across the opposite edge — so it gets a message a person can act
-            // on; anything rarer falls back to PostGIS's own reason.
+            // on; anything rarer falls back to the checker's own reason.
             $reason = (string) $row->reason;
 
             throw new InvalidArgumentException(str_contains(strtolower($reason), 'self-intersection')
                 ? __('parcels.geometry_errors.self_intersection')
                 : __('parcels.geometry_errors.invalid', ['reason' => $reason]));
-        }
-
-        if ((int) $row->points > self::MAX_POINTS) {
-            throw new InvalidArgumentException(__('parcels.geometry_errors.too_many_points', ['max' => self::MAX_POINTS]));
         }
 
         if ((float) $row->x1 < self::BOUNDS['min_lng'] || (float) $row->x2 > self::BOUNDS['max_lng']
@@ -195,12 +185,12 @@ final class ParcelGeometry
         $rows = DB::select(
             'SELECT COALESCE(NULLIF(n.parcel_no, \'\'), n.geo_id) AS label
              FROM parcels n,
-                  (SELECT ST_SetSRID(ST_Multi(ST_GeomFromGeoJSON(?)), 4326) AS g) s
+                  (SELECT '.Spatial::fromGeoJson().' AS g) s
              WHERE n.id <> ?
                AND n.geom IS NOT NULL
                AND n.deleted_at IS NULL
-               AND n.geom && s.g
-               AND ST_Area(ST_Intersection(n.geom, s.g)::geography) > ?
+               AND '.Spatial::boxesIntersect('n.geom', 's.g').'
+               AND '.Spatial::areaSqm('ST_Intersection(n.geom, s.g)').' > ?
              ORDER BY 1
              LIMIT 20',
             [$geojson, $parcelId, self::OVERLAP_TOLERANCE_SQM]
@@ -219,17 +209,19 @@ final class ParcelGeometry
     {
         DB::insert(
             'INSERT INTO parcel_geometry_revisions (parcel_id, geom, area_sqm, action, user_id, created_at)
-             SELECT id, geom, ST_Area(geom::geography), ?, ?, NOW() FROM parcels WHERE id = ?',
+             SELECT id, geom, '.Spatial::areaSqm('geom').', ?, ?, NOW() FROM parcels WHERE id = ?',
             [$action, Auth::id(), $parcelId]
         );
 
+        if ($geojson === null) {
+            DB::update('UPDATE parcels SET geom = NULL, updated_at = NOW() WHERE id = ?', [$parcelId]);
+
+            return;
+        }
+
         DB::update(
-            'UPDATE parcels
-             SET geom = CASE WHEN ?::text IS NULL THEN NULL
-                             ELSE ST_SetSRID(ST_Multi(ST_GeomFromGeoJSON(?::text)), 4326) END,
-                 updated_at = NOW()
-             WHERE id = ?',
-            [$geojson, $geojson, $parcelId]
+            'UPDATE parcels SET geom = '.Spatial::fromGeoJson().', updated_at = NOW() WHERE id = ?',
+            [Spatial::multiPolygonJson($geojson), $parcelId]
         );
     }
 
@@ -266,6 +258,70 @@ final class ParcelGeometry
              LIMIT ?',
             [$parcelId, $limit]
         );
+    }
+
+    /**
+     * Validity, area, vertex count and bounds of a polygon, judged by PostGIS.
+     *
+     * @return \stdClass valid, reason, area, points, x1, y1, x2, y2
+     */
+    private static function measureInPostgis(string $geojson): \stdClass
+    {
+        try {
+            $row = DB::selectOne(
+                'SELECT ST_IsValid(g) AS valid,
+                        ST_IsValidReason(g) AS reason,
+                        ST_Area(g::geography) AS area,
+                        ST_NPoints(g) AS points,
+                        ST_XMin(g) AS x1, ST_YMin(g) AS y1, ST_XMax(g) AS x2, ST_YMax(g) AS y2
+                 FROM (SELECT ST_SetSRID(ST_Multi(ST_GeomFromGeoJSON(?)), 4326) AS g) s',
+                [$geojson]
+            );
+        } catch (QueryException) {
+            // ST_GeomFromGeoJSON rejects what json_decode accepted — an
+            // unclosed ring, a ring of fewer than four positions.
+            throw new InvalidArgumentException(__('parcels.geometry_errors.malformed'));
+        }
+
+        if ($row === null) {
+            throw new InvalidArgumentException(__('parcels.geometry_errors.malformed'));
+        }
+
+        return $row;
+    }
+
+    /**
+     * The same measurements taken in PHP, for a database without PostGIS.
+     *
+     * @param  array{type: 'MultiPolygon', coordinates: list<mixed>}  $geometry
+     * @return \stdClass valid, reason, area, points, x1, y1, x2, y2
+     */
+    private static function measureInPhp(array $geometry): \stdClass
+    {
+        // What ST_GeomFromGeoJSON would have refused: a position that is not
+        // a pair of numbers, or a ring that is not a list of positions.
+        foreach ($geometry['coordinates'] as $polygon) {
+            foreach (is_array($polygon) ? $polygon : [null] as $ring) {
+                foreach (is_array($ring) ? $ring : [null] as $position) {
+                    if (! is_array($position) || ! is_numeric($position[0] ?? null) || ! is_numeric($position[1] ?? null)) {
+                        throw new InvalidArgumentException(__('parcels.geometry_errors.malformed'));
+                    }
+                }
+            }
+        }
+
+        $measured = GeometryMath::measure($geometry['coordinates']);
+
+        return (object) [
+            'valid' => $measured['valid'],
+            'reason' => $measured['reason'],
+            'area' => $measured['area'],
+            'points' => $measured['points'],
+            'x1' => $measured['bbox'][0],
+            'y1' => $measured['bbox'][1],
+            'x2' => $measured['bbox'][2],
+            'y2' => $measured['bbox'][3],
+        ];
     }
 
     /**

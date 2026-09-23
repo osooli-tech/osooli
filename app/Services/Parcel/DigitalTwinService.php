@@ -6,6 +6,7 @@ namespace App\Services\Parcel;
 
 use App\Enums\PhotoType;
 use App\Models\Parcel;
+use App\Support\Database\Spatial;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -49,7 +50,7 @@ class DigitalTwinService
     {
         /** @var \stdClass|null $row */
         $row = DB::selectOne(
-            'SELECT ST_Area(geom::geography) AS area FROM parcels WHERE id = ? AND geom IS NOT NULL',
+            'SELECT '.Spatial::areaSqm('geom').' AS area FROM parcels WHERE id = ? AND geom IS NOT NULL',
             [$parcel->id]
         );
 

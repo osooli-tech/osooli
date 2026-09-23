@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,9 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // IF NOT EXISTS keeps this replayable — enum types outlive the table
-        // drops that RefreshDatabase performs between test runs.
-        DB::statement("ALTER TYPE photo_type_enum ADD VALUE IF NOT EXISTS 'صك'");
+        // A no-op on MariaDB, where the column is a VARCHAR.
+        PortableSchema::addEnumValue('photo_type_enum', 'صك');
     }
 
     /**

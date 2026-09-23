@@ -128,9 +128,7 @@ class ParcelPrintTest extends TestCase
         $parcel = Parcel::create(['parcel_no' => '101', 'geo_id' => 'geo-101', 'plan_id' => $plan->id]);
 
         DB::update(
-            "UPDATE parcels SET geom = ST_SetSRID(ST_GeomFromText(
-                'MULTIPOLYGON(((46.3 24.7, 46.4 24.7, 46.4 24.8, 46.3 24.8, 46.3 24.7)))'
-             ), 4326) WHERE id = ?",
+            "UPDATE parcels SET geom = ST_GeomFromText('MULTIPOLYGON(((46.3 24.7, 46.4 24.7, 46.4 24.8, 46.3 24.8, 46.3 24.7)))', 4326) WHERE id = ?",
             [$parcel->id]
         );
 

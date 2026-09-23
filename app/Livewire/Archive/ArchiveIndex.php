@@ -105,11 +105,11 @@ class ArchiveIndex extends Component
 
             $builder->where(function ($q) use ($term): void {
                 match ($this->tab) {
-                    'deeds' => $q->where('deed_no', 'ilike', $term),
-                    'owners' => $q->where('name', 'ilike', $term)
-                        ->orWhere('national_id', 'ilike', $term),
-                    default => $q->where('parcel_no', 'ilike', $term)
-                        ->orWhere('geo_id', 'ilike', $term),
+                    'deeds' => $q->whereLike('deed_no', $term),
+                    'owners' => $q->whereLike('name', $term)
+                        ->orWhereLike('national_id', $term),
+                    default => $q->whereLike('parcel_no', $term)
+                        ->orWhereLike('geo_id', $term),
                 };
             });
         }

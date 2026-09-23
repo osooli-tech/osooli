@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Parcel;
 
 use App\Models\Parcel;
+use App\Support\Database\Spatial;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Imagick;
@@ -93,7 +94,7 @@ class ParcelMapSvgService
              WHERE self.id = ?
                AND n.id <> self.id
                AND n.geom IS NOT NULL
-               AND ST_Intersects(n.geom, ST_Expand(self.geom, 0.003))
+               AND '.Spatial::intersectsExpanded('n.geom', 'self.geom', 0.003).'
              LIMIT 40',
             [$parcel->id]
         );

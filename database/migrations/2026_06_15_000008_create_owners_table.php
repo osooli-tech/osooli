@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\Dialect;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -21,10 +22,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Partial unique index: national_id must be unique when not null
-        DB::statement(
-            'CREATE UNIQUE INDEX uq_owners_national_id ON owners(national_id) WHERE national_id IS NOT NULL'
-        );
+        // national_id must be unique when not null. PostgreSQL states that as
+        // a partial index; MariaDB's unique index already admits many NULLs.
+        if (Dialect::isPostgres()) {
+            DB::statement(
+                'CREATE UNIQUE INDEX uq_owners_national_id ON owners(national_id) WHERE national_id IS NOT NULL'
+            );
+        } else {
+            Schema::table('owners', fn (Blueprint $table) => $table->unique('national_id', 'uq_owners_national_id'));
+        }
     }
 
     public function down(): void

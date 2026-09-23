@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\AuditLogs;
 
 use App\Models\AuditLog;
+use App\Support\AuditActions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Component;
@@ -17,15 +18,6 @@ class AuditLogIndex extends Component
     public string $search = '';
 
     public string $actionFilter = 'all';
-
-    /** @var string[] */
-    public array $actionOptions = [
-        'login',
-        'logout',
-        'download',
-        'export',
-        'modification_request status changed',
-    ];
 
     public function updatedSearch(): void
     {
@@ -44,8 +36,11 @@ class AuditLogIndex extends Component
             ->when($this->actionFilter !== 'all', fn ($q) => $q->where('action', $this->actionFilter))
             ->when($this->search !== '', function ($q): void {
                 $q->where(function ($inner): void {
-                    $inner->where('action', 'ilike', '%'.$this->search.'%')
-                        ->orWhereHas('user', fn ($u) => $u->where('name', 'ilike', '%'.$this->search.'%'));
+                    // Codes are English and people search in Arabic, so the
+                    // term is also matched against each action's label.
+                    $inner->whereLike('action', '%'.$this->search.'%')
+                        ->orWhereIn('action', AuditActions::matching($this->search))
+                        ->orWhereHas('user', fn ($u) => $u->whereLike('name', '%'.$this->search.'%'));
                 });
             })
             ->orderByDesc('created_at')
@@ -56,6 +51,7 @@ class AuditLogIndex extends Component
     {
         return view('livewire.audit-logs.audit-log-index', [
             'logs' => $this->logs(),
+            'actionOptions' => AuditActions::recorded(),
         ]);
     }
 }

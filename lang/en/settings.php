@@ -70,5 +70,6 @@ return [
         'roles_manage' => 'Manage roles',
         'audit_logs_view' => 'View audit log',
         'sync_view' => 'View sync',
+        'database_manage' => 'Manage databases and sync',
     ],
 ];
