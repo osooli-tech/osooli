@@ -15,6 +15,7 @@ use App\Models\ParcelPhoto;
 use App\Models\Plan;
 use App\Models\Region;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -112,6 +113,39 @@ class OwnerApiTest extends TestCase
         ])
             ->assertStatus(404)
             ->assertJsonPath('message', 'Phone number is not registered');
+    }
+
+    public function test_logging_in_from_a_second_device_signs_the_first_one_out(): void
+    {
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0500000001']);
+        $firstToken = $this->postJson('/api/v1/auth/verify-otp', ['phone' => '0500000001', 'otp' => '6666'])
+            ->assertOk()
+            ->json('data.token');
+
+        $this->withToken($firstToken)->getJson('/api/v1/me')->assertOk();
+
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0500000001']);
+        $this->postJson('/api/v1/auth/verify-otp', ['phone' => '0500000001', 'otp' => '6666'])
+            ->assertOk();
+
+        // The sanctum guard memoises the user it resolved for the first /me
+        // call above and would otherwise keep answering from that cache —
+        // real requests never share a guard instance, only this test process
+        // does, so this line only undoes a testing artefact.
+        Auth::forgetGuards();
+
+        $this->withToken($firstToken)->getJson('/api/v1/me')->assertStatus(401);
+    }
+
+    public function test_the_other_owners_tokens_are_left_alone(): void
+    {
+        $otherToken = $this->otherOwner->createToken('other-device')->plainTextToken;
+
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0500000001']);
+        $this->postJson('/api/v1/auth/verify-otp', ['phone' => '0500000001', 'otp' => '6666'])
+            ->assertOk();
+
+        $this->withToken($otherToken)->getJson('/api/v1/me')->assertOk();
     }
 
     public function test_endpoints_reject_unauthenticated_requests(): void

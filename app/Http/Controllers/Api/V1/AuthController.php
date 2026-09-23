@@ -49,6 +49,11 @@ class AuthController extends ApiController
             return $this->respondInvalid('otp', __('api.otp_invalid'));
         }
 
+        // Only one device may be signed in at a time: logging in here revokes
+        // whatever token an earlier device was holding, so its next request
+        // gets a 401 and it has to sign in again.
+        $owner->tokens()->delete();
+
         return $this->respond([
             'token' => $owner->createToken('mobile')->plainTextToken,
             'owner' => new OwnerResource($owner),
