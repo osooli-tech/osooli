@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Support\Database\Dialect;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Reads the allowed labels of a PostgreSQL enum type straight from the database.
+ * Reads the allowed labels of a PostgreSQL enum type straight from the database
+ * (on MariaDB, where the columns are VARCHAR, from DECLARED below).
  *
  * Dropdowns are built from this rather than from the PHP enums in App\Enums,
  * because those only cover five of the seven constrained columns — `fall_in`
@@ -29,6 +31,28 @@ final class DatabaseEnum
         'deed_class' => 'deed_class_enum',
         'qrar_source' => 'qrar_source_enum',
         'photo_type' => 'photo_type_enum',
+    ];
+
+    /**
+     * Every label of every type, in declaration order — what the migrations
+     * create, including values added later by ALTER TYPE … ADD VALUE.
+     *
+     * MariaDB stores these columns as VARCHAR (see PortableSchema), so there
+     * is no catalog to read and this list is what the dropdowns and the
+     * validation rule use there. A migration that adds a value must add it
+     * here too; DatabaseEnumTest fails on PostgreSQL when the two disagree.
+     *
+     * @var array<string, list<string>>
+     */
+    public const DECLARED = [
+        'asset_type_enum' => ['أرض', 'شقة', 'عمارة', 'فيلا', 'مستودع'],
+        'land_transaction_enum' => ['مباعة', 'مؤجرة', 'قيد البيع', 'خاصة'],
+        'allocation_method_enum' => ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
+        'fall_in_enum' => ['مخطط زراعي', 'مخطط بلدية', 'طلبات احكام', 'حجة استحكام', 'مخطط'],
+        'deed_status_enum' => ['محدث', 'قديم'],
+        'deed_class_enum' => ['زراعي', 'سكني', 'صناعي'],
+        'qrar_source_enum' => ['بلدي', 'مكتب هندسي', 'بدون'],
+        'photo_type_enum' => ['جوية', 'أرضية', 'كروكي مساحي', 'صك'],
     ];
 
     private const CACHE_TTL = 3600;
@@ -56,6 +80,10 @@ final class DatabaseEnum
      */
     public static function labels(string $type): array
     {
+        if (! Dialect::isPostgres()) {
+            return self::DECLARED[$type] ?? [];
+        }
+
         /** @var list<string> */
         return Cache::remember(
             "db-enum:{$type}",
