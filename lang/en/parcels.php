@@ -152,8 +152,6 @@ return [
     'map_unit_metres' => 'm',
     'map_legend_target' => 'This parcel',
     'map_legend_neighbours' => 'Neighbouring parcels',
-    'documents_page_title' => 'Attached documents',
-    'document_not_rendered' => 'This document could not be rendered — see the original file in the platform.',
     'region' => 'Region',
     'ownership_percentage' => 'Ownership share',
     'corners_section' => 'Parcel corner coordinates',

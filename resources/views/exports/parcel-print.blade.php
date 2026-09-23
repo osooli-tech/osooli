@@ -13,9 +13,26 @@
          one for one: three cards, three cards, one full-width map, footer —
          nothing added or dropped, only real data standing in for the
          mock-up's placeholder values. --}}
+    @font-face {
+        font-family: 'Cairo';
+        src: url('{{ resource_path('fonts/cairo/Cairo-Regular.ttf') }}');
+        font-weight: normal;
+        font-style: normal;
+    }
+    @font-face {
+        font-family: 'Cairo';
+        src: url('{{ resource_path('fonts/cairo/Cairo-Bold.ttf') }}');
+        font-weight: bold;
+        font-style: normal;
+    }
     body {
-        font-family: 'DejaVu Sans', sans-serif; font-size: 10px; color: #0b1c30; margin: 0;
+        font-family: 'Cairo', 'DejaVu Sans', sans-serif; font-size: 10px; color: #0b1c30; margin: 0;
         direction: {{ app()->isLocale('ar') ? 'rtl' : 'ltr' }};
+        {{-- Cairo's own metrics give a taller "normal" line-height than
+             DejaVu Sans did, which — spread across the report's many table
+             rows — pushed the footer onto a second page. An explicit value
+             here overrides that per element that doesn't set its own. --}}
+        line-height: 1.0;
     }
     table { direction: {{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}; }
 
@@ -90,7 +107,16 @@
 
     table.kv { width: 100%; border-collapse: collapse; }
     table.kv td { padding: 2.5px 0; vertical-align: top; border-bottom: 1px solid #eee; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; font-size: 9px; }
-    table.kv td.label { color: #777; width: 46%; }
+    {{-- Shrink-to-content, not a fixed share: a fixed label width left long
+         values (a long owner name, a long plan code) fighting for space that
+         short labels didn't need, wrapping across three lines while shorter
+         rows sat on one. width:1% + nowrap makes the label take only what its
+         own text needs; every row's value column then gets the same, full
+         remaining width regardless of how long its label happens to be. --}}
+    table.kv td.label {
+        color: #777; width: 1%; white-space: nowrap;
+        padding-{{ app()->isLocale('ar') ? 'left' : 'right' }}: 8px;
+    }
     table.kv td.value { font-weight: bold; color: #0b1c30; }
 
     table.grid { width: 100%; border-collapse: collapse; }
@@ -100,11 +126,6 @@
     table.grid td.total-label { font-weight: bold; text-align: center; }
     table.grid td.total-value { font-weight: bold; text-align: center; }
     .geodetic-note { font-size: 7.5px; color: #999; padding: 5px 7px 0; line-height: 1.5; }
-
-    .doc-block { margin-bottom: 16px; }
-    .doc-block .doc-title { font-size: 10.5px; font-weight: bold; color: #002444; margin-bottom: 6px; }
-    .doc-block img { max-width: 100%; border: 1px solid #ddd; }
-    .doc-block .missing { color: #999; font-size: 9px; }
 
     .footer-bottom { margin-top: 10px; }
     .footer-bottom table { width: 100%; }
@@ -423,27 +444,6 @@
         </div>
 
     </div>
-
-    {{-- Documents — each stored file is either a PDF (its first page is
-         rasterised server-side) or an image (embedded as-is). dompdf cannot
-         embed one PDF's pages inside another, hence the rasterising. --}}
-    @if ($documents->isNotEmpty())
-        <div class="page" style="page-break-before: always;">
-            <div class="section">
-                <h2 style="background-color:#002444;color:#fff;padding:6px 10px;border-radius:3px;">@ar(__('parcels.documents_page_title'))</h2>
-                @foreach ($documents as $doc)
-                    <div class="doc-block" style="{{ ! $loop->first ? 'page-break-before: always;' : '' }}">
-                        <p class="doc-title">@ar($doc['photo']->photo_type ? __('documents.photo_types.'.$doc['photo']->photo_type->value) : '—')</p>
-                        @if ($doc['preview'])
-                            <img src="{{ $doc['preview'] }}">
-                        @else
-                            <p class="missing">@ar(__('parcels.document_not_rendered'))</p>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
 
 </body>
 </html>

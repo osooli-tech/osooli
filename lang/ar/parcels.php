@@ -152,8 +152,6 @@ return [
     'map_unit_metres' => 'م',
     'map_legend_target' => 'القطعة المطلوبة',
     'map_legend_neighbours' => 'القطع المجاورة',
-    'documents_page_title' => 'المستندات المرفقة',
-    'document_not_rendered' => 'تعذّر عرض هذا المستند — راجع الملف الأصلي في المنصة.',
     'region' => 'المنطقة',
     'ownership_percentage' => 'نسبة الملكية',
     'corners_section' => 'إحداثيات أركان قطعة الأرض',

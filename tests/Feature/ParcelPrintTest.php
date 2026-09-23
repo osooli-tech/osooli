@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\PhotoType;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Deed;
 use App\Models\District;
 use App\Models\Owner;
 use App\Models\Parcel;
+use App\Models\ParcelPhoto;
 use App\Models\Plan;
 use App\Models\Region;
 use App\Models\User;
@@ -41,6 +43,26 @@ class ParcelPrintTest extends TestCase
 
         $response->assertOk();
         $this->assertSame('application/pdf', $response->headers->get('Content-Type'));
+    }
+
+    public function test_the_report_stays_one_page_even_with_a_deed_document_attached(): void
+    {
+        $parcel = $this->makeParcel();
+        ParcelPhoto::create([
+            'parcel_id' => $parcel->id,
+            'photo_url' => '/storage/documents/deeds/101.pdf',
+            'photo_type' => PhotoType::Deed->value,
+        ]);
+        $user = User::factory()->create(['is_active' => true]);
+
+        $response = $this->actingAs($user)->get(route('parcels.print', $parcel));
+
+        $response->assertOk();
+        // dompdf emits one "/Type /Page" object per page (not to be confused
+        // with the singular "/Type /Pages" tree root) — a plain, dependency-
+        // free way to assert page count against the raw PDF bytes.
+        $pageObjects = preg_match_all('/\/Type\s*\/Page(?!s)/', $response->getContent());
+        $this->assertSame(1, $pageObjects);
     }
 
     private function makeParcel(): Parcel

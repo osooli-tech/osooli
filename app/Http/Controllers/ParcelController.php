@@ -116,14 +116,6 @@ class ParcelController extends Controller
 
         $parcel->loadMissing(['photos', 'currentDeed', 'boundary']);
 
-        // A document that cannot be rendered (no Imagick locally, or an
-        // unsupported file type) is listed without a preview rather than
-        // silently dropped.
-        $documents = $parcel->photos->map(fn (ParcelPhoto $photo) => [
-            'photo' => $photo,
-            'preview' => $documentRender->dataUri($photo),
-        ]);
-
         /** @var \stdClass|null $geoRow */
         $geoRow = DB::selectOne(
             'SELECT ST_Y(ST_Centroid(geom)) AS lat, ST_X(ST_Centroid(geom)) AS lng FROM parcels WHERE id = ?',
@@ -153,7 +145,6 @@ class ParcelController extends Controller
             'twin' => $twin->for($parcel),
             'qrImage' => app(ParcelQrCodeService::class)->pngDataUriFor($parcel),
             'mapImage' => $mapSvg->render($parcel),
-            'documents' => $documents,
             'sitePhoto' => $sitePhoto,
             'reportNumber' => sprintf('SK-%s-%04d', now()->format('Y-m-d'), $parcel->id),
             'centroid' => $centroid,
