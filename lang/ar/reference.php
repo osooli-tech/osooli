@@ -58,6 +58,28 @@ return [
         'offices' => 'لا توجد مكاتب هندسية مسجلة',
     ],
 
+    'filters' => [
+        'all_regions' => 'كل المناطق',
+        'all_cities' => 'كل المدن',
+        'all_districts' => 'كل الأحياء',
+        'usage' => 'الارتباط',
+        'usage_all' => 'الكل',
+        'usage_used' => 'المرتبطة بـ :what فقط',
+        'usage_unused' => 'غير المرتبطة بـ :what',
+        'missing_en' => 'بلا اسم إنجليزي فقط',
+        'results' => 'عدد النتائج: :count',
+        'clear' => 'مسح الفلاتر',
+    ],
+
+    'dependents_hint' => [
+        'plans' => 'عدد القطع المسجّلة على هذا المخطط، ومنها المؤرشفة.',
+        'districts' => 'عدد المخططات المرتبطة بالحي. يبقى صفرًا للأحياء المضافة من العنوان الوطني إلى أن يُربط بها مخطط.',
+        'cities' => 'عدد الأحياء المسجّلة في المدينة. أغلب المدن والقرى ليس لها أحياء في بيانات العنوان الوطني، فيظهر صفر.',
+        'regions' => 'عدد المدن المسجّلة في المنطقة.',
+        'countries' => 'عدد المناطق المسجّلة في الدولة.',
+        'offices' => 'عدد سجلات الحدود المنسوبة إلى المكتب.',
+    ],
+
     /*
      * Column header for the number of records that depend on the row — the
      * same number that decides whether it can be deleted.

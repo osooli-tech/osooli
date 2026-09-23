@@ -12,6 +12,7 @@ use App\Http\Controllers\OwnerExportController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
 use App\Http\Controllers\PresentationRequestController;
+use App\Http\Controllers\ReferenceOptionsController;
 use App\Http\Controllers\ServiceController;
 use App\Models\MapAppearanceSetting;
 use Illuminate\Support\Facades\Route;
@@ -110,6 +111,9 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/reference', fn () => view('reference.index'))
         ->middleware('can:reference.view')
         ->name('reference.index');
+    Route::get('/reference/options/{source}', ReferenceOptionsController::class)
+        ->middleware('can:reference.view')
+        ->name('reference.options');
 
     // Archive — archived parcels, deeds and owners, and restoring them
     Route::get('/archive', fn () => view('archive.index'))

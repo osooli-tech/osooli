@@ -54,6 +54,28 @@ return [
         'offices' => 'No engineering offices recorded',
     ],
 
+    'filters' => [
+        'all_regions' => 'All regions',
+        'all_cities' => 'All cities',
+        'all_districts' => 'All districts',
+        'usage' => 'Linked',
+        'usage_all' => 'All',
+        'usage_used' => 'With :what only',
+        'usage_unused' => 'Without :what',
+        'missing_en' => 'Missing English name only',
+        'results' => 'Results: :count',
+        'clear' => 'Clear filters',
+    ],
+
+    'dependents_hint' => [
+        'plans' => 'Parcels recorded on this plan, archived ones included.',
+        'districts' => 'Plans linked to the district. Zero for districts added from the National Address until a plan is linked.',
+        'cities' => 'Districts recorded in the city. Most cities and villages have no districts in the National Address data, so they show zero.',
+        'regions' => 'Cities recorded in the region.',
+        'countries' => 'Regions recorded in the country.',
+        'offices' => 'Boundary records credited to the office.',
+    ],
+
     'dependents' => [
         'plans' => 'Parcels',
         'districts' => 'Plans',

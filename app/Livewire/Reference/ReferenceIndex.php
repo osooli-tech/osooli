@@ -47,6 +47,22 @@ class ReferenceIndex extends Component
 
     public string $search = '';
 
+    /*
+     * Filters above the table. Which ones a tab offers is decided in the
+     * view; each only narrows the tabs it makes sense for, and all of them
+     * are cleared when the tab changes.
+     */
+    public string $filterRegion = '';
+
+    public string $filterCity = '';
+
+    public string $filterDistrict = '';
+
+    /** '' (all), 'used' — something depends on the row — or 'unused'. */
+    public string $filterUsage = '';
+
+    public bool $filterMissingEn = false;
+
     public bool $showModal = false;
 
     public bool $editing = false;
@@ -80,13 +96,35 @@ class ReferenceIndex extends Component
         $this->resetPage();
     }
 
+    public function updated(string $property): void
+    {
+        if (! str_starts_with($property, 'filter')) {
+            return;
+        }
+
+        // A narrower parent invalidates a child picked under the old one.
+        if ($property === 'filterRegion') {
+            $this->filterCity = '';
+            $this->filterDistrict = '';
+        } elseif ($property === 'filterCity') {
+            $this->filterDistrict = '';
+        }
+
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset('search', 'filterRegion', 'filterCity', 'filterDistrict', 'filterUsage', 'filterMissingEn');
+        $this->resetPage();
+    }
+
     public function selectTab(string $tab): void
     {
         abort_unless(in_array($tab, self::TABS, true), 404);
 
         $this->tab = $tab;
-        $this->search = '';
-        $this->resetPage();
+        $this->clearFilters();
         $this->closeModal();
         $this->cancelDelete();
     }
@@ -231,7 +269,8 @@ class ReferenceIndex extends Component
             'paginator' => $page,
             'headers' => $this->headers(),
             'rows' => $this->rows($page),
-            'parentOptions' => $this->parentOptions(),
+            'filtering' => $this->search !== '' || $this->filterRegion !== '' || $this->filterCity !== ''
+                || $this->filterDistrict !== '' || $this->filterUsage !== '' || $this->filterMissingEn,
         ]);
     }
 
@@ -275,10 +314,16 @@ class ReferenceIndex extends Component
             'plans' => Plan::query()
                 ->with('district.city')
                 // Archived parcels count: the foreign key still points at the
-                // plan, so Postgres refuses the delete while any exist, and a
-                // restored parcel needs its plan back.
+                // plan, so the database refuses the delete while any exist,
+                // and a restored parcel needs its plan back.
                 ->withCount(['parcels as dependents_count' => fn ($q) => $q->withTrashed()])
                 ->when($searching, fn ($q) => $q->whereLike('plan_no', $term))
+                ->when($this->filterDistrict !== '', fn ($q) => $q->where('district_id', (int) $this->filterDistrict))
+                ->when($this->filterDistrict === '' && $this->filterCity !== '', fn ($q) => $q
+                    ->whereHas('district', fn ($d) => $d->where('city_id', (int) $this->filterCity)))
+                ->when($this->filterDistrict === '' && $this->filterCity === '' && $this->filterRegion !== '', fn ($q) => $q
+                    ->whereHas('district.city', fn ($c) => $c->where('region_id', (int) $this->filterRegion)))
+                ->tap(fn ($q) => $this->usageFilter($q, 'parcels', withTrashed: true))
                 ->orderBy('plan_no')
                 ->paginate(self::PER_PAGE),
 
@@ -286,6 +331,11 @@ class ReferenceIndex extends Component
                 ->with('city')
                 ->withCount(['plans as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
+                ->when($this->filterCity !== '', fn ($q) => $q->where('city_id', (int) $this->filterCity))
+                ->when($this->filterCity === '' && $this->filterRegion !== '', fn ($q) => $q
+                    ->whereHas('city', fn ($c) => $c->where('region_id', (int) $this->filterRegion)))
+                ->tap(fn ($q) => $this->usageFilter($q, 'plans'))
+                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
@@ -293,6 +343,9 @@ class ReferenceIndex extends Component
                 ->with('region')
                 ->withCount(['districts as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
+                ->when($this->filterRegion !== '', fn ($q) => $q->where('region_id', (int) $this->filterRegion))
+                ->tap(fn ($q) => $this->usageFilter($q, 'districts'))
+                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
@@ -300,12 +353,15 @@ class ReferenceIndex extends Component
                 ->with('country')
                 ->withCount(['cities as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
+                ->tap(fn ($q) => $this->usageFilter($q, 'cities'))
+                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
             'countries' => Country::query()
                 ->withCount(['regions as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
+                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
@@ -315,11 +371,31 @@ class ReferenceIndex extends Component
                     ->whereLike('name', $term)
                     ->orWhereLike('license_no', $term)
                     ->orWhereLike('phone', $term)))
+                ->tap(fn ($q) => $this->usageFilter($q, 'parcelBoundaries'))
                 ->orderBy('name')
                 ->paginate(self::PER_PAGE),
 
             default => throw new RuntimeException("Unknown reference tab [{$this->tab}]."),
         };
+    }
+
+    /** "Used" rows have at least one dependent record; "unused" have none. */
+    private function usageFilter(mixed $query, string $relation, bool $withTrashed = false): void
+    {
+        $scope = $withTrashed ? fn ($q) => $q->withTrashed() : null;
+
+        match ($this->filterUsage) {
+            'used' => $query->whereHas($relation, $scope),
+            'unused' => $query->whereDoesntHave($relation, $scope),
+            default => null,
+        };
+    }
+
+    private function missingEnglishFilter(mixed $query): void
+    {
+        if ($this->filterMissingEn) {
+            $query->where(fn ($q) => $q->whereNull('name_en')->orWhere('name_en', ''));
+        }
     }
 
     /**
@@ -468,52 +544,6 @@ class ReferenceIndex extends Component
             $record instanceof EngineeringOffice => $record->parcelBoundaries()->count(),
             default => throw new RuntimeException("Unknown reference tab [{$this->tab}]."),
         };
-    }
-
-    /**
-     * The parent dropdown for the active tab, as id => Arabic name. Empty for
-     * countries and offices, which have no parent.
-     *
-     * @return array<int, string>
-     */
-    private function parentOptions(): array
-    {
-        return match ($this->tab) {
-            'plans' => District::query()->with('city')->orderBy('name_ar')->get()
-                ->mapWithKeys(fn (District $district): array => [
-                    $district->id => $this->qualified($district->name_ar, $this->relatedName($district, 'city', '')),
-                ])->all(),
-
-            'districts' => City::query()->with('region')->orderBy('name_ar')->get()
-                ->mapWithKeys(fn (City $city): array => [
-                    $city->id => $this->qualified($city->name_ar, $this->relatedName($city, 'region', '')),
-                ])->all(),
-
-            'cities' => Region::query()->with('country')->orderBy('name_ar')->get()
-                ->mapWithKeys(fn (Region $region): array => [
-                    $region->id => $this->qualified($region->name_ar, $this->relatedName($region, 'country', '')),
-                ])->all(),
-
-            'regions' => Country::query()->orderBy('name_ar')->get()
-                ->mapWithKeys(fn (Country $country): array => [
-                    $country->id => $this->qualified($country->name_ar, null),
-                ])->all(),
-
-            default => [],
-        };
-    }
-
-    /**
-     * "الحي — المدينة". Two districts in different cities routinely share a
-     * name, so the parent is part of the label or the picker is a guess.
-     */
-    private function qualified(mixed $name, mixed $parent): string
-    {
-        $label = (string) $name;
-
-        return is_string($parent) && $parent !== ''
-            ? $label.' — '.$parent
-            : $label;
     }
 
     private function resetForms(): void

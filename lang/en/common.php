@@ -29,6 +29,8 @@ return [
     'confirm_archive' => 'Archive this record? It can be restored later.',
     'confirm_delete' => 'This deletes permanently and cannot be undone. Continue?',
     'no_results' => 'No results',
+    'search_choose' => 'Type to search, then choose…',
+    'clear' => 'Clear',
     'unauthorized' => 'You do not have permission for this action',
 
     'conflict' => 'Someone else changed this record after you opened it. Your edit was not saved, so their work is not lost. Reopen the record to see its current state, then re-apply your change.',

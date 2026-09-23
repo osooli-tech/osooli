@@ -53,6 +53,65 @@
                 </button>
             @endcan
         </div>
+
+        {{-- Filters. Keyed by tab so a picker's typed text never carries over. --}}
+        @php
+            $filterSelect = 'w-full px-3 py-2 text-sm rounded-xl bg-surface-container dark:bg-[#252b3b]
+                             border border-outline-variant dark:border-white/10 text-on-surface dark:text-white
+                             focus:outline-none focus:ring-2 focus:ring-primary/40';
+        @endphp
+        <div wire:key="filters-{{ $tab }}"
+             class="mt-4 pt-4 border-t border-outline-variant dark:border-white/10
+                    grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+
+            @if (in_array($tab, ['plans', 'districts', 'cities'], true))
+                <x-form.search-select name="filterRegion" source="regions" live
+                                      :label="__('reference.region')" :value="$filterRegion"
+                                      :placeholder="__('reference.filters.all_regions')" />
+            @endif
+
+            @if (in_array($tab, ['plans', 'districts'], true))
+                <x-form.search-select name="filterCity" source="cities" parent="filterRegion" live
+                                      :label="__('reference.city')" :value="$filterCity"
+                                      :placeholder="__('reference.filters.all_cities')" />
+            @endif
+
+            @if ($tab === 'plans')
+                <x-form.search-select name="filterDistrict" source="districts" parent="filterCity" live
+                                      :label="__('reference.district')" :value="$filterDistrict"
+                                      :placeholder="__('reference.filters.all_districts')" />
+            @endif
+
+            @if ($tab !== 'countries')
+                <div>
+                    <label class="block text-xs font-medium text-on-surface-variant dark:text-on-primary-container mb-1">
+                        {{ __('reference.filters.usage') }}
+                    </label>
+                    <select wire:model.live="filterUsage" class="{{ $filterSelect }}">
+                        <option value="">{{ __('reference.filters.usage_all') }}</option>
+                        <option value="used">{{ __('reference.filters.usage_used', ['what' => __('reference.dependents.'.$tab)]) }}</option>
+                        <option value="unused">{{ __('reference.filters.usage_unused', ['what' => __('reference.dependents.'.$tab)]) }}</option>
+                    </select>
+                </div>
+            @endif
+
+            @if (in_array($tab, ['districts', 'cities', 'regions', 'countries'], true))
+                <label class="flex items-center gap-2 text-sm text-on-surface dark:text-white cursor-pointer py-2">
+                    <input type="checkbox" wire:model.live="filterMissingEn" class="rounded text-secondary focus:ring-secondary">
+                    {{ __('reference.filters.missing_en') }}
+                </label>
+            @endif
+        </div>
+
+        <div class="mt-3 flex items-center justify-between gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
+            <span>{{ __('reference.filters.results', ['count' => number_format($paginator->total())]) }}</span>
+            @if ($filtering)
+                <button wire:click="clearFilters" class="inline-flex items-center gap-1 text-secondary hover:underline">
+                    <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+                    {{ __('reference.filters.clear') }}
+                </button>
+            @endif
+        </div>
     </div>
 
     {{-- Table --}}
@@ -71,7 +130,10 @@
                         @endforeach
                         <th class="text-start px-4 py-3 font-semibold
                                    text-on-surface-variant dark:text-on-primary-container">
-                            {{ __('reference.dependents.'.$tab) }}
+                            <span class="inline-flex items-center gap-1 cursor-help" title="{{ __('reference.dependents_hint.'.$tab) }}">
+                                {{ __('reference.dependents.'.$tab) }}
+                                <span class="material-symbols-outlined text-[14px] opacity-60">info</span>
+                            </span>
                         </th>
                         <th class="px-4 py-3"></th>
                     </tr>
@@ -167,34 +229,34 @@
                                       :label="__('reference.plan_no')"
                                       class="data-tabular" ltr required />
 
-                        <x-form.select name="planForm.districtId"
-                                       :label="__('reference.district')"
-                                       :options="$parentOptions"
-                                       :hint="__('reference.district_hint')" />
+                        <x-form.search-select name="planForm.districtId" source="districts"
+                                              :value="$planForm->districtId"
+                                              :label="__('reference.district')"
+                                              :hint="__('reference.district_hint')" />
 
                     @elseif ($tab === 'districts')
                         <x-form.input name="districtForm.nameAr" :label="__('reference.name_ar')" required />
                         <x-form.input name="districtForm.nameEn" :label="__('reference.name_en')" ltr />
 
-                        <x-form.select name="districtForm.cityId"
-                                       :label="__('reference.city')"
-                                       :options="$parentOptions" required />
+                        <x-form.search-select name="districtForm.cityId" source="cities"
+                                              :value="$districtForm->cityId"
+                                              :label="__('reference.city')" required />
 
                     @elseif ($tab === 'cities')
                         <x-form.input name="cityForm.nameAr" :label="__('reference.name_ar')" required />
                         <x-form.input name="cityForm.nameEn" :label="__('reference.name_en')" ltr />
 
-                        <x-form.select name="cityForm.regionId"
-                                       :label="__('reference.region')"
-                                       :options="$parentOptions" required />
+                        <x-form.search-select name="cityForm.regionId" source="regions"
+                                              :value="$cityForm->regionId"
+                                              :label="__('reference.region')" required />
 
                     @elseif ($tab === 'regions')
                         <x-form.input name="regionForm.nameAr" :label="__('reference.name_ar')" required />
                         <x-form.input name="regionForm.nameEn" :label="__('reference.name_en')" ltr />
 
-                        <x-form.select name="regionForm.countryId"
-                                       :label="__('reference.country')"
-                                       :options="$parentOptions" required />
+                        <x-form.search-select name="regionForm.countryId" source="countries"
+                                              :value="$regionForm->countryId"
+                                              :label="__('reference.country')" required />
 
                     @elseif ($tab === 'countries')
                         <x-form.input name="countryForm.nameAr" :label="__('reference.name_ar')" required />
