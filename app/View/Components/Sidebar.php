@@ -42,6 +42,12 @@ class Sidebar extends Component
             'permission' => 'reference.view',
         ],
         [
+            'route' => 'exports.index',
+            'label' => 'nav.exports',
+            'icon' => 'file_export',
+            'permission' => 'exports.bulk',
+        ],
+        [
             'route' => 'archive.index',
             'label' => 'nav.archive',
             'icon' => 'inventory_2',

@@ -38,6 +38,7 @@ final class AuditActions
         return match (true) {
             in_array($action, ['login', 'logout'], true) => $action,
             in_array($action, ['download', 'export'], true) => $action,
+            $action === 'export_bulk' => 'export',
             str_contains($action, 'geometry') => 'geometry',
             str_ends_with($action, '.create'), str_ends_with($action, '.upload'), $action === 'create_user' => 'create',
             str_ends_with($action, '.update'), in_array($action, ['edit_user', 'activate_user', 'deactivate_user'], true) => 'update',

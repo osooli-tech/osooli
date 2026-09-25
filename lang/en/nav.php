@@ -10,6 +10,7 @@ return [
     'owners' => 'Owners',
     'survey_decisions' => 'Survey Decisions',
     'reference' => 'Reference Data',
+    'exports' => 'Data export',
     'archive' => 'Archive',
     'documents' => 'Documents',
     'modification_requests' => 'Modification Requests',

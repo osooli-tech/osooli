@@ -35,6 +35,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'documents.upload',
         'documents.review',
         'exports.create',
+        'exports.bulk',
         'owners.create',
         'owners.edit',
         'modification_requests.view',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ExportDownloadController;
 use App\Http\Controllers\GeoJsonController;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
@@ -114,6 +115,14 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/reference/options/{source}', ReferenceOptionsController::class)
         ->middleware('can:reference.view')
         ->name('reference.options');
+
+    // Bulk export — deeds with everything attached, as GeoJSON
+    Route::get('/exports', fn () => view('exports.index'))
+        ->middleware('can:exports.bulk')
+        ->name('exports.index');
+    Route::get('/exports/{id}/download', ExportDownloadController::class)
+        ->middleware('can:exports.bulk')
+        ->name('exports.download');
 
     // Archive — archived parcels, deeds and owners, and restoring them
     Route::get('/archive', fn () => view('archive.index'))

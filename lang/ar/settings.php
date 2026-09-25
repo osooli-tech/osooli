@@ -58,6 +58,7 @@ return [
         'archive_view' => 'عرض الأرشيف',
         'archive_restore' => 'استرجاع المؤرشف',
         'exports_create' => 'تصدير البيانات',
+        'exports_bulk' => 'التصدير الشامل للصكوك (GeoJSON)',
         'owners_create' => 'إضافة مالك',
         'owners_edit' => 'تعديل بيانات المُلّاك',
         'presentation_requests_view' => 'عرض طلبات العرض التقديمي',

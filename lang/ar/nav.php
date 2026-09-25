@@ -9,6 +9,7 @@ return [
     'parcels' => 'الأراضي',
     'survey_decisions' => 'القرارات المساحية',
     'reference' => 'البيانات المرجعية',
+    'exports' => 'تصدير البيانات',
     'archive' => 'الأرشيف',
     'documents' => 'المستندات',
     'owners' => 'الملاك',
