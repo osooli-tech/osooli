@@ -392,14 +392,19 @@
         <div class="section">
             <div class="card">
                 <div class="card-title">@ar(__('parcels.map_section'))</div>
-                <div class="card-body" style="padding: 0;">
+                <div class="card-body" style="padding: 0; text-align: center;">
                     @if ($mapImage)
                         {{-- dompdf does not support object-fit — width:100% with a
                              fixed height on this square source image stretched it
                              non-uniformly. Sized as a square instead (matching the
-                             source canvas) and centred, so it scales without
-                             distortion. --}}
-                        <img style="display: block; width: 230px; height: 230px; margin: 0 auto;" src="{{ $mapImage }}">
+                             source canvas) to scale without distortion.
+
+                             Centred via text-align on the wrapper rather than
+                             margin:auto on the image — dompdf does not reliably
+                             centre a block element that way under direction:rtl,
+                             which left the image flush to the right edge with the
+                             rest of the card blank. --}}
+                        <img style="width: 230px; height: 230px;" src="{{ $mapImage }}">
                     @else
                         <p class="placeholder">@ar(__('parcels.map_not_rendered'))</p>
                     @endif
