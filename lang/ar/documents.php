@@ -22,6 +22,10 @@ return [
 
     // رفع المستندات
     'upload_title' => 'رفع مستند',
+    'parcel_search' => 'بحث عن القطعة',
+    'parcel_search_placeholder' => 'رقم القطعة أو المعرّف الفريد (Geo ID)',
+    'owner_filter' => 'تصفية حسب المالك',
+    'owner_filter_all' => 'كل الملاك',
     'parcel' => 'القطعة',
     'deed' => 'الصك',
     'deed_hint' => 'يُحدَّد فقط إذا كان المستند خاصاً بصك بعينه',

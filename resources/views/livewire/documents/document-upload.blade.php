@@ -8,6 +8,35 @@
             {{ __('documents.upload_title') }}
         </h2>
 
+        {{-- Narrows the parcel dropdown below. Hidden when the screen was
+             opened from one parcel's page, since that dropdown already holds
+             just the one parcel. --}}
+        @unless ($parcelLocked)
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="document-parcel-search" class="block text-xs font-medium
+                           text-on-surface-variant dark:text-on-primary-container mb-1">
+                        {{ __('documents.parcel_search') }}
+                    </label>
+                    <input type="search" id="document-parcel-search"
+                           wire:model.live.debounce.400ms="parcelSearch"
+                           autocomplete="off"
+                           placeholder="{{ __('documents.parcel_search_placeholder') }}"
+                           class="w-full px-3 py-2 text-sm rounded-xl
+                                  bg-surface-container dark:bg-[#252b3b]
+                                  border border-outline-variant dark:border-white/10
+                                  text-on-surface dark:text-white
+                                  focus:outline-none focus:ring-2 focus:ring-primary/40">
+                </div>
+
+                <x-form.select name="ownerId"
+                               :label="__('documents.owner_filter')"
+                               :options="$ownerOptions"
+                               :placeholder="__('documents.owner_filter_all')"
+                               wire:change="$refresh" />
+            </div>
+        @endunless
+
         {{-- Where the document is filed. The parcel is fixed when this screen
              was opened from one parcel's page, and the deed dropdown only has
              anything to offer once a parcel is chosen. --}}

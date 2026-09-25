@@ -22,6 +22,10 @@ return [
 
     // Upload
     'upload_title' => 'Upload a document',
+    'parcel_search' => 'Search for a parcel',
+    'parcel_search_placeholder' => 'Parcel number or unique Geo ID',
+    'owner_filter' => 'Filter by owner',
+    'owner_filter_all' => 'All owners',
     'parcel' => 'Parcel',
     'deed' => 'Deed',
     'deed_hint' => 'Only set when the document belongs to one specific deed',

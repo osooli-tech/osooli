@@ -94,7 +94,7 @@ class ParcelMapSvgService
              WHERE self.id = ?
                AND n.id <> self.id
                AND n.geom IS NOT NULL
-               AND '.Spatial::intersectsExpanded('n.geom', 'self.geom', 0.003).'
+               AND '.Spatial::intersectsExpanded('n.geom', 'self.geom', 0.01).'
              LIMIT 40',
             [$parcel->id]
         );

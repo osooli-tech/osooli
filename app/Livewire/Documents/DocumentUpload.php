@@ -6,6 +6,7 @@ namespace App\Livewire\Documents;
 
 use App\Livewire\Forms\DocumentUploadForm;
 use App\Models\Deed;
+use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\User;
 use App\Support\OwnerScope;
@@ -35,6 +36,13 @@ class DocumentUpload extends Component
     /** True when the screen was opened from one parcel and may not leave it. */
     #[Locked]
     public bool $parcelLocked = false;
+
+    /** Narrows the parcel dropdown by parcel_no or geo_id — parcel_no alone
+     *  repeats across plans, geo_id never does. */
+    public string $parcelSearch = '';
+
+    /** Narrows the parcel dropdown to one owner's parcels. */
+    public ?int $ownerId = null;
 
     public function mount(?int $parcelId = null, ?int $deedId = null): void
     {
@@ -104,6 +112,7 @@ class DocumentUpload extends Component
         return view('livewire.documents.document-upload', [
             'parcelOptions' => $this->parcelOptions(),
             'deedOptions' => $this->deedOptions(),
+            'ownerOptions' => $this->ownerOptions(),
             'maxMegabytes' => (int) round(DocumentUploadForm::MAX_KILOBYTES / 1024),
             'maxFiles' => DocumentUploadForm::MAX_FILES,
             'acceptAttribute' => '.'.implode(',.', DocumentUploadForm::ACCEPTED_EXTENSIONS),
@@ -111,7 +120,9 @@ class DocumentUpload extends Component
     }
 
     /**
-     * Parcels this user may file a document against, as id => parcel number.
+     * Parcels this user may file a document against, as id => "parcel_no —
+     * geo_id". geo_id rides along because parcel_no alone repeats across
+     * plans and can't tell two parcels apart in the dropdown.
      *
      * @return array<int, string>
      */
@@ -127,11 +138,41 @@ class DocumentUpload extends Component
         }
 
         $allowed = OwnerScope::parcelIds($this->currentUser());
+        $search = trim($this->parcelSearch);
 
         return Parcel::query()
             ->when($allowed !== null, fn (Builder $query) => $query->whereIn('id', $allowed ?? []))
+            ->when($this->ownerId !== null, fn (Builder $query) => $query->whereHas(
+                'currentDeed.owners',
+                fn (Builder $inner) => $inner->whereKey($this->ownerId)
+            ))
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $like = '%'.$search.'%';
+                $query->where(fn (Builder $inner) => $inner->whereLike('parcel_no', $like)->orWhereLike('geo_id', $like));
+            })
             ->orderBy('parcel_no')
-            ->pluck('parcel_no', 'id')
+            ->get(['id', 'parcel_no', 'geo_id'])
+            ->mapWithKeys(fn (Parcel $parcel): array => [
+                $parcel->id => $parcel->geo_id === null
+                    ? $parcel->parcel_no
+                    : "{$parcel->parcel_no} — {$parcel->geo_id}",
+            ])
+            ->all();
+    }
+
+    /**
+     * Owners this user may filter the parcel dropdown by, as id => name.
+     *
+     * @return array<int, string>
+     */
+    private function ownerOptions(): array
+    {
+        $allowed = OwnerScope::ownerIds($this->currentUser());
+
+        return Owner::query()
+            ->when($allowed !== null, fn (Builder $query) => $query->whereIn('id', $allowed ?? []))
+            ->orderBy('name')
+            ->pluck('name', 'id')
             ->all();
     }
 
