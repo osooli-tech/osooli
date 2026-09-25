@@ -249,6 +249,31 @@ class DeedImportTest extends TestCase
         $this->assertSame(0, Deed::where('parcel_id', $parcel->id)->count());
     }
 
+    public function test_a_table_exported_straight_from_gis_is_read_by_its_plain_columns(): void
+    {
+        $file = $this->exported();
+        $file['features'][] = [
+            'type' => 'Feature',
+            'geometry' => null,
+            'properties' => [
+                'geo_id' => 'GIS-240-11', 'parcel_no' => '11', 'fall_in' => 'صك',
+                'n_border' => 'قطعة رقم 10', 'n_dim' => 405.84, 'deed_no' => '262903006602', 'deed_area' => 51750,
+            ],
+        ];
+
+        $run = $this->analyse($file);
+        $item = $this->items($run['id'])[1];
+
+        $this->assertNotContains('geo_id_missing', array_column($item['errors'], 'code'));
+        $this->assertSame('GIS-240-11', $item['parcel']['geo_id']);
+
+        $this->apply($run['id']);
+        $parcel = Parcel::where('geo_id', 'GIS-240-11')->first();
+        $this->assertNotNull($parcel);
+        $this->assertSame('صك', (string) ($parcel->fall_in?->value ?? $parcel->fall_in));
+        $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', '262903006602')->count());
+    }
+
     public function test_a_unit_is_linked_to_a_parent_described_later_in_the_file(): void
     {
         $file = $this->exported();
