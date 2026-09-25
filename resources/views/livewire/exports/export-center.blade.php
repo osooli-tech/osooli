@@ -141,6 +141,13 @@
                     <input type="checkbox" wire:model.live="filters.include_archived" class="rounded text-secondary focus:ring-secondary">
                     {{ __('exports_center.include_archived') }}
                 </label>
+                <label class="mt-2 flex items-start gap-2 text-sm text-on-surface dark:text-white cursor-pointer">
+                    <input type="checkbox" wire:model.live="filters.include_deedless" class="mt-0.5 rounded text-secondary focus:ring-secondary">
+                    <span>
+                        {{ __('exports_center.include_deedless') }}
+                        <span class="block text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('exports_center.include_deedless_hint') }}</span>
+                    </span>
+                </label>
             </div>
         </div>
     </div>
@@ -201,7 +208,7 @@
                 @elseif ($current['state'] === 'succeeded')
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <span class="text-secondary font-semibold">
-                            {{ __('exports_center.done', ['count' => number_format($current['done'])]) }}
+                            {{ __('exports_center.done', ['count' => number_format($current['done']), 'deedless' => number_format((int) ($current['deedless'] ?? 0))]) }}
                         </span>
                         <a href="{{ route('exports.download', $current['id']) }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary text-white text-sm font-medium hover:brightness-110">
@@ -215,6 +222,27 @@
             </div>
         @endif
     </div>
+
+    {{-- Owners with no deed have no polygon, so they leave as a spreadsheet. --}}
+    @if ($ownersWithoutDeeds !== null)
+        <div class="{{ $card }} flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="text-sm font-semibold text-on-surface dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-[20px]">person_off</span>
+                    {{ __('exports_center.owners_without_deeds') }}
+                    <span class="px-2 py-0.5 rounded-full text-xs bg-surface-container dark:bg-white/10 data-tabular">{{ number_format($ownersWithoutDeeds) }}</span>
+                </h2>
+                <p class="text-xs text-on-surface-variant dark:text-on-primary-container mt-1">{{ __('exports_center.owners_without_deeds_hint') }}</p>
+            </div>
+            @if ($ownersWithoutDeeds > 0)
+                <a href="{{ route('exports.owners-without-deeds', ['archived' => $filters['include_archived'] ? 1 : 0]) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-outline-variant dark:border-white/10 text-sm text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
+                    <span class="material-symbols-outlined text-[18px]">table_view</span>
+                    {{ __('exports_center.export_excel') }}
+                </a>
+            @endif
+        </div>
+    @endif
 
     {{-- ── History ── --}}
     <div class="{{ $card }}">

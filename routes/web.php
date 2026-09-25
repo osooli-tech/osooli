@@ -120,6 +120,9 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/exports', fn () => view('exports.index'))
         ->middleware('can:exports.bulk')
         ->name('exports.index');
+    Route::get('/exports/owners-without-deeds', [ExportDownloadController::class, 'ownersWithoutDeeds'])
+        ->middleware('can:exports.bulk')
+        ->name('exports.owners-without-deeds');
     Route::get('/exports/{id}/download', ExportDownloadController::class)
         ->middleware('can:exports.bulk')
         ->name('exports.download');

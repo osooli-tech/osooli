@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\Exports;
 
+use App\Exports\OwnersWithoutDeedsExport;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Support\DatabaseEnum;
 use App\Support\Export\DeedExportFilters;
 use App\Support\Export\DeedGeoJsonExporter;
 use App\Support\Export\ExportRuns;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -80,7 +82,7 @@ class ExportCenter extends Component
         $user = Auth::user();
         $filters = new DeedExportFilters($this->filters);
 
-        if ($filters->query($user)->count() === 0) {
+        if ($filters->count($user) === 0) {
             $this->dispatch('toast', type: 'warning', message: __('exports_center.nothing_to_export'));
 
             return;
@@ -125,17 +127,22 @@ class ExportCenter extends Component
 
         $count = null;
         try {
-            $count = (new DeedExportFilters($this->filters))->query($user)->count();
+            $count = (new DeedExportFilters($this->filters))->count($user);
         } catch (Throwable) {
             // A half-typed number is not worth an error page; the count waits.
         }
 
         $current = $this->following === null ? null : ExportRuns::find($this->following);
 
+        $ownersWithoutDeeds = OwnerScope::isRestricted($user)
+            ? null
+            : OwnersWithoutDeedsExport::base((bool) $this->filters['include_archived'])->count();
+
         return view('livewire.exports.export-center', [
             'count' => $count,
             'current' => $current,
             'running' => ($current['state'] ?? null) === 'running',
+            'ownersWithoutDeeds' => $ownersWithoutDeeds,
             // Administrators see everyone's exports; others only their own.
             'history' => ExportRuns::recent($user->can('roles.manage') ? null : $user->id),
             'enums' => [

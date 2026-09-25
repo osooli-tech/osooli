@@ -69,6 +69,12 @@ return [
     'use_district' => 'It means «:name»',
     'create_district' => 'Create a new district «:name»',
 
+    'office_question' => 'Engineering office «:office» is not in the reference data:',
+    'use_office' => 'It means «:name»',
+    'create_office' => 'Add a new engineering office «:name»',
+    'parcel_only' => 'Parcel without a deed',
+    'parents_missing' => ':count parcels name a parent that is neither recorded nor in the file; they will not be linked.',
+    'parents_not_linked' => 'No parent was found for these GEO IDs, so they were not linked: :list',
     'deed' => 'Deed',
     'exclude' => 'Exclude',
     'nothing_here' => 'Nothing with this status.',
@@ -92,6 +98,7 @@ return [
     'new_plan' => 'New plan :plan',
 
     'fields' => [
+        'parent_geo_id' => 'Parent property', 'matches_deed' => 'Matches deed', 'engineering_office_id' => 'Engineering office',
         'deed_id' => 'Deed id', 'geo_id' => 'GEO ID', 'region' => 'Region', 'city' => 'City', 'district' => 'District',
         'deed_no' => 'Deed number', 'deed_date_hijri' => 'Date', 'deed_area' => 'Area', 'deed_status' => 'Status',
         'deed_class' => 'Class', 'parcel_no' => 'Parcel number', 'plan_no' => 'Plan', 'asset_type' => 'Asset type',
@@ -105,6 +112,8 @@ return [
     ],
 
     'codes' => [
+        'parent_self' => 'A parcel cannot be its own parent.',
+        'owners_without_deed' => 'Owners given without a deed; an owner is only linked through a deed, so they are not imported.',
         'deed_id_duplicate_in_file' => 'deed_id repeated in the file (first at item :of) — usually a copied row; remove deed_id from the new one.',
         'deed_id_number_mismatch' => 'This deed_id belongs to deed :detail but the file gives another number. For a new deed remove deed_id; to renumber a deed use the dashboard.',
         'flat_nested_differ' => '«:field» differs between the visible column and the nested copy; the visible column is used.',

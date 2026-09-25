@@ -27,6 +27,8 @@ return [
     'yes' => 'موجود',
     'no' => 'غير موجود',
     'include_archived' => 'تضمين المؤرشف',
+    'include_deedless' => 'تضمين القطع التي ليس لها صك',
+    'include_deedless_hint' => 'تُصدَّر بياناتها ومضلعها دون صك. لا تُضمَّن إذا فلترت بحقول الصك أو المالك.',
 
     'enums' => [
         'deed_status' => 'حالة الصك',
@@ -54,16 +56,26 @@ return [
         'documents' => 'المستندات وروابطها',
     ],
 
-    'matching' => 'صكًّا مطابقًا',
+    'matching' => 'عنصرًا مطابقًا (صكوك وقطع بلا صك)',
     'reset' => 'مسح الفلاتر',
     'export_geojson' => 'تصدير GeoJSON',
     'nothing_to_export' => 'لا توجد صكوك مطابقة للفلاتر.',
     'started' => 'بدأ التصدير في الخلفية.',
     'progress' => 'جارٍ التصدير: :done من :total صك',
-    'done' => 'اكتمل التصدير: :count صك.',
+    'done' => 'اكتمل التصدير: :count عنصر (منها :deedless قطعة بلا صك).',
     'download' => 'تنزيل',
     'failed' => 'فشل التصدير',
     'running' => 'قيد التنفيذ',
+
+    'owners_without_deeds' => 'الملاك الذين ليس لهم صكوك',
+    'owners_without_deeds_hint' => 'ليس لهم قطع ولا مضلعات، فلا يدخلون ملف الخرائط؛ يُصدَّرون في ملف Excel منفصل.',
+    'export_excel' => 'تصدير Excel',
+    'owner_columns' => [
+        'id' => 'المعرّف',
+        'whatsapp' => 'واتساب',
+        'created_at' => 'تاريخ الإضافة',
+        'archived_at' => 'تاريخ الأرشفة',
+    ],
 
     'history' => 'آخر التصديرات (تُحذف الملفات بعد :days أيام)',
     'history_empty' => 'لا توجد تصديرات سابقة.',
@@ -99,5 +111,6 @@ return [
         'has_survey' => 'القرار',
         'has_documents' => 'المستندات',
         'include_archived' => 'مع المؤرشف',
+        'include_deedless' => 'مع القطع بلا صك',
     ],
 ];

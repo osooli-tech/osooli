@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Exports\OwnersWithoutDeedsExport;
 use App\Livewire\Exports\ExportCenter;
 use App\Models\City;
 use App\Models\Country;
@@ -165,6 +166,47 @@ class DeedExportTest extends TestCase
         $this->assertSame('succeeded', ExportRuns::find($id)['state']);
         $this->actingAs($user)->get(route('exports.download', $id))->assertOk();
         $this->actingAs($this->exporter())->get(route('exports.download', $id))->assertForbidden();
+    }
+
+    public function test_parcels_without_deeds_units_and_history_are_exported(): void
+    {
+        $user = $this->exporter();
+        $this->actingAs($user);
+
+        $building = Parcel::where('geo_id', 'GEO-1')->first();
+        Parcel::create(['geo_id' => 'FLAT-1', 'parcel_no' => '101-1', 'parent_parcel_id' => $building->id]);
+
+        $file = $this->export([], $user);
+        $flat = collect($file['features'])->firstWhere('properties.parcel_geo_id', 'FLAT-1');
+
+        // Two deeds plus the flat, which has no deed.
+        $this->assertCount(3, $file['features']);
+        $this->assertSame('parcel-'.Parcel::where('geo_id', 'FLAT-1')->value('id'), $flat['id']);
+        $this->assertNull($flat['properties']['deed']);
+        $this->assertSame('GEO-1', $flat['properties']['parent_geo_id']);
+        $this->assertSame('GEO-1', $flat['properties']['parcel']['parent_geo_id']);
+
+        $deed = collect($file['features'])->firstWhere('properties.deed_no', '310101000001')['properties'];
+        $this->assertNotNull($deed['deed']['meta']['created_at']);
+        $this->assertNotNull($deed['parcel']['meta']['created_at']);
+        $this->assertSame(['mime_type', 'size_bytes', 'uploaded_by', 'uploaded_at', 'reviewed_by', 'reviewed_at', 'rejection_reason'], array_keys($deed['documents'][0]['meta']));
+
+        // A filter on a deed's own fields leaves deedless parcels out.
+        $this->assertSame(1, (new DeedExportFilters(['deed_no' => '310101']))->count($user));
+        $this->assertSame(3, (new DeedExportFilters([]))->count($user));
+        $this->assertSame(2, (new DeedExportFilters(['include_deedless' => false]))->count($user));
+    }
+
+    public function test_owners_without_deeds_export_as_a_spreadsheet(): void
+    {
+        Owner::create(['name' => 'مالك بلا صك', 'national_id' => '1999999999']);
+
+        $this->actingAs($this->exporter())
+            ->get(route('exports.owners-without-deeds'))
+            ->assertOk()
+            ->assertDownload('owners-without-deeds-'.now()->format('Y-m-d').'.xlsx');
+
+        $this->assertSame(1, OwnersWithoutDeedsExport::base(false)->count());
     }
 
     public function test_the_page_needs_the_permission(): void

@@ -23,7 +23,7 @@ use Throwable;
 final class DeedImportApplier
 {
     /** Tables in the order their created rows must be deleted on undo. */
-    public const CREATED_ORDER = ['deed_owners', 'survey_decisions', 'parcel_boundaries', 'deeds', 'parcels', 'owners', 'plans', 'districts'];
+    public const CREATED_ORDER = ['deed_owners', 'survey_decisions', 'parcel_boundaries', 'deeds', 'parcels', 'owners', 'plans', 'districts', 'engineering_offices'];
 
     private string $now;
 
@@ -44,6 +44,12 @@ final class DeedImportApplier
 
     /** @var array<string, int> owner key => owner id */
     private array $owners = [];
+
+    /** @var array<string, int> office decision key => office id */
+    private array $offices = [];
+
+    /** @var array<int, string> parcel id => the parent GEO ID to link once every parcel exists */
+    private array $parentLinks = [];
 
     /** @var array<string, int> */
     private array $stats = ['deeds_created' => 0, 'deeds_updated' => 0, 'parcels_created' => 0, 'parcels_updated' => 0,
@@ -83,6 +89,8 @@ final class DeedImportApplier
                         ImportRuns::save($run);
                     }
                 }
+
+                $this->linkParents($run);
             });
 
             ImportRuns::writeJson(ImportRuns::path($id, 'undo.json'), $this->undo);
@@ -111,6 +119,13 @@ final class DeedImportApplier
         $parcelId = $this->parcel($item, $planId);
 
         $deed = $item['deed'];
+        if ($deed['action'] === 'none') {
+            // A parcel alone: nothing about a deed or its owners to write.
+            $this->boundaryAndSurvey($item, $parcelId, $choices);
+
+            return;
+        }
+
         if ($deed['action'] === 'create') {
             $deedId = $this->insert('deeds', $deed['values'] + ['parcel_id' => $parcelId]);
             $this->stats['deeds_created']++;
@@ -139,10 +154,30 @@ final class DeedImportApplier
             }
         }
 
+        $this->boundaryAndSurvey($item, $parcelId, $choices);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @param  array<string, mixed>  $choices
+     */
+    private function boundaryAndSurvey(array $item, int $parcelId, array $choices): void
+    {
         if (isset($item['boundary'])) {
-            $item['boundary']['action'] === 'create'
-                ? $this->insert('parcel_boundaries', $item['boundary']['values'] + ['parcel_id' => $parcelId])
-                : $this->update('parcel_boundaries', (int) $item['boundary']['id'], $item['boundary']['changes']);
+            $boundary = $item['boundary'];
+
+            if (isset($boundary['office_key'])) {
+                $officeId = $this->office($boundary['office_key'], $choices);
+                if ($boundary['action'] === 'create') {
+                    $boundary['values']['engineering_office_id'] = $officeId;
+                } else {
+                    $boundary['changes']['engineering_office_id'] = [null, $officeId];
+                }
+            }
+
+            $boundary['action'] === 'create'
+                ? $this->insert('parcel_boundaries', $boundary['values'] + ['parcel_id' => $parcelId])
+                : $this->update('parcel_boundaries', (int) $boundary['id'], $boundary['changes']);
         }
 
         foreach ($item['survey'] ?? [] as $decision) {
@@ -176,6 +211,42 @@ final class DeedImportApplier
         }
 
         return $this->plans[$plan['plan_no']] = $this->insert('plans', ['plan_no' => $plan['plan_no'], 'district_id' => $districtId]);
+    }
+
+    /** @param  array<string, mixed>  $choices */
+    private function office(string $key, array $choices): int
+    {
+        $choice = $choices[$key];
+
+        if ($choice !== 'create') {
+            return (int) $choice;
+        }
+
+        return $this->offices[$key] ??= $this->insert('engineering_offices', ['name' => (string) $this->decisionsNeeded[$key]['name']]);
+    }
+
+    /**
+     * Point units at their parents, now that every parcel in the file exists.
+     *
+     * @param  array<string, mixed>  $run
+     */
+    private function linkParents(array &$run): void
+    {
+        $missing = [];
+
+        foreach ($this->parentLinks as $parcelId => $parentGeoId) {
+            $parentId = DB::table('parcels')->where('geo_id', $parentGeoId)->value('id');
+
+            if ($parentId === null) {
+                $missing[] = $parentGeoId;
+
+                continue;
+            }
+
+            $this->update('parcels', $parcelId, ['parent_parcel_id' => [null, (int) $parentId]]);
+        }
+
+        $run['parents_not_found'] = array_values(array_unique($missing));
     }
 
     /** @param  array<string, mixed>  $choices */
@@ -217,6 +288,8 @@ final class DeedImportApplier
             $id = (int) $parcel['id'];
             $changes = $parcel['changes'] ?? [];
 
+            unset($changes['parent_geo_id']);
+
             if (isset($changes['plan_no'])) {
                 $changes['plan_id'] = [DB::table('parcels')->where('id', $id)->value('plan_id'), $planId];
                 unset($changes['plan_no']);
@@ -226,6 +299,10 @@ final class DeedImportApplier
                 $this->update('parcels', $id, $changes);
                 $this->stats['parcels_updated']++;
             }
+        }
+
+        if (isset($parcel['parent_geo_id'])) {
+            $this->parentLinks[$id] = $parcel['parent_geo_id'];
         }
 
         if (isset($parcel['geometry'])) {

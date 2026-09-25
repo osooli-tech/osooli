@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Export;
 
 use App\Models\Deed;
+use App\Models\Parcel;
 use App\Models\User;
 use App\Support\OwnerScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,7 +48,11 @@ final class DeedExportFilters
         'has_survey' => '',
         'has_documents' => '',
         'include_archived' => false,
+        'include_deedless' => true,
     ];
+
+    /** Filters that only a deed can meet; set, they rule deedless parcels out. */
+    private const DEED_ONLY = ['deed_no', 'owner', 'deed_status', 'deed_class', 'area_min', 'area_max', 'date_from', 'date_to'];
 
     /** Multi-select filters on the parcel, by column. */
     private const PARCEL_LISTS = ['asset_type', 'fall_in', 'land_transaction', 'allocation_method'];
@@ -76,6 +81,39 @@ final class DeedExportFilters
     public function includeArchived(): bool
     {
         return (bool) $this->values['include_archived'];
+    }
+
+    /** How many features the export will hold: deeds, plus deedless parcels. */
+    public function count(?User $user): int
+    {
+        return $this->query($user)->count() + ($this->parcelsWithoutDeeds($user)?->count() ?? 0);
+    }
+
+    /**
+     * Parcels with no deed, which a deed-by-deed export would otherwise
+     * leave out entirely — or null when they cannot belong: a filter on a
+     * deed's own fields is set, or the user sees parcels only through the
+     * owners of their deeds.
+     *
+     * @return Builder<Parcel>|null
+     */
+    public function parcelsWithoutDeeds(?User $user): ?Builder
+    {
+        $deedFilterSet = array_filter(
+            array_intersect_key($this->values, array_flip(self::DEED_ONLY)),
+            static fn (mixed $v): bool => $v !== '' && $v !== []
+        ) !== [];
+
+        if (! $this->values['include_deedless'] || $deedFilterSet || OwnerScope::isRestricted($user)) {
+            return null;
+        }
+
+        $archived = $this->includeArchived();
+
+        return Parcel::query()
+            ->when($archived, fn (Builder $q) => $q->withTrashed())
+            ->whereDoesntHave('deeds', fn ($d) => $archived ? $d->withoutGlobalScope(SoftDeletingScope::class) : $d)
+            ->tap(fn (Builder $p) => $this->parcelConditions($p));
     }
 
     /**
@@ -113,44 +151,54 @@ final class DeedExportFilters
                         ->orWhereLike('phone', $term)));
             });
 
-        $query->whereHas('parcel', function ($p) use ($v, $archived): void {
+        $query->whereHas('parcel', function ($p) use ($archived): void {
             // withTrashed(), spelled as the scope it removes: inside whereHas the
             // builder is typed by relation, and only the scope call is on it.
             $p->when($archived, fn ($q) => $q->withoutGlobalScope(SoftDeletingScope::class));
-
-            if ($v['district_id'] !== '') {
-                $p->whereHas('plan', fn (Builder $q) => $q->where('district_id', (int) $v['district_id']));
-            } elseif ($v['city_id'] !== '') {
-                $p->whereHas('plan.district', fn (Builder $q) => $q->where('city_id', (int) $v['city_id']));
-            } elseif ($v['region_id'] !== '') {
-                $p->whereHas('plan.district.city', fn (Builder $q) => $q->where('region_id', (int) $v['region_id']));
-            }
-
-            if ($v['plan_no'] !== '') {
-                $p->whereHas('plan', fn (Builder $q) => $q->whereLike('plan_no', '%'.trim((string) $v['plan_no']).'%'));
-            }
-
-            if ($v['parcel'] !== '') {
-                $term = '%'.trim((string) $v['parcel']).'%';
-                $p->where(fn (Builder $q) => $q->whereLike('parcel_no', $term)->orWhereLike('geo_id', $term));
-            }
-
-            foreach (self::PARCEL_LISTS as $column) {
-                if ($v[$column] !== []) {
-                    $p->whereIn($column, (array) $v[$column]);
-                }
-            }
-
-            $p->when(is_numeric($v['price_min']), fn (Builder $q) => $q->where('m_price', '>=', (float) $v['price_min']))
-                ->when(is_numeric($v['price_max']), fn (Builder $q) => $q->where('m_price', '<=', (float) $v['price_max']));
-
-            self::presence($p, $v['has_geometry'], fn (Builder $q) => $q->whereNotNull('geom'), fn (Builder $q) => $q->whereNull('geom'));
-            self::presence($p, $v['has_boundary'], fn (Builder $q) => $q->has('boundary'), fn (Builder $q) => $q->doesntHave('boundary'));
-            self::presence($p, $v['has_survey'], fn (Builder $q) => $q->has('surveyDecisions'), fn (Builder $q) => $q->doesntHave('surveyDecisions'));
-            self::presence($p, $v['has_documents'], fn (Builder $q) => $q->has('photos'), fn (Builder $q) => $q->doesntHave('photos'));
+            $this->parcelConditions($p);
         });
 
         return $query;
+    }
+
+    /**
+     * The filters that describe the land: location, plan, parcel number,
+     * classifications, price, and which records it has.
+     */
+    private function parcelConditions(mixed $p): void
+    {
+        $v = $this->values;
+
+        if ($v['district_id'] !== '') {
+            $p->whereHas('plan', fn (Builder $q) => $q->where('district_id', (int) $v['district_id']));
+        } elseif ($v['city_id'] !== '') {
+            $p->whereHas('plan.district', fn (Builder $q) => $q->where('city_id', (int) $v['city_id']));
+        } elseif ($v['region_id'] !== '') {
+            $p->whereHas('plan.district.city', fn (Builder $q) => $q->where('region_id', (int) $v['region_id']));
+        }
+
+        if ($v['plan_no'] !== '') {
+            $p->whereHas('plan', fn (Builder $q) => $q->whereLike('plan_no', '%'.trim((string) $v['plan_no']).'%'));
+        }
+
+        if ($v['parcel'] !== '') {
+            $term = '%'.trim((string) $v['parcel']).'%';
+            $p->where(fn (Builder $q) => $q->whereLike('parcel_no', $term)->orWhereLike('geo_id', $term));
+        }
+
+        foreach (self::PARCEL_LISTS as $column) {
+            if ($v[$column] !== []) {
+                $p->whereIn($column, (array) $v[$column]);
+            }
+        }
+
+        $p->when(is_numeric($v['price_min']), fn (Builder $q) => $q->where('m_price', '>=', (float) $v['price_min']))
+            ->when(is_numeric($v['price_max']), fn (Builder $q) => $q->where('m_price', '<=', (float) $v['price_max']));
+
+        self::presence($p, $v['has_geometry'], fn (Builder $q) => $q->whereNotNull('geom'), fn (Builder $q) => $q->whereNull('geom'));
+        self::presence($p, $v['has_boundary'], fn (Builder $q) => $q->has('boundary'), fn (Builder $q) => $q->doesntHave('boundary'));
+        self::presence($p, $v['has_survey'], fn (Builder $q) => $q->has('surveyDecisions'), fn (Builder $q) => $q->doesntHave('surveyDecisions'));
+        self::presence($p, $v['has_documents'], fn (Builder $q) => $q->has('photos'), fn (Builder $q) => $q->doesntHave('photos'));
     }
 
     /** Apply a yes / no / any filter. */

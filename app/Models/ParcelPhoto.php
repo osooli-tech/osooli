@@ -114,6 +114,18 @@ class ParcelPhoto extends Model
         return $this->belongsTo(Deed::class);
     }
 
+    /** @return BelongsTo<User, $this> */
+    public function uploader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    /** @return BelongsTo<User, $this> */
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
     /**
      * Which disk holds this document's file, and where on it.
      *

@@ -27,6 +27,8 @@ return [
     'yes' => 'Present',
     'no' => 'Missing',
     'include_archived' => 'Include archived',
+    'include_deedless' => 'Include parcels with no deed',
+    'include_deedless_hint' => 'Exported with their details and polygon, without a deed. Left out when filtering on deed or owner fields.',
 
     'enums' => [
         'deed_status' => 'Deed status',
@@ -54,16 +56,26 @@ return [
         'documents' => 'Documents and their links',
     ],
 
-    'matching' => 'matching deeds',
+    'matching' => 'matching features (deeds and deedless parcels)',
     'reset' => 'Clear filters',
     'export_geojson' => 'Export GeoJSON',
     'nothing_to_export' => 'No deeds match the filters.',
     'started' => 'Export started in the background.',
     'progress' => 'Exporting: :done of :total deeds',
-    'done' => 'Export finished: :count deeds.',
+    'done' => 'Export finished: :count features (:deedless parcels without a deed).',
     'download' => 'Download',
     'failed' => 'Export failed',
     'running' => 'Running',
+
+    'owners_without_deeds' => 'Owners with no deeds',
+    'owners_without_deeds_hint' => 'They have no parcel and no polygon, so they cannot go in the map file; they export as a separate Excel file.',
+    'export_excel' => 'Export Excel',
+    'owner_columns' => [
+        'id' => 'ID',
+        'whatsapp' => 'WhatsApp',
+        'created_at' => 'Added',
+        'archived_at' => 'Archived',
+    ],
 
     'history' => 'Recent exports (files are deleted after :days days)',
     'history_empty' => 'No exports yet.',
@@ -99,5 +111,6 @@ return [
         'has_survey' => 'Decision',
         'has_documents' => 'Documents',
         'include_archived' => 'With archived',
+        'include_deedless' => 'With deedless parcels',
     ],
 ];

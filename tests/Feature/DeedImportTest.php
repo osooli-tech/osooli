@@ -229,6 +229,76 @@ class DeedImportTest extends TestCase
         $this->assertSame('310101000001', $this->deed->fresh()->deed_no);
     }
 
+    public function test_a_parcel_alone_is_imported_without_creating_a_deed(): void
+    {
+        $file = $this->exported();
+        $file['features'][] = [
+            'type' => 'Feature',
+            'geometry' => null,
+            'properties' => ['parcel_geo_id' => 'LAND-ONLY', 'parcel_no' => '777', 'deed' => null],
+        ];
+
+        $run = $this->analyse($file);
+        $item = $this->items($run['id'])[1];
+
+        $this->assertSame('new', $item['status']);
+        $this->assertSame('none', $item['deed']['action']);
+
+        $this->apply($run['id']);
+        $parcel = Parcel::where('geo_id', 'LAND-ONLY')->first();
+        $this->assertNotNull($parcel);
+        $this->assertSame(0, Deed::where('parcel_id', $parcel->id)->count());
+    }
+
+    public function test_a_unit_is_linked_to_a_parent_described_later_in_the_file(): void
+    {
+        $file = $this->exported();
+        $file['features'][] = ['type' => 'Feature', 'geometry' => null,
+            'properties' => ['parcel_geo_id' => 'FLAT-1', 'parent_geo_id' => 'TOWER-1']];
+        $file['features'][] = ['type' => 'Feature', 'geometry' => null,
+            'properties' => ['parcel_geo_id' => 'TOWER-1']];
+        $file['features'][] = ['type' => 'Feature', 'geometry' => null,
+            'properties' => ['parcel_geo_id' => 'FLAT-2', 'parent_geo_id' => 'NOWHERE']];
+
+        $run = $this->analyse($file);
+        $this->assertSame([3 => 'NOWHERE'], $run['unresolved_parents']);
+
+        $this->apply($run['id']);
+        $tower = Parcel::where('geo_id', 'TOWER-1')->value('id');
+        $this->assertSame($tower, Parcel::where('geo_id', 'FLAT-1')->value('parent_parcel_id'));
+        $this->assertNull(Parcel::where('geo_id', 'FLAT-2')->value('parent_parcel_id'));
+
+        // Undo removes the units and their link with them.
+        app(DeedImportUndo::class)->run($run['id'], $this->user);
+        $this->assertDatabaseMissing('parcels', ['geo_id' => 'FLAT-1']);
+        $this->assertDatabaseMissing('parcels', ['geo_id' => 'TOWER-1']);
+    }
+
+    public function test_the_engineering_office_and_deed_match_are_imported(): void
+    {
+        $file = $this->exported();
+        $file['features'][0]['properties']['boundary'] = [
+            'north' => ['border' => 'شارع 30م', 'length' => 25],
+            'matches_deed' => 'نعم',
+            'engineering_office' => 'مكتب الرؤية للاستشارات',
+        ];
+
+        $run = $this->analyse($file);
+        $key = array_key_first($run['decisions_needed']);
+        $this->assertSame('office', $run['decisions_needed'][$key]['type']);
+
+        $this->apply($run['id'], [$key => 'create']);
+        $office = DB::table('engineering_offices')->where('name', 'مكتب الرؤية للاستشارات')->value('id');
+        $boundary = DB::table('parcel_boundaries')->where('parcel_id', $this->deed->parcel_id)->first();
+
+        $this->assertNotNull($office);
+        $this->assertSame((int) $office, (int) $boundary->engineering_office_id);
+        $this->assertTrue((bool) $boundary->matches_deed);
+
+        app(DeedImportUndo::class)->run($run['id'], $this->user);
+        $this->assertDatabaseMissing('engineering_offices', ['name' => 'مكتب الرؤية للاستشارات']);
+    }
+
     public function test_the_stream_reads_a_pretty_printed_file_and_its_header(): void
     {
         $path = storage_path('app/stream-test.geojson');

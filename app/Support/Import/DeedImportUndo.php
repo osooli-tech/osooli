@@ -104,6 +104,7 @@ final class DeedImportUndo
             'owners' => DB::table('deed_owners')->where('owner_id', $id)->exists(),
             'plans' => DB::table('parcels')->where('plan_id', $id)->exists(),
             'districts' => DB::table('plans')->where('district_id', $id)->exists(),
+            'engineering_offices' => DB::table('parcel_boundaries')->where('engineering_office_id', $id)->exists(),
             'deeds' => DB::table('parcel_photos')->where('deed_id', $id)->exists(),
             'parcels' => DB::table('deeds')->where('parcel_id', $id)->exists()
                 || DB::table('parcel_photos')->where('parcel_id', $id)->exists(),

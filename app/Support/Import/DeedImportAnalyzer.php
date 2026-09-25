@@ -42,7 +42,7 @@ final class DeedImportAnalyzer
 
     public const OWNER_FIELDS = ['name', 'phone', 'email', 'whatsapp'];
 
-    public const BOUNDARY_FIELDS = ['n_border', 'n_dim', 's_border', 's_dim', 'e_border', 'e_dim', 'w_border', 'w_dim', 'measured_area', 'survey_date'];
+    public const BOUNDARY_FIELDS = ['n_border', 'n_dim', 's_border', 's_dim', 'e_border', 'e_dim', 'w_border', 'w_dim', 'measured_area', 'survey_date', 'matches_deed'];
 
     public const SURVEY_FIELDS = ['qrar_no', 'report_no', 'qrar_source', 'folder'];
 
@@ -80,6 +80,18 @@ final class DeedImportAnalyzer
     /** @var array<string, list<string>> */
     private array $enumValues = [];
 
+    /** @var array<string, int> normalised office name => id */
+    private array $offices = [];
+
+    /** @var array<int, string> office id => name, for suggestions */
+    private array $officeNames = [];
+
+    /** @var array<string, true> every geo_id the file describes */
+    private array $geoIdsInFile = [];
+
+    /** @var array<int, string> feature index => parent geo_id not yet found */
+    private array $pendingParents = [];
+
     /** @return array<string, mixed> the finished run */
     public function run(string $id, ?User $user): array
     {
@@ -104,6 +116,10 @@ final class DeedImportAnalyzer
 
             $this->owners = new OwnerMatcher;
             $this->locations = new LocationIndex;
+            foreach (DB::table('engineering_offices')->get(['id', 'name']) as $office) {
+                $this->offices[Normalise::arabic((string) $office->name)] = (int) $office->id;
+                $this->officeNames[(int) $office->id] = (string) $office->name;
+            }
             foreach (self::ENUMS as $column) {
                 $this->enumValues[$column] = DatabaseEnum::for($column);
             }
@@ -134,6 +150,13 @@ final class DeedImportAnalyzer
             }
 
             $run['decisions_needed'] = $this->decisions;
+            // A parent named before it appeared in the file is fine; one that
+            // never appears anywhere is not.
+            $run['unresolved_parents'] = array_filter(
+                $this->pendingParents,
+                fn (string $geoId): bool => ! isset($this->geoIdsInFile[$geoId])
+            );
+            $run['counts']['warnings'] += count($run['unresolved_parents']);
             $run['state'] = 'analysed';
         } catch (Throwable $e) {
             report($e);
@@ -190,15 +213,19 @@ final class DeedImportAnalyzer
             ->where(fn ($q) => $q->whereIn('deeds.id', $deedIds ?: [0])->orWhereIn('deeds.deed_no', $deedNos ?: ['']))
             ->get($deedColumns);
 
+        $parentGeoIds = array_filter(array_map(static fn (ImportRecord $r) => $r->parcel['parent_geo_id'], $records));
+
         $parcels = DB::table('parcels')->leftJoin('plans', 'plans.id', '=', 'parcels.plan_id')
+            ->leftJoin('parcels as parents', 'parents.id', '=', 'parcels.parent_parcel_id')
             ->whereIn('parcels.geo_id', $geoIds ?: [''])
-            ->selectRaw('parcels.*, plans.plan_no, ST_AsGeoJSON(parcels.geom, 8) AS geojson')
+            ->selectRaw('parcels.*, plans.plan_no, parents.geo_id AS parent_geo_id, ST_AsGeoJSON(parcels.geom, 8) AS geojson')
             ->get()->keyBy('geo_id');
 
         $parcelIds = $parcels->pluck('id')->all() ?: [0];
         $deedIdsFound = $deeds->pluck('id')->all() ?: [0];
 
         return [
+            'parent_ids' => DB::table('parcels')->whereIn('geo_id', $parentGeoIds ?: [''])->pluck('id', 'geo_id'),
             'deeds_by_id' => $deeds->keyBy('id'),
             'deeds_by_no' => $deeds->keyBy('deed_no'),
             'parcels' => $parcels,
@@ -261,18 +288,27 @@ final class DeedImportAnalyzer
 
             $this->geometry($record, $parcelRow, $item);
             $this->plan($record, $parcelRow, $item);
+            $this->parent($record, $parcelRow, $existing, $item);
 
             if (! empty($item['parcel']['changes']) || isset($item['parcel']['geometry'])) {
                 $item['parcel']['action'] = $parcelRow ? 'update' : 'create';
             }
         }
 
-        // ── Deed ──
-        $this->deed($record, $existing, $geoId, $item);
+        $this->geoIdsInFile[$geoId] = true;
 
-        // ── Owners ──
-        if ($record->owners !== null) {
-            $this->owners($record, $existing, $item);
+        // ── Deed and owners — unless the feature is a parcel alone ──
+        if ($record->hasDeed) {
+            $this->deed($record, $existing, $geoId, $item);
+
+            if ($record->owners !== null) {
+                $this->owners($record, $existing, $item);
+            }
+        } else {
+            $item['deed'] = ['action' => 'none'];
+            if ($record->owners !== null && $record->owners !== []) {
+                $item['warnings'][] = ['code' => 'owners_without_deed'];
+            }
         }
 
         // ── Boundaries and survey decisions (with the parcel's first deed) ──
@@ -280,13 +316,18 @@ final class DeedImportAnalyzer
             $parcelId = $parcelRow?->id;
             if ($record->boundary !== null) {
                 $values = $this->values($record->boundary, self::BOUNDARY_FIELDS, $item);
+                $values['engineering_office_id'] = $this->office($record->engineeringOffice, $item);
                 $current = $parcelId ? ($existing['boundaries'][$parcelId] ?? null) : null;
                 $changes = $current ? $this->changes((array) $current, $values) : [];
                 if ($current === null && array_filter($values, static fn ($v) => $v !== null) !== []) {
                     $item['boundary'] = ['action' => 'create', 'values' => $values];
-                } elseif ($changes !== []) {
+                } elseif ($changes !== [] || isset($item['office_key'])) {
                     $item['boundary'] = ['action' => 'update', 'id' => $current->id, 'changes' => $changes];
                 }
+                if (isset($item['boundary']) && isset($item['office_key'])) {
+                    $item['boundary']['office_key'] = $item['office_key'];
+                }
+                unset($item['office_key']);
             }
 
             if ($record->surveyDecisions !== null) {
@@ -297,6 +338,72 @@ final class DeedImportAnalyzer
         $this->checks($record, $item);
 
         return $this->finish($item);
+    }
+
+    /**
+     * The unit's parent (a flat's building), by GEO ID. The parent may be
+     * described later in the same file, so an unknown one is only flagged
+     * once the whole file has been read.
+     *
+     * @param  array<string, mixed>  $existing
+     * @param  array<string, mixed>  $item
+     */
+    private function parent(ImportRecord $record, ?object $parcelRow, array $existing, array &$item): void
+    {
+        $parent = $record->parcel['parent_geo_id'];
+        $current = $parcelRow === null ? null : $parcelRow->parent_geo_id;
+
+        if ($parent === null || $parent === $current) {
+            return;
+        }
+
+        if ($parent === $record->parcel['geo_id']) {
+            $item['errors'][] = ['code' => 'parent_self'];
+
+            return;
+        }
+
+        $item['parcel']['parent_geo_id'] = $parent;
+        $item['parcel']['changes']['parent_geo_id'] = [$current, $parent];
+
+        if (! isset($existing['parent_ids'][$parent]) && ! isset($this->geoIdsInFile[$parent])) {
+            $this->pendingParents[$item['index']] = $parent;
+        }
+    }
+
+    /**
+     * The engineering office a boundary names: its id when known, otherwise
+     * a decision — create it, or pick the office it probably means.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function office(?string $name, array &$item): ?int
+    {
+        if ($name === null) {
+            return null;
+        }
+
+        $key = Normalise::arabic($name);
+        if (isset($this->offices[$key])) {
+            return $this->offices[$key];
+        }
+
+        $decision = 'office:'.$key;
+        if (! isset($this->decisions[$decision])) {
+            $suggestions = [];
+            foreach ($this->officeNames as $id => $label) {
+                $other = Normalise::arabic($label);
+                if (str_contains($other, $key) || str_contains($key, $other) || levenshtein($key, $other) <= 8) {
+                    $suggestions[] = ['id' => $id, 'label' => $label];
+                }
+            }
+            $this->decisions[$decision] = ['type' => 'office', 'name' => $name, 'suggestions' => array_slice($suggestions, 0, 5)];
+        }
+
+        $item['decisions'][] = $decision;
+        $item['office_key'] = $decision;
+
+        return null;
     }
 
     /** @param  array<string, mixed>  $item */
@@ -620,7 +727,7 @@ final class DeedImportAnalyzer
                 continue;
             }
 
-            $values[$field] = is_float($value) ? $value : trim((string) $value);
+            $values[$field] = is_float($value) || is_bool($value) ? $value : trim((string) $value);
         }
 
         return $values;
@@ -644,9 +751,11 @@ final class DeedImportAnalyzer
             }
 
             $old = $current[$field] ?? null;
-            $same = is_float($new)
+            $same = is_bool($new)
+                ? $old !== null && (bool) $old === $new
+                : (is_float($new)
                 ? $old !== null && is_numeric($old) && round((float) $old, 2) === $new
-                : (string) $old === (string) $new;
+                : (string) $old === (string) $new);
 
             if (! $same) {
                 $changes[$field] = [$old, $new];
@@ -678,7 +787,7 @@ final class DeedImportAnalyzer
     {
         $item['decisions'] = array_values(array_unique($item['decisions']));
 
-        $touches = ($item['deed']['action'] ?? 'same') !== 'same'
+        $touches = ! in_array($item['deed']['action'] ?? 'same', ['same', 'none'], true)
             || in_array($item['parcel']['action'] ?? 'same', ['create', 'update'], true)
             || isset($item['boundary']) || ! empty($item['survey'])
             || ! empty(array_filter($item['owners'] ?? [], static fn (array $o): bool => $o['action'] !== 'link' || $o['link']['action'] !== 'same'))
@@ -688,6 +797,7 @@ final class DeedImportAnalyzer
             $item['errors'] !== [] => 'error',
             $item['decisions'] !== [] => 'decision',
             ($item['deed']['action'] ?? null) === 'create' => 'new',
+            ($item['deed']['action'] ?? null) === 'none' && ($item['parcel']['action'] ?? null) === 'create' => 'new',
             $touches => 'changed',
             default => 'same',
         };

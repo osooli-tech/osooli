@@ -127,6 +127,22 @@
                                             {{ __('imports_center.new_owner') }}
                                         </label>
                                     </div>
+                                @elseif ($decision['type'] === 'office')
+                                    <p class="mb-2 text-on-surface dark:text-white">
+                                        {{ __('imports_center.office_question', ['office' => $decision['name']]) }}
+                                    </p>
+                                    <div class="space-y-1">
+                                        @foreach ($decision['suggestions'] as $suggestion)
+                                            <label class="flex items-center gap-2 cursor-pointer">
+                                                <input type="radio" wire:model="choices.{{ $hash }}" value="{{ $suggestion['id'] }}" class="text-secondary">
+                                                {{ __('imports_center.use_office', ['name' => $suggestion['label']]) }}
+                                            </label>
+                                        @endforeach
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" wire:model="choices.{{ $hash }}" value="create" class="text-secondary">
+                                            {{ __('imports_center.create_office', ['name' => $decision['name']]) }}
+                                        </label>
+                                    </div>
                                 @else
                                     <p class="mb-2 text-on-surface dark:text-white">
                                         {{ __('imports_center.district_question', ['district' => $decision['name'], 'city' => $decision['city']]) }}
@@ -149,6 +165,13 @@
                     </div>
                 @endif
 
+                @if (! empty($run['unresolved_parents']))
+                    <div class="rounded-xl bg-amber-50 dark:bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-300">
+                        ⚠ {{ __('imports_center.parents_missing', ['count' => count($run['unresolved_parents'])]) }}
+                        <span dir="ltr" class="block text-xs mt-1">{{ collect($run['unresolved_parents'])->map(fn ($geo, $i) => '#'.($i + 1).' → '.$geo)->take(20)->implode(' · ') }}</span>
+                    </div>
+                @endif
+
                 {{-- The analysed records. --}}
                 <div class="divide-y divide-outline-variant dark:divide-white/10 rounded-xl border border-outline-variant dark:border-white/10">
                     @forelse ($items as $item)
@@ -158,7 +181,7 @@
                                 <span class="text-xs text-on-surface-variant data-tabular w-10">#{{ $item['index'] + 1 }}</span>
                                 <span class="px-2 py-0.5 rounded-full text-xs {{ $statusStyles[$item['status']] }}">{{ __('imports_center.status.'.$item['status']) }}</span>
                                 <button wire:click="$set('open', {{ $open === $item['index'] ? 'null' : $item['index'] }})" class="font-medium text-on-surface dark:text-white hover:underline" dir="auto">
-                                    {{ __('imports_center.deed') }} {{ $item['label'] }}
+                                    {{ ($item['deed']['action'] ?? null) === 'none' ? __('imports_center.parcel_only') : __('imports_center.deed').' '.$item['label'] }}
                                     <span class="text-xs text-on-surface-variant">· {{ $item['parcel']['geo_id'] ?? '' }}</span>
                                 </button>
                                 @if ($item['warnings'] !== [])
@@ -272,6 +295,11 @@
                     <div class="pt-4 border-t border-outline-variant dark:border-white/10 flex flex-wrap items-center justify-between gap-3">
                         <p class="text-sm text-secondary font-semibold">
                             {{ __('imports_center.applied', collect($run['result'] ?? [])->map(fn ($n) => number_format($n))->all()) }}
+                            @if (! empty($run['parents_not_found']))
+                                <span class="block text-xs font-normal text-amber-700 dark:text-amber-300">
+                                    {{ __('imports_center.parents_not_linked', ['list' => implode('، ', $run['parents_not_found'])]) }}
+                                </span>
+                            @endif
                         </p>
                         <button wire:click="undo" wire:confirm="{{ __('imports_center.undo_confirm') }}" class="{{ $ghost }}">
                             <span class="material-symbols-outlined text-[18px]">undo</span>

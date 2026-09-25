@@ -43,6 +43,12 @@ final class ImportRecord
     /** @var list<string> fields whose flat column and nested copy disagree */
     public array $conflicts = [];
 
+    /** Whether the feature says anything about a deed; if not, it is a parcel alone. */
+    public bool $hasDeed = true;
+
+    /** The engineering office named in the boundary, if any. */
+    public ?string $engineeringOffice = null;
+
     /** @param  array<string, mixed>  $feature */
     public static function fromFeature(array $feature): self
     {
@@ -89,7 +95,11 @@ final class ImportRecord
             'fall_in' => self::str($parcel['fall_in'] ?? null),
             'm_price' => $parcel['m_price'] ?? null,
             'parcel_price' => $parcel['parcel_price'] ?? null,
+            'parent_geo_id' => self::str($pick('parent_geo_id', 'parent_geo_id', $parcel['parent_geo_id'] ?? null)),
         ];
+
+        // A feature with nothing about a deed describes a parcel alone.
+        $record->hasDeed = array_filter($record->deed, static fn (mixed $v): bool => $v !== null && $v !== '') !== [];
 
         $record->planNo = self::str($pick('plan_no', 'plan_no', $parcel['plan']['plan_no'] ?? null));
         $record->location = [
@@ -118,7 +128,9 @@ final class ImportRecord
                 'w_border' => self::str($b['west']['border'] ?? null), 'w_dim' => $b['west']['length'] ?? null,
                 'measured_area' => $b['measured_area'] ?? null,
                 'survey_date' => self::str($b['survey_date'] ?? null),
+                'matches_deed' => self::bool($b['matches_deed'] ?? null),
             ];
+            $record->engineeringOffice = self::str($b['engineering_office'] ?? null);
         }
 
         if (is_array($p['survey_decisions'] ?? null)) {
@@ -162,6 +174,20 @@ final class ImportRecord
         $value = trim((string) $value);
 
         return $value === '' ? null : $value;
+    }
+
+    /** true / false from the ways a spreadsheet or GIS writes them; null if unclear. */
+    private static function bool(mixed $value): ?bool
+    {
+        if (is_bool($value) || $value === null) {
+            return $value;
+        }
+
+        return match (mb_strtolower(trim((string) $value))) {
+            '1', 'true', 'yes', 'نعم', 'مطابق' => true,
+            '0', 'false', 'no', 'لا', 'غير مطابق' => false,
+            default => null,
+        };
     }
 
     private static function int(mixed $value): ?int
