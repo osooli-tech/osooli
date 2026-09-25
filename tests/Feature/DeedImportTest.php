@@ -299,6 +299,26 @@ class DeedImportTest extends TestCase
         $this->assertDatabaseMissing('engineering_offices', ['name' => 'مكتب الرؤية للاستشارات']);
     }
 
+    public function test_two_places_with_one_name_in_a_region_are_told_apart(): void
+    {
+        // As with the two «الدرعية» in the National Address: a second
+        // place of the same name, in the same region, with no districts.
+        $region = Region::where('name_ar', 'منطقة الرياض')->first();
+        City::create(['region_id' => $region->id, 'name_ar' => 'الرياض']);
+
+        // Unedited export: the district settles which «الرياض» is meant.
+        $run = $this->analyse($this->exported());
+        $this->assertSame(0, $run['counts']['error']);
+
+        // No district, a new plan: the city with districts is taken.
+        $file = $this->exported();
+        $file['features'][0]['properties']['district'] = null;
+        $file['features'][0]['properties']['parcel']['location']['district'] = null;
+        $file['features'][0]['properties']['plan_no'] = 'P-NEW-2';
+        $run = $this->analyse($file);
+        $this->assertSame(0, $run['counts']['error']);
+    }
+
     public function test_the_stream_reads_a_pretty_printed_file_and_its_header(): void
     {
         $path = storage_path('app/stream-test.geojson');

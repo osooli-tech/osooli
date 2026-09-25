@@ -121,7 +121,7 @@ return [
         'geometry_invalid' => 'Invalid polygon: :detail',
         'region_not_found' => 'The region is not in the reference data.',
         'city_not_found' => 'City «:detail» is not in the reference data.',
-        'city_ambiguous' => 'More than one city is called «:detail»; give the region in the file.',
+        'city_ambiguous' => 'More than one place in the region is called «:detail» and the district does not settle it; give the district or an existing plan number.',
         'deed_duplicate_in_file' => 'Deed number repeated in the file (first at item :of).',
         'deed_on_other_parcel' => 'This deed is recorded on another parcel (:detail).',
         'deed_without_number' => 'Deed without a number; it will be added as new.',

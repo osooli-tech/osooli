@@ -263,6 +263,7 @@ return [
         'edit' => 'Before an edit',
         'restore' => 'Before a restore',
         'import' => 'Before an import',
+        'cleanup' => 'Before a data cleanup',
     ],
     'geometry_errors' => [
         'malformed' => 'The polygon data could not be read. Redraw it and try again.',

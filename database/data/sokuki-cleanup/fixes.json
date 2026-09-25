@@ -1,0 +1,10302 @@
+{
+ "source": "sokuki-deeds-20260925-091549-jni9ex.geojson",
+ "districts": [
+  {
+   "name_ar": "أوثال",
+   "name_en": "Uthal",
+   "city_ar": "عيون الجواء",
+   "city_en": "Uyun Al Jawa'",
+   "city_national_address_id": 1999,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "القصيباء-1",
+   "name_en": "Qusayba-1",
+   "city_ar": "بريدة",
+   "city_en": "Buraidah",
+   "city_national_address_id": 11,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "المليداء",
+   "name_en": "Al Mulayda",
+   "city_ar": "بريدة",
+   "city_en": "Buraidah",
+   "city_national_address_id": 11,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "بطين-1",
+   "name_en": "Al Butayn-1",
+   "city_ar": "بريدة",
+   "city_en": "Buraidah",
+   "city_national_address_id": 11,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "روض ابن كميان",
+   "name_en": "Rawd Ibn Kumayyan",
+   "city_ar": "بريدة",
+   "city_en": "Buraidah",
+   "city_national_address_id": 11,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "ضلفعة-1",
+   "name_en": "Ad Dalfa'ah-1",
+   "city_ar": "البكيرية",
+   "city_en": "Al Bukayriyah",
+   "city_national_address_id": 2630,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "ضلفعة-2",
+   "name_en": "Ad Dalfa'ah-2",
+   "city_ar": "عيون الجواء",
+   "city_en": "Uyun Al Jawa'",
+   "city_national_address_id": 1999,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "ضلفعة-3",
+   "name_en": "Ad Dalfa'ah-3",
+   "city_ar": "عيون الجواء",
+   "city_en": "Uyun Al Jawa'",
+   "city_national_address_id": 1999,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "كبد-1",
+   "name_en": "Kabd-1",
+   "city_ar": "بريدة",
+   "city_en": "Buraidah",
+   "city_national_address_id": 11,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "كبد-2",
+   "name_en": "Kabd-2",
+   "city_ar": "عيون الجواء",
+   "city_en": "Uyun Al Jawa'",
+   "city_national_address_id": 1999,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "محير الترمس",
+   "name_en": "Mihir At Turmus",
+   "city_ar": "بريدة",
+   "city_en": "Buraidah",
+   "city_national_address_id": 11,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "وادي عنيزة",
+   "name_en": "Wadi Unayzah",
+   "city_ar": "عنيزة",
+   "city_en": "Unayzah",
+   "city_national_address_id": 80,
+   "region_ar": "منطقة القصيم"
+  },
+  {
+   "name_ar": "العمارية",
+   "name_en": "Al 'Ammariyah",
+   "city_ar": null,
+   "city_en": null,
+   "city_national_address_id": null,
+   "region_ar": "منطقة الرياض"
+  },
+  {
+   "name_ar": "الوصيل",
+   "name_en": "Al Wusayl",
+   "city_ar": null,
+   "city_en": null,
+   "city_national_address_id": null,
+   "region_ar": "منطقة الرياض"
+  }
+ ],
+ "plans": [
+  {
+   "parcel_id": 337,
+   "geo_id": "BUTAYN-05-PAR-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 338,
+   "geo_id": "BUTAYN-10-PAD-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 339,
+   "geo_id": "BUTAYN-10-PLAN-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 340,
+   "geo_id": "BUTAYN-10-PLAN-02",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 341,
+   "geo_id": "BUTAYN-10-PAR-02",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 342,
+   "geo_id": "BUTAYN-10-PAR-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 343,
+   "geo_id": "BUTAYN-11-PAR-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 344,
+   "geo_id": "BUTAYN-08-PLAN-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 345,
+   "geo_id": "BUTAYN-08-PAR-03",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 346,
+   "geo_id": "BUTAYN-08-PAR-02",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 347,
+   "geo_id": "BUTAYN-02-PAD-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 348,
+   "geo_id": "BUTAYN-02-PAR-02",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 349,
+   "geo_id": "BUTAYN-02-PAR-03",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 350,
+   "geo_id": "Uthal-PAD-02",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 351,
+   "geo_id": "Uthal-PAD-03",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 352,
+   "geo_id": "Uthal-PAD-04",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 353,
+   "geo_id": "Uthal-PAD-05",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 354,
+   "geo_id": "Uthal-PAD-06",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 355,
+   "geo_id": "Uthal-PAD-07",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 356,
+   "geo_id": "Uthal-PAD-08",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 357,
+   "geo_id": "Uthal-PAD-09",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 358,
+   "geo_id": "Uthal-PAD-01",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 359,
+   "geo_id": "Uthal-PAR-08",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 361,
+   "geo_id": "Qusayba-01-PAR-03",
+   "plan_no": "بدون - القصيباء-1",
+   "district": "القصيباء-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 363,
+   "geo_id": "WADIUnaizah-PAR-14",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 364,
+   "geo_id": "Dalfaa-01-PAR-02",
+   "plan_no": "بدون - ضلفعة-1",
+   "district": "ضلفعة-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 365,
+   "geo_id": "WADIUnaizah-PAR-02",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 366,
+   "geo_id": "WADIUnaizah-PAR-05",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 367,
+   "geo_id": "Dalfaa-02-PAR-01",
+   "plan_no": "بدون - ضلفعة-2",
+   "district": "ضلفعة-2",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 368,
+   "geo_id": "WADIUnaizah-PAR-03",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «None» في حي وادي عنيزة"
+  },
+  {
+   "parcel_id": 369,
+   "geo_id": "WADIUnaizah-PAR-04",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 370,
+   "geo_id": "WADIUnaizah-PAR-12",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 371,
+   "geo_id": "Qusayba-01-PAR-01",
+   "plan_no": "بدون - القصيباء-1",
+   "district": "القصيباء-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 372,
+   "geo_id": "WADIUnaizah-PAR-09",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 373,
+   "geo_id": "WADIUnaizah-PAR-07",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 374,
+   "geo_id": "NFR-PAR-01",
+   "plan_no": "بدون - روض ابن كميان",
+   "district": "روض ابن كميان",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 375,
+   "geo_id": "WADIUnaizah-PAR-11",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 376,
+   "geo_id": "Dalfaa-01-PAR-01",
+   "plan_no": "بدون - ضلفعة-1",
+   "district": "ضلفعة-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 377,
+   "geo_id": "KABAD-02-PAD-01",
+   "plan_no": "بدون - كبد-2",
+   "district": "كبد-2",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 378,
+   "geo_id": "WADIUnaizah-PAR-10",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 379,
+   "geo_id": "WADIUnaizah-PAR-01",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 380,
+   "geo_id": "BUTAYN-08-PAR-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 381,
+   "geo_id": "WADIUnaizah-PAR-08",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 382,
+   "geo_id": "Qusayba-01-PAR-02",
+   "plan_no": "بدون - القصيباء-1",
+   "district": "القصيباء-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 383,
+   "geo_id": "WADIUnaizah-PAR-06",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 385,
+   "geo_id": "Qusayba-01-PAD-01",
+   "plan_no": "بدون - القصيباء-1",
+   "district": "القصيباء-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 387,
+   "geo_id": "BUTAYN-02-PAD-02",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 389,
+   "geo_id": "Dalfaa-01-PAD-01",
+   "plan_no": "بدون - ضلفعة-1",
+   "district": "ضلفعة-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 390,
+   "geo_id": "WADIUnaizah-PAD-08",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 392,
+   "geo_id": "WADIUnaizah-PAD-04",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 393,
+   "geo_id": "WADIUnaizah-PAD-06",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 397,
+   "geo_id": "BUTAYN-09-PAD-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 405,
+   "geo_id": "WADIUnaizah-PAD-02",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 406,
+   "geo_id": "WADIUnaizah-PAD-01",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 407,
+   "geo_id": "WADIUnaizah-PAD-03",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 408,
+   "geo_id": "WADIUnaizah-PAD-05",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 410,
+   "geo_id": "AIRPORT-PLAN-01",
+   "plan_no": "بدون - المليداء",
+   "district": "المليداء",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 411,
+   "geo_id": "BUTAYN-02-PAR-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 412,
+   "geo_id": "BUTAYN-02-PAR-04",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 413,
+   "geo_id": "BUTAYN-02-PAR-05",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 414,
+   "geo_id": "BUTAYN-02-PAR-06",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 417,
+   "geo_id": "WADIUnaizah-PAR-13",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 418,
+   "geo_id": "Uthal-PAR-19",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 419,
+   "geo_id": "Uthal-PAR-15",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 420,
+   "geo_id": "Uthal-PAR-14",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 421,
+   "geo_id": "Uthal-PAR-18",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 422,
+   "geo_id": "Uthal-PAR-17",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 423,
+   "geo_id": "Uthal-PAR-16",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 424,
+   "geo_id": "Uthal-PAR-12",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 425,
+   "geo_id": "Uthal-PAR-13",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 426,
+   "geo_id": "Uthal-PAR-10",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 427,
+   "geo_id": "Uthal-PAR-11",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 428,
+   "geo_id": "Uthal-PAR-09",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 429,
+   "geo_id": "Uthal-PAR-05",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 430,
+   "geo_id": "Uthal-PAR-06",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 431,
+   "geo_id": "Uthal-PAR-04",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 432,
+   "geo_id": "Uthal-PAR-07",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 433,
+   "geo_id": "Uthal-PAR-01",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 434,
+   "geo_id": "Uthal-PAR-03",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 435,
+   "geo_id": "Uthal-PAR-02",
+   "plan_no": "بدون - أوثال",
+   "district": "أوثال",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 436,
+   "geo_id": "BUTAYN-11-PAD-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 438,
+   "geo_id": "WADIUnaizah-PAD-07",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 439,
+   "geo_id": "WADIUnaizah-PAD-09",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 440,
+   "geo_id": "WADIUnaizah-PAD-10",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 441,
+   "geo_id": "WADIUnaizah-PAD-11",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 442,
+   "geo_id": "WADIUnaizah-PAD-12",
+   "plan_no": "بدون - وادي عنيزة",
+   "district": "وادي عنيزة",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 443,
+   "geo_id": "KABD-01-PAR-01",
+   "plan_no": "بدون - كبد-1",
+   "district": "كبد-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 451,
+   "geo_id": "BUTAYN-01-PAR-03",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 452,
+   "geo_id": "BUTAYN-01-PAR-01",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  },
+  {
+   "parcel_id": 453,
+   "geo_id": "BUTAYN-01-PAR-02",
+   "plan_no": "بدون - بطين-1",
+   "district": "بطين-1",
+   "reason": "القطعة بلا مخطط؛ كانت على المخطط المشترك «بدون» في حي بطين-1"
+  }
+ ],
+ "values": [
+  {
+   "table": "owners",
+   "id": 1,
+   "field": "phone",
+   "from": "0511111111",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 32,
+   "field": "phone",
+   "from": "0511111112",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 33,
+   "field": "phone",
+   "from": "0511111113",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 35,
+   "field": "phone",
+   "from": "0511111114",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 36,
+   "field": "phone",
+   "from": "0511111115",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 38,
+   "field": "phone",
+   "from": "0511111116",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 39,
+   "field": "phone",
+   "from": "0511111117",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 40,
+   "field": "phone",
+   "from": "0511111118",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 41,
+   "field": "phone",
+   "from": "0511111119",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 42,
+   "field": "phone",
+   "from": "0511111120",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 43,
+   "field": "phone",
+   "from": "0511111121",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 44,
+   "field": "phone",
+   "from": "0511111122",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 45,
+   "field": "phone",
+   "from": "0511111123",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 46,
+   "field": "phone",
+   "from": "0511111124",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 47,
+   "field": "phone",
+   "from": "0511111125",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 49,
+   "field": "phone",
+   "from": "0511111126",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 53,
+   "field": "phone",
+   "from": "0511111127",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 54,
+   "field": "phone",
+   "from": "0511111128",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 55,
+   "field": "phone",
+   "from": "0511111129",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 56,
+   "field": "phone",
+   "from": "0511111130",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 57,
+   "field": "phone",
+   "from": "0511111131",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 58,
+   "field": "phone",
+   "from": "0511111132",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 59,
+   "field": "phone",
+   "from": "0511111133",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 75,
+   "field": "phone",
+   "from": "0511111134",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 76,
+   "field": "phone",
+   "from": "0511111135",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 77,
+   "field": "phone",
+   "from": "0511111136",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 80,
+   "field": "phone",
+   "from": "0511111137",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 81,
+   "field": "phone",
+   "from": "0511111138",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 82,
+   "field": "phone",
+   "from": "0511111139",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 84,
+   "field": "phone",
+   "from": "0511111140",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 85,
+   "field": "phone",
+   "from": "0511111141",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 87,
+   "field": "phone",
+   "from": "0511111142",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 88,
+   "field": "phone",
+   "from": "0511111143",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 89,
+   "field": "phone",
+   "from": "0511111144",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 90,
+   "field": "phone",
+   "from": "0511111145",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 91,
+   "field": "phone",
+   "from": "0511111146",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 92,
+   "field": "phone",
+   "from": "0511111147",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 93,
+   "field": "phone",
+   "from": "0511111148",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 96,
+   "field": "phone",
+   "from": "0511111149",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 98,
+   "field": "phone",
+   "from": "0511111150",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 99,
+   "field": "phone",
+   "from": "0511111151",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 100,
+   "field": "phone",
+   "from": "0511111152",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 102,
+   "field": "phone",
+   "from": "0511111153",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 103,
+   "field": "phone",
+   "from": "0511111154",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 103,
+   "field": "national_id",
+   "from": "100353750",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "owners",
+   "id": 104,
+   "field": "phone",
+   "from": "0511111155",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 105,
+   "field": "phone",
+   "from": "0511111156",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 106,
+   "field": "phone",
+   "from": "0511111157",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 106,
+   "field": "name",
+   "from": "أحمد بن محمد  عثمان الدهش",
+   "to": "أحمد بن محمد عثمان الدهش",
+   "reason": "إزالة مسافات زائدة"
+  },
+  {
+   "table": "owners",
+   "id": 107,
+   "field": "phone",
+   "from": "0511111158",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 109,
+   "field": "phone",
+   "from": "0511111159",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 116,
+   "field": "phone",
+   "from": "0511111160",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 117,
+   "field": "phone",
+   "from": "0511111161",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 120,
+   "field": "phone",
+   "from": "0511111162",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 122,
+   "field": "phone",
+   "from": "0511111163",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 123,
+   "field": "phone",
+   "from": "0511111164",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 124,
+   "field": "phone",
+   "from": "0511111165",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 127,
+   "field": "phone",
+   "from": "0511111166",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 132,
+   "field": "phone",
+   "from": "0511111167",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 134,
+   "field": "phone",
+   "from": "0511111168",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 136,
+   "field": "phone",
+   "from": "0511111169",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 137,
+   "field": "phone",
+   "from": "0511111170",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 138,
+   "field": "phone",
+   "from": "0511111171",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 143,
+   "field": "phone",
+   "from": "0511111172",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 144,
+   "field": "phone",
+   "from": "0511111173",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 146,
+   "field": "phone",
+   "from": "0511111174",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 147,
+   "field": "phone",
+   "from": "0511111175",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 148,
+   "field": "phone",
+   "from": "0511111176",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 151,
+   "field": "phone",
+   "from": "0511111177",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 152,
+   "field": "phone",
+   "from": "0511111178",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 153,
+   "field": "phone",
+   "from": "0511111179",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 153,
+   "field": "national_id",
+   "from": "911613000156",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "owners",
+   "id": 154,
+   "field": "phone",
+   "from": "0511111180",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 155,
+   "field": "phone",
+   "from": "0511111181",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 156,
+   "field": "phone",
+   "from": "0511111182",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 158,
+   "field": "phone",
+   "from": "0511111183",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 159,
+   "field": "phone",
+   "from": "0511111184",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 162,
+   "field": "phone",
+   "from": "0511111185",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 163,
+   "field": "phone",
+   "from": "0511111186",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 164,
+   "field": "phone",
+   "from": "0511111187",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 165,
+   "field": "phone",
+   "from": "0511111188",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 166,
+   "field": "phone",
+   "from": "0511111189",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 167,
+   "field": "phone",
+   "from": "0511111190",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 168,
+   "field": "phone",
+   "from": "0511111191",
+   "to": null,
+   "reason": "رقم جوال تجريبي (05111111xx) وليس رقم المالك"
+  },
+  {
+   "table": "owners",
+   "id": 403,
+   "field": "national_id",
+   "from": "148956",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "owners",
+   "id": 454,
+   "field": "national_id",
+   "from": "47192",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "owners",
+   "id": 455,
+   "field": "national_id",
+   "from": "123597",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "owners",
+   "id": 457,
+   "field": "national_id",
+   "from": "166435",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "owners",
+   "id": 458,
+   "field": "national_id",
+   "from": "104660577",
+   "to": null,
+   "reason": "رقم هوية غير صالح: يجب أن يكون 10 أرقام يبدأ بـ1 أو 2 أو 7"
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 1
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 2
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "w_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 2
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 3
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 4
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 8
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 9
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 19
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "وادي ",
+   "to": "وادي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 20
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "n_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 27
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "n_border",
+   "from": "قطعة رقم 25 ",
+   "to": "قطعة رقم 25",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 73
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "n_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 82
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 50 متر ",
+   "to": "شارع عرض 50 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 83
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 15 متر ",
+   "to": "شارع عرض 15 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 85
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "n_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 94
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "قطعة رقم 57 ",
+   "to": "قطعة رقم 57",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 94
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 94
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "w_border",
+   "from": "شارع عرض 15 متر ",
+   "to": "شارع عرض 15 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 98
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "شارع عرض 15 متر ",
+   "to": "شارع عرض 15 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 100
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "w_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 100
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 103
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض  15 متر",
+   "to": "شارع عرض 15 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 132
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 50 متر منكسر ",
+   "to": "شارع عرض 50 متر منكسر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 144
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "شارع عرض 15 متر ",
+   "to": "شارع عرض 15 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 153
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "n_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 159
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "شارع عرض 25 متر ",
+   "to": "شارع عرض 25 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 159
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 20 متر ",
+   "to": "شارع عرض 20 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 159
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "w_border",
+   "from": "شارع عرض 36 متر ",
+   "to": "شارع عرض 36 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 159
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 30 متر ",
+   "to": "شارع عرض 30 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 165
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع عرض 50 متر ",
+   "to": "شارع عرض 50 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 456
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "أرض مملوكة ",
+   "to": "أرض مملوكة",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 457
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "شارع ",
+   "to": "شارع",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 458
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "أرض مملوكة ",
+   "to": "أرض مملوكة",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 459
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "n_border",
+   "from": "باقي القطعة ",
+   "to": "باقي القطعة",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 460
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "e_border",
+   "from": "باقي الأرض ",
+   "to": "باقي الأرض",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 462
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "w_border",
+   "from": "شارع عرض 50 متر ",
+   "to": "شارع عرض 50 متر",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 463
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "s_border",
+   "from": "أرض مملوكة ",
+   "to": "أرض مملوكة",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 464
+  },
+  {
+   "table": "parcel_boundaries",
+   "id": 0,
+   "field": "w_border",
+   "from": "الجزء المباع لأحمد الراجحي ",
+   "to": "الجزء المباع لأحمد الراجحي",
+   "reason": "إزالة مسافات زائدة",
+   "parcel_id": 464
+  },
+  {
+   "table": "deeds",
+   "id": 102,
+   "field": "deed_date_hijri",
+   "from": "0444-09-21",
+   "to": "1444-09-21",
+   "reason": "سنة هجرية ناقصة الرقم الأول (04xx ← 14xx)"
+  },
+  {
+   "table": "deeds",
+   "id": 135,
+   "field": "deed_date_hijri",
+   "from": "0445-08-25",
+   "to": "1445-08-25",
+   "reason": "سنة هجرية ناقصة الرقم الأول (04xx ← 14xx)"
+  }
+ ],
+ "geometries": [
+  {
+   "parcel_id": 369,
+   "geo_id": "WADIUnaizah-PAR-04",
+   "before_area": 555645.84,
+   "after_area_approx": 555645.84,
+   "reason": "إصلاح مضلع متقاطع ذاتياً",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.86591309,
+        26.11014244
+       ],
+       [
+        43.86620133,
+        26.11157172
+       ],
+       [
+        43.86609731,
+        26.1122419
+       ],
+       [
+        43.86547833,
+        26.113520310000002
+       ],
+       [
+        43.86441121,
+        26.11765856
+       ],
+       [
+        43.86485583,
+        26.117810640000002
+       ],
+       [
+        43.86681554,
+        26.11765346
+       ],
+       [
+        43.8673444,
+        26.11799142
+       ],
+       [
+        43.86741472,
+        26.11909822
+       ],
+       [
+        43.86964248,
+        26.11906447
+       ],
+       [
+        43.87167495,
+        26.11673712
+       ],
+       [
+        43.87360273,
+        26.11268056
+       ],
+       [
+        43.86591309,
+        26.11014244
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 436,
+   "geo_id": "BUTAYN-11-PAD-01",
+   "before_area": 1117937.98,
+   "after_area_approx": 1117936.87,
+   "reason": "قص تداخل 1 م² مع القطعة BUTAYN-11-PAR-01",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.76909257,
+        26.96353942
+       ],
+       [
+        43.769038970000004,
+        26.96358786
+       ],
+       [
+        43.768830030000004,
+        26.9638183
+       ],
+       [
+        43.76875778,
+        26.96389983
+       ],
+       [
+        43.76869022,
+        26.96398986
+       ],
+       [
+        43.76764997,
+        26.965195440000002
+       ],
+       [
+        43.76751299,
+        26.96534756
+       ],
+       [
+        43.76736823,
+        26.96552329
+       ],
+       [
+        43.767160080000004,
+        26.96576809
+       ],
+       [
+        43.76701316,
+        26.96594667
+       ],
+       [
+        43.7668462,
+        26.96613665
+       ],
+       [
+        43.76674966,
+        26.96623764
+       ],
+       [
+        43.7649743,
+        26.96830283
+       ],
+       [
+        43.76486191,
+        26.96844712
+       ],
+       [
+        43.76481004,
+        26.96851622
+       ],
+       [
+        43.76474918,
+        26.96858857
+       ],
+       [
+        43.76475208,
+        26.96859007
+       ],
+       [
+        43.774655530000004,
+        26.97401417
+       ],
+       [
+        43.776121090000004,
+        26.97297382
+       ],
+       [
+        43.77623898,
+        26.972893940000002
+       ],
+       [
+        43.77643327,
+        26.97276017
+       ],
+       [
+        43.77838145,
+        26.97141033
+       ],
+       [
+        43.77853716,
+        26.97130433
+       ],
+       [
+        43.77869708,
+        26.971196850000002
+       ],
+       [
+        43.77912055,
+        26.97088416
+       ],
+       [
+        43.77919702,
+        26.9708249
+       ],
+       [
+        43.77930994,
+        26.97074106
+       ],
+       [
+        43.779422000000004,
+        26.97065351
+       ],
+       [
+        43.77949085,
+        26.97058903
+       ],
+       [
+        43.77991446,
+        26.970213010000002
+       ],
+       [
+        43.77998714,
+        26.97014818
+       ],
+       [
+        43.78008982,
+        26.970050020000002
+       ],
+       [
+        43.7801916,
+        26.96995393
+       ],
+       [
+        43.78137119,
+        26.968921130000002
+       ],
+       [
+        43.78147632,
+        26.96883193
+       ],
+       [
+        43.78258478,
+        26.96786247
+       ],
+       [
+        43.78269031,
+        26.96776925
+       ],
+       [
+        43.78287034,
+        26.96761467
+       ],
+       [
+        43.78298078,
+        26.96752437
+       ],
+       [
+        43.78305378,
+        26.96746415
+       ],
+       [
+        43.7831209,
+        26.96739839
+       ],
+       [
+        43.78315591,
+        26.96736586
+       ],
+       [
+        43.78315703,
+        26.967325900000002
+       ],
+       [
+        43.783128850000004,
+        26.967294550000002
+       ],
+       [
+        43.78304352,
+        26.96726852
+       ],
+       [
+        43.78289301,
+        26.96722941
+       ],
+       [
+        43.78036517,
+        26.96657076
+       ],
+       [
+        43.780180800000004,
+        26.966518790000002
+       ],
+       [
+        43.78002838,
+        26.96647431
+       ],
+       [
+        43.77980655,
+        26.96641975
+       ],
+       [
+        43.77957359,
+        26.96636604
+       ],
+       [
+        43.77938535,
+        26.9663128
+       ],
+       [
+        43.77906292,
+        26.96622787
+       ],
+       [
+        43.77898007,
+        26.96620059
+       ],
+       [
+        43.77871067,
+        26.96613493
+       ],
+       [
+        43.778476510000004,
+        26.966076870000002
+       ],
+       [
+        43.776762930000004,
+        26.96562472
+       ],
+       [
+        43.77298012,
+        26.9646081
+       ],
+       [
+        43.77271427,
+        26.964540120000002
+       ],
+       [
+        43.7725524,
+        26.96449519
+       ],
+       [
+        43.77045746,
+        26.96391944
+       ],
+       [
+        43.77038007,
+        26.9639001
+       ],
+       [
+        43.77010333,
+        26.96381755
+       ],
+       [
+        43.76919342,
+        26.96355159
+       ],
+       [
+        43.76915015,
+        26.96353784
+       ],
+       [
+        43.76911808,
+        26.963528110000002
+       ],
+       [
+        43.76909257,
+        26.96353942
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 345,
+   "geo_id": "BUTAYN-08-PAR-03",
+   "before_area": 2143083.9,
+   "after_area_approx": 2142995.03,
+   "reason": "قص تداخل 89 م² مع القطعة BUTAYN-08-PLAN-01",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.66935717,
+        26.78914975
+       ],
+       [
+        43.68457068,
+        26.79589549
+       ],
+       [
+        43.68457671,
+        26.79584994
+       ],
+       [
+        43.68458291,
+        26.79578138
+       ],
+       [
+        43.68462109,
+        26.795494
+       ],
+       [
+        43.68464744,
+        26.79529033
+       ],
+       [
+        43.68467462,
+        26.79509107
+       ],
+       [
+        43.6847115,
+        26.79481617
+       ],
+       [
+        43.68474623,
+        26.79457755
+       ],
+       [
+        43.68478102,
+        26.79429289
+       ],
+       [
+        43.684818570000004,
+        26.79404547
+       ],
+       [
+        43.6848623,
+        26.79371691
+       ],
+       [
+        43.6849014,
+        26.79342893
+       ],
+       [
+        43.6849385,
+        26.79314236
+       ],
+       [
+        43.68498638,
+        26.79277102
+       ],
+       [
+        43.68502444,
+        26.79249455
+       ],
+       [
+        43.68505475,
+        26.79228575
+       ],
+       [
+        43.68617342,
+        26.783943790000002
+       ],
+       [
+        43.68274269,
+        26.78098589
+       ],
+       [
+        43.68266897,
+        26.78083852
+       ],
+       [
+        43.66902914,
+        26.77987458
+       ],
+       [
+        43.66935717,
+        26.78914975
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 387,
+   "geo_id": "BUTAYN-02-PAD-02",
+   "before_area": 51341382.53,
+   "after_area_approx": 51341157.89,
+   "reason": "قص تداخل 224 م² مع القطعة BUTAYN-02-PAR-03",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.66503051,
+        26.73839778
+       ],
+       [
+        43.66502671,
+        26.73875992
+       ],
+       [
+        43.66502703,
+        26.73884868
+       ],
+       [
+        43.66502331,
+        26.73902772
+       ],
+       [
+        43.66501452,
+        26.7392559
+       ],
+       [
+        43.66500594,
+        26.73943527
+       ],
+       [
+        43.66499201,
+        26.73961177
+       ],
+       [
+        43.66498143,
+        26.73975003
+       ],
+       [
+        43.66496615,
+        26.73992729
+       ],
+       [
+        43.66495375,
+        26.7400609
+       ],
+       [
+        43.66492763,
+        26.74019462
+       ],
+       [
+        43.66490768,
+        26.74028194
+       ],
+       [
+        43.664878030000004,
+        26.74046117
+       ],
+       [
+        43.66485296,
+        26.74059249
+       ],
+       [
+        43.6648197,
+        26.74072512
+       ],
+       [
+        43.66479779,
+        26.74081479
+       ],
+       [
+        43.6647878,
+        26.74085673
+       ],
+       [
+        43.66478092,
+        26.74090215
+       ],
+       [
+        43.66476221,
+        26.74117159
+       ],
+       [
+        43.66474682,
+        26.7413499
+       ],
+       [
+        43.66473443,
+        26.74148782
+       ],
+       [
+        43.66473098,
+        26.74162255
+       ],
+       [
+        43.66473271,
+        26.74175722
+       ],
+       [
+        43.66472747,
+        26.7418452
+       ],
+       [
+        43.66472848,
+        26.74193848
+       ],
+       [
+        43.66475522,
+        26.74211455
+       ],
+       [
+        43.66478283,
+        26.74228507
+       ],
+       [
+        43.66480565,
+        26.74241938
+       ],
+       [
+        43.66481985,
+        26.74250875
+       ],
+       [
+        43.66482738,
+        26.74255085
+       ],
+       [
+        43.66483779,
+        26.74259802
+       ],
+       [
+        43.66488038,
+        26.74272538
+       ],
+       [
+        43.66495278,
+        26.74294157
+       ],
+       [
+        43.66498182,
+        26.743028770000002
+       ],
+       [
+        43.66499832,
+        26.74307099
+       ],
+       [
+        43.66506276,
+        26.74319375
+       ],
+       [
+        43.665101820000004,
+        26.74327667
+       ],
+       [
+        43.665134540000004,
+        26.74335968
+       ],
+       [
+        43.665172500000004,
+        26.743454970000002
+       ],
+       [
+        43.66525935,
+        26.74360527
+       ],
+       [
+        43.6653355,
+        26.74372347
+       ],
+       [
+        43.66543102,
+        26.74388235
+       ],
+       [
+        43.66552832,
+        26.74404135
+       ],
+       [
+        43.66559869,
+        26.74416002
+       ],
+       [
+        43.6656484,
+        26.74423789
+       ],
+       [
+        43.66575155,
+        26.74439167
+       ],
+       [
+        43.66582969,
+        26.74450792
+       ],
+       [
+        43.66590484,
+        26.74462428
+       ],
+       [
+        43.66593052,
+        26.744667330000002
+       ],
+       [
+        43.66602495,
+        26.744822160000002
+       ],
+       [
+        43.66612393,
+        26.74497924
+       ],
+       [
+        43.66622006,
+        26.745137070000002
+       ],
+       [
+        43.66628287,
+        26.74525696
+       ],
+       [
+        43.66634398,
+        26.7453837
+       ],
+       [
+        43.66641294,
+        26.74555261
+       ],
+       [
+        43.66648363,
+        26.7457205
+       ],
+       [
+        43.66653792,
+        26.7458459
+       ],
+       [
+        43.66659817,
+        26.74596907
+       ],
+       [
+        43.6666607,
+        26.74609417
+       ],
+       [
+        43.666703070000004,
+        26.74617477
+       ],
+       [
+        43.66674368,
+        26.74625891
+       ],
+       [
+        43.6668071,
+        26.74638114
+       ],
+       [
+        43.66684754,
+        26.74646401
+       ],
+       [
+        43.66689409,
+        26.74654117
+       ],
+       [
+        43.66694246,
+        26.74662094
+       ],
+       [
+        43.66703313,
+        26.74678343
+       ],
+       [
+        43.6670917,
+        26.74690606
+       ],
+       [
+        43.66715369,
+        26.747027160000002
+       ],
+       [
+        43.6672283,
+        26.74714774
+       ],
+       [
+        43.66727833,
+        26.74722762
+       ],
+       [
+        43.66734638,
+        26.74734889
+       ],
+       [
+        43.6674109,
+        26.74746759
+       ],
+       [
+        43.66747457,
+        26.74759252
+       ],
+       [
+        43.66754319,
+        26.74771106
+       ],
+       [
+        43.66763956,
+        26.74787088
+       ],
+       [
+        43.66771518,
+        26.74798912
+       ],
+       [
+        43.66779295,
+        26.748102120000002
+       ],
+       [
+        43.66787284,
+        26.74821931
+       ],
+       [
+        43.66801919,
+        26.7484033
+       ],
+       [
+        43.668115470000004,
+        26.74850581
+       ],
+       [
+        43.668149910000004,
+        26.74854025
+       ],
+       [
+        43.66825663,
+        26.74863243
+       ],
+       [
+        43.66833153,
+        26.748695
+       ],
+       [
+        43.66854662,
+        26.748811710000002
+       ],
+       [
+        43.66874707,
+        26.74894966
+       ],
+       [
+        43.66891123,
+        26.74905156
+       ],
+       [
+        43.66899102,
+        26.74910454
+       ],
+       [
+        43.66914516,
+        26.74921837
+       ],
+       [
+        43.66926685,
+        26.749300560000002
+       ],
+       [
+        43.66938637,
+        26.74938284
+       ],
+       [
+        43.669510620000004,
+        26.74945847
+       ],
+       [
+        43.66963636,
+        26.74953544
+       ],
+       [
+        43.669796160000004,
+        26.7496419
+       ],
+       [
+        43.66995759,
+        26.74974702
+       ],
+       [
+        43.67007232,
+        26.74983519
+       ],
+       [
+        43.67015287,
+        26.74989479
+       ],
+       [
+        43.67027192,
+        26.74997322
+       ],
+       [
+        43.67035434,
+        26.75002659
+       ],
+       [
+        43.67051033,
+        26.750140000000002
+       ],
+       [
+        43.670625040000004,
+        26.75022694
+       ],
+       [
+        43.67070461,
+        26.75028313
+       ],
+       [
+        43.67082814,
+        26.75035994
+       ],
+       [
+        43.6708713,
+        26.75038429
+       ],
+       [
+        43.67100352,
+        26.75044732
+       ],
+       [
+        43.671098990000004,
+        26.75047961
+       ],
+       [
+        43.67124224,
+        26.75052189
+       ],
+       [
+        43.6714806,
+        26.75059176
+       ],
+       [
+        43.67167328,
+        26.75064911
+       ],
+       [
+        43.67196121,
+        26.75072389
+       ],
+       [
+        43.67229904,
+        26.750806700000002
+       ],
+       [
+        43.67249371,
+        26.75085663
+       ],
+       [
+        43.67253436,
+        26.75086339
+       ],
+       [
+        43.67257493,
+        26.750874160000002
+       ],
+       [
+        43.67273614,
+        26.75092366
+       ],
+       [
+        43.67287721,
+        26.7509665
+       ],
+       [
+        43.67292542,
+        26.75098057
+       ],
+       [
+        43.67307558,
+        26.75101004
+       ],
+       [
+        43.67326609,
+        26.751063300000002
+       ],
+       [
+        43.67346133,
+        26.7511059
+       ],
+       [
+        43.67365426,
+        26.75114756
+       ],
+       [
+        43.67384895,
+        26.751195810000002
+       ],
+       [
+        43.67404294,
+        26.75123755
+       ],
+       [
+        43.67428608,
+        26.7512867
+       ],
+       [
+        43.67443598,
+        26.75131755
+       ],
+       [
+        43.67458188,
+        26.75134885
+       ],
+       [
+        43.67467635,
+        26.75136946
+       ],
+       [
+        43.67477334,
+        26.75139732
+       ],
+       [
+        43.67487389,
+        26.75141482
+       ],
+       [
+        43.67496966,
+        26.75143186
+       ],
+       [
+        43.67502064,
+        26.7514331
+       ],
+       [
+        43.67506823,
+        26.75145062
+       ],
+       [
+        43.675101930000004,
+        26.7514714
+       ],
+       [
+        43.67511492,
+        26.751496760000002
+       ],
+       [
+        43.67512954,
+        26.75153935
+       ],
+       [
+        43.67515537,
+        26.75157772
+       ],
+       [
+        43.67519797,
+        26.75160151
+       ],
+       [
+        43.67524221,
+        26.75161648
+       ],
+       [
+        43.67533461,
+        26.751646660000002
+       ],
+       [
+        43.67543321,
+        26.75167571
+       ],
+       [
+        43.67567401,
+        26.75173191
+       ],
+       [
+        43.67586738,
+        26.751777620000002
+       ],
+       [
+        43.6760611,
+        26.7518247
+       ],
+       [
+        43.6762054,
+        26.75186252
+       ],
+       [
+        43.676347480000004,
+        26.75190088
+       ],
+       [
+        43.67658606,
+        26.75196626
+       ],
+       [
+        43.67672871,
+        26.75200597
+       ],
+       [
+        43.67687408,
+        26.75204467
+       ],
+       [
+        43.67706642,
+        26.75209065
+       ],
+       [
+        43.67726325,
+        26.75213832
+       ],
+       [
+        43.67740774,
+        26.75217319
+       ],
+       [
+        43.67755393,
+        26.75220121
+       ],
+       [
+        43.677755160000004,
+        26.7522381
+       ],
+       [
+        43.67788782,
+        26.75227019
+       ],
+       [
+        43.67798956,
+        26.7522945
+       ],
+       [
+        43.67813357,
+        26.75232546
+       ],
+       [
+        43.67833042,
+        26.75236915
+       ],
+       [
+        43.67847651,
+        26.75240098
+       ],
+       [
+        43.67867072,
+        26.75244706
+       ],
+       [
+        43.678867340000004,
+        26.75249302
+       ],
+       [
+        43.67896032,
+        26.752515640000002
+       ],
+       [
+        43.679008010000004,
+        26.75252614
+       ],
+       [
+        43.67910657,
+        26.75254382
+       ],
+       [
+        43.67920788,
+        26.75255724
+       ],
+       [
+        43.67930672,
+        26.75256836
+       ],
+       [
+        43.6794557,
+        26.75259562
+       ],
+       [
+        43.67955622,
+        26.752615640000002
+       ],
+       [
+        43.67965309,
+        26.75263675
+       ],
+       [
+        43.68002194,
+        26.75275457
+       ],
+       [
+        43.68025546,
+        26.75283114
+       ],
+       [
+        43.68029845,
+        26.75284543
+       ],
+       [
+        43.68045009,
+        26.75288337
+       ],
+       [
+        43.680822920000004,
+        26.75301731
+       ],
+       [
+        43.68114726,
+        26.75313967
+       ],
+       [
+        43.68129009,
+        26.753194230000002
+       ],
+       [
+        43.68138254,
+        26.75323144
+       ],
+       [
+        43.68155817,
+        26.75329519
+       ],
+       [
+        43.6818862,
+        26.75341217
+       ],
+       [
+        43.68225563,
+        26.7535406
+       ],
+       [
+        43.68239408,
+        26.75360315
+       ],
+       [
+        43.68276508,
+        26.75375033
+       ],
+       [
+        43.6831389,
+        26.75387464
+       ],
+       [
+        43.68327689,
+        26.75392696
+       ],
+       [
+        43.68365634,
+        26.75405491
+       ],
+       [
+        43.68406609,
+        26.75421099
+       ],
+       [
+        43.684539380000004,
+        26.754363520000002
+       ],
+       [
+        43.68481746,
+        26.75447277
+       ],
+       [
+        43.68519775,
+        26.75459667
+       ],
+       [
+        43.68533069,
+        26.75465814
+       ],
+       [
+        43.68546643,
+        26.75471455
+       ],
+       [
+        43.685748600000004,
+        26.75480837
+       ],
+       [
+        43.685841780000004,
+        26.754838
+       ],
+       [
+        43.68608527,
+        26.75490179
+       ],
+       [
+        43.68640675,
+        26.755026
+       ],
+       [
+        43.68658999,
+        26.75509246
+       ],
+       [
+        43.68700294,
+        26.75525301
+       ],
+       [
+        43.68709148,
+        26.75528882
+       ],
+       [
+        43.68713861,
+        26.75530412
+       ],
+       [
+        43.68719002,
+        26.7553109
+       ],
+       [
+        43.68723695,
+        26.755306830000002
+       ],
+       [
+        43.68728851,
+        26.755293260000002
+       ],
+       [
+        43.68732931,
+        26.75527266
+       ],
+       [
+        43.68737247,
+        26.75524336
+       ],
+       [
+        43.68747625,
+        26.75514798
+       ],
+       [
+        43.68759543,
+        26.75500413
+       ],
+       [
+        43.68776952,
+        26.754840820000002
+       ],
+       [
+        43.68787727,
+        26.754740260000002
+       ],
+       [
+        43.68802891,
+        26.754567090000002
+       ],
+       [
+        43.68814871,
+        26.7544224
+       ],
+       [
+        43.68828183,
+        26.75428506
+       ],
+       [
+        43.68841002,
+        26.75414987
+       ],
+       [
+        43.68850868,
+        26.754045440000002
+       ],
+       [
+        43.688742930000004,
+        26.75380771
+       ],
+       [
+        43.68894156,
+        26.75360673
+       ],
+       [
+        43.68920334,
+        26.75333366
+       ],
+       [
+        43.68942703,
+        26.75309328
+       ],
+       [
+        43.68968687,
+        26.75281262
+       ],
+       [
+        43.68991361,
+        26.752575150000002
+       ],
+       [
+        43.69014226,
+        26.75233296
+       ],
+       [
+        43.69033588,
+        26.75212724
+       ],
+       [
+        43.69055955,
+        26.7518885
+       ],
+       [
+        43.6908199,
+        26.7516107
+       ],
+       [
+        43.69104396,
+        26.75136861
+       ],
+       [
+        43.691166530000004,
+        26.75122885
+       ],
+       [
+        43.691300580000004,
+        26.75109437
+       ],
+       [
+        43.69157945,
+        26.75077498
+       ],
+       [
+        43.691747480000004,
+        26.75060774
+       ],
+       [
+        43.69196567,
+        26.750365860000002
+       ],
+       [
+        43.69216144,
+        26.7501584
+       ],
+       [
+        43.69232582,
+        26.74998891
+       ],
+       [
+        43.69258757,
+        26.74970978
+       ],
+       [
+        43.69274505,
+        26.74953416
+       ],
+       [
+        43.69286322,
+        26.74939123
+       ],
+       [
+        43.69312234,
+        26.74911681
+       ],
+       [
+        43.693323480000004,
+        26.74891868
+       ],
+       [
+        43.69348929,
+        26.7487492
+       ],
+       [
+        43.69371589,
+        26.74850597
+       ],
+       [
+        43.69393746,
+        26.74826752
+       ],
+       [
+        43.694204750000004,
+        26.74799117
+       ],
+       [
+        43.69442318,
+        26.74775083
+       ],
+       [
+        43.69461536,
+        26.74753909
+       ],
+       [
+        43.6947799,
+        26.7473674
+       ],
+       [
+        43.694914680000004,
+        26.74723583
+       ],
+       [
+        43.69507343,
+        26.74706434
+       ],
+       [
+        43.69523675,
+        26.74689356
+       ],
+       [
+        43.69536561,
+        26.74675415
+       ],
+       [
+        43.69561351,
+        26.74647361
+       ],
+       [
+        43.69583403,
+        26.74622574
+       ],
+       [
+        43.695960660000004,
+        26.74608913
+       ],
+       [
+        43.6960282,
+        26.74601821
+       ],
+       [
+        43.69639283,
+        26.74564203
+       ],
+       [
+        43.69659728,
+        26.745388170000002
+       ],
+       [
+        43.697239520000004,
+        26.74469775
+       ],
+       [
+        43.69742697,
+        26.744483680000002
+       ],
+       [
+        43.697514,
+        26.744373930000002
+       ],
+       [
+        43.69778943,
+        26.74404913
+       ],
+       [
+        43.69818345,
+        26.74363948
+       ],
+       [
+        43.69880746,
+        26.74293473
+       ],
+       [
+        43.69923877,
+        26.74243439
+       ],
+       [
+        43.69974459,
+        26.74182848
+       ],
+       [
+        43.700265460000004,
+        26.74120727
+       ],
+       [
+        43.70076642,
+        26.74060146
+       ],
+       [
+        43.70119304,
+        26.74015701
+       ],
+       [
+        43.70166435,
+        26.739625710000002
+       ],
+       [
+        43.70209395,
+        26.739123120000002
+       ],
+       [
+        43.70247944,
+        26.73870584
+       ],
+       [
+        43.70300837,
+        26.73810586
+       ],
+       [
+        43.70346579,
+        26.73757236
+       ],
+       [
+        43.70402047,
+        26.7369309
+       ],
+       [
+        43.70481961,
+        26.7360031
+       ],
+       [
+        43.70576172,
+        26.73489074
+       ],
+       [
+        43.70596632,
+        26.73462814
+       ],
+       [
+        43.70617006,
+        26.734410790000002
+       ],
+       [
+        43.70665549,
+        26.73385353
+       ],
+       [
+        43.70682269,
+        26.73367996
+       ],
+       [
+        43.707047610000004,
+        26.73343751
+       ],
+       [
+        43.70728145,
+        26.73320209
+       ],
+       [
+        43.707553080000004,
+        26.73287752
+       ],
+       [
+        43.70774473,
+        26.73267041
+       ],
+       [
+        43.708118150000004,
+        26.73224192
+       ],
+       [
+        43.7083289,
+        26.7319939
+       ],
+       [
+        43.70908369,
+        26.73114859
+       ],
+       [
+        43.70951098,
+        26.730708540000002
+       ],
+       [
+        43.70979609,
+        26.73038893
+       ],
+       [
+        43.70984111,
+        26.730366800000002
+       ],
+       [
+        43.70993265,
+        26.7303359
+       ],
+       [
+        43.71002989,
+        26.7303127
+       ],
+       [
+        43.71059479,
+        26.7301317
+       ],
+       [
+        43.711061470000004,
+        26.7299707
+       ],
+       [
+        43.7113432,
+        26.72986441
+       ],
+       [
+        43.7116155,
+        26.72975483
+       ],
+       [
+        43.7118479,
+        26.72965356
+       ],
+       [
+        43.71212042,
+        26.72954692
+       ],
+       [
+        43.71279371,
+        26.72924894
+       ],
+       [
+        43.71350282,
+        26.72890674
+       ],
+       [
+        43.71380612,
+        26.728748200000002
+       ],
+       [
+        43.714329830000004,
+        26.72847335
+       ],
+       [
+        43.71459334,
+        26.72835945
+       ],
+       [
+        43.71490402,
+        26.72820849
+       ],
+       [
+        43.71516112,
+        26.72806546
+       ],
+       [
+        43.71538515,
+        26.727962180000002
+       ],
+       [
+        43.71583591,
+        26.72773415
+       ],
+       [
+        43.71616334,
+        26.72756286
+       ],
+       [
+        43.71681703,
+        26.7272234
+       ],
+       [
+        43.71724494,
+        26.72699131
+       ],
+       [
+        43.71758598,
+        26.72679548
+       ],
+       [
+        43.71801835,
+        26.72656453
+       ],
+       [
+        43.71826772,
+        26.72641664
+       ],
+       [
+        43.71838501,
+        26.72639015
+       ],
+       [
+        43.71856107,
+        26.72639174
+       ],
+       [
+        43.71868511,
+        26.72637817
+       ],
+       [
+        43.71888011,
+        26.726366040000002
+       ],
+       [
+        43.71912933,
+        26.72637314
+       ],
+       [
+        43.71943248,
+        26.72637219
+       ],
+       [
+        43.71968424,
+        26.72636407
+       ],
+       [
+        43.71993322,
+        26.72635607
+       ],
+       [
+        43.72033466,
+        26.72634548
+       ],
+       [
+        43.72088589,
+        26.726317260000002
+       ],
+       [
+        43.72113362,
+        26.72628109
+       ],
+       [
+        43.72127709,
+        26.7262638
+       ],
+       [
+        43.72166686,
+        26.72617111
+       ],
+       [
+        43.7218758,
+        26.7260979
+       ],
+       [
+        43.72249566,
+        26.72582865
+       ],
+       [
+        43.72286022,
+        26.72568737
+       ],
+       [
+        43.72335557,
+        26.72547007
+       ],
+       [
+        43.72352559,
+        26.72537582
+       ],
+       [
+        43.72369133,
+        26.72526842
+       ],
+       [
+        43.72384429,
+        26.72515533
+       ],
+       [
+        43.723916100000004,
+        26.72509034
+       ],
+       [
+        43.72450868,
+        26.72460391
+       ],
+       [
+        43.72466341,
+        26.724487840000002
+       ],
+       [
+        43.72480751,
+        26.72435682
+       ],
+       [
+        43.72492438,
+        26.72426687
+       ],
+       [
+        43.72531902,
+        26.7239166
+       ],
+       [
+        43.72656386,
+        26.72262075
+       ],
+       [
+        43.7266023,
+        26.72259143
+       ],
+       [
+        43.72664201,
+        26.72256891
+       ],
+       [
+        43.7282547,
+        26.7222399
+       ],
+       [
+        43.72830535,
+        26.72222463
+       ],
+       [
+        43.72922598,
+        26.72201682
+       ],
+       [
+        43.72947335,
+        26.72196943
+       ],
+       [
+        43.72961475,
+        26.721930020000002
+       ],
+       [
+        43.73020315,
+        26.72179828
+       ],
+       [
+        43.73147883,
+        26.7215505
+       ],
+       [
+        43.73157268,
+        26.72151532
+       ],
+       [
+        43.73184751,
+        26.72132693
+       ],
+       [
+        43.73324615,
+        26.72044482
+       ],
+       [
+        43.73377431,
+        26.72010486
+       ],
+       [
+        43.73400526,
+        26.71994005
+       ],
+       [
+        43.73415995,
+        26.71982592
+       ],
+       [
+        43.73441385,
+        26.71967738
+       ],
+       [
+        43.73520941,
+        26.71912454
+       ],
+       [
+        43.73559798,
+        26.71884287
+       ],
+       [
+        43.73583155,
+        26.71866661
+       ],
+       [
+        43.73649876,
+        26.71812658
+       ],
+       [
+        43.737444860000004,
+        26.71731762
+       ],
+       [
+        43.73785936,
+        26.7169302
+       ],
+       [
+        43.738402560000004,
+        26.71706341
+       ],
+       [
+        43.73937933,
+        26.71726976
+       ],
+       [
+        43.73967196,
+        26.71735914
+       ],
+       [
+        43.73985418,
+        26.717437920000002
+       ],
+       [
+        43.74144588,
+        26.71820915
+       ],
+       [
+        43.74153856,
+        26.71823973
+       ],
+       [
+        43.74191345,
+        26.71837215
+       ],
+       [
+        43.74238946,
+        26.71850799
+       ],
+       [
+        43.74243757,
+        26.71851608
+       ],
+       [
+        43.74248712,
+        26.718517470000002
+       ],
+       [
+        43.74258409,
+        26.71851011
+       ],
+       [
+        43.7426336,
+        26.71850986
+       ],
+       [
+        43.74277704,
+        26.71853866
+       ],
+       [
+        43.74367992,
+        26.718813100000002
+       ],
+       [
+        43.74387202,
+        26.718865100000002
+       ],
+       [
+        43.744990380000004,
+        26.719379710000002
+       ],
+       [
+        43.74540632,
+        26.71961971
+       ],
+       [
+        43.74571391,
+        26.719846580000002
+       ],
+       [
+        43.74602734,
+        26.71998568
+       ],
+       [
+        43.74642595,
+        26.720175740000002
+       ],
+       [
+        43.74696409,
+        26.72042137
+       ],
+       [
+        43.74722229,
+        26.720565190000002
+       ],
+       [
+        43.74726119,
+        26.72059303
+       ],
+       [
+        43.7472902,
+        26.72062412
+       ],
+       [
+        43.74732401,
+        26.72066175
+       ],
+       [
+        43.74791658,
+        26.72170096
+       ],
+       [
+        43.74797309,
+        26.72177837
+       ],
+       [
+        43.74844987,
+        26.72255765
+       ],
+       [
+        43.74846693,
+        26.722600370000002
+       ],
+       [
+        43.74848037,
+        26.722689080000002
+       ],
+       [
+        43.74845777,
+        26.722777100000002
+       ],
+       [
+        43.74842274,
+        26.722858730000002
+       ],
+       [
+        43.74806236,
+        26.72360462
+       ],
+       [
+        43.74789867,
+        26.723983920000002
+       ],
+       [
+        43.74788439,
+        26.72402421
+       ],
+       [
+        43.74787499,
+        26.72406495
+       ],
+       [
+        43.74781236,
+        26.72436409
+       ],
+       [
+        43.747525960000004,
+        26.72512773
+       ],
+       [
+        43.74738942,
+        26.72551692
+       ],
+       [
+        43.7471751,
+        26.72591786
+       ],
+       [
+        43.74671156,
+        26.72690296
+       ],
+       [
+        43.74637606,
+        26.72762218
+       ],
+       [
+        43.74589095,
+        26.72889158
+       ],
+       [
+        43.74588162,
+        26.72893214
+       ],
+       [
+        43.74589835,
+        26.72897232
+       ],
+       [
+        43.74642194,
+        26.729323570000002
+       ],
+       [
+        43.7470434,
+        26.72978398
+       ],
+       [
+        43.74805081,
+        26.73086266
+       ],
+       [
+        43.74818685,
+        26.73098504
+       ],
+       [
+        43.74833842,
+        26.73110376
+       ],
+       [
+        43.74867947,
+        26.73135554
+       ],
+       [
+        43.74931436,
+        26.73181489
+       ],
+       [
+        43.7500227,
+        26.7323899
+       ],
+       [
+        43.7503314,
+        26.7326044
+       ],
+       [
+        43.75084468,
+        26.73295896
+       ],
+       [
+        43.75088857,
+        26.732982460000002
+       ],
+       [
+        43.75162949,
+        26.73333303
+       ],
+       [
+        43.75204554,
+        26.733562940000002
+       ],
+       [
+        43.752321020000004,
+        26.73374227
+       ],
+       [
+        43.75239152,
+        26.7337995
+       ],
+       [
+        43.75241847,
+        26.73383067
+       ],
+       [
+        43.752834220000004,
+        26.73441213
+       ],
+       [
+        43.75289233,
+        26.73447353
+       ],
+       [
+        43.75292753,
+        26.734499
+       ],
+       [
+        43.7529704,
+        26.73452988
+       ],
+       [
+        43.75318745,
+        26.73464039
+       ],
+       [
+        43.75541922,
+        26.73569827
+       ],
+       [
+        43.756418610000004,
+        26.736206
+       ],
+       [
+        43.7572788,
+        26.73663862
+       ],
+       [
+        43.7580671,
+        26.73711294
+       ],
+       [
+        43.75832373,
+        26.73725031
+       ],
+       [
+        43.758497,
+        26.73732957
+       ],
+       [
+        43.758670540000004,
+        26.73740183
+       ],
+       [
+        43.75899728,
+        26.73749906
+       ],
+       [
+        43.75913532,
+        26.737514400000002
+       ],
+       [
+        43.75918022,
+        26.73752686
+       ],
+       [
+        43.76180507,
+        26.73876976
+       ],
+       [
+        43.76168546,
+        26.73942608
+       ],
+       [
+        43.76160642,
+        26.74027518
+       ],
+       [
+        43.76161619,
+        26.7403226
+       ],
+       [
+        43.7616211,
+        26.740409030000002
+       ],
+       [
+        43.76161619,
+        26.74049606
+       ],
+       [
+        43.76142564,
+        26.74291839
+       ],
+       [
+        43.76126953,
+        26.74439096
+       ],
+       [
+        43.76098702,
+        26.74763144
+       ],
+       [
+        43.7609877,
+        26.747674540000002
+       ],
+       [
+        43.760993060000004,
+        26.74772331
+       ],
+       [
+        43.76101868,
+        26.74780719
+       ],
+       [
+        43.76152056,
+        26.74778436
+       ],
+       [
+        43.764920090000004,
+        26.74761935
+       ],
+       [
+        43.76818765,
+        26.74746116
+       ],
+       [
+        43.76871721,
+        26.747514210000002
+       ],
+       [
+        43.76886852,
+        26.74752299
+       ],
+       [
+        43.77107754,
+        26.74760008
+       ],
+       [
+        43.77112906,
+        26.747596910000002
+       ],
+       [
+        43.77181332,
+        26.74748492
+       ],
+       [
+        43.77190787,
+        26.74745473
+       ],
+       [
+        43.77320561,
+        26.74697054
+       ],
+       [
+        43.77367837,
+        26.74671183
+       ],
+       [
+        43.77452039,
+        26.746155560000002
+       ],
+       [
+        43.77468131,
+        26.74604274
+       ],
+       [
+        43.77640823,
+        26.74479224
+       ],
+       [
+        43.77769269,
+        26.74379001
+       ],
+       [
+        43.77789003,
+        26.74367982
+       ],
+       [
+        43.77878986,
+        26.7431808
+       ],
+       [
+        43.77957395,
+        26.74269701
+       ],
+       [
+        43.77982982,
+        26.74249057
+       ],
+       [
+        43.77986075,
+        26.74245768
+       ],
+       [
+        43.78085873,
+        26.741169680000002
+       ],
+       [
+        43.781004360000004,
+        26.7409666
+       ],
+       [
+        43.78112222,
+        26.740870960000002
+       ],
+       [
+        43.7813012,
+        26.74086497
+       ],
+       [
+        43.7816204,
+        26.740944470000002
+       ],
+       [
+        43.78179328,
+        26.74100731
+       ],
+       [
+        43.7820667,
+        26.74111301
+       ],
+       [
+        43.78218343,
+        26.74116716
+       ],
+       [
+        43.7849116,
+        26.74258182
+       ],
+       [
+        43.78617349,
+        26.74330315
+       ],
+       [
+        43.78725866,
+        26.74402784
+       ],
+       [
+        43.78735236,
+        26.74410495
+       ],
+       [
+        43.78869753,
+        26.7452122
+       ],
+       [
+        43.79064607,
+        26.74694942
+       ],
+       [
+        43.79100809,
+        26.74722852
+       ],
+       [
+        43.79128358,
+        26.74745098
+       ],
+       [
+        43.79340598,
+        26.749376390000002
+       ],
+       [
+        43.79403861,
+        26.75002343
+       ],
+       [
+        43.79426774,
+        26.75024169
+       ],
+       [
+        43.795452600000004,
+        26.75136918
+       ],
+       [
+        43.79549235,
+        26.7513964
+       ],
+       [
+        43.79554029,
+        26.75139325
+       ],
+       [
+        43.79557931,
+        26.75138004
+       ],
+       [
+        43.79561167,
+        26.7513614
+       ],
+       [
+        43.79563194,
+        26.75133279
+       ],
+       [
+        43.795649340000004,
+        26.751293
+       ],
+       [
+        43.79576841,
+        26.75078216
+       ],
+       [
+        43.79628046,
+        26.748272240000002
+       ],
+       [
+        43.79693941,
+        26.74490754
+       ],
+       [
+        43.79731115,
+        26.74305068
+       ],
+       [
+        43.79734201,
+        26.74288139
+       ],
+       [
+        43.79735909,
+        26.74278903
+       ],
+       [
+        43.79746955,
+        26.74220773
+       ],
+       [
+        43.79747643,
+        26.74216697
+       ],
+       [
+        43.797541710000004,
+        26.74187134
+       ],
+       [
+        43.7975883,
+        26.74165975
+       ],
+       [
+        43.79762643,
+        26.7414938
+       ],
+       [
+        43.7976501,
+        26.741414080000002
+       ],
+       [
+        43.79792058,
+        26.74149041
+       ],
+       [
+        43.798922940000004,
+        26.7417722
+       ],
+       [
+        43.80117215,
+        26.7424484
+       ],
+       [
+        43.80482836,
+        26.74363844
+       ],
+       [
+        43.80565299,
+        26.74387451
+       ],
+       [
+        43.80567677,
+        26.7436183
+       ],
+       [
+        43.80567824,
+        26.74359354
+       ],
+       [
+        43.80568489,
+        26.74349918
+       ],
+       [
+        43.80568678,
+        26.74347213
+       ],
+       [
+        43.80569292,
+        26.74336345
+       ],
+       [
+        43.80570496,
+        26.74325696
+       ],
+       [
+        43.80577442,
+        26.742259830000002
+       ],
+       [
+        43.80586781,
+        26.740916560000002
+       ],
+       [
+        43.805963750000004,
+        26.73956502
+       ],
+       [
+        43.80605592,
+        26.7382213
+       ],
+       [
+        43.806150970000004,
+        26.7368759
+       ],
+       [
+        43.80625006,
+        26.73553366
+       ],
+       [
+        43.80634125,
+        26.73420083
+       ],
+       [
+        43.80643836,
+        26.73281919
+       ],
+       [
+        43.80653624,
+        26.73142968
+       ],
+       [
+        43.80663394,
+        26.729995210000002
+       ],
+       [
+        43.80544061,
+        26.729847120000002
+       ],
+       [
+        43.804916150000004,
+        26.72978708
+       ],
+       [
+        43.80355011,
+        26.72960522
+       ],
+       [
+        43.802545190000004,
+        26.72947067
+       ],
+       [
+        43.80209577,
+        26.72941646
+       ],
+       [
+        43.80181235,
+        26.72939186
+       ],
+       [
+        43.79894273,
+        26.72929385
+       ],
+       [
+        43.79690254,
+        26.72921442
+       ],
+       [
+        43.79561899,
+        26.72919056
+       ],
+       [
+        43.79508842,
+        26.72917371
+       ],
+       [
+        43.7939625,
+        26.729094630000002
+       ],
+       [
+        43.79397584,
+        26.72898159
+       ],
+       [
+        43.793990720000004,
+        26.72889031
+       ],
+       [
+        43.793992700000004,
+        26.7288639
+       ],
+       [
+        43.79398538,
+        26.7288275
+       ],
+       [
+        43.79397446,
+        26.72879392
+       ],
+       [
+        43.79400384,
+        26.72847876
+       ],
+       [
+        43.794049890000004,
+        26.72830664
+       ],
+       [
+        43.7941328,
+        26.72800067
+       ],
+       [
+        43.79414069,
+        26.727953720000002
+       ],
+       [
+        43.794241140000004,
+        26.72762209
+       ],
+       [
+        43.79429341,
+        26.72745064
+       ],
+       [
+        43.794350550000004,
+        26.727270060000002
+       ],
+       [
+        43.79437156,
+        26.72717921
+       ],
+       [
+        43.79451625,
+        26.72662267
+       ],
+       [
+        43.79458666,
+        26.72634271
+       ],
+       [
+        43.79460061,
+        26.7262923
+       ],
+       [
+        43.79489177,
+        26.72524386
+       ],
+       [
+        43.79498776,
+        26.72487397
+       ],
+       [
+        43.79500362,
+        26.72482944
+       ],
+       [
+        43.795049240000004,
+        26.72469535
+       ],
+       [
+        43.79507871,
+        26.724558860000002
+       ],
+       [
+        43.79508935,
+        26.72446549
+       ],
+       [
+        43.79508978,
+        26.724370580000002
+       ],
+       [
+        43.79500201,
+        26.72371197
+       ],
+       [
+        43.79491667,
+        26.72324987
+       ],
+       [
+        43.79489825,
+        26.72307061
+       ],
+       [
+        43.79485983,
+        26.72275123
+       ],
+       [
+        43.79486123,
+        26.72270184
+       ],
+       [
+        43.79487062,
+        26.722651550000002
+       ],
+       [
+        43.79511413,
+        26.72208604
+       ],
+       [
+        43.79547152,
+        26.72132197
+       ],
+       [
+        43.79571597,
+        26.72081617
+       ],
+       [
+        43.79583167,
+        26.72057045
+       ],
+       [
+        43.79617109,
+        26.71992586
+       ],
+       [
+        43.79624244,
+        26.71976627
+       ],
+       [
+        43.79632847,
+        26.71916931
+       ],
+       [
+        43.796356700000004,
+        26.71886339
+       ],
+       [
+        43.79642816,
+        26.71805337
+       ],
+       [
+        43.79650824,
+        26.717428780000002
+       ],
+       [
+        43.79651865,
+        26.71720289
+       ],
+       [
+        43.79656337,
+        26.71680181
+       ],
+       [
+        43.79660561,
+        26.71648588
+       ],
+       [
+        43.79665851,
+        26.71572237
+       ],
+       [
+        43.79672146,
+        26.715233050000002
+       ],
+       [
+        43.79678089,
+        26.714605600000002
+       ],
+       [
+        43.79689438,
+        26.713668820000002
+       ],
+       [
+        43.79694639,
+        26.71312878
+       ],
+       [
+        43.79703751,
+        26.712454700000002
+       ],
+       [
+        43.79707002,
+        26.71209498
+       ],
+       [
+        43.79716413,
+        26.71146993
+       ],
+       [
+        43.79716639,
+        26.71128947
+       ],
+       [
+        43.797165650000004,
+        26.71126554
+       ],
+       [
+        43.79686404,
+        26.71107212
+       ],
+       [
+        43.7967874,
+        26.71101874
+       ],
+       [
+        43.79503451,
+        26.709737190000002
+       ],
+       [
+        43.794717070000004,
+        26.70953189
+       ],
+       [
+        43.79450024,
+        26.709404810000002
+       ],
+       [
+        43.79414039,
+        26.70916441
+       ],
+       [
+        43.79405528,
+        26.709114070000002
+       ],
+       [
+        43.79387092,
+        26.70905144
+       ],
+       [
+        43.793574650000004,
+        26.70899351
+       ],
+       [
+        43.79293207,
+        26.70892151
+       ],
+       [
+        43.792579350000004,
+        26.708891310000002
+       ],
+       [
+        43.79202847,
+        26.70884041
+       ],
+       [
+        43.79097775,
+        26.70877292
+       ],
+       [
+        43.79067226,
+        26.70874766
+       ],
+       [
+        43.79022151,
+        26.70869883
+       ],
+       [
+        43.78987741,
+        26.70865626
+       ],
+       [
+        43.78972428,
+        26.70862614
+       ],
+       [
+        43.7894872,
+        26.708555020000002
+       ],
+       [
+        43.78888725,
+        26.70832038
+       ],
+       [
+        43.78874967,
+        26.70826483
+       ],
+       [
+        43.78837971,
+        26.70812031
+       ],
+       [
+        43.7880831,
+        26.7080019
+       ],
+       [
+        43.78777162,
+        26.70786087
+       ],
+       [
+        43.78745055,
+        26.70772969
+       ],
+       [
+        43.78709522,
+        26.70755584
+       ],
+       [
+        43.78692468,
+        26.70746003
+       ],
+       [
+        43.78675215,
+        26.70737192
+       ],
+       [
+        43.786344830000004,
+        26.70710673
+       ],
+       [
+        43.78581559,
+        26.70677146
+       ],
+       [
+        43.78545512,
+        26.7065252
+       ],
+       [
+        43.7851047,
+        26.7062662
+       ],
+       [
+        43.78499607,
+        26.70617383
+       ],
+       [
+        43.78487301,
+        26.70602587
+       ],
+       [
+        43.78468612,
+        26.70576204
+       ],
+       [
+        43.78452775,
+        26.70552574
+       ],
+       [
+        43.78433653,
+        26.70521303
+       ],
+       [
+        43.78401297,
+        26.70470516
+       ],
+       [
+        43.783571200000004,
+        26.70404891
+       ],
+       [
+        43.78308552,
+        26.70336838
+       ],
+       [
+        43.78281608,
+        26.70300329
+       ],
+       [
+        43.78267091,
+        26.70285786
+       ],
+       [
+        43.7824544,
+        26.70254997
+       ],
+       [
+        43.78221896,
+        26.70221002
+       ],
+       [
+        43.78216238,
+        26.70208293
+       ],
+       [
+        43.78207345,
+        26.70182639
+       ],
+       [
+        43.78184982,
+        26.70113017
+       ],
+       [
+        43.781587890000004,
+        26.70040306
+       ],
+       [
+        43.78148662,
+        26.70014228
+       ],
+       [
+        43.78129693,
+        26.69968588
+       ],
+       [
+        43.78111933,
+        26.69921071
+       ],
+       [
+        43.781035790000004,
+        26.69899983
+       ],
+       [
+        43.78096241,
+        26.69878221
+       ],
+       [
+        43.78071194,
+        26.69819731
+       ],
+       [
+        43.780689710000004,
+        26.69816425
+       ],
+       [
+        43.78065769,
+        26.69814633
+       ],
+       [
+        43.780616280000004,
+        26.698135830000002
+       ],
+       [
+        43.78036641,
+        26.69811936
+       ],
+       [
+        43.77996166,
+        26.69811338
+       ],
+       [
+        43.77946187,
+        26.698103160000002
+       ],
+       [
+        43.77901655,
+        26.69806891
+       ],
+       [
+        43.778762390000004,
+        26.698039740000002
+       ],
+       [
+        43.77846477,
+        26.69801637
+       ],
+       [
+        43.777992510000004,
+        26.69797027
+       ],
+       [
+        43.7776725,
+        26.697931580000002
+       ],
+       [
+        43.77711826,
+        26.69788403
+       ],
+       [
+        43.776725,
+        26.697826550000002
+       ],
+       [
+        43.77605349,
+        26.69771812
+       ],
+       [
+        43.77575885,
+        26.6976623
+       ],
+       [
+        43.77544103,
+        26.69759197
+       ],
+       [
+        43.77539487,
+        26.69757619
+       ],
+       [
+        43.77528881,
+        26.697545390000002
+       ],
+       [
+        43.775242240000004,
+        26.69752806
+       ],
+       [
+        43.77520624,
+        26.69750694
+       ],
+       [
+        43.77516879,
+        26.69747949
+       ],
+       [
+        43.77513976,
+        26.69745347
+       ],
+       [
+        43.77512758,
+        26.6974185
+       ],
+       [
+        43.77524262,
+        26.697121850000002
+       ],
+       [
+        43.77531818,
+        26.69695072
+       ],
+       [
+        43.77542545,
+        26.69663737
+       ],
+       [
+        43.77552869,
+        26.69638362
+       ],
+       [
+        43.77560813,
+        26.69612258
+       ],
+       [
+        43.77563129,
+        26.69607929
+       ],
+       [
+        43.77578339,
+        26.695843200000002
+       ],
+       [
+        43.77593988,
+        26.6954684
+       ],
+       [
+        43.77628594,
+        26.69491438
+       ],
+       [
+        43.77632993,
+        26.694834240000002
+       ],
+       [
+        43.77677441,
+        26.694024170000002
+       ],
+       [
+        43.77699235,
+        26.69361375
+       ],
+       [
+        43.777209830000004,
+        26.69320605
+       ],
+       [
+        43.777409920000004,
+        26.69284008
+       ],
+       [
+        43.777621950000004,
+        26.692484020000002
+       ],
+       [
+        43.77774011,
+        26.69225004
+       ],
+       [
+        43.77779833,
+        26.69215459
+       ],
+       [
+        43.77791615,
+        26.69194902
+       ],
+       [
+        43.77806049,
+        26.69166311
+       ],
+       [
+        43.77813613,
+        26.6915468
+       ],
+       [
+        43.77818288,
+        26.6914656
+       ],
+       [
+        43.77841359,
+        26.69101688
+       ],
+       [
+        43.77852925,
+        26.69081929
+       ],
+       [
+        43.77860471,
+        26.69070042
+       ],
+       [
+        43.77874902,
+        26.6905138
+       ],
+       [
+        43.779048610000004,
+        26.69014991
+       ],
+       [
+        43.77934949,
+        26.689789530000002
+       ],
+       [
+        43.78008314,
+        26.68887836
+       ],
+       [
+        43.78025415,
+        26.68865524
+       ],
+       [
+        43.780374370000004,
+        26.68851141
+       ],
+       [
+        43.78043604,
+        26.68843795
+       ],
+       [
+        43.78087789,
+        26.68789341
+       ],
+       [
+        43.78091339,
+        26.68787635
+       ],
+       [
+        43.78095005,
+        26.68788204
+       ],
+       [
+        43.78113219,
+        26.68795206
+       ],
+       [
+        43.78150916,
+        26.6880624
+       ],
+       [
+        43.78230412,
+        26.68833683
+       ],
+       [
+        43.78248911,
+        26.6883931
+       ],
+       [
+        43.78325224,
+        26.68861728
+       ],
+       [
+        43.78338998,
+        26.688662270000002
+       ],
+       [
+        43.78413453,
+        26.68892001
+       ],
+       [
+        43.78416948,
+        26.68889408
+       ],
+       [
+        43.78418257,
+        26.68885762
+       ],
+       [
+        43.783876910000004,
+        26.68862564
+       ],
+       [
+        43.78369989,
+        26.6884743
+       ],
+       [
+        43.783366810000004,
+        26.68821318
+       ],
+       [
+        43.783069330000004,
+        26.68796741
+       ],
+       [
+        43.783036440000004,
+        26.687939
+       ],
+       [
+        43.78283942,
+        26.68779281
+       ],
+       [
+        43.78239458,
+        26.68742883
+       ],
+       [
+        43.78229047,
+        26.68733808
+       ],
+       [
+        43.78203589,
+        26.68711801
+       ],
+       [
+        43.78140198,
+        26.68660877
+       ],
+       [
+        43.78104216,
+        26.686296040000002
+       ],
+       [
+        43.78096727,
+        26.686241550000002
+       ],
+       [
+        43.78028833,
+        26.68585349
+       ],
+       [
+        43.77999865,
+        26.68579116
+       ],
+       [
+        43.77909946,
+        26.68573159
+       ],
+       [
+        43.77885142,
+        26.68569623
+       ],
+       [
+        43.77865601,
+        26.68566625
+       ],
+       [
+        43.77825861,
+        26.68563532
+       ],
+       [
+        43.77766215,
+        26.68559769
+       ],
+       [
+        43.77706338,
+        26.68556014
+       ],
+       [
+        43.776068880000004,
+        26.6855149
+       ],
+       [
+        43.77567208,
+        26.68548656
+       ],
+       [
+        43.77512071,
+        26.6854696
+       ],
+       [
+        43.77482353,
+        26.68542989
+       ],
+       [
+        43.77452638,
+        26.68540103
+       ],
+       [
+        43.77401474,
+        26.68523299
+       ],
+       [
+        43.77365049,
+        26.68508691
+       ],
+       [
+        43.77183852,
+        26.68444899
+       ],
+       [
+        43.7707329,
+        26.68402256
+       ],
+       [
+        43.77009514,
+        26.68377645
+       ],
+       [
+        43.76803564,
+        26.68296725
+       ],
+       [
+        43.76754338,
+        26.682862110000002
+       ],
+       [
+        43.76735244,
+        26.68281662
+       ],
+       [
+        43.76712589,
+        26.68337587
+       ],
+       [
+        43.766990910000004,
+        26.68376214
+       ],
+       [
+        43.76676404,
+        26.684498440000002
+       ],
+       [
+        43.76673894,
+        26.68468232
+       ],
+       [
+        43.766701080000004,
+        26.68481284
+       ],
+       [
+        43.76660128,
+        26.68507327
+       ],
+       [
+        43.76645996,
+        26.68531095
+       ],
+       [
+        43.76626601,
+        26.685573
+       ],
+       [
+        43.76612089,
+        26.685758540000002
+       ],
+       [
+        43.76591271,
+        26.68606866
+       ],
+       [
+        43.7657649,
+        26.68625139
+       ],
+       [
+        43.765613880000004,
+        26.686487890000002
+       ],
+       [
+        43.76533441,
+        26.68686147
+       ],
+       [
+        43.76523417,
+        26.68701833
+       ],
+       [
+        43.764868560000004,
+        26.6875047
+       ],
+       [
+        43.76471033,
+        26.6877336
+       ],
+       [
+        43.76439844,
+        26.68808805
+       ],
+       [
+        43.76415786,
+        26.68830983
+       ],
+       [
+        43.76389285,
+        26.68858372
+       ],
+       [
+        43.76363888,
+        26.68886529
+       ],
+       [
+        43.76345644,
+        26.68908816
+       ],
+       [
+        43.763256240000004,
+        26.689283200000002
+       ],
+       [
+        43.76311392,
+        26.68941023
+       ],
+       [
+        43.76289766,
+        26.68966236
+       ],
+       [
+        43.76249977,
+        26.69006835
+       ],
+       [
+        43.762126020000004,
+        26.69043767
+       ],
+       [
+        43.76201315,
+        26.690526260000002
+       ],
+       [
+        43.76193046,
+        26.69058143
+       ],
+       [
+        43.76184953,
+        26.69063385
+       ],
+       [
+        43.76116977,
+        26.69123593
+       ],
+       [
+        43.76065817,
+        26.69173105
+       ],
+       [
+        43.76024041,
+        26.6921228
+       ],
+       [
+        43.76012201,
+        26.69220589
+       ],
+       [
+        43.7600039,
+        26.69229232
+       ],
+       [
+        43.7596206,
+        26.692654140000002
+       ],
+       [
+        43.75948844,
+        26.6927879
+       ],
+       [
+        43.75934915,
+        26.69298625
+       ],
+       [
+        43.7592655,
+        26.69319754
+       ],
+       [
+        43.75925607,
+        26.69323901
+       ],
+       [
+        43.75925207,
+        26.693284430000002
+       ],
+       [
+        43.75925481,
+        26.69333111
+       ],
+       [
+        43.759287820000004,
+        26.69364703
+       ],
+       [
+        43.75931963,
+        26.693912
+       ],
+       [
+        43.7593296,
+        26.6939526
+       ],
+       [
+        43.75939818,
+        26.69412266
+       ],
+       [
+        43.75948107,
+        26.69431487
+       ],
+       [
+        43.75962082,
+        26.694717
+       ],
+       [
+        43.75966714,
+        26.694844500000002
+       ],
+       [
+        43.75976465,
+        26.69505282
+       ],
+       [
+        43.75978102,
+        26.69509484
+       ],
+       [
+        43.759867570000004,
+        26.69535536
+       ],
+       [
+        43.7600786,
+        26.69592545
+       ],
+       [
+        43.76027086,
+        26.69641369
+       ],
+       [
+        43.76035121,
+        26.69665899
+       ],
+       [
+        43.76053281,
+        26.69713872
+       ],
+       [
+        43.76065037,
+        26.69742313
+       ],
+       [
+        43.76073032,
+        26.69764056
+       ],
+       [
+        43.76104156,
+        26.698441210000002
+       ],
+       [
+        43.76112298,
+        26.69865473
+       ],
+       [
+        43.7612755,
+        26.699036760000002
+       ],
+       [
+        43.76139126,
+        26.699373950000002
+       ],
+       [
+        43.76141075,
+        26.699417060000002
+       ],
+       [
+        43.76153238,
+        26.69970851
+       ],
+       [
+        43.76160576,
+        26.69992496
+       ],
+       [
+        43.76163719,
+        26.70000782
+       ],
+       [
+        43.761645890000004,
+        26.70005221
+       ],
+       [
+        43.76164456,
+        26.70009741
+       ],
+       [
+        43.76163821,
+        26.70014274
+       ],
+       [
+        43.76162606,
+        26.70018512
+       ],
+       [
+        43.76157744,
+        26.70031205
+       ],
+       [
+        43.76147926,
+        26.7005649
+       ],
+       [
+        43.7612607,
+        26.70097027
+       ],
+       [
+        43.7612004,
+        26.70109436
+       ],
+       [
+        43.76112915,
+        26.70126179
+       ],
+       [
+        43.76103274,
+        26.701558770000002
+       ],
+       [
+        43.76090532,
+        26.70192347
+       ],
+       [
+        43.76076758,
+        26.702289020000002
+       ],
+       [
+        43.76063491,
+        26.70262761
+       ],
+       [
+        43.76045262,
+        26.70312543
+       ],
+       [
+        43.76033749,
+        26.70348464
+       ],
+       [
+        43.76023012,
+        26.70392284
+       ],
+       [
+        43.76017625,
+        26.70419025
+       ],
+       [
+        43.76015081,
+        26.704544170000002
+       ],
+       [
+        43.76015056,
+        26.70481351
+       ],
+       [
+        43.76018426,
+        26.70534963
+       ],
+       [
+        43.760200760000004,
+        26.70547917
+       ],
+       [
+        43.76029473,
+        26.706109180000002
+       ],
+       [
+        43.76032551,
+        26.706531560000002
+       ],
+       [
+        43.76035463,
+        26.70695336
+       ],
+       [
+        43.760333010000004,
+        26.7075406
+       ],
+       [
+        43.76032862,
+        26.707760790000002
+       ],
+       [
+        43.76031796,
+        26.7082526
+       ],
+       [
+        43.76026987,
+        26.70842894
+       ],
+       [
+        43.76018563,
+        26.70865129
+       ],
+       [
+        43.76007766,
+        26.708938630000002
+       ],
+       [
+        43.759832100000004,
+        26.709550280000002
+       ],
+       [
+        43.75972962,
+        26.70983428
+       ],
+       [
+        43.75955912,
+        26.71034954
+       ],
+       [
+        43.75954249,
+        26.710392
+       ],
+       [
+        43.75935404,
+        26.71090278
+       ],
+       [
+        43.759240330000004,
+        26.71118136
+       ],
+       [
+        43.75907993,
+        26.71167942
+       ],
+       [
+        43.75880321,
+        26.71240477
+       ],
+       [
+        43.75868688,
+        26.71267706
+       ],
+       [
+        43.75851353,
+        26.71300618
+       ],
+       [
+        43.75849275,
+        26.7130395
+       ],
+       [
+        43.75818468,
+        26.71355805
+       ],
+       [
+        43.757982580000004,
+        26.71389562
+       ],
+       [
+        43.75772378,
+        26.7142836
+       ],
+       [
+        43.75766006,
+        26.71435615
+       ],
+       [
+        43.75740667,
+        26.71463328
+       ],
+       [
+        43.75711974,
+        26.71494362
+       ],
+       [
+        43.75672971,
+        26.71536138
+       ],
+       [
+        43.75662512,
+        26.7154586
+       ],
+       [
+        43.756508260000004,
+        26.71559577
+       ],
+       [
+        43.75622353,
+        26.71544034
+       ],
+       [
+        43.7561768,
+        26.71541802
+       ],
+       [
+        43.75587127,
+        26.71526901
+       ],
+       [
+        43.75546027,
+        26.71510981
+       ],
+       [
+        43.75541406,
+        26.71509046
+       ],
+       [
+        43.75514254,
+        26.71497696
+       ],
+       [
+        43.754774,
+        26.71483719
+       ],
+       [
+        43.75433215,
+        26.71465876
+       ],
+       [
+        43.75417693,
+        26.71459626
+       ],
+       [
+        43.75371939,
+        26.71441184
+       ],
+       [
+        43.75357719,
+        26.71436319
+       ],
+       [
+        43.75352495,
+        26.71435649
+       ],
+       [
+        43.753129550000004,
+        26.71430127
+       ],
+       [
+        43.7529807,
+        26.71426951
+       ],
+       [
+        43.75242009,
+        26.714195880000002
+       ],
+       [
+        43.75213565,
+        26.714149120000002
+       ],
+       [
+        43.75164558,
+        26.714093990000002
+       ],
+       [
+        43.75118408,
+        26.71403328
+       ],
+       [
+        43.750455970000004,
+        26.71394135
+       ],
+       [
+        43.75035679,
+        26.71393407
+       ],
+       [
+        43.75030678,
+        26.71392493
+       ],
+       [
+        43.75026271,
+        26.71390921
+       ],
+       [
+        43.75020805,
+        26.71388229
+       ],
+       [
+        43.749913740000004,
+        26.713734470000002
+       ],
+       [
+        43.74960039,
+        26.71358824
+       ],
+       [
+        43.74920559,
+        26.71338956
+       ],
+       [
+        43.748937,
+        26.71326843
+       ],
+       [
+        43.74847793,
+        26.71305249
+       ],
+       [
+        43.748295490000004,
+        26.71297433
+       ],
+       [
+        43.74791852,
+        26.71279828
+       ],
+       [
+        43.74748947,
+        26.71260367
+       ],
+       [
+        43.746977980000004,
+        26.712369940000002
+       ],
+       [
+        43.74675149,
+        26.71227597
+       ],
+       [
+        43.74632887,
+        26.71213031
+       ],
+       [
+        43.74588562,
+        26.71197468
+       ],
+       [
+        43.74537887,
+        26.71179584
+       ],
+       [
+        43.744886040000004,
+        26.71162104
+       ],
+       [
+        43.74484302,
+        26.71160197
+       ],
+       [
+        43.74480096,
+        26.71157794
+       ],
+       [
+        43.74472306,
+        26.71152056
+       ],
+       [
+        43.74449434,
+        26.71134208
+       ],
+       [
+        43.74402385,
+        26.71096527
+       ],
+       [
+        43.7438446,
+        26.71081849
+       ],
+       [
+        43.74364677,
+        26.7106447
+       ],
+       [
+        43.74341319,
+        26.710425230000002
+       ],
+       [
+        43.74315669,
+        26.71012514
+       ],
+       [
+        43.74297327,
+        26.70992321
+       ],
+       [
+        43.74284275,
+        26.70976458
+       ],
+       [
+        43.74253229,
+        26.70943391
+       ],
+       [
+        43.74224691,
+        26.70911216
+       ],
+       [
+        43.74196769,
+        26.70880167
+       ],
+       [
+        43.74186961,
+        26.70869867
+       ],
+       [
+        43.7416859,
+        26.70848754
+       ],
+       [
+        43.74133071,
+        26.708105
+       ],
+       [
+        43.74113322,
+        26.7079071
+       ],
+       [
+        43.74109389,
+        26.70787612
+       ],
+       [
+        43.741052010000004,
+        26.70785153
+       ],
+       [
+        43.74100906,
+        26.70783459
+       ],
+       [
+        43.74043484,
+        26.70770189
+       ],
+       [
+        43.73997287,
+        26.70759588
+       ],
+       [
+        43.73942146,
+        26.70744971
+       ],
+       [
+        43.73889741,
+        26.707324110000002
+       ],
+       [
+        43.73811595,
+        26.70714606
+       ],
+       [
+        43.73767757,
+        26.70704489
+       ],
+       [
+        43.737435160000004,
+        26.70699416
+       ],
+       [
+        43.73705615,
+        26.706899240000002
+       ],
+       [
+        43.7365733,
+        26.70678529
+       ],
+       [
+        43.73606433,
+        26.70666456
+       ],
+       [
+        43.73560566,
+        26.70656223
+       ],
+       [
+        43.73517087,
+        26.70646331
+       ],
+       [
+        43.734684460000004,
+        26.70636069
+       ],
+       [
+        43.73424964,
+        26.7062516
+       ],
+       [
+        43.73410678,
+        26.7062174
+       ],
+       [
+        43.733719810000004,
+        26.706140180000002
+       ],
+       [
+        43.73346291,
+        26.70607271
+       ],
+       [
+        43.733006780000004,
+        26.70593914
+       ],
+       [
+        43.73248436,
+        26.70577544
+       ],
+       [
+        43.73200516,
+        26.70563906
+       ],
+       [
+        43.731580890000004,
+        26.70551342
+       ],
+       [
+        43.731009900000004,
+        26.70535181
+       ],
+       [
+        43.73034583,
+        26.70516144
+       ],
+       [
+        43.7297723,
+        26.70499436
+       ],
+       [
+        43.72953483,
+        26.7049178
+       ],
+       [
+        43.72905274,
+        26.70477983
+       ],
+       [
+        43.72867963,
+        26.70466747
+       ],
+       [
+        43.72814744,
+        26.70452061
+       ],
+       [
+        43.72781785,
+        26.7044143
+       ],
+       [
+        43.727487690000004,
+        26.70432232
+       ],
+       [
+        43.72696354,
+        26.70415997
+       ],
+       [
+        43.72692305,
+        26.70414612
+       ],
+       [
+        43.72687227,
+        26.704129990000002
+       ],
+       [
+        43.726726920000004,
+        26.704083660000002
+       ],
+       [
+        43.7266301,
+        26.70405217
+       ],
+       [
+        43.72634572,
+        26.70396542
+       ],
+       [
+        43.72611381,
+        26.70389053
+       ],
+       [
+        43.72592385,
+        26.70383494
+       ],
+       [
+        43.72573658,
+        26.7037792
+       ],
+       [
+        43.72546526,
+        26.70369588
+       ],
+       [
+        43.72521843,
+        26.70362102
+       ],
+       [
+        43.72503443,
+        26.70357357
+       ],
+       [
+        43.72494538,
+        26.70354976
+       ],
+       [
+        43.72491367,
+        26.70357565
+       ],
+       [
+        43.72482457,
+        26.70353325
+       ],
+       [
+        43.724618,
+        26.703495970000002
+       ],
+       [
+        43.72446392,
+        26.70346521
+       ],
+       [
+        43.72406976,
+        26.70338153
+       ],
+       [
+        43.72387297,
+        26.70333724
+       ],
+       [
+        43.72367336,
+        26.70328961
+       ],
+       [
+        43.72327954,
+        26.70320739
+       ],
+       [
+        43.72307337,
+        26.70316378
+       ],
+       [
+        43.722715640000004,
+        26.70308546
+       ],
+       [
+        43.72235203,
+        26.7030049
+       ],
+       [
+        43.72191616,
+        26.70290639
+       ],
+       [
+        43.72152838,
+        26.70282915
+       ],
+       [
+        43.72103493,
+        26.70273078
+       ],
+       [
+        43.720685270000004,
+        26.70266222
+       ],
+       [
+        43.72032806,
+        26.70259065
+       ],
+       [
+        43.72005728,
+        26.70252656
+       ],
+       [
+        43.71967029,
+        26.70242009
+       ],
+       [
+        43.719478790000004,
+        26.70237356
+       ],
+       [
+        43.7193351,
+        26.70234379
+       ],
+       [
+        43.719240660000004,
+        26.70232931
+       ],
+       [
+        43.71908907,
+        26.70231237
+       ],
+       [
+        43.718942930000004,
+        26.70228815
+       ],
+       [
+        43.71851764,
+        26.70219906
+       ],
+       [
+        43.71814586,
+        26.70211513
+       ],
+       [
+        43.717828940000004,
+        26.70204172
+       ],
+       [
+        43.71734595,
+        26.701932120000002
+       ],
+       [
+        43.717030030000004,
+        26.70186922
+       ],
+       [
+        43.71639621,
+        26.70174089
+       ],
+       [
+        43.71620934,
+        26.7017049
+       ],
+       [
+        43.71605168,
+        26.70167511
+       ],
+       [
+        43.715957180000004,
+        26.70165223
+       ],
+       [
+        43.71590477,
+        26.70163324
+       ],
+       [
+        43.71586154,
+        26.701607720000002
+       ],
+       [
+        43.7156056,
+        26.701288390000002
+       ],
+       [
+        43.71525342,
+        26.70085591
+       ],
+       [
+        43.715009620000004,
+        26.70058997
+       ],
+       [
+        43.71486906,
+        26.7004398
+       ],
+       [
+        43.71473679,
+        26.70029132
+       ],
+       [
+        43.71460485,
+        26.70014679
+       ],
+       [
+        43.71457238,
+        26.70010117
+       ],
+       [
+        43.71455377,
+        26.70006521
+       ],
+       [
+        43.71452077,
+        26.700029620000002
+       ],
+       [
+        43.71448943,
+        26.69999086
+       ],
+       [
+        43.71413741,
+        26.699536130000002
+       ],
+       [
+        43.71402697,
+        26.69940883
+       ],
+       [
+        43.71389812,
+        26.699266650000002
+       ],
+       [
+        43.71379878,
+        26.6991685
+       ],
+       [
+        43.71364151,
+        26.6989956
+       ],
+       [
+        43.713550930000004,
+        26.69887943
+       ],
+       [
+        43.71341236,
+        26.69869561
+       ],
+       [
+        43.71303063,
+        26.698222010000002
+       ],
+       [
+        43.71267041,
+        26.69778993
+       ],
+       [
+        43.71216182,
+        26.69717387
+       ],
+       [
+        43.71210644,
+        26.69709713
+       ],
+       [
+        43.71207039,
+        26.697060920000002
+       ],
+       [
+        43.7120458,
+        26.69703058
+       ],
+       [
+        43.71180547,
+        26.69672288
+       ],
+       [
+        43.711688110000004,
+        26.69656798
+       ],
+       [
+        43.71148713,
+        26.69631326
+       ],
+       [
+        43.71114699,
+        26.69590088
+       ],
+       [
+        43.71086093,
+        26.69557089
+       ],
+       [
+        43.71060652,
+        26.695342280000002
+       ],
+       [
+        43.71050099,
+        26.6952402
+       ],
+       [
+        43.71012992,
+        26.69487702
+       ],
+       [
+        43.71002155,
+        26.6947757
+       ],
+       [
+        43.70981019,
+        26.69459089
+       ],
+       [
+        43.709749020000004,
+        26.69452537
+       ],
+       [
+        43.70956895,
+        26.6942942
+       ],
+       [
+        43.70944608,
+        26.69416421
+       ],
+       [
+        43.70935865,
+        26.69406104
+       ],
+       [
+        43.70930549,
+        26.69399094
+       ],
+       [
+        43.709265620000004,
+        26.69395773
+       ],
+       [
+        43.70922257,
+        26.69393431
+       ],
+       [
+        43.7091322,
+        26.693880240000002
+       ],
+       [
+        43.709106,
+        26.69385344
+       ],
+       [
+        43.70905711,
+        26.69377355
+       ],
+       [
+        43.7086259,
+        26.69325169
+       ],
+       [
+        43.70831632,
+        26.69288843
+       ],
+       [
+        43.70816894,
+        26.69270261
+       ],
+       [
+        43.70808545,
+        26.69259174
+       ],
+       [
+        43.708031760000004,
+        26.6925241
+       ],
+       [
+        43.707878040000004,
+        26.6923357
+       ],
+       [
+        43.70772678,
+        26.69216386
+       ],
+       [
+        43.70763526,
+        26.69206185
+       ],
+       [
+        43.7073611,
+        26.69172238
+       ],
+       [
+        43.70726741,
+        26.69161241
+       ],
+       [
+        43.70717765,
+        26.69150112
+       ],
+       [
+        43.70706827,
+        26.6913478
+       ],
+       [
+        43.70695687,
+        26.69120984
+       ],
+       [
+        43.70692689,
+        26.69117515
+       ],
+       [
+        43.70682421,
+        26.69107071
+       ],
+       [
+        43.70670759,
+        26.69092802
+       ],
+       [
+        43.70648437,
+        26.690656450000002
+       ],
+       [
+        43.7061991,
+        26.690311700000002
+       ],
+       [
+        43.70592346,
+        26.68995171
+       ],
+       [
+        43.70572243,
+        26.68970686
+       ],
+       [
+        43.7056296,
+        26.68959462
+       ],
+       [
+        43.70525674,
+        26.6891316
+       ],
+       [
+        43.70514334,
+        26.68892284
+       ],
+       [
+        43.70513685,
+        26.6888805
+       ],
+       [
+        43.70515881,
+        26.68879402
+       ],
+       [
+        43.70517936,
+        26.68875353
+       ],
+       [
+        43.70523381,
+        26.68868724
+       ],
+       [
+        43.70533587,
+        26.68857139
+       ],
+       [
+        43.70539078,
+        26.688483650000002
+       ],
+       [
+        43.70542776,
+        26.68841343
+       ],
+       [
+        43.70560016,
+        26.688113310000002
+       ],
+       [
+        43.70565223,
+        26.68803217
+       ],
+       [
+        43.70578159,
+        26.68783442
+       ],
+       [
+        43.70589384,
+        26.68766945
+       ],
+       [
+        43.70598986,
+        26.687508740000002
+       ],
+       [
+        43.70611427,
+        26.68725638
+       ],
+       [
+        43.7063003,
+        26.68692057
+       ],
+       [
+        43.706417,
+        26.68670428
+       ],
+       [
+        43.70651994,
+        26.68648915
+       ],
+       [
+        43.70665544,
+        26.68618001
+       ],
+       [
+        43.70670223,
+        26.68605041
+       ],
+       [
+        43.70671079,
+        26.68600059
+       ],
+       [
+        43.70672293,
+        26.68590913
+       ],
+       [
+        43.70674133,
+        26.685866400000002
+       ],
+       [
+        43.70678974,
+        26.68579145
+       ],
+       [
+        43.70685488,
+        26.68570316
+       ],
+       [
+        43.70689517,
+        26.68562747
+       ],
+       [
+        43.70697317,
+        26.68546496
+       ],
+       [
+        43.70709134,
+        26.68526941
+       ],
+       [
+        43.70716754,
+        26.685156550000002
+       ],
+       [
+        43.707282140000004,
+        26.68500679
+       ],
+       [
+        43.70740079,
+        26.68486601
+       ],
+       [
+        43.70743221,
+        26.68483225
+       ],
+       [
+        43.70760589,
+        26.68467202
+       ],
+       [
+        43.70769683,
+        26.68455609
+       ],
+       [
+        43.70774762,
+        26.68447217
+       ],
+       [
+        43.70782803,
+        26.684355150000002
+       ],
+       [
+        43.70799392,
+        26.684127670000002
+       ],
+       [
+        43.7080921,
+        26.68401441
+       ],
+       [
+        43.70828469,
+        26.68380191
+       ],
+       [
+        43.70838841,
+        26.68370021
+       ],
+       [
+        43.70857935,
+        26.68354964
+       ],
+       [
+        43.70869664,
+        26.68346647
+       ],
+       [
+        43.70896999,
+        26.68326192
+       ],
+       [
+        43.709492170000004,
+        26.68288108
+       ],
+       [
+        43.70996321,
+        26.682529510000002
+       ],
+       [
+        43.71003764,
+        26.68246715
+       ],
+       [
+        43.71007808,
+        26.68243819
+       ],
+       [
+        43.71010629,
+        26.68240973
+       ],
+       [
+        43.71029102,
+        26.682247540000002
+       ],
+       [
+        43.710512120000004,
+        26.682056550000002
+       ],
+       [
+        43.71072984,
+        26.68185911
+       ],
+       [
+        43.71100537,
+        26.68158812
+       ],
+       [
+        43.71106026,
+        26.68150447
+       ],
+       [
+        43.71103748,
+        26.68147722
+       ],
+       [
+        43.71089608,
+        26.6814171
+       ],
+       [
+        43.71075509,
+        26.68134939
+       ],
+       [
+        43.710618350000004,
+        26.68127374
+       ],
+       [
+        43.710438520000004,
+        26.68117702
+       ],
+       [
+        43.710352900000004,
+        26.681119340000002
+       ],
+       [
+        43.71021525,
+        26.6810406
+       ],
+       [
+        43.71016991,
+        26.68102068
+       ],
+       [
+        43.71012429,
+        26.68099399
+       ],
+       [
+        43.71008079,
+        26.680965320000002
+       ],
+       [
+        43.70991515,
+        26.68085775
+       ],
+       [
+        43.70970266,
+        26.680711770000002
+       ],
+       [
+        43.70948771,
+        26.68056322
+       ],
+       [
+        43.70920284,
+        26.68035346
+       ],
+       [
+        43.70899564,
+        26.68020249
+       ],
+       [
+        43.70872239,
+        26.679994960000002
+       ],
+       [
+        43.70861046,
+        26.67989007
+       ],
+       [
+        43.70829734,
+        26.67965129
+       ],
+       [
+        43.70793685,
+        26.67938982
+       ],
+       [
+        43.70769876,
+        26.6792143
+       ],
+       [
+        43.70739574,
+        26.67896264
+       ],
+       [
+        43.70724507,
+        26.678851950000002
+       ],
+       [
+        43.70700929,
+        26.67868382
+       ],
+       [
+        43.70686598,
+        26.6785661
+       ],
+       [
+        43.70673238,
+        26.678441590000002
+       ],
+       [
+        43.706631290000004,
+        26.67834147
+       ],
+       [
+        43.70654726,
+        26.67824757
+       ],
+       [
+        43.7062893,
+        26.67801722
+       ],
+       [
+        43.70618541,
+        26.67791769
+       ],
+       [
+        43.706068110000004,
+        26.67777763
+       ],
+       [
+        43.70600148,
+        26.67770979
+       ],
+       [
+        43.70585228,
+        26.67757563
+       ],
+       [
+        43.70581458,
+        26.6775507
+       ],
+       [
+        43.705710610000004,
+        26.67746641
+       ],
+       [
+        43.70551784,
+        26.67725755
+       ],
+       [
+        43.70548487,
+        26.67722075
+       ],
+       [
+        43.70546241,
+        26.67718344
+       ],
+       [
+        43.70544224,
+        26.67715106
+       ],
+       [
+        43.70543055,
+        26.67711561
+       ],
+       [
+        43.70518284,
+        26.67683777
+       ],
+       [
+        43.70501315,
+        26.67665736
+       ],
+       [
+        43.70487739,
+        26.676530370000002
+       ],
+       [
+        43.70467042,
+        26.67628757
+       ],
+       [
+        43.70445695,
+        26.67605093
+       ],
+       [
+        43.70416402,
+        26.675737690000002
+       ],
+       [
+        43.703865300000004,
+        26.675405180000002
+       ],
+       [
+        43.703735540000004,
+        26.67526165
+       ],
+       [
+        43.70361093,
+        26.675122130000002
+       ],
+       [
+        43.703498950000004,
+        26.67500327
+       ],
+       [
+        43.70344853,
+        26.674951540000002
+       ],
+       [
+        43.703383960000004,
+        26.67499561
+       ],
+       [
+        43.703298780000004,
+        26.6750576
+       ],
+       [
+        43.703135180000004,
+        26.67518548
+       ],
+       [
+        43.70299522,
+        26.67531184
+       ],
+       [
+        43.70286457,
+        26.67543523
+       ],
+       [
+        43.70270276,
+        26.67558148
+       ],
+       [
+        43.70263589,
+        26.67562853
+       ],
+       [
+        43.70250844,
+        26.6757364
+       ],
+       [
+        43.70243548,
+        26.67580072
+       ],
+       [
+        43.70228405,
+        26.67593304
+       ],
+       [
+        43.70210654,
+        26.67608178
+       ],
+       [
+        43.70193606,
+        26.67620986
+       ],
+       [
+        43.70176609,
+        26.67632219
+       ],
+       [
+        43.70160011,
+        26.67642928
+       ],
+       [
+        43.70142267,
+        26.67654601
+       ],
+       [
+        43.701315380000004,
+        26.67660773
+       ],
+       [
+        43.70117854,
+        26.676685940000002
+       ],
+       [
+        43.70104168,
+        26.67676919
+       ],
+       [
+        43.70092145,
+        26.67685976
+       ],
+       [
+        43.70085412,
+        26.6769143
+       ],
+       [
+        43.70073399,
+        26.677013940000002
+       ],
+       [
+        43.70056403,
+        26.67715309
+       ],
+       [
+        43.70044536,
+        26.67723817
+       ],
+       [
+        43.70031911,
+        26.67731914
+       ],
+       [
+        43.70020381,
+        26.67738431
+       ],
+       [
+        43.70008342,
+        26.67746155
+       ],
+       [
+        43.69984489,
+        26.67757344
+       ],
+       [
+        43.69972794,
+        26.67764827
+       ],
+       [
+        43.69966285,
+        26.67771131
+       ],
+       [
+        43.69958501,
+        26.677753290000002
+       ],
+       [
+        43.69937966,
+        26.67788721
+       ],
+       [
+        43.69916665,
+        26.67800382
+       ],
+       [
+        43.69894815,
+        26.67812089
+       ],
+       [
+        43.69873364,
+        26.67823654
+       ],
+       [
+        43.69855703,
+        26.67833567
+       ],
+       [
+        43.69844914,
+        26.67839806
+       ],
+       [
+        43.69830986,
+        26.678479590000002
+       ],
+       [
+        43.69808778,
+        26.67861011
+       ],
+       [
+        43.69788924,
+        26.67873407
+       ],
+       [
+        43.697703770000004,
+        26.67885581
+       ],
+       [
+        43.69746082,
+        26.67899138
+       ],
+       [
+        43.69723183,
+        26.679134910000002
+       ],
+       [
+        43.69703793,
+        26.679261750000002
+       ],
+       [
+        43.69684273,
+        26.67939242
+       ],
+       [
+        43.696576470000004,
+        26.67958525
+       ],
+       [
+        43.69624008,
+        26.679835620000002
+       ],
+       [
+        43.69591115,
+        26.68008155
+       ],
+       [
+        43.695805130000004,
+        26.68015991
+       ],
+       [
+        43.69577527,
+        26.68019434
+       ],
+       [
+        43.69546328,
+        26.6804864
+       ],
+       [
+        43.69543161,
+        26.68050423
+       ],
+       [
+        43.69524032,
+        26.68066833
+       ],
+       [
+        43.69516243,
+        26.68073758
+       ],
+       [
+        43.69503416,
+        26.68082118
+       ],
+       [
+        43.69491575,
+        26.68090519
+       ],
+       [
+        43.69479733,
+        26.68099953
+       ],
+       [
+        43.69475546,
+        26.681029210000002
+       ],
+       [
+        43.69459464,
+        26.68113606
+       ],
+       [
+        43.69444439,
+        26.68124733
+       ],
+       [
+        43.69440608,
+        26.68128058
+       ],
+       [
+        43.69426721,
+        26.68140743
+       ],
+       [
+        43.69418387,
+        26.68145299
+       ],
+       [
+        43.6939705,
+        26.68163572
+       ],
+       [
+        43.693713620000004,
+        26.68176604
+       ],
+       [
+        43.69363037,
+        26.68181874
+       ],
+       [
+        43.69359404,
+        26.68184771
+       ],
+       [
+        43.69347096,
+        26.68192461
+       ],
+       [
+        43.69312513,
+        26.682183000000002
+       ],
+       [
+        43.69282862,
+        26.68241661
+       ],
+       [
+        43.69272457,
+        26.68251219
+       ],
+       [
+        43.69269232,
+        26.68253949
+       ],
+       [
+        43.692578170000004,
+        26.68262304
+       ],
+       [
+        43.69249088,
+        26.68267749
+       ],
+       [
+        43.6919528,
+        26.68305758
+       ],
+       [
+        43.691734350000004,
+        26.68321335
+       ],
+       [
+        43.69166078,
+        26.68327563
+       ],
+       [
+        43.69163142,
+        26.683305920000002
+       ],
+       [
+        43.69140118,
+        26.68353082
+       ],
+       [
+        43.69129266,
+        26.68361461
+       ],
+       [
+        43.69117401,
+        26.68368694
+       ],
+       [
+        43.69094391,
+        26.68383475
+       ],
+       [
+        43.69078038,
+        26.68394205
+       ],
+       [
+        43.69059255,
+        26.68407736
+       ],
+       [
+        43.690523920000004,
+        26.68413276
+       ],
+       [
+        43.69041509,
+        26.684277220000002
+       ],
+       [
+        43.690352770000004,
+        26.684343130000002
+       ],
+       [
+        43.6903208,
+        26.68436651
+       ],
+       [
+        43.69028049,
+        26.68438977
+       ],
+       [
+        43.69019692,
+        26.68443002
+       ],
+       [
+        43.69015881,
+        26.684444120000002
+       ],
+       [
+        43.69006524,
+        26.68445801
+       ],
+       [
+        43.690025840000004,
+        26.68447361
+       ],
+       [
+        43.68990852,
+        26.68455896
+       ],
+       [
+        43.68982733,
+        26.68462175
+       ],
+       [
+        43.68936963,
+        26.68497072
+       ],
+       [
+        43.68929215,
+        26.68503015
+       ],
+       [
+        43.68905572,
+        26.68526845
+       ],
+       [
+        43.68899183,
+        26.68534365
+       ],
+       [
+        43.688835340000004,
+        26.685490390000002
+       ],
+       [
+        43.68872093,
+        26.68559024
+       ],
+       [
+        43.68853608,
+        26.68575267
+       ],
+       [
+        43.688149530000004,
+        26.68610452
+       ],
+       [
+        43.68807587,
+        26.68616592
+       ],
+       [
+        43.68776792,
+        26.6864582
+       ],
+       [
+        43.68761499,
+        26.68659628
+       ],
+       [
+        43.68765326,
+        26.68662494
+       ],
+       [
+        43.68788402,
+        26.68678374
+       ],
+       [
+        43.68799196,
+        26.68686346
+       ],
+       [
+        43.68813155,
+        26.68698231
+       ],
+       [
+        43.68821269,
+        26.68704165
+       ],
+       [
+        43.688611460000004,
+        26.68729852
+       ],
+       [
+        43.6886468,
+        26.68733167
+       ],
+       [
+        43.68869489,
+        26.6874517
+       ],
+       [
+        43.688907470000004,
+        26.6878904
+       ],
+       [
+        43.68905729,
+        26.68821436
+       ],
+       [
+        43.68927688,
+        26.68864541
+       ],
+       [
+        43.68953296,
+        26.68913299
+       ],
+       [
+        43.68965686,
+        26.68936164
+       ],
+       [
+        43.6897109,
+        26.68943905
+       ],
+       [
+        43.68979453,
+        26.68959894
+       ],
+       [
+        43.689871180000004,
+        26.68971655
+       ],
+       [
+        43.69005773,
+        26.69001467
+       ],
+       [
+        43.69017206,
+        26.690212550000002
+       ],
+       [
+        43.69018246,
+        26.69024548
+       ],
+       [
+        43.69016714,
+        26.69028356
+       ],
+       [
+        43.6900837,
+        26.69039043
+       ],
+       [
+        43.69004316,
+        26.69047809
+       ],
+       [
+        43.68999693,
+        26.69069255
+       ],
+       [
+        43.68997469,
+        26.690784830000002
+       ],
+       [
+        43.68994693,
+        26.69086422
+       ],
+       [
+        43.68989735,
+        26.690985
+       ],
+       [
+        43.68980495,
+        26.69118817
+       ],
+       [
+        43.68973768,
+        26.691350240000002
+       ],
+       [
+        43.68968137,
+        26.69152123
+       ],
+       [
+        43.689657170000004,
+        26.69162647
+       ],
+       [
+        43.68964459,
+        26.69175501
+       ],
+       [
+        43.68964518,
+        26.69184402
+       ],
+       [
+        43.68966698,
+        26.69223387
+       ],
+       [
+        43.68965714,
+        26.69241341
+       ],
+       [
+        43.68963792,
+        26.69262648
+       ],
+       [
+        43.68963685,
+        26.69271571
+       ],
+       [
+        43.68965638,
+        26.69274711
+       ],
+       [
+        43.68968684,
+        26.69278302
+       ],
+       [
+        43.68972223,
+        26.69281119
+       ],
+       [
+        43.68996362,
+        26.69301992
+       ],
+       [
+        43.69017531,
+        26.69320739
+       ],
+       [
+        43.69039567,
+        26.69338604
+       ],
+       [
+        43.69062012,
+        26.69355071
+       ],
+       [
+        43.69083248,
+        26.6937181
+       ],
+       [
+        43.690905130000004,
+        26.693785520000002
+       ],
+       [
+        43.69103817,
+        26.693915060000002
+       ],
+       [
+        43.69118042,
+        26.694035630000002
+       ],
+       [
+        43.69146964,
+        26.69424056
+       ],
+       [
+        43.69164224,
+        26.69436784
+       ],
+       [
+        43.692097940000004,
+        26.69471134
+       ],
+       [
+        43.69244181,
+        26.69498352
+       ],
+       [
+        43.69279104,
+        26.695271090000002
+       ],
+       [
+        43.69299202,
+        26.69542857
+       ],
+       [
+        43.69333659,
+        26.69571315
+       ],
+       [
+        43.69372387,
+        26.69602287
+       ],
+       [
+        43.69389398,
+        26.69616289
+       ],
+       [
+        43.69417815,
+        26.69638424
+       ],
+       [
+        43.69446145,
+        26.69661414
+       ],
+       [
+        43.69464222,
+        26.69678334
+       ],
+       [
+        43.69484593,
+        26.69696022
+       ],
+       [
+        43.69506298,
+        26.69714282
+       ],
+       [
+        43.69531572,
+        26.69736015
+       ],
+       [
+        43.69549078,
+        26.69752253
+       ],
+       [
+        43.6956719,
+        26.69769215
+       ],
+       [
+        43.6958824,
+        26.69789556
+       ],
+       [
+        43.69610721,
+        26.69808469
+       ],
+       [
+        43.696193380000004,
+        26.69814811
+       ],
+       [
+        43.69641344,
+        26.69828405
+       ],
+       [
+        43.6964472,
+        26.69831273
+       ],
+       [
+        43.696467320000004,
+        26.6983503
+       ],
+       [
+        43.69640082,
+        26.69857298
+       ],
+       [
+        43.69633759,
+        26.69876342
+       ],
+       [
+        43.69627468,
+        26.69899121
+       ],
+       [
+        43.6962388,
+        26.69907788
+       ],
+       [
+        43.69612254,
+        26.699339390000002
+       ],
+       [
+        43.695962030000004,
+        26.6996909
+       ],
+       [
+        43.69583109,
+        26.69999575
+       ],
+       [
+        43.69565437,
+        26.70039881
+       ],
+       [
+        43.695468,
+        26.70082443
+       ],
+       [
+        43.69540166,
+        26.70099487
+       ],
+       [
+        43.69532891,
+        26.701169240000002
+       ],
+       [
+        43.69532429,
+        26.70121321
+       ],
+       [
+        43.69532017,
+        26.70125457
+       ],
+       [
+        43.69531046,
+        26.70129407
+       ],
+       [
+        43.69527719,
+        26.70137643
+       ],
+       [
+        43.69520369,
+        26.70152432
+       ],
+       [
+        43.695111860000004,
+        26.701690720000002
+       ],
+       [
+        43.69496451,
+        26.70192213
+       ],
+       [
+        43.694834390000004,
+        26.70209267
+       ],
+       [
+        43.69463429,
+        26.702409980000002
+       ],
+       [
+        43.69450869,
+        26.70261362
+       ],
+       [
+        43.69420158,
+        26.70310401
+       ],
+       [
+        43.69411302,
+        26.70326791
+       ],
+       [
+        43.693997700000004,
+        26.70350371
+       ],
+       [
+        43.693904270000004,
+        26.70365619
+       ],
+       [
+        43.693800870000004,
+        26.70380454
+       ],
+       [
+        43.6936053,
+        26.70412743
+       ],
+       [
+        43.6935375,
+        26.704195990000002
+       ],
+       [
+        43.69318691,
+        26.70471968
+       ],
+       [
+        43.69299987,
+        26.70508882
+       ],
+       [
+        43.69292005,
+        26.70519819
+       ],
+       [
+        43.69281608,
+        26.70529986
+       ],
+       [
+        43.69256775,
+        26.70567829
+       ],
+       [
+        43.6925034,
+        26.70579833
+       ],
+       [
+        43.69219804,
+        26.70634191
+       ],
+       [
+        43.69205709,
+        26.70658278
+       ],
+       [
+        43.69185984,
+        26.70688221
+       ],
+       [
+        43.69174689,
+        26.70703346
+       ],
+       [
+        43.6915768,
+        26.70720418
+       ],
+       [
+        43.69122986,
+        26.707641680000002
+       ],
+       [
+        43.691205090000004,
+        26.70767098
+       ],
+       [
+        43.69151174,
+        26.70804338
+       ],
+       [
+        43.69172217,
+        26.70830218
+       ],
+       [
+        43.69192816,
+        26.70855676
+       ],
+       [
+        43.69210165,
+        26.70877531
+       ],
+       [
+        43.692303,
+        26.70903396
+       ],
+       [
+        43.69241117,
+        26.70918228
+       ],
+       [
+        43.6926084,
+        26.70943722
+       ],
+       [
+        43.69265181,
+        26.70951291
+       ],
+       [
+        43.6926997,
+        26.7095896
+       ],
+       [
+        43.69277062,
+        26.70970457
+       ],
+       [
+        43.69290816,
+        26.70993405
+       ],
+       [
+        43.69303514,
+        26.71015654
+       ],
+       [
+        43.69309013,
+        26.71026966
+       ],
+       [
+        43.69315098,
+        26.71038422
+       ],
+       [
+        43.69329228,
+        26.71064644
+       ],
+       [
+        43.693455130000004,
+        26.71093741
+       ],
+       [
+        43.69348889,
+        26.71101654
+       ],
+       [
+        43.6935652,
+        26.71118007
+       ],
+       [
+        43.69368924,
+        26.71140596
+       ],
+       [
+        43.69375689,
+        26.71155432
+       ],
+       [
+        43.69380944,
+        26.71168706
+       ],
+       [
+        43.6938892,
+        26.71188034
+       ],
+       [
+        43.693949350000004,
+        26.71200142
+       ],
+       [
+        43.69419765,
+        26.71246296
+       ],
+       [
+        43.69434777,
+        26.71272905
+       ],
+       [
+        43.6944128,
+        26.71283219
+       ],
+       [
+        43.694728850000004,
+        26.71341307
+       ],
+       [
+        43.69491995,
+        26.71369551
+       ],
+       [
+        43.69517693,
+        26.71408045
+       ],
+       [
+        43.69536292,
+        26.71434631
+       ],
+       [
+        43.69538851,
+        26.7144004
+       ],
+       [
+        43.69503164,
+        26.71474121
+       ],
+       [
+        43.69471853,
+        26.715016860000002
+       ],
+       [
+        43.69425496,
+        26.71541783
+       ],
+       [
+        43.69379081,
+        26.71581712
+       ],
+       [
+        43.69332985,
+        26.71619171
+       ],
+       [
+        43.69329469,
+        26.716211180000002
+       ],
+       [
+        43.69322532,
+        26.71627246
+       ],
+       [
+        43.69275128,
+        26.71668176
+       ],
+       [
+        43.69245138,
+        26.71693274
+       ],
+       [
+        43.69233151,
+        26.71705036
+       ],
+       [
+        43.6921221,
+        26.717234610000002
+       ],
+       [
+        43.69179985,
+        26.71750167
+       ],
+       [
+        43.69172131,
+        26.71755601
+       ],
+       [
+        43.69167962,
+        26.71758635
+       ],
+       [
+        43.69153741,
+        26.71770907
+       ],
+       [
+        43.69126505,
+        26.717934760000002
+       ],
+       [
+        43.69091786,
+        26.71821752
+       ],
+       [
+        43.690585240000004,
+        26.71848967
+       ],
+       [
+        43.6904037,
+        26.71864332
+       ],
+       [
+        43.69001153,
+        26.71896705
+       ],
+       [
+        43.6894052,
+        26.71947726
+       ],
+       [
+        43.68927052,
+        26.71959205
+       ],
+       [
+        43.689205890000004,
+        26.71964907
+       ],
+       [
+        43.68919135,
+        26.71967097
+       ],
+       [
+        43.68914087,
+        26.719750780000002
+       ],
+       [
+        43.68905688,
+        26.71990481
+       ],
+       [
+        43.68887672,
+        26.71988494
+       ],
+       [
+        43.68870751,
+        26.7198681
+       ],
+       [
+        43.68861151,
+        26.71985166
+       ],
+       [
+        43.68815987,
+        26.71979658
+       ],
+       [
+        43.68786763,
+        26.71975977
+       ],
+       [
+        43.68756246,
+        26.71972397
+       ],
+       [
+        43.68726727,
+        26.71969678
+       ],
+       [
+        43.68721929,
+        26.71968922
+       ],
+       [
+        43.68696715,
+        26.71966547
+       ],
+       [
+        43.68662206,
+        26.71963446
+       ],
+       [
+        43.686272880000004,
+        26.71960229
+       ],
+       [
+        43.68592803,
+        26.71956586
+       ],
+       [
+        43.68557323,
+        26.719526260000002
+       ],
+       [
+        43.68537499,
+        26.71952185
+       ],
+       [
+        43.68517895,
+        26.71948864
+       ],
+       [
+        43.685030940000004,
+        26.71946905
+       ],
+       [
+        43.68493275,
+        26.719461550000002
+       ],
+       [
+        43.68483017,
+        26.71945497
+       ],
+       [
+        43.68477384,
+        26.71945393
+       ],
+       [
+        43.68448008,
+        26.71942532
+       ],
+       [
+        43.68412714,
+        26.71938454
+       ],
+       [
+        43.68382966,
+        26.71935403
+       ],
+       [
+        43.68362847,
+        26.71933683
+       ],
+       [
+        43.68348069,
+        26.71932641
+       ],
+       [
+        43.68344426,
+        26.719336900000002
+       ],
+       [
+        43.6834221,
+        26.71936186
+       ],
+       [
+        43.68339747,
+        26.71939042
+       ],
+       [
+        43.68332748,
+        26.71946921
+       ],
+       [
+        43.683213200000004,
+        26.71961704
+       ],
+       [
+        43.68321316,
+        26.71961708
+       ],
+       [
+        43.68315967,
+        26.71968627
+       ],
+       [
+        43.68290234,
+        26.71996417
+       ],
+       [
+        43.68267662,
+        26.72020051
+       ],
+       [
+        43.68244806,
+        26.72044224
+       ],
+       [
+        43.68214583,
+        26.72074316
+       ],
+       [
+        43.68187697,
+        26.72101075
+       ],
+       [
+        43.6816405,
+        26.72124561
+       ],
+       [
+        43.68140543,
+        26.72148144
+       ],
+       [
+        43.681107420000004,
+        26.7217802
+       ],
+       [
+        43.68101618,
+        26.72189243
+       ],
+       [
+        43.68092077,
+        26.72199748
+       ],
+       [
+        43.680820600000004,
+        26.72209575
+       ],
+       [
+        43.68076302,
+        26.72217117
+       ],
+       [
+        43.68067644,
+        26.722281080000002
+       ],
+       [
+        43.68041711,
+        26.72255452
+       ],
+       [
+        43.680259480000004,
+        26.7227287
+       ],
+       [
+        43.6800568,
+        26.72293107
+       ],
+       [
+        43.67977382,
+        26.72318441
+       ],
+       [
+        43.6795324,
+        26.72341626
+       ],
+       [
+        43.67936828,
+        26.72358492
+       ],
+       [
+        43.67916487,
+        26.72377644
+       ],
+       [
+        43.67895707,
+        26.72397953
+       ],
+       [
+        43.67878664,
+        26.72414512
+       ],
+       [
+        43.67854901,
+        26.72437602
+       ],
+       [
+        43.6783783,
+        26.724545080000002
+       ],
+       [
+        43.6783203,
+        26.72461699
+       ],
+       [
+        43.67825835,
+        26.72468894
+       ],
+       [
+        43.67821674,
+        26.72470948
+       ],
+       [
+        43.67818009,
+        26.724709360000002
+       ],
+       [
+        43.67812362,
+        26.72469627
+       ],
+       [
+        43.67807647,
+        26.72468343
+       ],
+       [
+        43.67690225,
+        26.72446536
+       ],
+       [
+        43.67688246,
+        26.72449168
+       ],
+       [
+        43.676803910000004,
+        26.72462396
+       ],
+       [
+        43.67668165,
+        26.72481817
+       ],
+       [
+        43.67648475,
+        26.72507591
+       ],
+       [
+        43.67624728,
+        26.72537762
+       ],
+       [
+        43.67606743,
+        26.72559548
+       ],
+       [
+        43.67586016,
+        26.72583969
+       ],
+       [
+        43.67569976,
+        26.72602456
+       ],
+       [
+        43.67547546,
+        26.72626862
+       ],
+       [
+        43.67542137,
+        26.72634029
+       ],
+       [
+        43.67527256,
+        26.72651856
+       ],
+       [
+        43.67499966,
+        26.72684697
+       ],
+       [
+        43.67478354,
+        26.72709661
+       ],
+       [
+        43.67460355,
+        26.72730366
+       ],
+       [
+        43.67441974,
+        26.727527040000002
+       ],
+       [
+        43.674222220000004,
+        26.72778554
+       ],
+       [
+        43.67401384,
+        26.72804455
+       ],
+       [
+        43.67386922,
+        26.72822451
+       ],
+       [
+        43.67366626,
+        26.7284789
+       ],
+       [
+        43.67351712,
+        26.728661170000002
+       ],
+       [
+        43.67343005,
+        26.72877281
+       ],
+       [
+        43.673357010000004,
+        26.72888673
+       ],
+       [
+        43.67326945,
+        26.72899985
+       ],
+       [
+        43.67319905,
+        26.72906
+       ],
+       [
+        43.673121890000004,
+        26.72911785
+       ],
+       [
+        43.67308099,
+        26.72914251
+       ],
+       [
+        43.67303443,
+        26.72916326
+       ],
+       [
+        43.67285389,
+        26.72924124
+       ],
+       [
+        43.67269094,
+        26.72931161
+       ],
+       [
+        43.67266466,
+        26.72932358
+       ],
+       [
+        43.672664590000004,
+        26.72932361
+       ],
+       [
+        43.67258262,
+        26.72936563
+       ],
+       [
+        43.67240945,
+        26.72945146
+       ],
+       [
+        43.67227441,
+        26.72951839
+       ],
+       [
+        43.672229200000004,
+        26.729539080000002
+       ],
+       [
+        43.6721434,
+        26.72958052
+       ],
+       [
+        43.67205379,
+        26.72962279
+       ],
+       [
+        43.671960070000004,
+        26.729666
+       ],
+       [
+        43.671872820000004,
+        26.72970283
+       ],
+       [
+        43.67178423,
+        26.72974459
+       ],
+       [
+        43.6716883,
+        26.7297876
+       ],
+       [
+        43.67165222,
+        26.72980811
+       ],
+       [
+        43.671516170000004,
+        26.72987811
+       ],
+       [
+        43.6712981,
+        26.72998223
+       ],
+       [
+        43.671123630000004,
+        26.73007231
+       ],
+       [
+        43.6709485,
+        26.73016054
+       ],
+       [
+        43.67081828,
+        26.73022883
+       ],
+       [
+        43.67072746,
+        26.73027372
+       ],
+       [
+        43.67059655,
+        26.73033246
+       ],
+       [
+        43.67050699,
+        26.730375770000002
+       ],
+       [
+        43.67037572,
+        26.73044246
+       ],
+       [
+        43.67029408,
+        26.730484450000002
+       ],
+       [
+        43.67015387,
+        26.73054355
+       ],
+       [
+        43.67006125,
+        26.73057969
+       ],
+       [
+        43.66997313,
+        26.73062144
+       ],
+       [
+        43.66979336,
+        26.730703820000002
+       ],
+       [
+        43.66952003,
+        26.73080952
+       ],
+       [
+        43.66947394,
+        26.73083279
+       ],
+       [
+        43.66943189,
+        26.730853460000002
+       ],
+       [
+        43.6692975,
+        26.73091818
+       ],
+       [
+        43.66920826,
+        26.73096306
+       ],
+       [
+        43.66916501,
+        26.730983130000002
+       ],
+       [
+        43.66903127,
+        26.73104482
+       ],
+       [
+        43.66894335,
+        26.73108735
+       ],
+       [
+        43.668811070000004,
+        26.731148870000002
+       ],
+       [
+        43.66836852,
+        26.7313571
+       ],
+       [
+        43.66818476,
+        26.73144443
+       ],
+       [
+        43.66800668,
+        26.73152457
+       ],
+       [
+        43.66773716,
+        26.73164192
+       ],
+       [
+        43.667646330000004,
+        26.73168201
+       ],
+       [
+        43.667600820000004,
+        26.73170485
+       ],
+       [
+        43.66755789,
+        26.73172243
+       ],
+       [
+        43.66747257,
+        26.73176305
+       ],
+       [
+        43.66734201,
+        26.731828
+       ],
+       [
+        43.66729744,
+        26.73185441
+       ],
+       [
+        43.667214380000004,
+        26.73189763
+       ],
+       [
+        43.66703419,
+        26.73198159
+       ],
+       [
+        43.66685234,
+        26.73206142
+       ],
+       [
+        43.666669230000004,
+        26.73213704
+       ],
+       [
+        43.66657925,
+        26.73217439
+       ],
+       [
+        43.66644426,
+        26.73223906
+       ],
+       [
+        43.6661706,
+        26.732348730000002
+       ],
+       [
+        43.66598601,
+        26.73242108
+       ],
+       [
+        43.66571634,
+        26.73253568
+       ],
+       [
+        43.66548794,
+        26.73263064
+       ],
+       [
+        43.66521442,
+        26.73274261
+       ],
+       [
+        43.66516833,
+        26.73276262
+       ],
+       [
+        43.66514248,
+        26.73280051
+       ],
+       [
+        43.665131620000004,
+        26.73289191
+       ],
+       [
+        43.66509602,
+        26.733159230000002
+       ],
+       [
+        43.66509024,
+        26.73320431
+       ],
+       [
+        43.66508476,
+        26.73324956
+       ],
+       [
+        43.665081130000004,
+        26.73351951
+       ],
+       [
+        43.6650626,
+        26.73365485
+       ],
+       [
+        43.66505779,
+        26.73369591
+       ],
+       [
+        43.66505301,
+        26.73392288
+       ],
+       [
+        43.66504941,
+        26.73419544
+       ],
+       [
+        43.6650456,
+        26.73437569
+       ],
+       [
+        43.66503348,
+        26.73459773
+       ],
+       [
+        43.66501713,
+        26.73487284
+       ],
+       [
+        43.66500997,
+        26.73504959
+       ],
+       [
+        43.66500307,
+        26.73527613
+       ],
+       [
+        43.66500645,
+        26.73550197
+       ],
+       [
+        43.6650128,
+        26.73567958
+       ],
+       [
+        43.66502792,
+        26.73577138
+       ],
+       [
+        43.66502843,
+        26.73590399
+       ],
+       [
+        43.66502792,
+        26.7362659
+       ],
+       [
+        43.66502657,
+        26.73653599
+       ],
+       [
+        43.66503102,
+        26.73667434
+       ],
+       [
+        43.66503625,
+        26.73680842
+       ],
+       [
+        43.66503772,
+        26.73685387
+       ],
+       [
+        43.66503556,
+        26.73694262
+       ],
+       [
+        43.66502796,
+        26.7369885
+       ],
+       [
+        43.66502553,
+        26.73703306
+       ],
+       [
+        43.665034920000004,
+        26.73739215
+       ],
+       [
+        43.66503863,
+        26.737663
+       ],
+       [
+        43.6650377,
+        26.7377137
+       ],
+       [
+        43.66503464,
+        26.73775642
+       ],
+       [
+        43.665033120000004,
+        26.7377981
+       ],
+       [
+        43.66501891,
+        26.73793566
+       ],
+       [
+        43.665022900000004,
+        26.73824875
+       ],
+       [
+        43.66503051,
+        26.73839778
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 430,
+   "geo_id": "Uthal-PAR-06",
+   "before_area": 1215512.08,
+   "after_area_approx": 1215496.44,
+   "reason": "قص تداخل 16 م² مع القطعة Uthal-PAD-02",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.68100819,
+        26.62052573
+       ],
+       [
+        43.68108408,
+        26.62054911
+       ],
+       [
+        43.68108413,
+        26.62054913
+       ],
+       [
+        43.68182397,
+        26.62077704
+       ],
+       [
+        43.68198222,
+        26.62082579
+       ],
+       [
+        43.68658741,
+        26.62447567
+       ],
+       [
+        43.6870007,
+        26.62413192
+       ],
+       [
+        43.69437163,
+        26.61800011
+       ],
+       [
+        43.69437184,
+        26.61800032
+       ],
+       [
+        43.69828516,
+        26.61474463
+       ],
+       [
+        43.687184110000004,
+        26.61139833
+       ],
+       [
+        43.68100819,
+        26.62052573
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 464,
+   "geo_id": "1165-3أ",
+   "before_area": 1890745.66,
+   "after_area_approx": 1887191.62,
+   "reason": "قص تداخل 345 م² مع القطعة Uthal-PAD-03؛ قص تداخل 3198 م² مع القطعة Uthal-PAR-08",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.664767080000004,
+        26.63541339
+       ],
+       [
+        43.66677892,
+        26.63213275
+       ],
+       [
+        43.667211110000004,
+        26.63143853
+       ],
+       [
+        43.66727869,
+        26.63132128
+       ],
+       [
+        43.66775235,
+        26.630526800000002
+       ],
+       [
+        43.66792012,
+        26.63024539
+       ],
+       [
+        43.66803241,
+        26.63006073
+       ],
+       [
+        43.66808879,
+        26.629968
+       ],
+       [
+        43.66839974,
+        26.629451160000002
+       ],
+       [
+        43.66860608,
+        26.62912014
+       ],
+       [
+        43.66865393,
+        26.6290503
+       ],
+       [
+        43.66869139,
+        26.62898155
+       ],
+       [
+        43.66870535,
+        26.62895624
+       ],
+       [
+        43.668759800000004,
+        26.62885749
+       ],
+       [
+        43.66896947,
+        26.62850123
+       ],
+       [
+        43.66897058,
+        26.628499350000002
+       ],
+       [
+        43.66897167,
+        26.62849758
+       ],
+       [
+        43.66932565,
+        26.62792079
+       ],
+       [
+        43.6693345,
+        26.62790637
+       ],
+       [
+        43.66955101,
+        26.62754263
+       ],
+       [
+        43.66966361,
+        26.62735344
+       ],
+       [
+        43.66981619,
+        26.627100430000002
+       ],
+       [
+        43.669922,
+        26.62692497
+       ],
+       [
+        43.66992667,
+        26.62690817
+       ],
+       [
+        43.66993194,
+        26.62688921
+       ],
+       [
+        43.66990335,
+        26.62686625
+       ],
+       [
+        43.66982704,
+        26.6268101
+       ],
+       [
+        43.66936287,
+        26.626463140000002
+       ],
+       [
+        43.66902186,
+        26.62620498
+       ],
+       [
+        43.66895933,
+        26.62615966
+       ],
+       [
+        43.66882222,
+        26.62606028
+       ],
+       [
+        43.66862826,
+        26.62591356
+       ],
+       [
+        43.66857991,
+        26.62586607
+       ],
+       [
+        43.66855762,
+        26.62584417
+       ],
+       [
+        43.66855756,
+        26.62584411
+       ],
+       [
+        43.66857011,
+        26.62582382
+       ],
+       [
+        43.66858344,
+        26.62580264
+       ],
+       [
+        43.668922200000004,
+        26.62531285
+       ],
+       [
+        43.66908607,
+        26.62509635
+       ],
+       [
+        43.66912801,
+        26.62503671
+       ],
+       [
+        43.66924507,
+        26.62487025
+       ],
+       [
+        43.6696362,
+        26.624329720000002
+       ],
+       [
+        43.66968299,
+        26.62426506
+       ],
+       [
+        43.66971053,
+        26.6242269
+       ],
+       [
+        43.67006249,
+        26.623739150000002
+       ],
+       [
+        43.670273720000004,
+        26.62343344
+       ],
+       [
+        43.67044279,
+        26.62320896
+       ],
+       [
+        43.6704461,
+        26.62320422
+       ],
+       [
+        43.67047053,
+        26.623169230000002
+       ],
+       [
+        43.67059654,
+        26.6229232
+       ],
+       [
+        43.67072966,
+        26.6226317
+       ],
+       [
+        43.670796610000004,
+        26.62248202
+       ],
+       [
+        43.67092405,
+        26.6222012
+       ],
+       [
+        43.67092479,
+        26.62219971
+       ],
+       [
+        43.6711065,
+        26.62177893
+       ],
+       [
+        43.67126744,
+        26.621399840000002
+       ],
+       [
+        43.67128428,
+        26.62135845
+       ],
+       [
+        43.67153803,
+        26.62077212
+       ],
+       [
+        43.67171693,
+        26.620345
+       ],
+       [
+        43.671950190000004,
+        26.61980379
+       ],
+       [
+        43.67213772,
+        26.61938113
+       ],
+       [
+        43.672193050000004,
+        26.61924282
+       ],
+       [
+        43.672254880000004,
+        26.6191129
+       ],
+       [
+        43.67234329,
+        26.61891382
+       ],
+       [
+        43.67249294,
+        26.6185496
+       ],
+       [
+        43.671743400000004,
+        26.6177359
+       ],
+       [
+        43.67118719,
+        26.61725593
+       ],
+       [
+        43.67123636,
+        26.61718545
+       ],
+       [
+        43.6700529,
+        26.61590068
+       ],
+       [
+        43.66834576,
+        26.61442619
+       ],
+       [
+        43.65434071,
+        26.62998017
+       ],
+       [
+        43.65877527,
+        26.63135412
+       ],
+       [
+        43.664767080000004,
+        26.63541339
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 428,
+   "geo_id": "Uthal-PAR-09",
+   "before_area": 904935.61,
+   "after_area_approx": 902783.24,
+   "reason": "قص تداخل 2146 م² مع القطعة Uthal-PAD-04",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.70984587,
+        26.61800452
+       ],
+       [
+        43.71471984,
+        26.60855257
+       ],
+       [
+        43.70710501,
+        26.60575867
+       ],
+       [
+        43.70303561,
+        26.61589052
+       ],
+       [
+        43.70302185,
+        26.615886370000002
+       ],
+       [
+        43.70299939,
+        26.61594239
+       ],
+       [
+        43.70984587,
+        26.61800452
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 420,
+   "geo_id": "Uthal-PAR-14",
+   "before_area": 660879.28,
+   "after_area_approx": 656967.61,
+   "reason": "قص تداخل 3519 م² مع القطعة Uthal-PAD-06؛ قص تداخل 381 م² مع القطعة Uthal-PAD-07",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.67947902,
+        26.59419106
+       ],
+       [
+        43.684188,
+        26.58429586
+       ],
+       [
+        43.684871030000004,
+        26.58298152
+       ],
+       [
+        43.68545109,
+        26.581772700000002
+       ],
+       [
+        43.6853385,
+        26.5817307
+       ],
+       [
+        43.67177049,
+        26.59045309
+       ],
+       [
+        43.67947902,
+        26.59419106
+       ]
+      ]
+     ],
+     [
+      [
+       [
+        43.68423548,
+        26.584305960000002
+       ],
+       [
+        43.684188,
+        26.58429586
+       ],
+       [
+        43.68422979,
+        26.58431782
+       ],
+       [
+        43.68423548,
+        26.584305960000002
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 432,
+   "geo_id": "Uthal-PAR-07",
+   "before_area": 912644.87,
+   "after_area_approx": 911172.14,
+   "reason": "قص تداخل 1468 م² مع القطعة Uthal-PAD-06",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.68942249,
+        26.611787200000002
+       ],
+       [
+        43.69348843,
+        26.60163203
+       ],
+       [
+        43.68920133,
+        26.59939509
+       ],
+       [
+        43.685404,
+        26.59748459
+       ],
+       [
+        43.68432947,
+        26.5987546
+       ],
+       [
+        43.68739379,
+        26.60092765
+       ],
+       [
+        43.68636445,
+        26.60268943
+       ],
+       [
+        43.68294523,
+        26.611468640000002
+       ],
+       [
+        43.68609394,
+        26.61248844
+       ],
+       [
+        43.687052,
+        26.61107259
+       ],
+       [
+        43.68942249,
+        26.611787200000002
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 421,
+   "geo_id": "Uthal-PAR-18",
+   "before_area": 156982.68,
+   "after_area_approx": 156833.11,
+   "reason": "قص تداخل 149 م² مع القطعة Uthal-PAD-07",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.689846360000004,
+        26.56575238
+       ],
+       [
+        43.68810866,
+        26.57246392
+       ],
+       [
+        43.68856227,
+        26.57253883
+       ],
+       [
+        43.68856596,
+        26.57251303
+       ],
+       [
+        43.689588390000004,
+        26.57270829
+       ],
+       [
+        43.689591740000004,
+        26.57269634
+       ],
+       [
+        43.69257057,
+        26.56206637
+       ],
+       [
+        43.69258507,
+        26.56201459
+       ],
+       [
+        43.689846360000004,
+        26.56575238
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 425,
+   "geo_id": "Uthal-PAR-13",
+   "before_area": 149682.73,
+   "after_area_approx": 149029.07,
+   "reason": "قص تداخل 652 م² مع القطعة Uthal-PAD-07",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.6841687,
+        26.58444511
+       ],
+       [
+        43.69284519,
+        26.588903990000002
+       ],
+       [
+        43.69286412,
+        26.58885403
+       ],
+       [
+        43.69381481,
+        26.5863441
+       ],
+       [
+        43.69135879,
+        26.58582162
+       ],
+       [
+        43.68460909,
+        26.58451711
+       ],
+       [
+        43.68417447,
+        26.584433100000002
+       ],
+       [
+        43.68412775,
+        26.58442407
+       ],
+       [
+        43.6841687,
+        26.58444511
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 463,
+   "geo_id": "1165-1",
+   "before_area": 1976575.03,
+   "after_area_approx": 1975724.49,
+   "reason": "قص تداخل 848 م² مع القطعة Uthal-PAD-09",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.70322805,
+        26.5612828
+       ],
+       [
+        43.70350139,
+        26.56186135
+       ],
+       [
+        43.70394627,
+        26.56236801
+       ],
+       [
+        43.70684651,
+        26.562675210000002
+       ],
+       [
+        43.71641265,
+        26.56348204
+       ],
+       [
+        43.71363285,
+        26.55862551
+       ],
+       [
+        43.712948000000004,
+        26.5580174
+       ],
+       [
+        43.7123145,
+        26.554764600000002
+       ],
+       [
+        43.71204916,
+        26.553018220000002
+       ],
+       [
+        43.71182032,
+        26.550980120000002
+       ],
+       [
+        43.71317605,
+        26.54725467
+       ],
+       [
+        43.71339332,
+        26.54684138
+       ],
+       [
+        43.71128836,
+        26.54647732
+       ],
+       [
+        43.7028536,
+        26.54285878
+       ],
+       [
+        43.70322805,
+        26.5612828
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 462,
+   "geo_id": "1165-3ب",
+   "before_area": 1927290.13,
+   "after_area_approx": 1912745.52,
+   "reason": "قص تداخل 14501 م² مع القطعة Uthal-PAR-08",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.663180510000004,
+        26.61433546
+       ],
+       [
+        43.66290566,
+        26.614117620000002
+       ],
+       [
+        43.65983705,
+        26.61171652
+       ],
+       [
+        43.65854656,
+        26.61307339
+       ],
+       [
+        43.65629841,
+        26.61535556
+       ],
+       [
+        43.6559693,
+        26.61514791
+       ],
+       [
+        43.6494348,
+        26.6216212
+       ],
+       [
+        43.650854530000004,
+        26.62346028
+       ],
+       [
+        43.64698379,
+        26.62549558
+       ],
+       [
+        43.64980979,
+        26.62857619
+       ],
+       [
+        43.65434071,
+        26.62998017
+       ],
+       [
+        43.66834576,
+        26.61442619
+       ],
+       [
+        43.66543165,
+        26.61190921
+       ],
+       [
+        43.66504182,
+        26.61175545
+       ],
+       [
+        43.663180510000004,
+        26.61433546
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 415,
+   "geo_id": "1331-2",
+   "before_area": 9828587.1,
+   "after_area_approx": 9824519.9,
+   "reason": "قص تداخل 4054 م² مع القطعة 1331-1",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.69646113,
+        27.40503542
+       ],
+       [
+        43.69050324,
+        27.4029937
+       ],
+       [
+        43.69042045,
+        27.40297933
+       ],
+       [
+        43.67986381,
+        27.41075546
+       ],
+       [
+        43.67313792,
+        27.41566327
+       ],
+       [
+        43.668008650000004,
+        27.419653320000002
+       ],
+       [
+        43.68074607,
+        27.43651347
+       ],
+       [
+        43.70528868,
+        27.418240790000002
+       ],
+       [
+        43.70527622,
+        27.41822701
+       ],
+       [
+        43.73555761,
+        27.39256987
+       ],
+       [
+        43.700606040000004,
+        27.40714179
+       ],
+       [
+        43.69646113,
+        27.40503542
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 390,
+   "geo_id": "WADIUnaizah-PAD-08",
+   "before_area": 1423029.82,
+   "after_area_approx": 1422808.98,
+   "reason": "قص تداخل 220 م² مع القطعة WADIUnaizah-PAR-12",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.90556928,
+        26.10235653
+       ],
+       [
+        43.905609500000004,
+        26.10212897
+       ],
+       [
+        43.90727495,
+        26.10260159
+       ],
+       [
+        43.90954593,
+        26.103250980000002
+       ],
+       [
+        43.91033608,
+        26.10330805
+       ],
+       [
+        43.91066198,
+        26.10293949
+       ],
+       [
+        43.90211081,
+        26.100985220000002
+       ],
+       [
+        43.90138455,
+        26.094690370000002
+       ],
+       [
+        43.90652141,
+        26.09117308
+       ],
+       [
+        43.90614578,
+        26.09043583
+       ],
+       [
+        43.90223241,
+        26.08986226
+       ],
+       [
+        43.90271952,
+        26.08889863
+       ],
+       [
+        43.904050930000004,
+        26.08767962
+       ],
+       [
+        43.903736970000004,
+        26.08737787
+       ],
+       [
+        43.9047901,
+        26.08642623
+       ],
+       [
+        43.90622745,
+        26.085247680000002
+       ],
+       [
+        43.90556617,
+        26.08161069
+       ],
+       [
+        43.90511611,
+        26.080379960000002
+       ],
+       [
+        43.90487566,
+        26.07904514
+       ],
+       [
+        43.90305034,
+        26.078668710000002
+       ],
+       [
+        43.90411604,
+        26.08494379
+       ],
+       [
+        43.895852,
+        26.087073150000002
+       ],
+       [
+        43.89584466,
+        26.08788243
+       ],
+       [
+        43.89549664,
+        26.08783452
+       ],
+       [
+        43.89549662,
+        26.087836890000002
+       ],
+       [
+        43.88706441,
+        26.08667618
+       ],
+       [
+        43.88706681,
+        26.08667415
+       ],
+       [
+        43.887032,
+        26.086669360000002
+       ],
+       [
+        43.88689998,
+        26.08712117
+       ],
+       [
+        43.89301948,
+        26.08798239
+       ],
+       [
+        43.89585204,
+        26.0884452
+       ],
+       [
+        43.89592883,
+        26.09513815
+       ],
+       [
+        43.89573986,
+        26.09985871
+       ],
+       [
+        43.89736537,
+        26.09995616
+       ],
+       [
+        43.89811842,
+        26.10051646
+       ],
+       [
+        43.89817115,
+        26.10065505
+       ],
+       [
+        43.90553322,
+        26.10234015
+       ],
+       [
+        43.90556928,
+        26.10235653
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 453,
+   "geo_id": "BUTAYN-01-PAR-02",
+   "before_area": 268572.2,
+   "after_area_approx": 264466.77,
+   "reason": "قص تداخل 4093 م² مع القطعة 8487-4",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.75101887,
+        26.637296980000002
+       ],
+       [
+        43.751175950000004,
+        26.63701155
+       ],
+       [
+        43.75094158,
+        26.63681141
+       ],
+       [
+        43.75015678,
+        26.635353170000002
+       ],
+       [
+        43.74834154,
+        26.62815322
+       ],
+       [
+        43.74464651,
+        26.629455280000002
+       ],
+       [
+        43.74758884,
+        26.63511318
+       ],
+       [
+        43.75101887,
+        26.637296980000002
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 446,
+   "geo_id": "416-2",
+   "before_area": 59055.75,
+   "after_area_approx": 59053.96,
+   "reason": "قص تداخل 2 م² مع القطعة Uthal-PAR-12",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.70492126,
+        26.590668230000002
+       ],
+       [
+        43.705907090000004,
+        26.58843943
+       ],
+       [
+        43.70381452,
+        26.58778785
+       ],
+       [
+        43.70279371,
+        26.59000576
+       ],
+       [
+        43.70492126,
+        26.590668230000002
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 448,
+   "geo_id": "416-1",
+   "before_area": 58377.46,
+   "after_area_approx": 58375.98,
+   "reason": "قص تداخل 1 م² مع القطعة Uthal-PAR-12",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.708338940000004,
+        26.59173242
+       ],
+       [
+        43.70666111,
+        26.58867421
+       ],
+       [
+        43.705907090000004,
+        26.58843943
+       ],
+       [
+        43.70492126,
+        26.590668230000002
+       ],
+       [
+        43.708338940000004,
+        26.59173242
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 460,
+   "geo_id": "6أ-1165",
+   "before_area": 1062519.99,
+   "after_area_approx": 1062517.46,
+   "reason": "قص تداخل 3 م² مع القطعة 1165-6",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.67632594,
+        26.647064320000002
+       ],
+       [
+        43.67005936,
+        26.64469031
+       ],
+       [
+        43.66962431,
+        26.6444647
+       ],
+       [
+        43.66827433,
+        26.64382883
+       ],
+       [
+        43.66800576,
+        26.64374642
+       ],
+       [
+        43.6673579,
+        26.64356801
+       ],
+       [
+        43.665972860000004,
+        26.643632410000002
+       ],
+       [
+        43.66573128,
+        26.64364478
+       ],
+       [
+        43.665493420000004,
+        26.64380968
+       ],
+       [
+        43.66367828,
+        26.64761454
+       ],
+       [
+        43.66151287,
+        26.65187727
+       ],
+       [
+        43.66098146,
+        26.65267746
+       ],
+       [
+        43.66801006,
+        26.65525801
+       ],
+       [
+        43.67305822,
+        26.64977566
+       ],
+       [
+        43.67632594,
+        26.647064320000002
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 456,
+   "geo_id": "2أ-1165",
+   "before_area": 999015.01,
+   "after_area_approx": 998932.92,
+   "reason": "قص تداخل 82 م² مع القطعة 1165-2",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.6789949,
+        26.56670694
+       ],
+       [
+        43.675731060000004,
+        26.56577175
+       ],
+       [
+        43.67485694,
+        26.56796963
+       ],
+       [
+        43.67411248,
+        26.5698414
+       ],
+       [
+        43.6723566,
+        26.56928369
+       ],
+       [
+        43.6714816,
+        26.571552190000002
+       ],
+       [
+        43.66995645,
+        26.57133848
+       ],
+       [
+        43.66821747,
+        26.57162202
+       ],
+       [
+        43.66742206,
+        26.573918250000002
+       ],
+       [
+        43.67648238,
+        26.57952908
+       ],
+       [
+        43.67656706,
+        26.57929167
+       ],
+       [
+        43.68017523,
+        26.57068327
+       ],
+       [
+        43.6789949,
+        26.56670694
+       ]
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "parcel_id": 461,
+   "geo_id": "1165-5",
+   "before_area": 1018939.74,
+   "after_area_approx": 1018933.62,
+   "reason": "قص تداخل 6 م² مع القطعة 1165-4",
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        43.674778350000004,
+        26.63575977
+       ],
+       [
+        43.6735928,
+        26.63547845
+       ],
+       [
+        43.67359299,
+        26.63547814
+       ],
+       [
+        43.67359228,
+        26.63547797
+       ],
+       [
+        43.66704336,
+        26.6322626
+       ],
+       [
+        43.66121894,
+        26.64175966
+       ],
+       [
+        43.665492900000004,
+        26.6438092
+       ],
+       [
+        43.66573075,
+        26.64364429
+       ],
+       [
+        43.66597234,
+        26.64363193
+       ],
+       [
+        43.66627534,
+        26.64361784
+       ],
+       [
+        43.66735737,
+        26.643567530000002
+       ],
+       [
+        43.66756077,
+        26.64362354
+       ],
+       [
+        43.66800523,
+        26.643745940000002
+       ],
+       [
+        43.6682738,
+        26.64382835
+       ],
+       [
+        43.668458030000004,
+        26.64391512
+       ],
+       [
+        43.66962379,
+        26.64446422
+       ],
+       [
+        43.67509348,
+        26.63577089
+       ],
+       [
+        43.674778350000004,
+        26.63575977
+       ]
+      ]
+     ]
+    ]
+   }
+  }
+ ],
+ "archive": {
+  "deeds": [
+   {
+    "id": 324,
+    "deed_no": "123456",
+    "geo_id": "100600",
+    "reason": "سجل تجريبي: رقم صك 123456 بلا مالك"
+   },
+   {
+    "id": 1,
+    "deed_no": "3/276",
+    "geo_id": "164-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 596426008802"
+   },
+   {
+    "id": 2,
+    "deed_no": "3/275",
+    "geo_id": "165-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 396426008804"
+   },
+   {
+    "id": 3,
+    "deed_no": "3/274",
+    "geo_id": "166-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 393314001567"
+   },
+   {
+    "id": 5,
+    "deed_no": "3/272",
+    "geo_id": "37-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 560649002860"
+   },
+   {
+    "id": 6,
+    "deed_no": "3/268",
+    "geo_id": "31-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 460649002859"
+   },
+   {
+    "id": 8,
+    "deed_no": "3/269",
+    "geo_id": "30-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 596426008280"
+   },
+   {
+    "id": 9,
+    "deed_no": "3/270",
+    "geo_id": "29-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 696426008803"
+   },
+   {
+    "id": 10,
+    "deed_no": "3/296",
+    "geo_id": "99-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 960649002863"
+   },
+   {
+    "id": 12,
+    "deed_no": "3/297",
+    "geo_id": "98-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 360649002855"
+   },
+   {
+    "id": 14,
+    "deed_no": "3/292",
+    "geo_id": "135-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 393314001566"
+   },
+   {
+    "id": 15,
+    "deed_no": "3/293",
+    "geo_id": "138-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 760649002865"
+   },
+   {
+    "id": 16,
+    "deed_no": "3/295",
+    "geo_id": "131-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 796426008281"
+   },
+   {
+    "id": 17,
+    "deed_no": "3/294",
+    "geo_id": "133-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 293314001565"
+   },
+   {
+    "id": 18,
+    "deed_no": "3/288",
+    "geo_id": "221-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 496426009141"
+   },
+   {
+    "id": 19,
+    "deed_no": "3/290",
+    "geo_id": "219-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 496426008285"
+   },
+   {
+    "id": 20,
+    "deed_no": "3/291",
+    "geo_id": "218-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 396426008288"
+   },
+   {
+    "id": 21,
+    "deed_no": "3/289",
+    "geo_id": "220-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 496426009140"
+   },
+   {
+    "id": 22,
+    "deed_no": "3/278",
+    "geo_id": "244-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 796426009143"
+   },
+   {
+    "id": 23,
+    "deed_no": "3/279",
+    "geo_id": "243-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 796426009142"
+   },
+   {
+    "id": 24,
+    "deed_no": "3/281",
+    "geo_id": "308-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 360649002873"
+   },
+   {
+    "id": 25,
+    "deed_no": "3/282",
+    "geo_id": "310-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 360649002869"
+   },
+   {
+    "id": 26,
+    "deed_no": "3/280",
+    "geo_id": "309-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 960649002872"
+   },
+   {
+    "id": 27,
+    "deed_no": "3/283",
+    "geo_id": "316-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 760649002871"
+   },
+   {
+    "id": 28,
+    "deed_no": "3/284",
+    "geo_id": "384-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 396426008290"
+   },
+   {
+    "id": 29,
+    "deed_no": "3/287",
+    "geo_id": "377-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 796426009139"
+   },
+   {
+    "id": 30,
+    "deed_no": "3/285",
+    "geo_id": "383-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 693314001574"
+   },
+   {
+    "id": 31,
+    "deed_no": "3/286",
+    "geo_id": "378-623",
+    "reason": "صك قديم حلّ محله الصك المحدث 793314001562"
+   }
+  ],
+  "parcels": [
+   {
+    "id": 465,
+    "geo_id": "100600",
+    "reason": "قطعة السجل التجريبي"
+   }
+  ]
+ }
+}

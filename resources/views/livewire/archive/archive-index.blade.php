@@ -2,7 +2,7 @@
 
     {{-- Tabs --}}
     <div class="flex flex-wrap gap-2">
-        @foreach (['parcels' => __('archive.parcels'), 'deeds' => __('archive.deeds'), 'owners' => __('archive.owners')] as $key => $label)
+        @foreach (['parcels' => __('archive.parcels'), 'deeds' => __('archive.deeds'), 'owners' => __('archive.owners'), 'values' => __('archive.values')] as $key => $label)
             <button type="button" wire:click="switchTab('{{ $key }}')"
                     class="flex items-center gap-2 px-4 py-2 text-sm rounded-xl transition
                            {{ $tab === $key
@@ -67,13 +67,18 @@
                                     </span>
                                 @elseif ($tab === 'deeds')
                                     {{ $record->deed_no ?: '—' }}
+                                @elseif ($tab === 'values')
+                                    <span class="font-medium">{{ $record->value ?? '—' }}</span>
+                                    <span class="block text-xs text-on-surface-variant dark:text-on-primary-container/70">
+                                        {{ $record->record_table }} #{{ $record->record_id }} · {{ $record->field }} — {{ $record->reason }}
+                                    </span>
                                 @else
                                     {{ $record->name }}
                                 @endif
                             </td>
                             <x-table.created-cell :date="$record->created_at" />
                             <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
-                                {{ $record->deleted_at?->format('Y-m-d H:i') ?? '—' }}
+                                {{ ($tab === 'values' ? $record->created_at : $record->deleted_at)?->format('Y-m-d H:i') ?? '—' }}
                             </td>
                             <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
                                 {{ $record->archivedBy?->name ?? '—' }}
@@ -86,7 +91,7 @@
                                              so the click deserves a deliberate second step. --}}
                                         <div class="flex items-center gap-2 justify-end">
                                             <span class="text-xs text-on-surface-variant dark:text-on-primary-container">
-                                                {{ __('archive.confirm_restore') }}
+                                                {{ $tab === 'values' ? __('archive.confirm_restore_value') : __('archive.confirm_restore') }}
                                             </span>
                                             <button type="button" wire:click="restore({{ $record->id }})"
                                                     class="px-3 py-1.5 text-xs rounded-lg bg-primary text-white">

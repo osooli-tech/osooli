@@ -48,9 +48,16 @@ final class LocationIndex
     /**
      * The city a region/city pair names, or why it cannot be found.
      *
+     * Names repeat even inside one region — the National Address has two
+     * places called «الدرعية» in the Riyadh region, the historic town and a
+     * village. When the region does not settle it, the district does: the
+     * city that has a district by that name. Failing that, the one of them
+     * that has districts at all, since a village with none is rarely where
+     * a surveyed parcel lies. Only a true tie is reported as ambiguous.
+     *
      * @return array{id: int|null, error: string|null}
      */
-    public function city(?string $region, string $city): array
+    public function city(?string $region, string $city, ?string $district = null): array
     {
         $options = $this->cities[Normalise::arabic($city)] ?? [];
 
@@ -62,10 +69,26 @@ final class LocationIndex
             $options = array_values(array_filter($options, static fn (array $c): bool => in_array($c['region_id'], $regionIds, true)));
         }
 
+        if (count($options) > 1 && $district !== null) {
+            $withDistrict = array_values(array_filter(
+                $options,
+                fn (array $c): bool => $this->district($c['id'], $district) !== null
+            ));
+            if (count($withDistrict) === 1) {
+                return ['id' => $withDistrict[0]['id'], 'error' => null];
+            }
+        }
+
+        if (count($options) > 1) {
+            usort($options, fn (array $a, array $b): int => count($this->districtNames[$b['id']] ?? []) <=> count($this->districtNames[$a['id']] ?? []));
+            if (count($this->districtNames[$options[0]['id']] ?? []) > count($this->districtNames[$options[1]['id']] ?? [])) {
+                return ['id' => $options[0]['id'], 'error' => null];
+            }
+        }
+
         return match (count($options)) {
             0 => ['id' => null, 'error' => 'city_not_found'],
             1 => ['id' => $options[0]['id'], 'error' => null],
-            // Villages share names across regions; the region settles it.
             default => ['id' => null, 'error' => 'city_ambiguous'],
         };
     }

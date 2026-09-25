@@ -446,11 +446,17 @@ final class DeedImportAnalyzer
         $districtId = null;
         $districtKey = null;
 
+        // A plan already on record fixes the location by itself; a city name
+        // that cannot be pinned down then does not matter.
+        $knownPlan = $record->planNo !== null && $this->locations->plan($record->planNo) !== null;
+
         if ($record->location['city'] !== null) {
-            $city = $this->locations->city($record->location['region'], $record->location['city']);
+            $city = $this->locations->city($record->location['region'], $record->location['city'], $record->location['district']);
 
             if ($city['id'] === null) {
-                $item['errors'][] = ['code' => $city['error'], 'detail' => $record->location['city']];
+                if (! $knownPlan) {
+                    $item['errors'][] = ['code' => $city['error'], 'detail' => $record->location['city']];
+                }
             } elseif ($record->location['district'] !== null) {
                 $districtId = $this->locations->district($city['id'], $record->location['district']);
 

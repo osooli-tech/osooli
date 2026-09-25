@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Archive;
 
 use App\Livewire\Concerns\FiltersByCreatedAt;
+use App\Models\ArchivedValue;
 use App\Models\Deed;
 use App\Models\Owner;
 use App\Models\Parcel;
@@ -28,8 +29,11 @@ class ArchiveIndex extends Component
     use FiltersByCreatedAt;
     use WritesSafely;
 
-    /** The three archivable record types, in the order they are shown. */
-    private const TYPES = ['parcels', 'deeds', 'owners'];
+    /**
+     * The three archivable record types, in the order they are shown, then
+     * the single field values a data cleanup took out of live records.
+     */
+    private const TYPES = ['parcels', 'deeds', 'owners', 'values'];
 
     public string $tab = 'parcels';
 
@@ -67,6 +71,21 @@ class ArchiveIndex extends Component
     {
         abort_unless(auth()->user()?->can('archive.restore'), 403);
 
+        if ($this->tab === 'values') {
+            $value = ArchivedValue::query()->findOrFail($id);
+
+            $this->writeSafely('values.restore', $value->record_table, $value->record_id, function () use ($value): null {
+                $value->restore();
+
+                return null;
+            });
+
+            $this->restoringId = null;
+            $this->dispatch('toast', type: 'success', message: __('common.restored'));
+
+            return;
+        }
+
         $record = $this->query()->whereKey($id)->firstOrFail();
 
         $this->writeSafely(
@@ -92,10 +111,21 @@ class ArchiveIndex extends Component
      * arm returns a builder bound to its own model, which is not the same as
      * a single builder that could yield any of the three.
      *
-     * @return Builder<Parcel>|Builder<Deed>|Builder<Owner>
+     * @return Builder<Parcel>|Builder<Deed>|Builder<Owner>|Builder<ArchivedValue>
      */
     private function query()
     {
+        if ($this->tab === 'values') {
+            $builder = ArchivedValue::query();
+
+            if ($this->search !== '') {
+                $term = '%'.$this->search.'%';
+                $builder->where(fn ($q) => $q->whereLike('value', $term)->orWhereLike('reason', $term));
+            }
+
+            return $this->applyCreatedAt($builder->with('archivedBy')->latest('created_at')->latest('id'));
+        }
+
         $builder = match ($this->tab) {
             'deeds' => Deed::query()->onlyTrashed()->with('parcel'),
             'owners' => Owner::query()->onlyTrashed(),
@@ -119,7 +149,7 @@ class ArchiveIndex extends Component
         return $this->applyCreatedAt($builder->with('archivedBy')->latest('deleted_at'));
     }
 
-    /** @return Collection<int, Parcel>|Collection<int, Deed>|Collection<int, Owner> */
+    /** @return Collection<int, Parcel>|Collection<int, Deed>|Collection<int, Owner>|Collection<int, ArchivedValue> */
     public function records(): Collection
     {
         return $this->query()->limit(100)->get();
@@ -137,6 +167,7 @@ class ArchiveIndex extends Component
             'parcels' => Parcel::query()->onlyTrashed()->count(),
             'deeds' => Deed::query()->onlyTrashed()->count(),
             'owners' => Owner::query()->onlyTrashed()->count(),
+            'values' => ArchivedValue::query()->count(),
         ];
     }
 
