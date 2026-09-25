@@ -46,6 +46,7 @@
                  data-token="{{ config('services.mapbox.token') }}"
                  data-geojson-url="{{ route('geo.parcels') }}"
                  data-projects-url="{{ route('geo.projects') }}"
+                 data-boundaries-url="{{ route('geo.boundaries', '__LEVEL__') }}"
                  data-buildings-url="{{ route('geo.buildings') }}"
                  data-colors="{{ json_encode($mapColors) }}"
                  data-colors-update-url="{{ route('map-colors.update') }}"
@@ -171,6 +172,30 @@
                                 <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
                                               text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
                                     <input type="checkbox" checked data-layer="{{ $layer }}"
+                                           class="accent-secondary w-3.5 h-3.5 shrink-0">
+                                    <span class="material-symbols-outlined text-[15px]">{{ $icon }}</span>
+                                    {{ __($label) }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- Administrative boundaries — off until asked for: the
+                         district layer is detailed and loads for the view. --}}
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-wide
+                                  text-on-surface-variant dark:text-on-primary-container mb-1.5">
+                            {{ __('dashboard.boundaries') }}
+                        </p>
+                        <div class="space-y-0.5">
+                            @foreach ([
+                                'regions' => ['dashboard.boundary_regions', 'public'],
+                                'cities' => ['dashboard.boundary_cities', 'location_city'],
+                                'districts' => ['dashboard.boundary_districts', 'holiday_village'],
+                            ] as $level => [$label, $icon])
+                                <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
+                                              text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
+                                    <input type="checkbox" data-boundary="{{ $level }}"
                                            class="accent-secondary w-3.5 h-3.5 shrink-0">
                                     <span class="material-symbols-outlined text-[15px]">{{ $icon }}</span>
                                     {{ __($label) }}

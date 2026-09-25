@@ -112,6 +112,7 @@ return [
     ],
 
     'codes' => [
+        'placement' => ':detail',
         'parent_self' => 'A parcel cannot be its own parent.',
         'owners_without_deed' => 'Owners given without a deed; an owner is only linked through a deed, so they are not imported.',
         'deed_id_duplicate_in_file' => 'deed_id repeated in the file (first at item :of) — usually a copied row; remove deed_id from the new one.',

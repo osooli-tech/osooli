@@ -16,7 +16,7 @@ window.addEventListener('toast', (e) => {
         icon: iconMap[type] ?? 'info',
         title: message,
         showConfirmButton: false,
-        timer: 3000,
+        timer: type === 'warning' ? 9000 : 3000,
         timerProgressBar: true,
         customClass: { popup: 'swal-toast-popup' },
     });

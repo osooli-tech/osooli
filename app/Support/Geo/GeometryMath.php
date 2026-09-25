@@ -158,14 +158,29 @@ final class GeometryMath
                 }
 
                 for ($i = 0; $i < $count - 1; $i++) {
-                    $segments[] = [$ringIndex, $i, $count - 1, $ring[$i], $ring[$i + 1]];
+                    $segments[] = [
+                        $ringIndex, $i, $count - 1, $ring[$i], $ring[$i + 1],
+                        min((float) $ring[$i][0], (float) $ring[$i + 1][0]),
+                        max((float) $ring[$i][0], (float) $ring[$i + 1][0]),
+                        min((float) $ring[$i][1], (float) $ring[$i + 1][1]),
+                        max((float) $ring[$i][1], (float) $ring[$i + 1][1]),
+                    ];
                 }
             }
 
+            // A sweep along x: edges sorted by their left end, each compared
+            // only with the ones starting before it ends. A district or region
+            // boundary has thousands of edges, and every pair would take a
+            // minute; a parcel's handful is unaffected either way.
+            usort($segments, static fn (array $a, array $b): int => $a[5] <=> $b[5]);
             $total = count($segments);
 
             for ($a = 0; $a < $total; $a++) {
-                for ($b = $a + 1; $b < $total; $b++) {
+                for ($b = $a + 1; $b < $total && $segments[$b][5] <= $segments[$a][6]; $b++) {
+                    if ($segments[$b][8] < $segments[$a][7] || $segments[$b][7] > $segments[$a][8]) {
+                        continue;
+                    }
+
                     [$ringA, $iA, $lenA, $p1, $p2] = $segments[$a];
                     [$ringB, $iB, $lenB, $q1, $q2] = $segments[$b];
 

@@ -24,6 +24,12 @@ class Sidebar extends Component
             'permission' => 'parcels.view',
         ],
         [
+            'route' => 'parcels.placement',
+            'label' => 'nav.placement',
+            'icon' => 'wrong_location',
+            'permission' => 'parcels.view',
+        ],
+        [
             'route' => 'owners.index',
             'label' => 'nav.owners',
             'icon' => 'group',

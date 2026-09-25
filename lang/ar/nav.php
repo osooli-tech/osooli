@@ -13,6 +13,7 @@ return [
     'imports' => 'استيراد البيانات',
     'archive' => 'الأرشيف',
     'documents' => 'المستندات',
+    'placement' => 'قطع خارج حيّها',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
     'presentation_requests' => 'طلبات العروض التقديمية',

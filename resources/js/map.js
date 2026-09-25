@@ -27,7 +27,7 @@ if (! container) {
             priced: { true: '#00b386', false: '#8a8f98' },
             fall_in: {
                 'مخطط زراعي': '#00b386', 'مخطط بلدية': '#d9534f', 'طلبات احكام': '#c9a84c',
-                'حجة استحكام': '#4a90d9', 'مخطط': '#9b6dd6',
+                'حجة استحكام': '#4a90d9', 'مخطط': '#9b6dd6', 'الصك': '#e07b39',
             },
         },
     };
@@ -407,7 +407,90 @@ if (! container) {
             map.on('mouseleave', `${id}-fill`, () => { map.getCanvas().style.cursor = ''; });
         }
 
+        // ── Administrative boundaries ─────────────────────────────
+        // Loaded for the current view only, at a simplification to match the
+        // zoom, and only for the levels switched on. Cities and districts
+        // wait until the map is close enough for them to mean anything.
+        const BOUNDARIES = {
+            regions: { colour: '#002444', width: 2.5, minZoom: 0, dash: [1] },
+            cities: { colour: '#7a5c00', width: 1.8, minZoom: 7, dash: [3, 2] },
+            districts: { colour: '#c0392b', width: 1.2, minZoom: 11, dash: [2, 2] },
+        };
+        const boundaryUrl = container.dataset.boundariesUrl ?? '';
+        const boundariesOn = new Set();
+
+        function addBoundaryLayers() {
+            Object.entries(BOUNDARIES).forEach(([level, style]) => {
+                const id = `boundary-${level}`;
+                if (map.getSource(id)) return;
+
+                map.addSource(id, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+                map.addLayer({
+                    id: `${id}-line`,
+                    type: 'line',
+                    source: id,
+                    minzoom: style.minZoom,
+                    layout: { visibility: boundariesOn.has(level) ? 'visible' : 'none' },
+                    paint: {
+                        'line-color': style.colour,
+                        'line-width': style.width,
+                        'line-dasharray': style.dash,
+                        // Approximate city boundaries are drawn fainter than official ones.
+                        'line-opacity': ['case', ['==', ['get', 'source'], 'approximate'], 0.45, 0.9],
+                    },
+                });
+                map.addLayer({
+                    id: `${id}-labels`,
+                    type: 'symbol',
+                    source: id,
+                    minzoom: style.minZoom,
+                    layout: {
+                        visibility: boundariesOn.has(level) ? 'visible' : 'none',
+                        'text-field': ['get', 'name'],
+                        'text-size': level === 'districts' ? 11 : 12,
+                        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                        'symbol-placement': 'point',
+                        'text-allow-overlap': false,
+                    },
+                    paint: { 'text-color': style.colour, 'text-halo-color': '#ffffff', 'text-halo-width': 1.5 },
+                });
+            });
+        }
+
+        let boundaryTimer = null;
+        function refreshBoundaries() {
+            clearTimeout(boundaryTimer);
+            boundaryTimer = setTimeout(() => {
+                const zoom = map.getZoom();
+                const b = map.getBounds();
+                const bbox = [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()].map((n) => n.toFixed(5)).join(',');
+
+                boundariesOn.forEach((level) => {
+                    if (zoom < BOUNDARIES[level].minZoom || ! boundaryUrl) return;
+                    const url = `${boundaryUrl.replace('__LEVEL__', level)}?bbox=${bbox}&zoom=${zoom.toFixed(1)}`;
+                    fetch(url, { headers: { Accept: 'application/json' } })
+                        .then((r) => r.json())
+                        .then((data) => map.getSource(`boundary-${level}`)?.setData(data))
+                        .catch((err) => console.error('[Sakuki] boundaries load failed:', err));
+                });
+            }, 250);
+        }
+
+        document.querySelectorAll('input[data-boundary]').forEach((box) => {
+            box.addEventListener('change', () => {
+                const level = box.dataset.boundary;
+                box.checked ? boundariesOn.add(level) : boundariesOn.delete(level);
+                ['line', 'labels'].forEach((part) => {
+                    const id = `boundary-${level}-${part}`;
+                    if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', box.checked ? 'visible' : 'none');
+                });
+                refreshBoundaries();
+            });
+        });
+        map.on('moveend', refreshBoundaries);
+
         function addAllLayers() {
+            addBoundaryLayers();
             addParcelLayers();
             addDisplayLayer('projects', container.dataset.projectsUrl, colours.projects_fill);
             addDisplayLayer('buildings', container.dataset.buildingsUrl, colours.buildings_fill);
@@ -553,6 +636,7 @@ if (! container) {
         // hidden set have to be re-applied on top of the fresh style.
         function restoreLayerState() {
             applyColourMode();
+            refreshBoundaries();
             hiddenLayers.forEach((id) => {
                 (DISPLAY_LAYER_GROUPS[id] ?? [id]).forEach((layerId) => {
                     if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', 'none');

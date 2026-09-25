@@ -60,6 +60,9 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:exports.create')->name('parcels.export.excel');
     Route::get('/parcels/export/pdf', [ParcelExportController::class, 'pdf'])
         ->middleware(['can:exports.create', 'report.locale'])->name('parcels.export.pdf');
+    Route::get('/parcels/placement', fn () => view('parcels.placement'))
+        ->middleware('can:parcels.view')
+        ->name('parcels.placement');
     Route::get('/parcels/{parcel}', [ParcelController::class, 'show'])->name('parcels.show');
     Route::get('/parcels/{parcel}/twin', [ParcelController::class, 'twin'])->name('parcels.twin');
     Route::get('/parcels/{parcel}/print', [ParcelController::class, 'print'])
@@ -166,6 +169,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/geo/parcels', [GeoJsonController::class, 'parcels'])->name('geo.parcels');
     Route::get('/geo/projects', [GeoJsonController::class, 'projects'])->name('geo.projects');
     Route::get('/geo/buildings', [GeoJsonController::class, 'buildings'])->name('geo.buildings');
+    Route::get('/geo/boundaries/{level}', [GeoJsonController::class, 'boundaries'])->name('geo.boundaries');
 
     // Client-editable map colours (base layer fills + colour-by legend)
     Route::patch('/map-colors', [MapAppearanceSettingsController::class, 'update'])

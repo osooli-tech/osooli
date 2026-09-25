@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Parcels;
 
+use App\Support\Geo\ParcelPlacement;
 use App\Livewire\Forms\DeedForm;
 use App\Livewire\Forms\ParcelForm;
 use App\Models\Deed;
@@ -100,7 +101,11 @@ class ParcelFormModal extends Component
             return;
         }
 
-        $this->dispatch('toast', type: 'success', message: __('common.updated'));
+        // Saved either way; a parcel now outside its plan's district is flagged.
+        $warning = ParcelPlacement::message(ParcelPlacement::forParcel($parcel->id));
+        $warning === null
+            ? $this->dispatch('toast', type: 'success', message: __('common.updated'))
+            : $this->dispatch('toast', type: 'warning', message: __('common.updated').' '.$warning);
         $this->dispatch('parcel-saved', parcelId: $parcel->id);
     }
 

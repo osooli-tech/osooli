@@ -58,6 +58,7 @@ class MapAppearanceSetting extends Model
                 'طلبات احكام' => '#c9a84c',
                 'حجة استحكام' => '#4a90d9',
                 'مخطط' => '#9b6dd6',
+                'الصك' => '#e07b39',
             ],
         ],
     ];

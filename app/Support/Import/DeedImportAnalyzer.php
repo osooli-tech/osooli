@@ -7,6 +7,7 @@ namespace App\Support\Import;
 use App\Models\User;
 use App\Support\Database\Spatial;
 use App\Support\DatabaseEnum;
+use App\Support\Geo\ParcelPlacement;
 use App\Support\ParcelGeometry;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -343,6 +344,7 @@ final class DeedImportAnalyzer
         }
 
         $this->checks($record, $item);
+        $this->placement($record, $parcelRow, $item);
 
         return $this->finish($item);
     }
@@ -682,6 +684,35 @@ final class DeedImportAnalyzer
             if ($changes !== []) {
                 $item['survey'][] = ['action' => 'update', 'id' => (int) $row->id, 'changes' => $changes];
             }
+        }
+    }
+
+    /**
+     * Whether the parcel lies in the district its plan is in — advice only,
+     * like everywhere else: boundaries can be out of date or approximate.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function placement(ImportRecord $record, ?object $parcelRow, array &$item): void
+    {
+        if (($item['parcel']['action'] ?? null) === 'repeat' || $item['errors'] !== []) {
+            return;
+        }
+
+        $geojson = $item['parcel']['geometry'] ?? $parcelRow?->geojson;
+        if ($geojson === null) {
+            return;
+        }
+
+        $districtId = $item['plan']['district_id'] ?? null;
+        if ($districtId === null) {
+            $planNo = $record->planNo ?? ($parcelRow?->plan_no === null ? null : (string) $parcelRow->plan_no);
+            $districtId = $planNo === null ? null : ($this->locations->plan($planNo)['district_id'] ?? null);
+        }
+
+        $message = ParcelPlacement::message(ParcelPlacement::forGeometry((string) $geojson, $districtId));
+        if ($message !== null) {
+            $item['warnings'][] = ['code' => 'placement', 'detail' => $message];
         }
     }
 

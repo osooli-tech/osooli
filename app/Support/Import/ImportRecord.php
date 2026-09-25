@@ -65,11 +65,17 @@ final class ImportRecord
         // The flat column is what a GIS attribute table shows and what
         // people edit there, so it wins over the nested copy — noted when
         // the two disagree.
-        $pick = static function (string $field, string $flat, mixed $nested) use ($p, $record): mixed {
-            if (! array_key_exists($flat, $p)) {
+        // Several flat names may carry one field: ours (`parcel_geo_id`) and
+        // the plain column a table exported straight from GIS uses (`geo_id`).
+        $pick = static function (string $field, string|array $flat, mixed $nested) use ($p, $record): mixed {
+            $names = array_values(array_filter((array) $flat, static fn (string $n): bool => array_key_exists($n, $p)));
+            if ($names === []) {
                 return $nested;
             }
-            $value = $p[$flat];
+            $value = null;
+            foreach ($names as $name) {
+                $value ??= is_array($p[$name]) ? null : $p[$name];
+            }
             if ($nested !== null && $value !== null && ! is_array($value) && (string) $nested !== (string) $value) {
                 $record->conflicts[] = $field;
             }
@@ -87,14 +93,14 @@ final class ImportRecord
         ];
 
         $record->parcel = [
-            'geo_id' => self::str($pick('geo_id', 'parcel_geo_id', $parcel['geo_id'] ?? null)),
+            'geo_id' => self::str($pick('geo_id', ['parcel_geo_id', 'geo_id'], $parcel['geo_id'] ?? null)),
             'parcel_no' => self::str($pick('parcel_no', 'parcel_no', $parcel['parcel_no'] ?? null)),
-            'asset_type' => self::str($parcel['asset_type'] ?? null),
-            'land_transaction' => self::str($parcel['land_transaction'] ?? null),
-            'allocation_method' => self::str($parcel['allocation_method'] ?? null),
-            'fall_in' => self::str($parcel['fall_in'] ?? null),
-            'm_price' => $parcel['m_price'] ?? null,
-            'parcel_price' => $parcel['parcel_price'] ?? null,
+            'asset_type' => self::str($pick('asset_type', 'asset_type', $parcel['asset_type'] ?? null)),
+            'land_transaction' => self::str($pick('land_transaction', 'land_transaction', $parcel['land_transaction'] ?? null)),
+            'allocation_method' => self::str($pick('allocation_method', 'allocation_method', $parcel['allocation_method'] ?? null)),
+            'fall_in' => self::str($pick('fall_in', 'fall_in', $parcel['fall_in'] ?? null)),
+            'm_price' => $pick('m_price', 'm_price', $parcel['m_price'] ?? null),
+            'parcel_price' => $pick('parcel_price', 'parcel_price', $parcel['parcel_price'] ?? null),
             'parent_geo_id' => self::str($pick('parent_geo_id', 'parent_geo_id', $parcel['parent_geo_id'] ?? null)),
         ];
 
@@ -131,6 +137,21 @@ final class ImportRecord
                 'matches_deed' => self::bool($b['matches_deed'] ?? null),
             ];
             $record->engineeringOffice = self::str($b['engineering_office'] ?? null);
+        } else {
+            // A table exported straight from GIS carries the boundary as
+            // plain columns (`n_border`, `n_dim` …).
+            $flat = [
+                'n_border' => self::str($p['n_border'] ?? null), 'n_dim' => $p['n_dim'] ?? null,
+                's_border' => self::str($p['s_border'] ?? null), 's_dim' => $p['s_dim'] ?? null,
+                'e_border' => self::str($p['e_border'] ?? null), 'e_dim' => $p['e_dim'] ?? null,
+                'w_border' => self::str($p['w_border'] ?? null), 'w_dim' => $p['w_dim'] ?? null,
+                'measured_area' => $p['measured_area'] ?? null,
+                'survey_date' => self::str($p['survey_date'] ?? null),
+                'matches_deed' => self::bool($p['matches_deed'] ?? null),
+            ];
+            if (array_filter($flat, static fn (mixed $v): bool => $v !== null) !== []) {
+                $record->boundary = $flat;
+            }
         }
 
         if (is_array($p['survey_decisions'] ?? null)) {

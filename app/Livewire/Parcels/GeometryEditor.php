@@ -8,6 +8,7 @@ use App\Models\Parcel;
 use App\Models\User;
 use App\Support\Concerns\WritesSafely;
 use App\Support\OwnerScope;
+use App\Support\Geo\ParcelPlacement;
 use App\Support\ParcelGeometry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -174,7 +175,12 @@ class GeometryEditor extends Component
         $this->show = false;
         $this->overlaps = [];
         $this->dispatch('parcel-geometry-saved', parcelId: $this->parcelId);
-        $this->dispatch('toast', type: 'success', message: $message);
+
+        // Saved either way; a polygon outside its plan's district is flagged.
+        $warning = ParcelPlacement::message(ParcelPlacement::forParcel((int) $this->parcelId));
+        $warning === null
+            ? $this->dispatch('toast', type: 'success', message: $message)
+            : $this->dispatch('toast', type: 'warning', message: $message.' '.$warning);
     }
 
     /**

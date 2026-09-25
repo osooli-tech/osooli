@@ -12,6 +12,9 @@
 @section('content')
     @can('reference.view')
         <livewire:reference.reference-index />
+        @can('reference.edit')
+            <livewire:reference.boundary-editor />
+        @endcan
     @else
         <div class="flex flex-col items-center justify-center py-24 gap-4
                     text-on-surface-variant dark:text-on-primary-container">
