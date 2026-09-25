@@ -75,7 +75,11 @@ class PortfolioManager extends Component
 
         return view('livewire.owners.portfolio-manager', [
             'portfolios' => $owner->portfolios()->get()
-                ->map(fn ($p) => ['portfolio' => $p, 'summary' => $service->summary($p)]),
+                ->map(fn ($p) => [
+                    'portfolio' => $p,
+                    'summary' => $service->summary($p),
+                    'parcelIds' => $p->parcels()->pluck('parcels.id')->all(),
+                ]),
             'parcelRows' => $service->parcelsWithAssignment($owner),
         ]);
     }

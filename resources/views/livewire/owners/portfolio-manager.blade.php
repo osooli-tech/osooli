@@ -29,7 +29,7 @@
         @else
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 @foreach ($portfolios as $row)
-                    @php [$portfolio, $summary] = [$row['portfolio'], $row['summary']]; @endphp
+                    @php [$portfolio, $summary, $parcelIds] = [$row['portfolio'], $row['summary'], $row['parcelIds']]; @endphp
                     <div class="bg-surface dark:bg-[#1a2435] rounded-xl p-3 border border-outline-variant dark:border-white/10">
                         <div class="flex items-start justify-between gap-2 mb-1.5">
                             @if (isset($renaming[$portfolio->id]))
@@ -60,6 +60,14 @@
                                 {{ number_format($summary['value'], 0) }}
                                 <span class="text-[11px] font-normal text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.currency') }}</span>
                             </p>
+                        @endif
+                        @if ($parcelIds !== [])
+                            <button type="button"
+                                    onclick="window.dispatchEvent(new CustomEvent('portfolio-map-select', { detail: { ids: @js($parcelIds), name: @js($portfolio->name) } }))"
+                                    class="flex items-center gap-1.5 mt-2 text-xs font-medium text-secondary hover:underline">
+                                <span class="material-symbols-outlined text-[14px]">map</span>
+                                {{ __('owners.show_on_map') }}
+                            </button>
                         @endif
                     </div>
                 @endforeach

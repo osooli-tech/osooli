@@ -186,35 +186,30 @@ if (! container) {
                 },
             });
 
-            // A fixed medium zoom, set once, centred on the mean of every
-            // parcel's own centroid — not the midpoint of the overall
-            // bounding box. A handful of parcels far from the rest (a
-            // different city, a data outlier) skews a bounding-box midpoint
-            // toward the empty space between them and the main cluster. The
-            // median of each coordinate is used rather than the mean for the
-            // same reason again one level down: a mean still lets one badly
-            // wrong centroid (a bad geometry, a stray 0,0) drag the average
-            // toward it in proportion to how far off it is; a median only
-            // cares how many points are greater or less, so the same bad
-            // point can move it by at most one position in the sorted list.
-            const median = (values) => {
-                const sorted = [...values].sort((a, b) => a - b);
-                const mid = Math.floor(sorted.length / 2);
-
-                return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-            };
-
+            // Frames every parcel at once, from cluster to cluster across the
+            // whole dataset — using each parcel's centroid rather than its
+            // full polygon, so one oddly-shaped or unusually large parcel
+            // can't stretch the frame further than the data actually needs.
+            //
+            // This used to jump to one fixed zoom on one cluster instead,
+            // which hid every other cluster entirely — a real problem once a
+            // production check showed parcels spread across ~300km in
+            // several separate groups, not one city's worth close together.
+            // The centroid-dot layer above is what makes framing everything
+            // workable here: without it, a view wide enough to show every
+            // cluster left individual parcels too small to see at all.
             const positionCamera = (features) => {
                 if (cameraPositioned || ! features.length) return;
-                const centroids = features
-                    .map((f) => [f.properties?.centroid_lng, f.properties?.centroid_lat])
-                    .filter(([lng, lat]) => typeof lng === 'number' && typeof lat === 'number');
-                if (! centroids.length) return;
-
-                const centerLng = median(centroids.map(([lng]) => lng));
-                const centerLat = median(centroids.map(([, lat]) => lat));
-                map.jumpTo({ center: [centerLng, centerLat], zoom: 12 });
-                cameraPositioned = true;
+                const bounds = new mapboxgl.LngLatBounds();
+                features.forEach((f) => {
+                    const lng = f.properties?.centroid_lng;
+                    const lat = f.properties?.centroid_lat;
+                    if (typeof lng === 'number' && typeof lat === 'number') bounds.extend([lng, lat]);
+                });
+                if (! bounds.isEmpty()) {
+                    map.fitBounds(bounds, { padding: 60, maxZoom: 15 });
+                    cameraPositioned = true;
+                }
             };
 
             // The centroid-dot layer's own source data, built from the same

@@ -31,9 +31,9 @@
                     <span class="material-symbols-outlined text-[18px] text-secondary"
                           style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;">map</span>
                     <h3 class="text-sm font-semibold text-on-surface dark:text-white truncate">
-                        <span x-show="! selectedOwnerName">{{ __('owners.map_all_parcels') }}</span>
-                        <span x-show="selectedOwnerName" x-cloak>
-                            {{ __('owners.map_parcels_of') }} <span x-text="selectedOwnerName"></span>
+                        <span x-show="! activeName()">{{ __('owners.map_all_parcels') }}</span>
+                        <span x-show="activeName()" x-cloak>
+                            {{ __('owners.map_parcels_of') }} <span x-text="activeName()"></span>
                         </span>
                     </h3>
                     <span x-show="visibleCount !== null" x-cloak
@@ -42,7 +42,7 @@
                           x-text="visibleCount"></span>
                 </div>
 
-                <button type="button" x-show="selectedOwnerId" x-cloak @click="showAll()"
+                <button type="button" x-show="selectedOwnerId || selectedPortfolioIds" x-cloak @click="showAll()"
                         class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl
                                border border-outline-variant dark:border-white/10
                                text-on-surface-variant dark:text-on-primary-container
@@ -83,6 +83,8 @@ function ownersMap() {
         allFeatures: [],
         selectedOwnerId: null,
         selectedOwnerName: '',
+        selectedPortfolioIds: null,
+        selectedPortfolioName: '',
         visibleCount: null,
 
         init() {
@@ -157,6 +159,13 @@ function ownersMap() {
             window.addEventListener('owner-map-select', (e) => {
                 this.selectOwner(String(e.detail.id), e.detail.name ?? '');
             });
+
+            // Raised by a portfolio card's "show on map" button — a named
+            // subset of one owner's parcels, so it filters by exact parcel
+            // id rather than by owner like the row button above does.
+            window.addEventListener('portfolio-map-select', (e) => {
+                this.selectPortfolio(e.detail.ids ?? [], e.detail.name ?? '');
+            });
         },
 
         empty() {
@@ -171,8 +180,19 @@ function ownersMap() {
         },
 
         selectOwner(ownerId, ownerName) {
+            this.selectedPortfolioIds = null;
+            this.selectedPortfolioName = '';
             this.selectedOwnerId = ownerId;
             this.selectedOwnerName = ownerName;
+            this.apply();
+            document.getElementById('owners-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
+
+        selectPortfolio(ids, name) {
+            this.selectedOwnerId = null;
+            this.selectedOwnerName = '';
+            this.selectedPortfolioIds = ids;
+            this.selectedPortfolioName = name;
             this.apply();
             document.getElementById('owners-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         },
@@ -180,11 +200,22 @@ function ownersMap() {
         showAll() {
             this.selectedOwnerId = null;
             this.selectedOwnerName = '';
+            this.selectedPortfolioIds = null;
+            this.selectedPortfolioName = '';
             this.apply();
         },
 
-        /** Current features for the selected owner (or all of them). */
+        /** The active filter's own display name, or null when showing everything. */
+        activeName() {
+            return this.selectedPortfolioName || this.selectedOwnerName || null;
+        },
+
+        /** Current features for the selected portfolio, the selected owner, or all of them. */
         currentFeatures() {
+            if (this.selectedPortfolioIds !== null) {
+                return this.allFeatures.filter((f) => this.selectedPortfolioIds.includes(f.properties.id));
+            }
+
             return this.selectedOwnerId === null
                 ? this.allFeatures
                 : this.allFeatures.filter((f) => this.ownsParcel(f, this.selectedOwnerId));

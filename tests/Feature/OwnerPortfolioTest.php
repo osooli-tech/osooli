@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\DeedStatus;
+use App\Livewire\Owners\PortfolioManager;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Deed;
@@ -17,6 +18,7 @@ use App\Services\Owner\OwnerPortfolioService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class OwnerPortfolioTest extends TestCase
@@ -114,6 +116,22 @@ class OwnerPortfolioTest extends TestCase
         $this->assertCount(1, $rows);
         $this->assertSame($this->ownedParcel->id, $rows[0]['parcel']->id);
         $this->assertNull($rows[0]['portfolio_id']);
+    }
+
+    /**
+     * The manager's own "show on map" button (owners/index.blade.php's
+     * portfolio-map-select listener) needs the exact parcel ids a portfolio
+     * holds, not just its summary counts.
+     */
+    public function test_the_component_exposes_each_portfolios_exact_parcel_ids(): void
+    {
+        $portfolio = $this->service->create($this->owner, 'مشروع أ');
+        $this->service->assign($this->owner, $this->ownedParcel, $portfolio);
+
+        $rows = Livewire::test(PortfolioManager::class, ['ownerId' => $this->owner->id])
+            ->viewData('portfolios');
+
+        $this->assertSame([$this->ownedParcel->id], $rows->first()['parcelIds']);
     }
 
     private function makeParcel(int $planId, string $parcelNo, ?float $price, Owner $owner): Parcel
