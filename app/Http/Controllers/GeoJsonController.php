@@ -9,13 +9,18 @@ use App\Models\Parcel;
 use App\Models\Project;
 use App\Models\User;
 use App\Support\Database\Dialect;
+use App\Support\Database\Spatial;
 use App\Support\OwnerScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class GeoJsonController extends Controller
 {
+    private const BOUNDARY_LEVELS = ['regions', 'cities', 'districts'];
+
     public function parcels(): JsonResponse
     {
         if (! Dialect::isSpatial()) {
@@ -95,6 +100,54 @@ class GeoJsonController extends Controller
     public function buildings(): JsonResponse
     {
         return $this->displayLayer(Building::class);
+    }
+
+    /**
+     * Region, city or district boundaries inside the map's current view,
+     * simplified to about a pixel at its zoom — the full district layer is
+     * tens of megabytes, far too much to send whole.
+     */
+    public function boundaries(Request $request, string $level): JsonResponse
+    {
+        abort_unless(in_array($level, self::BOUNDARY_LEVELS, true), 404);
+
+        if (! Dialect::isSpatial()) {
+            return response()->json(['type' => 'FeatureCollection', 'features' => []]);
+        }
+
+        $box = array_map('floatval', explode(',', (string) $request->query('bbox', '34,15,56,33')));
+        if (count($box) !== 4) {
+            abort(422);
+        }
+        [$west, $south, $east, $north] = $box;
+        $zoom = max(0.0, min(22.0, (float) $request->query('zoom', 6)));
+        // Degrees per screen pixel at this zoom, roughly.
+        $tolerance = max(0.000005, 180 / (2 ** ($zoom + 8)));
+
+        $view = sprintf('POLYGON((%1$F %2$F,%3$F %2$F,%3$F %4$F,%1$F %4$F,%1$F %2$F))', $west, $south, $east, $north);
+
+        $rows = DB::select(
+            "SELECT id, name_ar, name_en, boundary_source, ST_AsGeoJSON(ST_Simplify(geom, ?), 6) AS geom_json
+             FROM {$level}
+             WHERE geom IS NOT NULL AND ".Spatial::boxesIntersect('geom', Spatial::fromWkt()).'
+             LIMIT 2000',
+            [$tolerance, $view]
+        );
+
+        $english = app()->isLocale('en');
+
+        return response()->json([
+            'type' => 'FeatureCollection',
+            'features' => array_values(array_filter(array_map(static fn (object $row): ?array => $row->geom_json === null ? null : [
+                'type' => 'Feature',
+                'id' => (int) $row->id,
+                'geometry' => json_decode((string) $row->geom_json, false),
+                'properties' => [
+                    'name' => $english && $row->name_en ? $row->name_en : $row->name_ar,
+                    'source' => $row->boundary_source,
+                ],
+            ], $rows))),
+        ]);
     }
 
     /** @param class-string<Project|Building> $modelClass */

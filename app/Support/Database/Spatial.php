@@ -60,6 +60,18 @@ final class Spatial
             : "ST_Intersects({$geometry}, ST_Buffer(ST_Envelope({$around}), {$margin}))";
     }
 
+    /** A geometry from one WKT bind parameter, in SRID 4326. */
+    public static function fromWkt(): string
+    {
+        return Dialect::isPostgres() ? 'ST_GeomFromText(?, 4326)' : 'ST_GeomFromText(?)';
+    }
+
+    /** A point from two bind parameters, longitude then latitude. */
+    public static function point(): string
+    {
+        return Dialect::isPostgres() ? 'ST_SetSRID(ST_MakePoint(?, ?), 4326)' : 'Point(?, ?)';
+    }
+
     /** Whether two geometries' bounding boxes overlap — the cheap pre-filter. */
     public static function boxesIntersect(string $a, string $b): string
     {

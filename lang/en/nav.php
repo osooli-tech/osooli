@@ -7,6 +7,7 @@ return [
     'main_nav' => 'Main Navigation',
     'dashboard' => 'Dashboard',
     'parcels' => 'Parcels',
+    'placement' => 'Parcels outside their district',
     'owners' => 'Owners',
     'survey_decisions' => 'Survey Decisions',
     'reference' => 'Reference Data',
