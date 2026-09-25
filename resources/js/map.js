@@ -104,6 +104,27 @@ if (! container) {
 
             map.addSource('parcels', { type: 'geojson', data: geoUrl, promoteId: 'id' });
 
+            // A dot at each parcel's centroid, prominent at a wide zoom range
+            // and fading out by the zoom where the real polygon is legible.
+            // Without this, a parcel a few pixels across at medium zoom was
+            // only findable by its number label — this makes it a deliberate,
+            // visible mark that yields to the real shape as the user zooms in,
+            // rather than the shape simply staying invisible until then.
+            map.addSource('parcel-markers', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+            map.addLayer({
+                id: 'parcels-markers',
+                type: 'circle',
+                source: 'parcel-markers',
+                paint: {
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 13, 7, 16, 0],
+                    'circle-color': colours.parcels_fill,
+                    'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.9, 13, 0.75, 16, 0],
+                    'circle-stroke-color': isDarkMode ? '#0d1420' : '#ffffff',
+                    'circle-stroke-width': 1.5,
+                },
+            });
+
             map.addLayer({
                 id: 'parcels-fill',
                 type: 'fill',
@@ -165,33 +186,50 @@ if (! container) {
                 },
             });
 
-            // A fixed medium zoom centred on the data, set once. fitBounds
-            // used to run here instead, zooming out until every last parcel
-            // fit on screen — with parcels scattered across a whole region
-            // that meant a nearly full-country view where nothing was
-            // individually readable. A medium zoom plus the label sizing
-            // above (small dot-like numbers at this zoom, growing as the
-            // user zooms in) reads better than either "everything, tiny" or
-            // "nothing, until you find it".
+            // A fixed medium zoom, set once, centred on the mean of every
+            // parcel's own centroid — not the midpoint of the overall
+            // bounding box. A handful of parcels far from the rest (a
+            // different city, a data outlier) skews a bounding-box midpoint
+            // toward the empty space between them and the main cluster; the
+            // mean of centroids instead sits inside wherever most parcels
+            // actually are.
             const positionCamera = (features) => {
                 if (cameraPositioned || ! features.length) return;
-                const bounds = new mapboxgl.LngLatBounds();
-                features.forEach((f) => {
-                    const coords = f.geometry?.coordinates;
-                    if (! coords) return;
-                    (f.geometry.type === 'Polygon' ? coords[0] : coords.flat(2))
-                        .forEach((c) => bounds.extend(c));
-                });
-                if (! bounds.isEmpty()) {
-                    map.jumpTo({ center: bounds.getCenter(), zoom: 13 });
-                    cameraPositioned = true;
-                }
+                const centroids = features
+                    .map((f) => [f.properties?.centroid_lng, f.properties?.centroid_lat])
+                    .filter(([lng, lat]) => typeof lng === 'number' && typeof lat === 'number');
+                if (! centroids.length) return;
+
+                const avgLng = centroids.reduce((sum, [lng]) => sum + lng, 0) / centroids.length;
+                const avgLat = centroids.reduce((sum, [, lat]) => sum + lat, 0) / centroids.length;
+                map.jumpTo({ center: [avgLng, avgLat], zoom: 13 });
+                cameraPositioned = true;
+            };
+
+            // The centroid-dot layer's own source data, built from the same
+            // centroid_lat/centroid_lng the camera centring above uses. Runs
+            // every time this function's caller does — including after a
+            // basemap switch, which rebuilds every source and layer from
+            // scratch and would otherwise leave this one permanently empty.
+            const populateMarkers = (features) => {
+                if (! features.length) return;
+
+                const points = features
+                    .filter((f) => typeof f.properties?.centroid_lng === 'number' && typeof f.properties?.centroid_lat === 'number')
+                    .map((f) => ({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: [f.properties.centroid_lng, f.properties.centroid_lat] },
+                        properties: f.properties,
+                    }));
+
+                map.getSource('parcel-markers')?.setData({ type: 'FeatureCollection', features: points });
             };
 
             const applyBounds = (data) => {
                 if (! data.features?.length) return;
                 allFeatures = data.features;
                 positionCamera(allFeatures);
+                populateMarkers(allFeatures);
                 populateCityFilter(allFeatures);
             };
 
@@ -259,10 +297,11 @@ if (! container) {
 
         // Layers a "show me this on the map" filter applies to together, so
         // a hidden parcel's fill, outline and label all disappear as one.
-        const FILTERABLE_LAYERS = ['parcels-fill', 'parcels-outline', 'parcels-labels'];
+        const FILTERABLE_LAYERS = ['parcels-fill', 'parcels-outline', 'parcels-labels', 'parcels-markers'];
 
         function matchesFilter(properties, type, value) {
             if (type === 'city') return properties?.city_name === value;
+            if (type === 'district') return properties?.district_name === value;
             if (type === 'parcelIds') return value.includes(properties?.id);
 
             return true;
@@ -280,9 +319,9 @@ if (! container) {
         // owner-portfolio card, and the "by city" dashboard chart — every
         // one of them just needs to say what to show, not how the map shows it.
         function applyMapFilter(type, value) {
-            const expression = type === 'city'
-                ? ['==', ['get', 'city_name'], value]
-                : ['in', ['get', 'id'], ['literal', value]];
+            const expression = type === 'parcelIds'
+                ? ['in', ['get', 'id'], ['literal', value]]
+                : ['==', ['get', type === 'city' ? 'city_name' : 'district_name'], value];
 
             FILTERABLE_LAYERS.forEach((id) => {
                 if (map.getLayer(id)) map.setFilter(id, expression);

@@ -126,7 +126,17 @@
                          c: null,
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'bar', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
+                                 chart: {
+                                     type: 'bar', height: 220, toolbar: { show: false },
+                                     background: 'transparent', fontFamily: '{{ $font }}',
+                                     events: {
+                                         dataPointSelection: (event, chartContext, config) => {
+                                             const district = @js(array_keys($byDistrict))[config.dataPointIndex];
+                                             if (! district) return;
+                                             window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'district', value: district } }));
+                                         },
+                                     },
+                                 },
                                  series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byDistrict)) }],
                                  xaxis: { categories: @js(array_keys($byDistrict)), labels: { style: { fontSize: '11px' } } },
                                  colors: ['#c9a84c'],
@@ -138,7 +148,7 @@
                              this.c.render();
                          }
                      }">
-                    <div x-ref="el"></div>
+                    <div x-ref="el" class="cursor-pointer"></div>
                 </div>
             @endif
         </div>
