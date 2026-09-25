@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Enums\PhotoType;
-use App\Models\Deed;
-use App\Models\ParcelPhoto;
+use App\Services\Import\DocumentImporter;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+use ZipArchive;
 
 class LinkDeedDocuments extends Command
 {
@@ -26,53 +24,76 @@ class LinkDeedDocuments extends Command
      */
     protected $description = 'Link deed PDF scans (named by deed number) in storage/app/public/documents/deeds to their parcels as "صك" documents';
 
-    public function handle(): int
+    /**
+     * Zips storage/app/public/documents/deeds and hands it to DocumentImporter,
+     * so this CLI path shares the same rule detection and multi-parcel deed
+     * fan-out as the dashboard import instead of its own ->first()-based match.
+     */
+    public function handle(DocumentImporter $importer): int
     {
-        $dir = 'documents/deeds';
-        $disk = Storage::disk('public');
+        $dir = storage_path('app/public/documents/deeds');
 
-        if (! $disk->exists($dir)) {
-            $this->error("Directory not found: storage/app/public/{$dir}");
+        if (! is_dir($dir)) {
+            $this->error("Directory not found: {$dir}");
 
             return self::FAILURE;
         }
 
-        $files = $disk->files($dir);
-        $linked = 0;
-        $noMatch = [];
+        // glob('*.pdf') is case-sensitive, which would silently drop a
+        // "*.PDF" scan (real scans routinely carry an upper-case extension).
+        // DocumentImporter::inspect() already matches case-insensitively via
+        // strtolower($file->getExtension()) — this mirrors that here, since
+        // it is the zip-building step, not the importer, that reads the raw
+        // directory listing.
+        $pdfs = array_filter(
+            glob($dir.'/*') ?: [],
+            static fn (string $path): bool => is_file($path) && preg_match('/\.pdf$/i', $path) === 1
+        );
 
-        foreach ($files as $path) {
-            if (! preg_match('/\.pdf$/i', $path)) {
-                continue;
-            }
+        if ($pdfs === []) {
+            $this->info("No PDF files found in {$dir}; nothing to link.");
 
-            // Filename (without extension) is the deed number.
-            $deedNo = trim(pathinfo($path, PATHINFO_FILENAME));
-
-            $deed = Deed::where('deed_no', $deedNo)->first();
-
-            if ($deed === null) {
-                $noMatch[] = $deedNo;
-
-                continue;
-            }
-
-            // Keyed by deed_id, not just parcel_id + type: a parcel can carry
-            // more than one deed (a sale or gift transfer keeps the old one on
-            // record), and each deed has its own scan. Keying on parcel_id
-            // alone made a second deed's scan silently overwrite the first's
-            // row instead of adding a second one.
-            ParcelPhoto::updateOrCreate(
-                ['parcel_id' => $deed->parcel_id, 'deed_id' => $deed->id, 'photo_type' => PhotoType::Deed->value],
-                ['photo_url' => '/storage/'.$path]
-            );
-            $linked++;
+            return self::SUCCESS;
         }
 
-        $this->info("Deed documents linked: {$linked}");
+        $zipPath = storage_path('app/private/link-deeds-'.uniqid().'.zip');
+        $zip = new ZipArchive;
 
-        if ($noMatch !== []) {
-            $this->warn('PDFs with no matching deed ('.count($noMatch).'): '.implode(', ', array_slice($noMatch, 0, 15)).(count($noMatch) > 15 ? ' …' : ''));
+        // ZipArchive::close() is documented to fail (and, on some libzip
+        // versions, simply never write the file) for a zero-entry archive —
+        // guarded against above by the empty-$pdfs check — but open() itself
+        // can also fail (a permission error, a full disk under storage/app/
+        // private). Ignoring that return value used to mean $zipPath might
+        // not exist at all by the time it reached commit() below, which then
+        // threw an uncaught ArchiveException instead of a clean command
+        // failure.
+        if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+            $this->error("Could not create a temporary archive at: {$zipPath}");
+
+            return self::FAILURE;
+        }
+
+        foreach ($pdfs as $pdf) {
+            $zip->addFile($pdf, basename($pdf));
+        }
+
+        if (! $zip->close()) {
+            $this->error("Could not write the temporary archive at: {$zipPath}");
+
+            return self::FAILURE;
+        }
+
+        try {
+            $result = $importer->commit($zipPath);
+        } finally {
+            @unlink($zipPath);
+        }
+
+        $this->info("Deed documents linked: {$result->created}");
+
+        if ($result->skipped > 0) {
+            $this->warn('PDFs with no matching deed ('.$result->skipped.'): '
+                .implode(', ', array_slice($result->details['unmatched_files'] ?? [], 0, 15)));
         }
 
         return self::SUCCESS;

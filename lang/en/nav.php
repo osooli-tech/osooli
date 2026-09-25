@@ -13,6 +13,7 @@ return [
     'exports' => 'Data export',
     'archive' => 'Archive',
     'documents' => 'Documents',
+    'imports' => 'Data import',
     'modification_requests' => 'Modification Requests',
     'presentation_requests' => 'Demo Requests',
     'notifications' => 'Notifications',

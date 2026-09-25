@@ -12,6 +12,7 @@ return [
     'exports' => 'تصدير البيانات',
     'archive' => 'الأرشيف',
     'documents' => 'المستندات',
+    'imports' => 'استيراد البيانات',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
     'presentation_requests' => 'طلبات العروض التقديمية',
