@@ -69,6 +69,9 @@
             <div class="relative z-10 flex flex-col items-center text-center px-16 space-y-6">
                 @yield('brand-panel')
             </div>
+            <p class="absolute bottom-8 inset-x-0 z-10 text-center text-sm text-primary-fixed-dim opacity-80">
+                {{ __('auth.managed_by') }}
+            </p>
             <div class="absolute -bottom-20 -end-20 w-96 h-96 bg-secondary opacity-10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -top-20 -start-20 w-96 h-96 bg-tertiary-container opacity-5 rounded-full blur-3xl pointer-events-none"></div>
         </aside>

@@ -175,7 +175,7 @@
                                     </button>
 
                                     @can('exports.create')
-                                        <a href="{{ route('owners.print', $owner) }}"
+                                        <a href="{{ route('owners.print', $owner) }}" data-report-language
                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl
                                                   border border-outline-variant dark:border-white/10
                                                   text-on-surface-variant dark:text-on-primary-container

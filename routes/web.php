@@ -59,10 +59,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/parcels/export/excel', [ParcelExportController::class, 'excel'])
         ->middleware('can:exports.create')->name('parcels.export.excel');
     Route::get('/parcels/export/pdf', [ParcelExportController::class, 'pdf'])
-        ->middleware('can:exports.create')->name('parcels.export.pdf');
+        ->middleware(['can:exports.create', 'report.locale'])->name('parcels.export.pdf');
     Route::get('/parcels/{parcel}', [ParcelController::class, 'show'])->name('parcels.show');
     Route::get('/parcels/{parcel}/twin', [ParcelController::class, 'twin'])->name('parcels.twin');
-    Route::get('/parcels/{parcel}/print', [ParcelController::class, 'print'])->name('parcels.print');
+    Route::get('/parcels/{parcel}/print', [ParcelController::class, 'print'])
+        ->middleware('report.locale')->name('parcels.print');
     Route::get('/parcels/{parcel}/documents', [ParcelController::class, 'documents'])->name('parcels.documents');
 
     // Owners
@@ -70,7 +71,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/owners/export/excel', [OwnerExportController::class, 'excel'])
         ->middleware('can:exports.create')->name('owners.export.excel');
     Route::get('/owners/{owner}/print', [OwnerExportController::class, 'pdf'])
-        ->middleware('can:exports.create')->name('owners.print');
+        ->middleware(['can:exports.create', 'report.locale'])->name('owners.print');
 
     // Survey decisions
     Route::get('/survey-decisions', fn () => view('survey-decisions.index'))->name('survey-decisions.index');

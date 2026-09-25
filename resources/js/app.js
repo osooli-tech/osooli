@@ -22,6 +22,40 @@ window.addEventListener('toast', (e) => {
     });
 });
 
+// ── Report language (any link marked data-report-language) ────────────────────
+// Printing asks first whether the report should be in Arabic or English; the
+// choice travels as ?lang= and applies to that report only. Delegated from
+// the document so links Livewire renders later are covered too.
+document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[data-report-language]');
+    if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) {
+        return;
+    }
+
+    event.preventDefault();
+    const text = window.reportLanguageText ?? {};
+
+    Swal.fire({
+        title: text.title ?? 'Report language',
+        icon: 'question',
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: text.arabic ?? 'العربية',
+        denyButtonText: text.english ?? 'English',
+        cancelButtonText: text.cancel ?? 'Cancel',
+        confirmButtonColor: '#006c4e',
+        denyButtonColor: '#002444',
+    }).then((result) => {
+        if (result.isDismissed) {
+            return;
+        }
+
+        const url = new URL(link.href, window.location.origin);
+        url.searchParams.set('lang', result.isConfirmed ? 'ar' : 'en');
+        window.location.href = url.toString();
+    });
+});
+
 // ── Notification sound (dispatched from NotificationBell when unread count rises) ─
 window.addEventListener('play-notification-sound', () => {
     new Audio('/sounds/notification.wav').play().catch(() => {

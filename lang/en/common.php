@@ -29,6 +29,9 @@ return [
     'confirm_archive' => 'Archive this record? It can be restored later.',
     'confirm_delete' => 'This deletes permanently and cannot be undone. Continue?',
     'no_results' => 'No results',
+    'report_language' => 'Which language should the report be in?',
+    'report_arabic' => 'العربية',
+    'report_english' => 'English',
     'search_choose' => 'Type to search, then choose…',
     'clear' => 'Clear',
 

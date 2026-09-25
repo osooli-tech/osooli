@@ -23,7 +23,7 @@
         {{ __('parcels.twin_open') }}
     </a>
 
-    <a href="{{ route('parcels.print', $parcel) }}"
+    <a href="{{ route('parcels.print', $parcel) }}" data-report-language
        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium
               border border-outline-variant dark:border-white/10
               text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5 transition-colors">

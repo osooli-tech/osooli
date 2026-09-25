@@ -32,6 +32,9 @@ return [
     'confirm_archive' => 'أرشفة هذا السجل؟ يمكن استرجاعه لاحقاً.',
     'confirm_delete' => 'حذف نهائي لا يمكن التراجع عنه. متأكد؟',
     'no_results' => 'لا توجد نتائج',
+    'report_language' => 'بأي لغة تريد التقرير؟',
+    'report_arabic' => 'العربية',
+    'report_english' => 'English',
     'search_choose' => 'اكتب للبحث ثم اختر…',
     'clear' => 'مسح',
 

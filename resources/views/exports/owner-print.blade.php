@@ -48,19 +48,19 @@
          Arabic text (dompdf has no bidi or letter shaping of its own), and
          every row of cells is reversed for Arabic in the markup above. --}}
     @font-face {
-        font-family: 'Tajawal';
-        src: url('{{ resource_path('fonts/tajawal/Tajawal-Regular.ttf') }}');
+        font-family: 'Cairo';
+        src: url('{{ resource_path('fonts/cairo/Cairo-Regular.ttf') }}');
         font-weight: normal;
         font-style: normal;
     }
     @font-face {
-        font-family: 'Tajawal';
-        src: url('{{ resource_path('fonts/tajawal/Tajawal-Bold.ttf') }}');
+        font-family: 'Cairo';
+        src: url('{{ resource_path('fonts/cairo/Cairo-Bold.ttf') }}');
         font-weight: bold;
         font-style: normal;
     }
     body {
-        font-family: 'Tajawal', 'DejaVu Sans', sans-serif; font-size: 11px; color: #0b1c30; margin: 0;
+        font-family: 'Cairo', 'DejaVu Sans', sans-serif; font-size: 11px; color: #0b1c30; margin: 0;
         direction: {{ $isAr ? 'rtl' : 'ltr' }};
     }
 
