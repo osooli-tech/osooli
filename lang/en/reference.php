@@ -62,7 +62,6 @@ return [
         'usage_all' => 'All',
         'usage_used' => 'With :what only',
         'usage_unused' => 'Without :what',
-        'missing_en' => 'Missing English name only',
         'results' => 'Results: :count',
         'clear' => 'Clear filters',
     ],

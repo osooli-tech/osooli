@@ -78,9 +78,6 @@ class ReferenceFiltersTest extends TestCase
         $page->call('clearFilters')->set('filterUsage', 'used')
             ->assertSee('الملقا')->assertDontSee('النرجس');
 
-        $page->call('clearFilters')->set('filterMissingEn', true)
-            ->assertSee('النرجس')->assertDontSee('الملقا');
-
         // Picking a region clears a city chosen under another one.
         $page->set('filterCity', (string) $this->riyadh->id)
             ->set('filterRegion', (string) $this->jeddah->region_id)

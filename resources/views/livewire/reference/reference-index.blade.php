@@ -95,12 +95,6 @@
                 </div>
             @endif
 
-            @if (in_array($tab, ['districts', 'cities', 'regions', 'countries'], true))
-                <label class="flex items-center gap-2 text-sm text-on-surface dark:text-white cursor-pointer py-2">
-                    <input type="checkbox" wire:model.live="filterMissingEn" class="rounded text-secondary focus:ring-secondary">
-                    {{ __('reference.filters.missing_en') }}
-                </label>
-            @endif
         </div>
 
         <div class="mt-3 flex items-center justify-between gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">

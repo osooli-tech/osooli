@@ -66,7 +66,6 @@ return [
         'usage_all' => 'الكل',
         'usage_used' => 'المرتبطة بـ :what فقط',
         'usage_unused' => 'غير المرتبطة بـ :what',
-        'missing_en' => 'بلا اسم إنجليزي فقط',
         'results' => 'عدد النتائج: :count',
         'clear' => 'مسح الفلاتر',
     ],

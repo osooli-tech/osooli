@@ -61,8 +61,6 @@ class ReferenceIndex extends Component
     /** '' (all), 'used' — something depends on the row — or 'unused'. */
     public string $filterUsage = '';
 
-    public bool $filterMissingEn = false;
-
     public bool $showModal = false;
 
     public bool $editing = false;
@@ -115,7 +113,7 @@ class ReferenceIndex extends Component
 
     public function clearFilters(): void
     {
-        $this->reset('search', 'filterRegion', 'filterCity', 'filterDistrict', 'filterUsage', 'filterMissingEn');
+        $this->reset('search', 'filterRegion', 'filterCity', 'filterDistrict', 'filterUsage');
         $this->resetPage();
     }
 
@@ -270,7 +268,7 @@ class ReferenceIndex extends Component
             'headers' => $this->headers(),
             'rows' => $this->rows($page),
             'filtering' => $this->search !== '' || $this->filterRegion !== '' || $this->filterCity !== ''
-                || $this->filterDistrict !== '' || $this->filterUsage !== '' || $this->filterMissingEn,
+                || $this->filterDistrict !== '' || $this->filterUsage !== '',
         ]);
     }
 
@@ -335,7 +333,6 @@ class ReferenceIndex extends Component
                 ->when($this->filterCity === '' && $this->filterRegion !== '', fn ($q) => $q
                     ->whereHas('city', fn ($c) => $c->where('region_id', (int) $this->filterRegion)))
                 ->tap(fn ($q) => $this->usageFilter($q, 'plans'))
-                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
@@ -345,7 +342,6 @@ class ReferenceIndex extends Component
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
                 ->when($this->filterRegion !== '', fn ($q) => $q->where('region_id', (int) $this->filterRegion))
                 ->tap(fn ($q) => $this->usageFilter($q, 'districts'))
-                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
@@ -354,14 +350,12 @@ class ReferenceIndex extends Component
                 ->withCount(['cities as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
                 ->tap(fn ($q) => $this->usageFilter($q, 'cities'))
-                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
             'countries' => Country::query()
                 ->withCount(['regions as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
-                ->tap(fn ($q) => $this->missingEnglishFilter($q))
                 ->orderBy('name_ar')
                 ->paginate(self::PER_PAGE),
 
@@ -389,13 +383,6 @@ class ReferenceIndex extends Component
             'unused' => $query->whereDoesntHave($relation, $scope),
             default => null,
         };
-    }
-
-    private function missingEnglishFilter(mixed $query): void
-    {
-        if ($this->filterMissingEn) {
-            $query->where(fn ($q) => $q->whereNull('name_en')->orWhere('name_en', ''));
-        }
     }
 
     /**
