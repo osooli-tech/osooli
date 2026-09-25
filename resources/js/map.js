@@ -117,9 +117,9 @@ if (! container) {
                 type: 'circle',
                 source: 'parcel-markers',
                 paint: {
-                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 13, 7, 16, 0],
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 3, 12, 7, 16, 0],
                     'circle-color': colours.parcels_fill,
-                    'circle-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0.9, 13, 0.75, 16, 0],
+                    'circle-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0.9, 12, 0.8, 16, 0],
                     'circle-stroke-color': isDarkMode ? '#0d1420' : '#ffffff',
                     'circle-stroke-width': 1.5,
                 },
@@ -190,9 +190,20 @@ if (! container) {
             // parcel's own centroid — not the midpoint of the overall
             // bounding box. A handful of parcels far from the rest (a
             // different city, a data outlier) skews a bounding-box midpoint
-            // toward the empty space between them and the main cluster; the
-            // mean of centroids instead sits inside wherever most parcels
-            // actually are.
+            // toward the empty space between them and the main cluster. The
+            // median of each coordinate is used rather than the mean for the
+            // same reason again one level down: a mean still lets one badly
+            // wrong centroid (a bad geometry, a stray 0,0) drag the average
+            // toward it in proportion to how far off it is; a median only
+            // cares how many points are greater or less, so the same bad
+            // point can move it by at most one position in the sorted list.
+            const median = (values) => {
+                const sorted = [...values].sort((a, b) => a - b);
+                const mid = Math.floor(sorted.length / 2);
+
+                return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+            };
+
             const positionCamera = (features) => {
                 if (cameraPositioned || ! features.length) return;
                 const centroids = features
@@ -200,9 +211,9 @@ if (! container) {
                     .filter(([lng, lat]) => typeof lng === 'number' && typeof lat === 'number');
                 if (! centroids.length) return;
 
-                const avgLng = centroids.reduce((sum, [lng]) => sum + lng, 0) / centroids.length;
-                const avgLat = centroids.reduce((sum, [, lat]) => sum + lat, 0) / centroids.length;
-                map.jumpTo({ center: [avgLng, avgLat], zoom: 13 });
+                const centerLng = median(centroids.map(([lng]) => lng));
+                const centerLat = median(centroids.map(([, lat]) => lat));
+                map.jumpTo({ center: [centerLng, centerLat], zoom: 12 });
                 cameraPositioned = true;
             };
 

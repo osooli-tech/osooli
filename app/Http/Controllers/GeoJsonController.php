@@ -14,8 +14,8 @@ use App\Support\OwnerScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GeoJsonController extends Controller
 {
@@ -73,8 +73,13 @@ class GeoJsonController extends Controller
                     'deed_date_hijri' => $latestDeed?->deed_date_hijri,
                     'deed_area' => $latestDeed?->deed_area,
                     'deed_status' => $latestDeed?->deed_status,
-                    'centroid_lat' => (float) $parcel->getAttribute('centroid_lat'),
-                    'centroid_lng' => (float) $parcel->getAttribute('centroid_lng'),
+                    // Null rather than 0.0 when PostGIS can't compute a
+                    // centroid (a degenerate geometry): 0,0 is a real place
+                    // (off the coast of west Africa), and casting a missing
+                    // value to it would silently pull the map's own centring
+                    // maths toward a point with no actual parcel there.
+                    'centroid_lat' => $parcel->getAttribute('centroid_lat') === null ? null : (float) $parcel->getAttribute('centroid_lat'),
+                    'centroid_lng' => $parcel->getAttribute('centroid_lng') === null ? null : (float) $parcel->getAttribute('centroid_lng'),
                     'documents_count' => $parcel->photos_count,
                     // Drives the priced/unpriced colouring; the amount itself stays out.
                     'is_priced' => $parcel->m_price !== null,
