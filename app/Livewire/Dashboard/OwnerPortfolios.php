@@ -22,7 +22,7 @@ class OwnerPortfolios extends Component
 {
     private const LIMIT = 12;
 
-    /** @var list<array{owner: string, name: string, parcels: int, area: float, value: float|null, priced: int}> */
+    /** @var list<array{owner: string, name: string, parcels: int, area: float, value: float|null, priced: int, parcel_ids: list<int>}> */
     public array $portfolios = [];
 
     public int $totalCount = 0;
@@ -52,6 +52,7 @@ class OwnerPortfolios extends Component
                     'area' => $summary['area'],
                     'priced' => $summary['priced'],
                     'value' => $summary['value'],
+                    'parcel_ids' => $portfolio->parcels()->pluck('parcels.id')->all(),
                 ];
             })
             ->values()

@@ -17,9 +17,18 @@
                             {{ $portfolio['name'] }}
                         </h3>
                     </div>
-                    <p class="text-[11px] text-on-surface-variant dark:text-on-primary-container truncate mb-3">
+                    <p class="text-[11px] text-on-surface-variant dark:text-on-primary-container truncate mb-1">
                         {{ $portfolio['owner'] }}
                     </p>
+
+                    @if ($portfolio['parcel_ids'] !== [])
+                        <button type="button"
+                                onclick="window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'parcelIds', value: @js($portfolio['parcel_ids']) } }))"
+                                class="flex items-center gap-1.5 mb-3 text-xs font-medium text-secondary hover:underline">
+                            <span class="material-symbols-outlined text-[15px]">map</span>
+                            {{ __('dashboard.portfolio_show_on_map') }}
+                        </button>
+                    @endif
 
                     <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                         <div>

@@ -49,6 +49,10 @@ if (! container) {
         window.loadMapbox().then((mapboxgl) => {
         mapboxgl.accessToken = token;
 
+        // Read once and reused everywhere a colour needs to differ by theme —
+        // basemap style, label colours, label halo.
+        const isDarkMode = document.documentElement.classList.contains('dark');
+
         // Without this, Mapbox GL renders Arabic (and other RTL scripts) as
         // isolated, unjoined letter forms instead of properly shaped text —
         // harmless while labels were numeric (parcel_no), but the project/
@@ -62,7 +66,7 @@ if (! container) {
 
         const map = new mapboxgl.Map({
             container: 'sakuki-map',
-            style: document.documentElement.classList.contains('dark')
+            style: isDarkMode
                 ? 'mapbox://styles/mapbox/dark-v11'
                 : 'mapbox://styles/mapbox/light-v11',
             center: [45.0, 24.0],
@@ -75,6 +79,8 @@ if (! container) {
         let allFeatures = [];
         let hoveredId = null;
         let selectedId = null;
+        let cameraPositioned = false;
+        let cityFilterPopulated = false;
         // Where the selected parcel is, so it can be kept in view when the
         // details panel opens and narrows the map.
         let selectedLngLat = null;
@@ -131,39 +137,62 @@ if (! container) {
                 },
             });
 
-            // Parcel number labels
+            // Parcel number labels. Both size and halo grow with zoom — at a
+            // medium default zoom a small parcel's polygon is only a few
+            // pixels across, and a full-size halo at that scale used to
+            // paint the whole shape a flat white instead of the fill colour
+            // showing through around a small dark parcel number.
+            //
+            // Text colour is theme-aware for the same reason: the fixed navy
+            // '#002444' effectively disappeared against the dark-v11 basemap,
+            // leaving only its white halo visible — which read as "the parcel
+            // itself is white" rather than as a label.
             map.addLayer({
                 id: 'parcels-labels',
                 type: 'symbol',
                 source: 'parcels',
                 layout: {
                     'text-field': ['to-string', ['get', 'parcel_no']],
-                    'text-size': 11,
+                    'text-size': ['interpolate', ['linear'], ['zoom'], 10, 8, 14, 11, 18, 15],
                     'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
                     'text-allow-overlap': false,
                     'text-ignore-placement': false,
                 },
                 paint: {
-                    'text-color': '#002444',
-                    'text-halo-color': '#ffffff',
-                    'text-halo-width': 1.5,
+                    'text-color': isDarkMode ? '#e8ecf5' : '#002444',
+                    'text-halo-color': isDarkMode ? '#0d1420' : '#ffffff',
+                    'text-halo-width': ['interpolate', ['linear'], ['zoom'], 10, 0.4, 14, 1.5],
                 },
             });
 
-            // Fit bounds to parcel data (first load only — allFeatures already cached after that)
-            const applyBounds = (data) => {
-                if (! data.features?.length) return;
-                allFeatures = data.features;
+            // A fixed medium zoom centred on the data, set once. fitBounds
+            // used to run here instead, zooming out until every last parcel
+            // fit on screen — with parcels scattered across a whole region
+            // that meant a nearly full-country view where nothing was
+            // individually readable. A medium zoom plus the label sizing
+            // above (small dot-like numbers at this zoom, growing as the
+            // user zooms in) reads better than either "everything, tiny" or
+            // "nothing, until you find it".
+            const positionCamera = (features) => {
+                if (cameraPositioned || ! features.length) return;
                 const bounds = new mapboxgl.LngLatBounds();
-                data.features.forEach((f) => {
+                features.forEach((f) => {
                     const coords = f.geometry?.coordinates;
                     if (! coords) return;
                     (f.geometry.type === 'Polygon' ? coords[0] : coords.flat(2))
                         .forEach((c) => bounds.extend(c));
                 });
                 if (! bounds.isEmpty()) {
-                    map.fitBounds(bounds, { padding: 60, maxZoom: 17 });
+                    map.jumpTo({ center: bounds.getCenter(), zoom: 13 });
+                    cameraPositioned = true;
                 }
+            };
+
+            const applyBounds = (data) => {
+                if (! data.features?.length) return;
+                allFeatures = data.features;
+                positionCamera(allFeatures);
+                populateCityFilter(allFeatures);
             };
 
             if (allFeatures.length) {
@@ -207,6 +236,88 @@ if (! container) {
                 map.getCanvas().style.cursor = '';
             });
         }
+
+        // Filled once from the parcels actually loaded, not queried
+        // separately — a city with no parcels on the map has no reason to
+        // appear in a filter over the map.
+        function populateCityFilter(features) {
+            const select = document.getElementById('map-city-filter');
+            if (! select || cityFilterPopulated) return;
+            cityFilterPopulated = true;
+
+            const cities = [...new Set(
+                features.map((f) => f.properties?.city_name).filter(Boolean)
+            )].sort((a, b) => a.localeCompare(b, 'ar'));
+
+            cities.forEach((city) => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                select.appendChild(option);
+            });
+        }
+
+        // Layers a "show me this on the map" filter applies to together, so
+        // a hidden parcel's fill, outline and label all disappear as one.
+        const FILTERABLE_LAYERS = ['parcels-fill', 'parcels-outline', 'parcels-labels'];
+
+        function matchesFilter(properties, type, value) {
+            if (type === 'city') return properties?.city_name === value;
+            if (type === 'parcelIds') return value.includes(properties?.id);
+
+            return true;
+        }
+
+        function clearMapFilter() {
+            FILTERABLE_LAYERS.forEach((id) => {
+                if (map.getLayer(id)) map.setFilter(id, null);
+            });
+            const select = document.getElementById('map-city-filter');
+            if (select) select.value = '';
+        }
+
+        // Shared by the city dropdown, a city-portfolio card, an
+        // owner-portfolio card, and the "by city" dashboard chart — every
+        // one of them just needs to say what to show, not how the map shows it.
+        function applyMapFilter(type, value) {
+            const expression = type === 'city'
+                ? ['==', ['get', 'city_name'], value]
+                : ['in', ['get', 'id'], ['literal', value]];
+
+            FILTERABLE_LAYERS.forEach((id) => {
+                if (map.getLayer(id)) map.setFilter(id, expression);
+            });
+
+            const select = document.getElementById('map-city-filter');
+            if (select) select.value = type === 'city' ? value : '';
+
+            const matches = allFeatures.filter((f) => matchesFilter(f.properties, type, value));
+            if (matches.length) {
+                const bounds = new mapboxgl.LngLatBounds();
+                matches.forEach((f) => {
+                    const coords = f.geometry?.coordinates;
+                    if (! coords) return;
+                    (f.geometry.type === 'Polygon' ? coords[0] : coords.flat(2))
+                        .forEach((c) => bounds.extend(c));
+                });
+                if (! bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+            }
+
+            document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        window.addEventListener('map-filter', (e) => {
+            const { type, value } = e.detail ?? {};
+            if (! type || value === undefined || value === null) return;
+            applyMapFilter(type, value);
+        });
+        window.addEventListener('map-filter-clear', clearMapFilter);
+
+        const cityFilterSelect = document.getElementById('map-city-filter');
+        cityFilterSelect?.addEventListener('change', () => {
+            cityFilterSelect.value ? applyMapFilter('city', cityFilterSelect.value) : clearMapFilter();
+        });
+        document.getElementById('map-filter-clear-btn')?.addEventListener('click', clearMapFilter);
 
         // Project zones and building footprints are a pure identification
         // layer — name/shape only, no click-through detail panel like parcels.
@@ -573,7 +684,7 @@ if (! container) {
 
         const toggleBasemapBtn = document.getElementById('toggle-basemap');
         const basemapLabel = document.getElementById('basemap-label');
-        const streetStyle = document.documentElement.classList.contains('dark')
+        const streetStyle = isDarkMode
             ? 'mapbox://styles/mapbox/dark-v11'
             : 'mapbox://styles/mapbox/light-v11';
         const satelliteStyle = 'mapbox://styles/mapbox/satellite-streets-v12';

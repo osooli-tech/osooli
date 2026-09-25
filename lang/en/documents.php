@@ -16,7 +16,7 @@ return [
     'photo_types' => [
         'جوية' => 'Agricultural Sheet',
         'أرضية' => 'Ground',
-        'كروكي مساحي' => 'Approved Plan',
+        'كروكي مساحي' => 'Survey Decision',
         'صك' => 'Deed',
     ],
 
