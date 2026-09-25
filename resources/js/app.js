@@ -1,4 +1,5 @@
 import './bootstrap';
+import './date-picker';
 import ApexCharts from 'apexcharts';
 import Swal from 'sweetalert2';
 

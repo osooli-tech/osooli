@@ -101,10 +101,10 @@
                                                ]"
                                                :placeholder="__('survey_decisions.matches_deed_unknown')" />
 
-                                <x-form.input name="boundary.surveyDate"
-                                              :label="__('survey_decisions.survey_date')"
-                                              :hint="__('survey_decisions.survey_date_hint')"
-                                              class="data-tabular" ltr />
+                                <x-form.date-input name="boundary.surveyDate"
+                                                   :label="__('survey_decisions.survey_date')"
+                                                   :hint="__('survey_decisions.survey_date_hint')"
+                                                   calendar="hijri" />
 
                                 <x-form.select name="boundary.engineeringOfficeId"
                                                :label="__('survey_decisions.engineering_office')"

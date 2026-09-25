@@ -34,6 +34,15 @@ return [
     'no_results' => 'لا توجد نتائج',
     'search_choose' => 'اكتب للبحث ثم اختر…',
     'clear' => 'مسح',
+
+    // Date picker
+    'pick_date' => 'اختر التاريخ…',
+    'today' => 'اليوم',
+    'previous_month' => 'الشهر السابق',
+    'next_month' => 'الشهر التالي',
+    'gregorian_equivalent' => 'يوافق ميلادياً:',
+    'hijri_equivalent' => 'يوافق هجرياً:',
+
     'unauthorized' => 'لا تملك صلاحية هذا الإجراء',
 
     /*

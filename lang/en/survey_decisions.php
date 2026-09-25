@@ -41,7 +41,7 @@ return [
     'measured_area_hint' => 'In square metres',
     'engineering_office' => 'Engineering Office',
     'survey_date' => 'Survey Date',
-    'survey_date_hint' => 'Plain text as YYYY-MM-DD, e.g. 1446-03-12',
+    'survey_date_hint' => 'Pick the date from the Hijri (Umm al-Qura) calendar.',
     'boundary_missing_hint' => 'This parcel has no boundary record yet; one will be created on save.',
     'saved' => 'Survey decision saved',
     'boundary_edit_title' => 'Edit parcel boundary',

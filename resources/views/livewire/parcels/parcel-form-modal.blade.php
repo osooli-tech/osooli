@@ -217,11 +217,10 @@
 
                     <x-form.input name="deedForm.deedNo" :label="__('parcels.deed_no')" ltr />
 
-                    <x-form.input name="deedForm.deedDateHijri"
-                                  :label="__('parcels.deed_date')"
-                                  :hint="__('parcels.deed_date_hint')"
-                                  placeholder="1446-03-15"
-                                  class="data-tabular" ltr />
+                    <x-form.date-input name="deedForm.deedDateHijri"
+                                       :label="__('parcels.deed_date')"
+                                       :hint="__('parcels.deed_date_hint')"
+                                       calendar="hijri" />
 
                     <x-form.input name="deedForm.deedArea"
                                   :label="__('parcels.deed_area')"

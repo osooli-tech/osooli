@@ -111,16 +111,12 @@
                         <label class="{{ $label }}">{{ __('exports_center.price') }} — {{ __('exports_center.to') }}</label>
                         <input type="number" min="0" step="any" wire:model.live.debounce.500ms="filters.price_max" class="{{ $input }}" dir="ltr">
                     </div>
-                    <div>
-                        <label class="{{ $label }}">{{ __('exports_center.deed_date') }} — {{ __('exports_center.from') }}</label>
-                        <input type="text" wire:model.live.debounce.500ms="filters.date_from" placeholder="1440-01-01" class="{{ $input }}" dir="ltr">
-                        @error('filters.date_from') <p class="mt-1 text-xs text-error">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="{{ $label }}">{{ __('exports_center.deed_date') }} — {{ __('exports_center.to') }}</label>
-                        <input type="text" wire:model.live.debounce.500ms="filters.date_to" placeholder="1447-12-29" class="{{ $input }}" dir="ltr">
-                        @error('filters.date_to') <p class="mt-1 text-xs text-error">{{ $message }}</p> @enderror
-                    </div>
+                    <x-form.date-input name="filters.date_from"
+                                       :label="__('exports_center.deed_date').' — '.__('exports_center.from')"
+                                       calendar="hijri" live />
+                    <x-form.date-input name="filters.date_to"
+                                       :label="__('exports_center.deed_date').' — '.__('exports_center.to')"
+                                       calendar="hijri" live />
                 </div>
             </div>
 
