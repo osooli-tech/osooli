@@ -30,7 +30,7 @@ class GeoJsonController extends Controller
         // fields and the owner-name aggregation below from the same rows —
         // one extra query total, not one per parcel.
         $parcels = Parcel::query()
-            ->with(['plan.district', 'deeds.deedOwners.owner'])
+            ->with(['plan.district.city', 'deeds.deedOwners.owner'])
             ->withCount('photos')
             ->whereNotNull('geom')
             ->when($parcelIds !== null, fn ($q) => $q->whereIn('id', $parcelIds))
@@ -63,6 +63,7 @@ class GeoJsonController extends Controller
                     'fall_in' => $parcel->fall_in,
                     'plan_no' => $parcel->plan?->plan_no,
                     'district_name' => $parcel->plan?->district?->name_ar,
+                    'city_name' => $parcel->plan?->district?->city?->name_ar,
                     'deed_no' => $latestDeed?->deed_no,
                     'deed_date_hijri' => $latestDeed?->deed_date_hijri,
                     'deed_area' => $latestDeed?->deed_area,

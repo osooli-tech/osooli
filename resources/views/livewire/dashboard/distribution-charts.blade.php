@@ -85,7 +85,20 @@
                          c: null,
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'bar', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
+                                 chart: {
+                                     type: 'bar', height: 220, toolbar: { show: false },
+                                     background: 'transparent', fontFamily: '{{ $font }}',
+                                     // Clicking a city's bar shows that city's parcels on
+                                     // the map above, the same filter the city dropdown
+                                     // and the city-portfolio cards use.
+                                     events: {
+                                         dataPointSelection: (event, chartContext, config) => {
+                                             const city = @js(array_keys($byCity))[config.dataPointIndex];
+                                             if (! city) return;
+                                             window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'city', value: city } }));
+                                         },
+                                     },
+                                 },
                                  series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byCity)) }],
                                  xaxis: { categories: @js(array_keys($byCity)), labels: { style: { fontSize: '11px' } } },
                                  colors: ['#006c4e'],
@@ -97,7 +110,7 @@
                              this.c.render();
                          }
                      }">
-                    <div x-ref="el"></div>
+                    <div x-ref="el" class="cursor-pointer"></div>
                 </div>
             @endif
         </div>

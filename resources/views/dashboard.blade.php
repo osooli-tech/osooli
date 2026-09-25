@@ -65,9 +65,11 @@
                 @endif
             </div>
 
-            {{-- Search box --}}
-            <div class="absolute top-3 inset-x-3 z-10 max-w-sm">
-                <div class="relative">
+            {{-- Search box + city filter. The filter's own options are filled
+                 in by map.js from the parcels actually on the map, so a city
+                 with nothing on it never appears as a choice. --}}
+            <div class="absolute top-3 inset-x-3 z-10 flex flex-wrap items-center gap-2 max-w-xl">
+                <div class="relative flex-1 min-w-[180px]">
                     <span class="material-symbols-outlined absolute top-1/2 -translate-y-1/2 start-3 text-[18px] text-on-surface-variant pointer-events-none">search</span>
                     <input id="map-search"
                            type="text"
@@ -79,6 +81,25 @@
                                   placeholder:text-on-surface-variant focus:outline-none
                                   focus:ring-2 focus:ring-primary/40" />
                 </div>
+
+                <select id="map-city-filter"
+                        class="px-3 py-2.5 text-sm rounded-xl shadow-md
+                               bg-white/95 dark:bg-[#1a1f2e]/95 backdrop-blur
+                               border border-outline-variant dark:border-white/10
+                               text-on-surface dark:text-white focus:outline-none
+                               focus:ring-2 focus:ring-primary/40">
+                    <option value="">{{ __('dashboard.city_filter_all') }}</option>
+                </select>
+
+                <button id="map-filter-clear-btn" type="button"
+                        title="{{ __('dashboard.city_filter_clear') }}"
+                        class="flex items-center justify-center w-9 h-9 rounded-xl shadow-md shrink-0
+                               bg-white/95 dark:bg-[#1a1f2e]/95 backdrop-blur
+                               border border-outline-variant dark:border-white/10
+                               text-on-surface-variant dark:text-on-primary-container
+                               hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+                </button>
             </div>
 
             {{-- Layer controls. Collapsed to a button until opened, so the panel
