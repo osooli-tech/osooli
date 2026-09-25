@@ -17,16 +17,3 @@ Artisan::command('inspire', function () {
 Schedule::command('db:sync --scheduled')
     ->dailyAt(app(DatabaseSettings::class)->sync()['time'])
     ->when(fn (): bool => app(DatabaseSettings::class)->sync()['auto']);
-
-// withoutOverlapping() matters here specifically: this command recursively
-// deletes directories — a second invocation starting while the first is still
-// running (a slow disk, a huge backlog) must not run the same delete logic
-// concurrently over the same rows. onOneServer() is safe to add too: the default cache store is
-// 'database' (config/cache.php), whose driver implements Laravel's
-// LockProvider contract against the cache_locks table created in
-// 0001_01_01_000001_create_cache_table.php, so the mutex it needs has
-// somewhere real to live.
-Schedule::command('app:prune-import-batches')
-    ->daily()
-    ->withoutOverlapping()
-    ->onOneServer();

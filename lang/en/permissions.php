@@ -18,7 +18,6 @@ return [
     'parcels.view_map' => 'View Geographic Map',
     'documents.download' => 'Download Documents',
     'exports.create' => 'Export Data',
-    'imports.create' => 'Import data',
     'modification_requests.view' => 'View Modification Requests',
     'modification_requests.manage' => 'Manage Modification Requests',
     'presentation_requests.view' => 'View Demo Requests',

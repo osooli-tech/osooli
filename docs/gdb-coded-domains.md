@@ -93,7 +93,7 @@
 
 | الملف | الموضع |
 |---|---|
-| `app/Services/Import/ParcelGeoJsonImporter.php` | ثابت `ENUM_VALUES` + الدالة `enum()` |
+| `app/Console/Commands/ImportParcelsGeoJson.php` | ثابت `ENUM_VALUES` + الدالة `enum()` |
 | `database/import/gdb_import.py` | ثابت `ENUM_VALUES` + الدالة `code_to_enum()` |
 
 ---
