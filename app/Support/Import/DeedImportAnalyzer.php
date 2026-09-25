@@ -68,7 +68,13 @@ final class DeedImportAnalyzer
     /** @var array<int, int> deed ids seen so far => feature index */
     private array $deedIds = [];
 
-    /** @var array<string, int> deed numbers seen so far => feature index */
+    /**
+     * "deed number | parcel GEO ID" seen so far => feature index. One deed
+     * number may cover several parcels — a deed row per parcel — so only
+     * the same number on the same parcel twice is a duplicate.
+     *
+     * @var array<string, int>
+     */
     private array $deedNumbers = [];
 
     /** @var array<string, array{index: int, signature: string}> geo_id => first feature carrying it */
@@ -227,7 +233,8 @@ final class DeedImportAnalyzer
         return [
             'parent_ids' => DB::table('parcels')->whereIn('geo_id', $parentGeoIds ?: [''])->pluck('id', 'geo_id'),
             'deeds_by_id' => $deeds->keyBy('id'),
-            'deeds_by_no' => $deeds->keyBy('deed_no'),
+            // A deed number and the parcel together identify a deed.
+            'deeds_by_no' => $deeds->keyBy(static fn (object $d): string => $d->deed_no.'|'.$d->geo_id),
             'parcels' => $parcels,
             'boundaries' => DB::table('parcel_boundaries')->whereIn('parcel_id', $parcelIds)->get()->keyBy('parcel_id'),
             'surveys' => DB::table('survey_decisions')->whereIn('parcel_id', $parcelIds)->get()->groupBy('parcel_id'),
@@ -501,11 +508,12 @@ final class DeedImportAnalyzer
         $deedNo = $record->deed['deed_no'];
         $values = $this->values($record->deed, self::DEED_FIELDS, $item);
 
-        if ($deedNo !== null) {
-            if (isset($this->deedNumbers[$deedNo])) {
-                $item['errors'][] = ['code' => 'deed_duplicate_in_file', 'of' => $this->deedNumbers[$deedNo]];
+        if ($deedNo !== null && $record->deed['id'] === null) {
+            $key = $deedNo.'|'.$geoId;
+            if (isset($this->deedNumbers[$key])) {
+                $item['errors'][] = ['code' => 'deed_duplicate_in_file', 'of' => $this->deedNumbers[$key]];
             }
-            $this->deedNumbers[$deedNo] ??= $item['index'];
+            $this->deedNumbers[$key] ??= $item['index'];
         }
 
         $row = null;
@@ -513,7 +521,7 @@ final class DeedImportAnalyzer
             $row = $existing['deeds_by_id'][$record->deed['id']] ?? null;
         }
         if ($row === null && $deedNo !== null) {
-            $row = $existing['deeds_by_no'][$deedNo] ?? null;
+            $row = $existing['deeds_by_no'][$deedNo.'|'.$geoId] ?? null;
         }
 
         if ($record->deed['id'] !== null) {
@@ -524,6 +532,8 @@ final class DeedImportAnalyzer
             $this->deedIds[$record->deed['id']] ??= $item['index'];
         }
 
+        // Only an id can point at a deed recorded on another parcel; a number
+        // is matched on this parcel alone.
         if ($row !== null && $row->geo_id !== $geoId) {
             $item['errors'][] = ['code' => 'deed_on_other_parcel', 'detail' => $row->geo_id];
         }

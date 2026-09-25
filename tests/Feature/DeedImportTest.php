@@ -178,9 +178,8 @@ class DeedImportTest extends TestCase
         $file = $this->exported();
         $file['features'][0]['properties']['deed_status'] = 'غير موجود';
 
-        // The same deed number on a parcel it is not recorded on.
+        // A deed_id that belongs to a deed on another parcel.
         $elsewhere = $this->exported()['features'][0];
-        unset($elsewhere['properties']['deed_id'], $elsewhere['properties']['deed']);
         $elsewhere['properties']['parcel_geo_id'] = 'GEO-OTHER';
         $elsewhere['properties']['parcel']['geo_id'] = 'GEO-OTHER';
         $file['features'][] = $elsewhere;
@@ -317,6 +316,33 @@ class DeedImportTest extends TestCase
         $file['features'][0]['properties']['plan_no'] = 'P-NEW-2';
         $run = $this->analyse($file);
         $this->assertSame(0, $run['counts']['error']);
+    }
+
+    public function test_one_deed_number_on_several_parcels_is_not_a_duplicate(): void
+    {
+        $file = $this->exported();
+
+        // The deed's number on a second parcel: a deed row of its own there.
+        $second = $file['features'][0];
+        unset($second['properties']['deed_id'], $second['properties']['deed']['id']);
+        $second['properties']['parcel_geo_id'] = 'GEO-2ND';
+        $second['properties']['parcel']['geo_id'] = 'GEO-2ND';
+        $file['features'][] = $second;
+
+        // The very same deed, number and parcel, twice: that is a duplicate.
+        $twice = $second;
+        $file['features'][] = $twice;
+
+        $run = $this->analyse($file);
+        $items = $this->items($run['id']);
+
+        $this->assertSame('same', $items[0]['status']);
+        $this->assertSame('new', $items[1]['status']);
+        $this->assertSame('error', $items[2]['status']);
+        $this->assertSame('deed_duplicate_in_file', $items[2]['errors'][0]['code']);
+
+        $this->apply($run['id']);
+        $this->assertSame(2, Deed::where('deed_no', '310101000001')->count());
     }
 
     public function test_the_stream_reads_a_pretty_printed_file_and_its_header(): void
