@@ -48,6 +48,16 @@
         }());
     </script>
 
+    {{-- Texts for the report-language pop-up (resources/js/app.js). --}}
+    <script>
+        window.reportLanguageText = @js([
+            'title' => __('common.report_language'),
+            'arabic' => __('common.report_arabic'),
+            'english' => __('common.report_english'),
+            'cancel' => __('common.cancel'),
+        ]);
+    </script>
+
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

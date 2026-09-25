@@ -9,11 +9,27 @@
              <th>/<td> in strict DOM order regardless of dir="rtl" — it does
              not reverse table columns the way a browser does — so the column
              order itself is reversed in markup for Arabic, below. --}}
-        body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #0b1c30; }
-        .masthead table { width: auto; }
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{{ resource_path('fonts/cairo/Cairo-Regular.ttf') }}');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{{ resource_path('fonts/cairo/Cairo-Bold.ttf') }}');
+            font-weight: bold;
+            font-style: normal;
+        }
+        body {
+            font-family: 'Cairo', 'DejaVu Sans', sans-serif; font-size: 11px; color: #0b1c30;
+            direction: {{ app()->isLocale('ar') ? 'rtl' : 'ltr' }};
+        }
+        .masthead table { width: 100%; }
+        .masthead td { vertical-align: middle; }
         .masthead .logo-mark { width: 28px; height: auto; vertical-align: middle; }
-        .masthead h1 { font-size: 16px; margin: 0; padding-{{ app()->isLocale('ar') ? 'right' : 'left' }}: 8px; vertical-align: middle; }
-        p.subtitle { color: #555; margin-top: 4px; margin-bottom: 16px; }
+        .masthead h1 { font-size: 16px; font-weight: bold; margin: 0; padding-{{ app()->isLocale('ar') ? 'right' : 'left' }}: 8px; }
+        p.subtitle { color: #555; margin-top: 4px; margin-bottom: 16px; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; }
         table.data { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: {{ app()->isLocale('ar') ? 'right' : 'left' }}; }
         th { background-color: #002444; color: #ffffff; }
@@ -22,10 +38,19 @@
 </head>
 <body>
     <div class="masthead">
+        {{-- dompdf keeps cells in DOM order, so for Arabic the logo cell
+             comes last and the spacer first: logo and title on the right. --}}
         <table>
             <tr>
-                <td><img class="logo-mark" src="{{ public_path('images/logo-icon.png') }}" alt=""></td>
-                <td><h1>@ar(__('parcels.title'))</h1></td>
+                @if (app()->isLocale('ar'))
+                    <td style="width: 100%;"></td>
+                    <td style="white-space: nowrap;"><h1>@ar(__('parcels.title'))</h1></td>
+                    <td style="width: 30px;"><img class="logo-mark" src="{{ public_path('images/logo-icon.png') }}" alt=""></td>
+                @else
+                    <td style="width: 30px;"><img class="logo-mark" src="{{ public_path('images/logo-icon.png') }}" alt=""></td>
+                    <td style="white-space: nowrap;"><h1>@ar(__('parcels.title'))</h1></td>
+                    <td style="width: 100%;"></td>
+                @endif
             </tr>
         </table>
     </div>

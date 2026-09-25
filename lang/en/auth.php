@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 return [
-    'brand_tagline' => 'Smart Real Estate Management Platform',
+    'brand_tagline' => 'Smart geospatial data. Better real estate decisions.',
+    'managed_by' => 'Managed by Elaa Al-Khaleej Investment Company',
     'login_title' => 'Sign In',
     'login_subtitle' => 'Enter your credentials to access the dashboard',
     'email' => 'Email Address',

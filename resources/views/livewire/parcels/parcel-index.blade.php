@@ -132,7 +132,7 @@
                         <span class="material-symbols-outlined text-[15px]">grid_on</span>
                         {{ __('parcels.export_excel') }}
                     </a>
-                    <a href="{{ route('parcels.export.pdf', ['search' => $search, 'filterAssetType' => $filterAssetType, 'filterLandTransaction' => $filterLandTransaction, 'filterDeedStatus' => $filterDeedStatus]) }}"
+                    <a href="{{ route('parcels.export.pdf', ['search' => $search, 'filterAssetType' => $filterAssetType, 'filterLandTransaction' => $filterLandTransaction, 'filterDeedStatus' => $filterDeedStatus]) }}" data-report-language
                        class="flex items-center gap-1.5 px-3 py-2 text-xs rounded-xl
                               border border-outline-variant dark:border-white/20
                               text-on-surface-variant dark:text-on-primary-container
