@@ -43,6 +43,11 @@ final class ParcelGeometry
     /** Payload ceiling before any parsing, in bytes. */
     private const MAX_BYTES = 1_000_000;
 
+    /** A region drawn in full detail runs to tens of thousands of vertices. */
+    private const BOUNDARY_MAX_POINTS = 50_000;
+
+    private const BOUNDARY_MAX_BYTES = 3_000_000;
+
     /** Overlap below this many m² is digitising noise along a shared edge. */
     private const OVERLAP_TOLERANCE_SQM = 1.0;
 
@@ -128,7 +133,31 @@ final class ParcelGeometry
      */
     public static function validate(string $input): array
     {
-        if ($input === '' || strlen($input) > self::MAX_BYTES) {
+        return self::checked($input, self::MAX_BYTES, self::MAX_POINTS, self::MAX_AREA_SQM);
+    }
+
+    /**
+     * The same checks for an administrative boundary — a district, city or
+     * region — which is many times the size and detail of any parcel. Only
+     * the limits differ; validity and the national bounds are held the same.
+     *
+     * @return array{geojson: string, area: float}
+     *
+     * @throws InvalidArgumentException with a translated, user-facing message
+     */
+    public static function validateBoundary(string $input): array
+    {
+        return self::checked($input, self::BOUNDARY_MAX_BYTES, self::BOUNDARY_MAX_POINTS, INF);
+    }
+
+    /**
+     * @return array{geojson: string, area: float}
+     *
+     * @throws InvalidArgumentException
+     */
+    private static function checked(string $input, int $maxBytes, int $maxPoints, float $maxArea): array
+    {
+        if ($input === '' || strlen($input) > $maxBytes) {
             throw new InvalidArgumentException(__('parcels.geometry_errors.malformed'));
         }
 
@@ -138,10 +167,10 @@ final class ParcelGeometry
 
         $row = Dialect::isPostgres() ? self::measureInPostgis($geojson) : self::measureInPhp($geometry);
 
-        // Checked before validity: the PHP validity check is quadratic in the
-        // vertex count, and an oversized polygon is refused either way.
-        if ((int) $row->points > self::MAX_POINTS) {
-            throw new InvalidArgumentException(__('parcels.geometry_errors.too_many_points', ['max' => self::MAX_POINTS]));
+        // Checked before validity: an oversized polygon is refused either
+        // way, and the vertex count is the plainer reason to give.
+        if ((int) $row->points > $maxPoints) {
+            throw new InvalidArgumentException(__('parcels.geometry_errors.too_many_points', ['max' => $maxPoints]));
         }
 
         if (! $row->valid) {
@@ -162,7 +191,7 @@ final class ParcelGeometry
 
         $area = (float) $row->area;
 
-        if ($area < self::MIN_AREA_SQM || $area > self::MAX_AREA_SQM) {
+        if ($area < self::MIN_AREA_SQM || $area > $maxArea) {
             throw new InvalidArgumentException(__('parcels.geometry_errors.area', [
                 'area' => number_format($area, 2),
             ]));

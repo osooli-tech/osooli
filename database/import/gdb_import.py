@@ -140,7 +140,8 @@ ENUM_VALUES = {
     'allocation_method': ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
     # 'طلبات احكام' / 'حجة استحكام' / 'مخطط' added for the دواجن الوطنية
     # source, which uses these three in addition to the original two.
-    'fall_in':           ['مخطط زراعي', 'مخطط بلدية', 'طلبات احكام', 'حجة استحكام', 'مخطط'],
+    # 'صك' added for the ArcGIS parcel table, which marks deed-held parcels.
+    'fall_in':           ['مخطط زراعي', 'مخطط بلدية', 'طلبات احكام', 'حجة استحكام', 'مخطط', 'صك'],
 }
 
 

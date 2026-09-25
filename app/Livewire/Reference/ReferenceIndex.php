@@ -21,6 +21,7 @@ use App\Support\Concerns\WritesSafely;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 use RuntimeException;
@@ -90,6 +91,10 @@ class ReferenceIndex extends Component
     {
         abort_unless(auth()->user()?->can('reference.view'), 403);
     }
+
+    /** Redraws the table so a row's boundary button shows its new state. */
+    #[On('boundary-saved')]
+    public function boundarySaved(): void {}
 
     public function updatingSearch(): void
     {
@@ -427,7 +432,7 @@ class ReferenceIndex extends Component
 
     /**
      * @param  LengthAwarePaginator<Model>  $page
-     * @return array<int, array{id: int, cells: array<int, string>, dependents: int, created_at: mixed}>
+     * @return array<int, array{id: int, cells: array<int, string>, dependents: int, created_at: mixed, boundary: string|null}>
      */
     private function rows(LengthAwarePaginator $page): array
     {
@@ -439,6 +444,9 @@ class ReferenceIndex extends Component
                 'cells' => $this->cells($record),
                 'dependents' => (int) $record->getAttribute('dependents_count'),
                 'created_at' => $record->getAttribute('created_at'),
+                // Where this record's boundary came from; null when it has none
+                // (and always null for plans and offices, which have none).
+                'boundary' => $record->getAttribute('boundary_source'),
             ];
         }
 
