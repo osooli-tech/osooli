@@ -6,7 +6,7 @@
     </div>
 
     {{-- Filters --}}
-    <div class="bg-surface-container-low dark:bg-[#1a2e42] rounded-2xl p-4 mb-5 flex flex-wrap gap-3 items-center">
+    <div class="bg-surface-container-low dark:bg-[#1a2e42] rounded-2xl p-4 mb-5 flex flex-wrap gap-3 items-end">
 
         {{-- Search --}}
         <div class="relative flex-1 min-w-[200px]">
@@ -30,6 +30,18 @@
             @endforeach
         </select>
 
+        {{-- Date --}}
+        <x-table.created-filter />
+
+        @if ($this->filteringByCreatedAt())
+            <button wire:click="clearCreatedAtFilter"
+                    class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
+                           text-error border border-error/30 hover:bg-error/10 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+                {{ __('common.clear') }}
+            </button>
+        @endif
+
     </div>
 
     {{-- Table --}}
@@ -42,7 +54,7 @@
                         <th class="px-4 py-3 text-start font-medium">{{ __('audit_logs.col_action') }}</th>
                         <th class="px-4 py-3 text-start font-medium">{{ __('audit_logs.col_target') }}</th>
                         <th class="px-4 py-3 text-start font-medium">{{ __('audit_logs.col_ip') }}</th>
-                        <th class="px-4 py-3 text-start font-medium">{{ __('audit_logs.col_date') }}</th>
+                        <x-table.created-header :sort="$createdSort" :label="__('audit_logs.col_date')" />
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-surface-container dark:divide-[#1a2e42]">
@@ -106,9 +118,7 @@
                             </td>
 
                             {{-- Date --}}
-                            <td class="px-4 py-3 text-on-surface-variant text-xs whitespace-nowrap">
-                                {{ $log->created_at?->format('Y-m-d H:i') }}
-                            </td>
+                            <x-table.created-cell :date="$log->created_at" class="text-xs" />
 
                         </tr>
                     @empty

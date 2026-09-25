@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\PresentationRequests;
 
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\PresentationRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -12,6 +13,7 @@ use Livewire\WithPagination;
 
 class RequestIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -40,6 +42,7 @@ class RequestIndex extends Component
                 })
             )
             ->latest()
+            ->tap(fn ($q) => $this->applyCreatedAt($q))
             ->paginate(15);
 
         return view('livewire.presentation-requests.request-index', [

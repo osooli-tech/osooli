@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Archive;
 
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Deed;
 use App\Models\Owner;
 use App\Models\Parcel;
@@ -24,6 +25,7 @@ use Livewire\Component;
  */
 class ArchiveIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WritesSafely;
 
     /** The three archivable record types, in the order they are shown. */
@@ -114,7 +116,7 @@ class ArchiveIndex extends Component
             });
         }
 
-        return $builder->with('archivedBy')->latest('deleted_at');
+        return $this->applyCreatedAt($builder->with('archivedBy')->latest('deleted_at'));
     }
 
     /** @return Collection<int, Parcel>|Collection<int, Deed>|Collection<int, Owner> */

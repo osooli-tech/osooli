@@ -40,8 +40,10 @@
                 </div>
             </div>
 
-            @if ($search !== '')
-                <button wire:click="$set('search', '')"
+            <x-table.created-filter />
+
+            @if ($search !== '' || $this->filteringByCreatedAt())
+                <button wire:click="clearFilters"
                         class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
                                text-error border border-error/30 hover:bg-error/10 transition-colors">
                     <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
@@ -87,6 +89,7 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('owners.deed_count') }}
                         </th>
+                        <x-table.created-header :sort="$createdSort" />
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -143,6 +146,9 @@
                                     </span>
                                 @endif
                             </td>
+
+                            {{-- Date added --}}
+                            <x-table.created-cell :date="$owner->created_at" />
 
                             {{-- Actions --}}
                             <td class="px-4 py-3">
@@ -203,7 +209,7 @@
                                     ]);
                             @endphp
                             <tr>
-                                <td colspan="6" class="bg-surface-container dark:bg-[#161f2e] px-4 py-4">
+                                <td colspan="7" class="bg-surface-container dark:bg-[#161f2e] px-4 py-4">
                                     {{-- Opens the shared modal instead of an inline editor
                                          per row: the modal covers all five columns, while
                                          the inline form only ever reached three. --}}
@@ -296,7 +302,7 @@
 
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-16 text-center">
+                            <td colspan="7" class="px-4 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3
                                             text-on-surface-variant dark:text-on-primary-container">
                                     <span class="material-symbols-outlined text-[48px] opacity-30">person_search</span>

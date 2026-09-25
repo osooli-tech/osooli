@@ -44,8 +44,11 @@
                 </select>
             </div>
 
+            {{-- Date added --}}
+            <x-table.created-filter />
+
             {{-- Clear filters --}}
-            @if ($search !== '' || $filterQrarSource !== '')
+            @if ($search !== '' || $filterQrarSource !== '' || $this->filteringByCreatedAt())
                 <button wire:click="clearFilters"
                         class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
                                text-error border border-error/30 hover:bg-error/10 transition-colors">
@@ -90,6 +93,7 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('survey_decisions.matches_deed') }}
                         </th>
+                        <x-table.created-header :sort="$createdSort" />
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -163,6 +167,9 @@
                                 @endif
                             </td>
 
+                            {{-- Date added --}}
+                            <x-table.created-cell :date="$decision->created_at" />
+
                             {{-- Link to parcel + survey document --}}
                             <td class="px-4 py-3">
                                 <div class="flex flex-col gap-1.5">
@@ -219,7 +226,7 @@
                         {{-- Boundaries row (borders + dimensions "as surveyed") --}}
                         @if ($boundary && ($boundary->n_border || $boundary->s_border || $boundary->e_border || $boundary->w_border))
                             <tr class="bg-surface-container dark:bg-[#161f2e] border-b border-outline-variant dark:border-white/10">
-                                <td colspan="9" class="px-4 py-3">
+                                <td colspan="10" class="px-4 py-3">
                                     <p class="text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-2">
                                         {{ __('survey_decisions.boundaries') }}
                                     </p>
@@ -246,7 +253,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-16 text-center">
+                            <td colspan="10" class="px-4 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3
                                             text-on-surface-variant dark:text-on-primary-container">
                                     <span class="material-symbols-outlined text-[48px] opacity-30">fact_check</span>

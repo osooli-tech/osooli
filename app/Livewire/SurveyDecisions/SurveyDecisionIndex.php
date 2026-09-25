@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\SurveyDecisions;
 
 use App\Enums\QrarSource;
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\SurveyDecision;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -14,6 +15,7 @@ use Livewire\WithPagination;
 
 class SurveyDecisionIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -52,7 +54,7 @@ class SurveyDecisionIndex extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'filterQrarSource']);
+        $this->reset(['search', 'filterQrarSource', 'createdFrom', 'createdTo']);
         $this->resetPage();
     }
 
@@ -71,6 +73,7 @@ class SurveyDecisionIndex extends Component
             })
             ->when($this->filterQrarSource !== '', fn ($q) => $q->where('qrar_source', $this->filterQrarSource))
             ->orderBy('id')
+            ->tap(fn ($q) => $this->applyCreatedAt($q))
             ->paginate(25);
     }
 

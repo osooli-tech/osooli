@@ -95,6 +95,8 @@
                 </div>
             @endif
 
+            <x-table.created-filter />
+
         </div>
 
         <div class="mt-3 flex items-center justify-between gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
@@ -129,6 +131,7 @@
                                 <span class="material-symbols-outlined text-[14px] opacity-60">info</span>
                             </span>
                         </th>
+                        <x-table.created-header :sort="$createdSort" />
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -154,6 +157,8 @@
                                 </span>
                             </td>
 
+                            <x-table.created-cell :date="$row['created_at']" />
+
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 justify-end">
                                     @can('reference.edit')
@@ -178,7 +183,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($headers) + 2 }}" class="px-4 py-16 text-center">
+                            <td colspan="{{ count($headers) + 3 }}" class="px-4 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3
                                             text-on-surface-variant dark:text-on-primary-container">
                                     <span class="material-symbols-outlined text-[48px] opacity-30">database</span>

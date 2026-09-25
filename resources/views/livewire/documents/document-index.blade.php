@@ -44,8 +44,11 @@
                 </select>
             </div>
 
+            {{-- Date added --}}
+            <x-table.created-filter />
+
             {{-- Clear filters --}}
-            @if ($search !== '' || $filterPhotoType !== '')
+            @if ($search !== '' || $filterPhotoType !== '' || $this->filteringByCreatedAt())
                 <button wire:click="clearFilters"
                         class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
                                text-error border border-error/30 hover:bg-error/10 transition-colors">
@@ -75,9 +78,7 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('documents.photo_type') }}
                         </th>
-                        <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
-                            {{ __('documents.upload_date') }}
-                        </th>
+                        <x-table.created-header :sort="$createdSort" :label="__('documents.upload_date')" />
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -116,9 +117,7 @@
                             </td>
 
                             {{-- Upload date --}}
-                            <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container data-tabular">
-                                {{ $photo->created_at?->format('Y-m-d') ?? '—' }}
-                            </td>
+                            <x-table.created-cell :date="$photo->created_at" />
 
                             {{-- Download --}}
                             <td class="px-4 py-3">

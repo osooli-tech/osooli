@@ -124,6 +124,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:exports.bulk')
         ->name('exports.download');
 
+    // Import — the export's format back in, reviewed before anything is written
+    Route::get('/imports', fn () => view('imports.index'))
+        ->middleware('can:imports.run')
+        ->name('imports.index');
+
     // Archive — archived parcels, deeds and owners, and restoring them
     Route::get('/archive', fn () => view('archive.index'))
         ->middleware('can:archive.view')

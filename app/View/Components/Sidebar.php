@@ -48,6 +48,12 @@ class Sidebar extends Component
             'permission' => 'exports.bulk',
         ],
         [
+            'route' => 'imports.index',
+            'label' => 'nav.imports',
+            'icon' => 'upload_file',
+            'permission' => 'imports.run',
+        ],
+        [
             'route' => 'archive.index',
             'label' => 'nav.archive',
             'icon' => 'inventory_2',

@@ -1,0 +1,316 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Feature;
+
+use App\Livewire\Imports\ImportCenter;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\Deed;
+use App\Models\District;
+use App\Models\Owner;
+use App\Models\Parcel;
+use App\Models\Plan;
+use App\Models\Region;
+use App\Models\User;
+use App\Support\Export\DeedExportFilters;
+use App\Support\Export\DeedGeoJsonExporter;
+use App\Support\Export\ExportRuns;
+use App\Support\Import\DeedImportAnalyzer;
+use App\Support\Import\DeedImportApplier;
+use App\Support\Import\DeedImportUndo;
+use App\Support\Import\GeoJsonFeatureStream;
+use App\Support\Import\ImportRuns;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
+
+class DeedImportTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private User $user;
+
+    private Deed $deed;
+
+    private Owner $salem;
+
+    /** @var list<string> */
+    private array $cleanup = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create(['is_active' => true]);
+        foreach (['imports.run', 'exports.bulk'] as $name) {
+            Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
+        }
+        $this->user->givePermissionTo(['imports.run', 'exports.bulk']);
+        $this->actingAs($this->user);
+
+        $country = Country::create(['name_ar' => 'المملكة العربية السعودية']);
+        $region = Region::create(['country_id' => $country->id, 'name_ar' => 'منطقة الرياض']);
+        $city = City::create(['region_id' => $region->id, 'name_ar' => 'الرياض']);
+        $district = District::create(['city_id' => $city->id, 'name_ar' => 'الملقا']);
+        $plan = Plan::create(['plan_no' => 'P-7', 'district_id' => $district->id]);
+
+        $parcel = Parcel::create(['geo_id' => 'GEO-1', 'parcel_no' => '101', 'plan_id' => $plan->id]);
+        DB::update(
+            "UPDATE parcels SET geom = ST_GeomFromText('MULTIPOLYGON(((46.6 24.7, 46.601 24.7, 46.601 24.701, 46.6 24.701, 46.6 24.7)))', 4326), asset_type = 'أرض' WHERE id = ?",
+            [$parcel->id]
+        );
+        $this->deed = Deed::create(['parcel_id' => $parcel->id, 'deed_no' => '310101000001', 'deed_area' => 11200]);
+        DB::update("UPDATE deeds SET deed_status = 'محدث' WHERE id = ?", [$this->deed->id]);
+        $this->salem = Owner::create(['name' => 'سالم أحمد', 'national_id' => '1000000001', 'phone' => '0500000001']);
+        $this->deed->owners()->attach($this->salem->id, ['ownership_share' => 100]);
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->cleanup as $path) {
+            foreach (glob($path.'/*') ?: [] as $file) {
+                @unlink($file);
+            }
+            is_dir($path) ? @rmdir($path) : @unlink($path);
+        }
+
+        parent::tearDown();
+    }
+
+    public function test_an_unedited_export_imports_as_all_unchanged(): void
+    {
+        $run = $this->analyse($this->exported());
+
+        $this->assertSame('analysed', $run['state'], (string) ($run['error'] ?? ''));
+        $this->assertSame(1, $run['counts']['same']);
+        $this->assertSame(0, $run['counts']['changed'] + $run['counts']['new'] + $run['counts']['error']);
+    }
+
+    public function test_edits_are_shown_field_by_field_applied_and_undone(): void
+    {
+        $file = $this->exported();
+        $file['features'][0]['properties']['deed_area'] = 12000;
+        $file['features'][0]['properties']['owners'][0]['phone'] = '0555555555';
+
+        $run = $this->analyse($file);
+        $item = $this->items($run['id'])[0];
+
+        $this->assertSame('changed', $item['status']);
+        // The visible column was edited, the nested copy was not: noted.
+        $this->assertContains('flat_nested_differ', array_column($item['warnings'], 'code'));
+        $this->assertEquals([11200, 12000], $item['deed']['changes']['deed_area']);
+        $this->assertSame('update', $item['owners'][0]['action']);
+
+        $this->apply($run['id']);
+        $this->assertEquals(12000, (float) $this->deed->fresh()->deed_area);
+        $this->assertSame('0555555555', $this->salem->fresh()->phone);
+
+        $undone = app(DeedImportUndo::class)->run($run['id'], $this->user);
+        $this->assertSame('undone', $undone['state']);
+        $this->assertEquals(11200, (float) $this->deed->fresh()->deed_area);
+        $this->assertSame('0500000001', $this->salem->fresh()->phone);
+    }
+
+    public function test_a_new_deed_with_a_new_owner_is_created_and_undo_removes_it(): void
+    {
+        $file = $this->exported();
+        $new = $file['features'][0];
+        $new['id'] = 'new';
+        unset($new['properties']['deed_id']);
+        $new['properties']['deed'] = ['deed_no' => '999999', 'deed_area' => 500, 'deed_status' => 'قديم'];
+        $new['properties'] = ['deed_no' => '999999', 'deed_area' => 500, 'deed_status' => 'قديم'] + $new['properties'];
+        $new['properties']['owners'] = [['name' => 'مالك جديد تماما', 'national_id' => '2000000000', 'ownership_share' => 100]];
+        $file['features'][] = $new;
+
+        $run = $this->analyse($file);
+        $this->assertSame(1, $run['counts']['new']);
+
+        $this->apply($run['id']);
+        $this->assertDatabaseHas('deeds', ['deed_no' => '999999']);
+        $this->assertDatabaseHas('owners', ['national_id' => '2000000000']);
+
+        app(DeedImportUndo::class)->run($run['id'], $this->user);
+        $this->assertDatabaseMissing('deeds', ['deed_no' => '999999']);
+        $this->assertDatabaseMissing('owners', ['national_id' => '2000000000']);
+    }
+
+    public function test_a_look_alike_owner_waits_for_a_decision(): void
+    {
+        $file = $this->exported();
+        // One digit off Salem's national ID: the usual typing slip.
+        $file['features'][0]['properties']['owners'][] = ['name' => 'سالم احمد', 'national_id' => '1000000007', 'ownership_share' => 0];
+
+        $run = $this->analyse($file);
+        $key = array_key_first($run['decisions_needed']);
+
+        $this->assertSame('decision', $this->items($run['id'])[0]['status']);
+        $this->assertSame('owner', $run['decisions_needed'][$key]['type']);
+        $this->assertSame($this->salem->id, $run['decisions_needed'][$key]['candidates'][0]['id']);
+        $this->assertContains('nid_close', $run['decisions_needed'][$key]['candidates'][0]['reasons']);
+
+        // "It is Salem": no new owner is created.
+        $this->apply($run['id'], [$key => $this->salem->id]);
+        $this->assertDatabaseMissing('owners', ['national_id' => '1000000007']);
+    }
+
+    public function test_an_unknown_district_can_be_created_on_decision(): void
+    {
+        $file = $this->exported();
+        $file['features'][0]['properties']['plan_no'] = 'P-NEW';
+        $file['features'][0]['properties']['district'] = 'حي النخيل الجديد';
+
+        $run = $this->analyse($file);
+        $key = array_key_first($run['decisions_needed']);
+        $this->assertSame('district', $run['decisions_needed'][$key]['type']);
+
+        $this->apply($run['id'], [$key => 'create']);
+        $this->assertDatabaseHas('districts', ['name_ar' => 'حي النخيل الجديد']);
+        $this->assertSame('P-NEW', Parcel::where('geo_id', 'GEO-1')->first()->plan->plan_no);
+    }
+
+    public function test_bad_rows_are_errors_and_are_never_written(): void
+    {
+        $file = $this->exported();
+        $file['features'][0]['properties']['deed_status'] = 'غير موجود';
+
+        // The same deed number on a parcel it is not recorded on.
+        $elsewhere = $this->exported()['features'][0];
+        unset($elsewhere['properties']['deed_id'], $elsewhere['properties']['deed']);
+        $elsewhere['properties']['parcel_geo_id'] = 'GEO-OTHER';
+        $elsewhere['properties']['parcel']['geo_id'] = 'GEO-OTHER';
+        $file['features'][] = $elsewhere;
+
+        $run = $this->analyse($file);
+        $items = $this->items($run['id']);
+
+        $this->assertSame('error', $items[0]['status']);
+        $this->assertSame('not_in_list', $items[0]['errors'][0]['code']);
+        $this->assertSame('error', $items[1]['status']);
+        $this->assertContains('deed_on_other_parcel', array_column($items[1]['errors'], 'code'));
+
+        $this->apply($run['id']);
+        $this->assertDatabaseMissing('parcels', ['geo_id' => 'GEO-OTHER']);
+    }
+
+    public function test_undo_keeps_a_row_edited_by_hand_after_the_import(): void
+    {
+        $file = $this->exported();
+        $file['features'][0]['properties']['deed_area'] = 12000;
+
+        $run = $this->analyse($file);
+        $this->apply($run['id']);
+
+        DB::table('deeds')->where('id', $this->deed->id)->update(['deed_area' => 13000, 'updated_at' => now()->addMinute()]);
+
+        $undone = app(DeedImportUndo::class)->run($run['id'], $this->user);
+        $this->assertEquals(13000, (float) $this->deed->fresh()->deed_area);
+        $this->assertContains('deeds#'.$this->deed->id, $undone['undo_result']['kept']);
+    }
+
+    public function test_a_copied_row_that_keeps_the_original_deed_id_is_refused(): void
+    {
+        $file = $this->exported();
+        $copy = $file['features'][0];
+        $copy['properties']['deed_no'] = '555555';
+        $file['features'][] = $copy;
+
+        $run = $this->analyse($file);
+        $codes = array_column($this->items($run['id'])[1]['errors'], 'code');
+
+        $this->assertContains('deed_id_duplicate_in_file', $codes);
+        $this->assertContains('deed_id_number_mismatch', $codes);
+
+        $this->apply($run['id']);
+        $this->assertSame('310101000001', $this->deed->fresh()->deed_no);
+    }
+
+    public function test_the_stream_reads_a_pretty_printed_file_and_its_header(): void
+    {
+        $path = storage_path('app/stream-test.geojson');
+        $this->cleanup[] = $path;
+        file_put_contents($path, json_encode([
+            'type' => 'FeatureCollection',
+            'sokuki' => ['format' => 'sokuki-deeds', 'version' => 1],
+            'features' => [
+                ['type' => 'Feature', 'properties' => ['deed_no' => 'a "quoted" {brace}'], 'geometry' => null],
+                ['type' => 'Feature', 'properties' => ['deed_no' => 'ب'], 'geometry' => null],
+            ],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        $stream = new GeoJsonFeatureStream($path);
+        $features = iterator_to_array($stream->features());
+
+        $this->assertCount(2, $features);
+        $this->assertSame('a "quoted" {brace}', $features[0]['properties']['deed_no']);
+        $this->assertSame('sokuki-deeds', $stream->header()['sokuki']['format']);
+    }
+
+    public function test_the_page_uploads_analyses_and_applies(): void
+    {
+        $this->withoutDefer();
+        $file = $this->exported();
+        $file['features'][0]['properties']['deed_area'] = 12500;
+
+        $page = Livewire::test(ImportCenter::class)
+            ->set('upload', UploadedFile::fake()->createWithContent('deeds.geojson', (string) json_encode($file, JSON_UNESCAPED_UNICODE)))
+            ->call('analyse');
+
+        $id = (string) $page->get('following');
+        $this->cleanup[] = ImportRuns::path($id);
+        $this->assertSame('analysed', ImportRuns::find($id)['state']);
+
+        $page->call('apply')->assertHasErrors('confirmed');
+        $page->set('confirmed', true)->call('apply');
+
+        $this->assertSame('applied', ImportRuns::find($id)['state']);
+        $this->assertEquals(12500, (float) $this->deed->fresh()->deed_area);
+    }
+
+    /** @return array<string, mixed> the current data as the export page writes it */
+    private function exported(): array
+    {
+        $id = ExportRuns::newId();
+        app(DeedGeoJsonExporter::class)->run($id, new DeedExportFilters([]), DeedGeoJsonExporter::GROUPS, $this->user);
+        $data = json_decode((string) file_get_contents(ExportRuns::filePath($id)), true);
+        @unlink(ExportRuns::filePath($id));
+        @unlink(ExportRuns::directory()."/{$id}.json");
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $file
+     * @return array<string, mixed>
+     */
+    private function analyse(array $file): array
+    {
+        $id = ImportRuns::newId();
+        $this->cleanup[] = ImportRuns::path($id);
+        file_put_contents(ImportRuns::path($id, 'source.geojson'), json_encode($file, JSON_UNESCAPED_UNICODE));
+        ImportRuns::save(['id' => $id, 'state' => 'analysing', 'user_id' => $this->user->id, 'file' => 't.geojson', 'created_at' => now()->toIso8601String()]);
+
+        return app(DeedImportAnalyzer::class)->run($id, $this->user);
+    }
+
+    /** @param  array<string, mixed>  $choices */
+    private function apply(string $id, array $choices = []): void
+    {
+        $run = ImportRuns::find($id);
+        $run['choices'] = $choices;
+        ImportRuns::save($run);
+
+        $applied = app(DeedImportApplier::class)->run($id, $this->user);
+        $this->assertSame('applied', $applied['state'], (string) ($applied['error'] ?? ''));
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function items(string $id): array
+    {
+        return array_values(iterator_to_array(ImportRuns::items($id)));
+    }
+}

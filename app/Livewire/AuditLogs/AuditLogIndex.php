@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\AuditLogs;
 
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\AuditLog;
 use App\Support\AuditActions;
 use Illuminate\Contracts\View\View;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 
 class AuditLogIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -44,6 +46,7 @@ class AuditLogIndex extends Component
                 });
             })
             ->orderByDesc('created_at')
+            ->tap(fn ($q) => $this->applyCreatedAt($q))
             ->paginate(25);
     }
 

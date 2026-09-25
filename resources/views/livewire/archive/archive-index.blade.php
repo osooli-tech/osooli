@@ -17,13 +17,26 @@
         @endforeach
     </div>
 
-    <input wire:model.live.debounce.400ms="search" type="search"
-           placeholder="{{ __('common.search') }}"
-           class="w-full md:w-80 px-3 py-2 text-sm rounded-xl
-                  bg-surface-container dark:bg-[#252b3b]
-                  border border-outline-variant dark:border-white/10
-                  text-on-surface dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-primary/40" />
+    <div class="flex flex-wrap gap-3 items-end">
+        <input wire:model.live.debounce.400ms="search" type="search"
+               placeholder="{{ __('common.search') }}"
+               class="w-full md:w-80 px-3 py-2 text-sm rounded-xl
+                      bg-surface-container dark:bg-[#252b3b]
+                      border border-outline-variant dark:border-white/10
+                      text-on-surface dark:text-white
+                      focus:outline-none focus:ring-2 focus:ring-primary/40" />
+
+        <x-table.created-filter />
+
+        @if ($this->filteringByCreatedAt())
+            <button wire:click="clearCreatedAtFilter"
+                    class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
+                           text-error border border-error/30 hover:bg-error/10 transition-colors">
+                <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+                {{ __('common.clear') }}
+            </button>
+        @endif
+    </div>
 
     <div class="bg-surface dark:bg-[#1b2030] rounded-2xl border border-outline-variant dark:border-white/10 overflow-hidden">
         <div class="overflow-x-auto">
@@ -33,6 +46,7 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('archive.record') }}
                         </th>
+                        <x-table.created-header :sort="$createdSort" />
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('archive.archived_at') }}
                         </th>
@@ -57,6 +71,7 @@
                                     {{ $record->name }}
                                 @endif
                             </td>
+                            <x-table.created-cell :date="$record->created_at" />
                             <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
                                 {{ $record->deleted_at?->format('Y-m-d H:i') ?? '—' }}
                             </td>
@@ -98,7 +113,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-16 text-center text-on-surface-variant dark:text-on-primary-container">
+                            <td colspan="5" class="px-4 py-16 text-center text-on-surface-variant dark:text-on-primary-container">
                                 {{ __('archive.empty') }}
                             </td>
                         </tr>

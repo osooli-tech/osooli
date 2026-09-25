@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users;
 
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -17,6 +18,7 @@ use Spatie\Permission\Models\Role;
 
 class UserIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -58,6 +60,12 @@ class UserIndex extends Component
 
     public function updatingFilterRole(): void
     {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'filterRole', 'createdFrom', 'createdTo']);
         $this->resetPage();
     }
 
@@ -235,6 +243,7 @@ class UserIndex extends Component
             })
             ->when($this->filterRole !== '', fn ($q) => $q->role($this->filterRole))
             ->latest()
+            ->tap(fn ($q) => $this->applyCreatedAt($q, 'users.created_at'))
             ->paginate(20);
     }
 

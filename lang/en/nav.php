@@ -11,6 +11,7 @@ return [
     'survey_decisions' => 'Survey Decisions',
     'reference' => 'Reference Data',
     'exports' => 'Data export',
+    'imports' => 'Data import',
     'archive' => 'Archive',
     'documents' => 'Documents',
     'modification_requests' => 'Modification Requests',

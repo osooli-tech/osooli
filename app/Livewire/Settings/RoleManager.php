@@ -29,7 +29,7 @@ class RoleManager extends Component
         'reference' => ['reference.view', 'reference.create', 'reference.edit', 'reference.delete'],
         'documents' => ['documents.download', 'documents.upload', 'documents.review'],
         'archive' => ['archive.view', 'archive.restore'],
-        'exports' => ['exports.create', 'exports.bulk'],
+        'exports' => ['exports.create', 'exports.bulk', 'imports.run'],
         'requests' => ['modification_requests.view', 'modification_requests.manage', 'presentation_requests.view'],
         'owners' => ['owners.create', 'owners.edit'],
         'users' => ['users.view', 'users.create', 'users.edit', 'users.delete'],

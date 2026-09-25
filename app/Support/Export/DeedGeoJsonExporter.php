@@ -60,6 +60,8 @@ final class DeedGeoJsonExporter
     public function run(string $id, DeedExportFilters $filters, array $groups, ?User $user): array
     {
         @set_time_limit(0);
+        // Large files: the owner index and per-file bookkeeping grow with them.
+        @ini_set('memory_limit', '512M');
         ignore_user_abort(true);
 
         $groups = array_values(array_intersect(self::GROUPS, $groups));

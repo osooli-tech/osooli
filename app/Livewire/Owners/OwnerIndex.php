@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Owners;
 
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Owner;
 use App\Models\User;
 use App\Support\OwnerScope;
@@ -16,6 +17,7 @@ use Livewire\WithPagination;
 
 class OwnerIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -25,6 +27,13 @@ class OwnerIndex extends Component
 
     public function updatingSearch(): void
     {
+        $this->resetPage();
+        $this->expanded = [];
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset(['search', 'createdFrom', 'createdTo']);
         $this->resetPage();
         $this->expanded = [];
     }
@@ -63,6 +72,7 @@ class OwnerIndex extends Component
                 });
             })
             ->orderBy('name')
+            ->tap(fn ($q) => $this->applyCreatedAt($q))
             ->paginate(20);
     }
 

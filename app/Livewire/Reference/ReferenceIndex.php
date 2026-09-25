@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Reference;
 
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Livewire\Forms\CityForm;
 use App\Livewire\Forms\CountryForm;
 use App\Livewire\Forms\DistrictForm;
@@ -35,6 +36,7 @@ use RuntimeException;
  */
 class ReferenceIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
     use WritesSafely;
 
@@ -113,7 +115,7 @@ class ReferenceIndex extends Component
 
     public function clearFilters(): void
     {
-        $this->reset('search', 'filterRegion', 'filterCity', 'filterDistrict', 'filterUsage');
+        $this->reset('search', 'filterRegion', 'filterCity', 'filterDistrict', 'filterUsage', 'createdFrom', 'createdTo');
         $this->resetPage();
     }
 
@@ -268,7 +270,7 @@ class ReferenceIndex extends Component
             'headers' => $this->headers(),
             'rows' => $this->rows($page),
             'filtering' => $this->search !== '' || $this->filterRegion !== '' || $this->filterCity !== ''
-                || $this->filterDistrict !== '' || $this->filterUsage !== '',
+                || $this->filterDistrict !== '' || $this->filterUsage !== '' || $this->filteringByCreatedAt(),
         ]);
     }
 
@@ -323,6 +325,7 @@ class ReferenceIndex extends Component
                     ->whereHas('district.city', fn ($c) => $c->where('region_id', (int) $this->filterRegion)))
                 ->tap(fn ($q) => $this->usageFilter($q, 'parcels', withTrashed: true))
                 ->orderBy('plan_no')
+                ->tap(fn ($q) => $this->applyCreatedAt($q))
                 ->paginate(self::PER_PAGE),
 
             'districts' => District::query()
@@ -334,6 +337,7 @@ class ReferenceIndex extends Component
                     ->whereHas('city', fn ($c) => $c->where('region_id', (int) $this->filterRegion)))
                 ->tap(fn ($q) => $this->usageFilter($q, 'plans'))
                 ->orderBy('name_ar')
+                ->tap(fn ($q) => $this->applyCreatedAt($q))
                 ->paginate(self::PER_PAGE),
 
             'cities' => City::query()
@@ -343,6 +347,7 @@ class ReferenceIndex extends Component
                 ->when($this->filterRegion !== '', fn ($q) => $q->where('region_id', (int) $this->filterRegion))
                 ->tap(fn ($q) => $this->usageFilter($q, 'districts'))
                 ->orderBy('name_ar')
+                ->tap(fn ($q) => $this->applyCreatedAt($q))
                 ->paginate(self::PER_PAGE),
 
             'regions' => Region::query()
@@ -351,12 +356,14 @@ class ReferenceIndex extends Component
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
                 ->tap(fn ($q) => $this->usageFilter($q, 'cities'))
                 ->orderBy('name_ar')
+                ->tap(fn ($q) => $this->applyCreatedAt($q))
                 ->paginate(self::PER_PAGE),
 
             'countries' => Country::query()
                 ->withCount(['regions as dependents_count'])
                 ->when($searching, fn ($q) => $this->nameFilter($q, $term))
                 ->orderBy('name_ar')
+                ->tap(fn ($q) => $this->applyCreatedAt($q))
                 ->paginate(self::PER_PAGE),
 
             'offices' => EngineeringOffice::query()
@@ -367,6 +374,7 @@ class ReferenceIndex extends Component
                     ->orWhereLike('phone', $term)))
                 ->tap(fn ($q) => $this->usageFilter($q, 'parcelBoundaries'))
                 ->orderBy('name')
+                ->tap(fn ($q) => $this->applyCreatedAt($q))
                 ->paginate(self::PER_PAGE),
 
             default => throw new RuntimeException("Unknown reference tab [{$this->tab}]."),
@@ -419,7 +427,7 @@ class ReferenceIndex extends Component
 
     /**
      * @param  LengthAwarePaginator<Model>  $page
-     * @return array<int, array{id: int, cells: array<int, string>, dependents: int}>
+     * @return array<int, array{id: int, cells: array<int, string>, dependents: int, created_at: mixed}>
      */
     private function rows(LengthAwarePaginator $page): array
     {
@@ -430,6 +438,7 @@ class ReferenceIndex extends Component
                 'id' => (int) $record->getKey(),
                 'cells' => $this->cells($record),
                 'dependents' => (int) $record->getAttribute('dependents_count'),
+                'created_at' => $record->getAttribute('created_at'),
             ];
         }
 

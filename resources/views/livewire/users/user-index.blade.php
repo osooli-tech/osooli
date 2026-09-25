@@ -46,9 +46,12 @@
                     </select>
                 </div>
 
+                {{-- Date added --}}
+                <x-table.created-filter />
+
                 {{-- Clear --}}
-                @if ($search !== '' || $filterRole !== '')
-                    <button wire:click="$set('search', ''); $set('filterRole', '')"
+                @if ($search !== '' || $filterRole !== '' || $this->filteringByCreatedAt())
+                    <button wire:click="clearFilters"
                             class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
                                    text-error border border-error/30 hover:bg-error/10 transition-colors">
                         <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
@@ -92,6 +95,7 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">
                             {{ __('users.last_login') }}
                         </th>
+                        <x-table.created-header :sort="$createdSort" />
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -170,6 +174,9 @@
                                 {{ $user->last_login_at?->diffForHumans() ?? __('users.never') }}
                             </td>
 
+                            {{-- Date added --}}
+                            <x-table.created-cell :date="$user->created_at" />
+
                             {{-- Actions --}}
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 justify-end">
@@ -197,7 +204,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-16 text-center">
+                            <td colspan="7" class="px-4 py-16 text-center">
                                 <div class="flex flex-col items-center gap-3
                                             text-on-surface-variant dark:text-on-primary-container">
                                     <span class="material-symbols-outlined text-[48px] opacity-30">manage_accounts</span>

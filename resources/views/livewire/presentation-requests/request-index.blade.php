@@ -1,25 +1,38 @@
 <div>
 
     {{-- ── Header ── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <p class="text-sm text-on-surface-variant dark:text-on-primary-container">
             {{ $requests->total() }} {{ trans_choice('presentation_requests.total', $requests->total()) }}
         </p>
 
-        {{-- Search --}}
-        <div class="relative w-full sm:w-72">
-            <span class="absolute inset-y-0 end-3 flex items-center pointer-events-none
-                         text-on-surface-variant dark:text-on-primary-container">
-                <span class="material-symbols-outlined text-[18px]">search</span>
-            </span>
-            <input wire:model.live.debounce.300ms="search"
-                   type="search"
-                   placeholder="{{ __('presentation_requests.search_placeholder') }}"
-                   class="w-full pe-10 ps-4 py-2 text-sm rounded-xl
-                          bg-surface-container dark:bg-[#252b3b]
-                          border border-outline-variant dark:border-white/10
-                          text-on-surface dark:text-white
-                          focus:outline-none focus:ring-2 focus:ring-secondary/40" />
+        <div class="flex flex-wrap items-end gap-3">
+            <x-table.created-filter />
+
+            @if ($this->filteringByCreatedAt())
+                <button wire:click="clearCreatedAtFilter"
+                        class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
+                               text-error border border-error/30 hover:bg-error/10 transition-colors">
+                    <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+                    {{ __('common.clear') }}
+                </button>
+            @endif
+
+            {{-- Search --}}
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 end-3 flex items-center pointer-events-none
+                             text-on-surface-variant dark:text-on-primary-container">
+                    <span class="material-symbols-outlined text-[18px]">search</span>
+                </span>
+                <input wire:model.live.debounce.300ms="search"
+                       type="search"
+                       placeholder="{{ __('presentation_requests.search_placeholder') }}"
+                       class="w-full pe-10 ps-4 py-2 text-sm rounded-xl
+                              bg-surface-container dark:bg-[#252b3b]
+                              border border-outline-variant dark:border-white/10
+                              text-on-surface dark:text-white
+                              focus:outline-none focus:ring-2 focus:ring-secondary/40" />
+            </div>
         </div>
     </div>
 
@@ -44,7 +57,7 @@
                             <th class="px-5 py-3 text-start">{{ __('presentation_requests.col_name') }}</th>
                             <th class="px-5 py-3 text-start">{{ __('presentation_requests.col_phone') }}</th>
                             <th class="px-5 py-3 text-start hidden md:table-cell">{{ __('presentation_requests.col_message') }}</th>
-                            <th class="px-5 py-3 text-start hidden lg:table-cell">{{ __('presentation_requests.col_date') }}</th>
+                            <x-table.created-header :sort="$createdSort" :label="__('presentation_requests.col_date')" pad="px-5 py-3" />
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant/40 dark:divide-white/5">
@@ -61,10 +74,7 @@
                                            max-w-[280px] truncate">
                                     {{ $req->message ?? '—' }}
                                 </td>
-                                <td class="px-5 py-3.5 hidden lg:table-cell
-                                           text-on-surface-variant dark:text-on-primary-container text-xs ltr">
-                                    {{ $req->created_at->format('Y-m-d H:i') }}
-                                </td>
+                                <x-table.created-cell :date="$req->created_at" pad="px-5 py-3.5" class="text-xs" />
                             </tr>
                         @endforeach
                     </tbody>

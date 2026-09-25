@@ -7,6 +7,7 @@ namespace App\Livewire\Parcels;
 use App\Enums\AssetType;
 use App\Enums\DeedStatus;
 use App\Enums\LandTransaction;
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Parcel;
 use App\Models\User;
 use App\Support\OwnerScope;
@@ -21,6 +22,7 @@ use Livewire\WithPagination;
 
 class ParcelIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -101,7 +103,7 @@ class ParcelIndex extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'filterAssetType', 'filterLandTransaction', 'filterDeedStatus', 'filterPricing']);
+        $this->reset(['search', 'filterAssetType', 'filterLandTransaction', 'filterDeedStatus', 'filterPricing', 'createdFrom', 'createdTo']);
         $this->resetPage();
     }
 
@@ -125,6 +127,7 @@ class ParcelIndex extends Component
                 ->whereNull('m_price')
                 ->whereNull('parcel_price'))
             ->orderBy('parcel_no')
+            ->tap(fn ($query) => $this->applyCreatedAt($query, 'parcels.created_at'))
             ->paginate(25);
     }
 

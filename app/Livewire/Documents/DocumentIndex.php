@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Documents;
 
 use App\Enums\PhotoType;
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\ParcelPhoto;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -13,6 +14,7 @@ use Livewire\WithPagination;
 
 class DocumentIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $search = '';
@@ -46,7 +48,7 @@ class DocumentIndex extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'filterPhotoType']);
+        $this->reset(['search', 'filterPhotoType', 'createdFrom', 'createdTo']);
         $this->resetPage();
     }
 
@@ -61,6 +63,7 @@ class DocumentIndex extends Component
             })
             ->when($this->filterPhotoType !== '', fn ($q) => $q->where('photo_type', $this->filterPhotoType))
             ->latest()
+            ->tap(fn ($q) => $this->applyCreatedAt($q))
             ->paginate(25);
     }
 

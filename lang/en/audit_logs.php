@@ -75,6 +75,8 @@ return [
         'country' => ['create' => 'Country added', 'update' => 'Country edited', 'delete' => 'Country deleted'],
         'engineering_office' => ['create' => 'Engineering office added', 'update' => 'Engineering office edited', 'delete' => 'Engineering office deleted'],
         'export_bulk' => 'Bulk deed export',
+        'import_apply' => 'Data import applied',
+        'import_undo' => 'Data import undone',
         'database' => [
             'sync' => 'Databases synced',
             'sync_failed' => 'Database sync failed',
@@ -101,6 +103,7 @@ return [
         'user' => 'User',
         'modification_request' => 'Modification request',
         'export' => 'Export file',
+        'import' => 'Import file',
         'database' => 'Database',
     ],
 ];

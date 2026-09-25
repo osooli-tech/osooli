@@ -40,6 +40,12 @@ return [
     'gregorian_equivalent' => 'Gregorian:',
     'hijri_equivalent' => 'Hijri:',
 
+    // Date added — filter and sortable column on every list
+    'created_at' => 'Date added',
+    'created_from' => 'Date added — from',
+    'created_to' => 'Date added — to',
+    'sort_by_date' => 'Sort by date added',
+
     'unauthorized' => 'You do not have permission for this action',
 
     'conflict' => 'Someone else changed this record after you opened it. Your edit was not saved, so their work is not lost. Reopen the record to see its current state, then re-apply your change.',

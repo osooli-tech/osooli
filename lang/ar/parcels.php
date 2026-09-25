@@ -262,6 +262,7 @@ return [
     'geometry_actions' => [
         'edit' => 'قبل تعديل',
         'restore' => 'قبل استرجاع',
+        'import' => 'قبل استيراد',
     ],
     'geometry_errors' => [
         'malformed' => 'بيانات المضلع غير مقروءة. أعد الرسم وحاول مجدداً.',

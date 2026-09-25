@@ -43,6 +43,12 @@ return [
     'gregorian_equivalent' => 'يوافق ميلادياً:',
     'hijri_equivalent' => 'يوافق هجرياً:',
 
+    // Date added — filter and sortable column on every list
+    'created_at' => 'تاريخ الإضافة',
+    'created_from' => 'تاريخ الإضافة — من',
+    'created_to' => 'تاريخ الإضافة — إلى',
+    'sort_by_date' => 'الترتيب حسب تاريخ الإضافة',
+
     'unauthorized' => 'لا تملك صلاحية هذا الإجراء',
 
     /*

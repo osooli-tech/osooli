@@ -94,8 +94,11 @@
                 </select>
             </div>
 
+            {{-- Date added --}}
+            <x-table.created-filter />
+
             {{-- Clear filters --}}
-            @if ($search !== '' || $filterAssetType !== '' || $filterLandTransaction !== '' || $filterDeedStatus !== '' || $filterPricing !== '')
+            @if ($search !== '' || $filterAssetType !== '' || $filterLandTransaction !== '' || $filterDeedStatus !== '' || $filterPricing !== '' || $this->filteringByCreatedAt())
                 <button wire:click="clearFilters"
                         class="flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl
                                text-error border border-error/30 hover:bg-error/10 transition-colors">
@@ -145,7 +148,7 @@
 
     {{-- Compute visible column count for empty-state colspan --}}
     @php
-        $colCount = 3; // parcel_no + plan_no + actions (always visible)
+        $colCount = 4; // parcel_no + plan_no + created_at + actions (always visible)
         $colCount += ($showAllColumns || $populated['asset_type'])      ? 1 : 0;
         $colCount += ($showAllColumns || $populated['land_transaction']) ? 1 : 0;
         $colCount += ($showAllColumns || $populated['district'])         ? 1 : 0;
@@ -223,6 +226,7 @@
                                 {{ __('parcels.parcel_price') }}
                             </th>
                         @endif
+                        <x-table.created-header :sort="$createdSort" />
                         <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
@@ -342,6 +346,9 @@
                                     {{ $parcel->parcel_price === null ? '—' : number_format((float) $parcel->parcel_price) }}
                                 </td>
                             @endif
+
+                            {{-- Date added --}}
+                            <x-table.created-cell :date="$parcel->created_at" />
 
                             {{-- Actions --}}
                             <td class="px-4 py-3">

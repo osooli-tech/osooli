@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\ModificationRequests;
 
 use App\Enums\ModificationRequestStatus;
+use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\AuditLog;
 use App\Models\ModificationRequest;
 use App\Models\User;
@@ -20,6 +21,7 @@ use Livewire\WithPagination;
 
 class RequestIndex extends Component
 {
+    use FiltersByCreatedAt;
     use WithPagination;
 
     public string $statusFilter = 'all';
@@ -142,6 +144,7 @@ class RequestIndex extends Component
                 })
             )
             ->latest()
+            ->tap(fn ($q) => $this->applyCreatedAt($q))
             ->paginate(15);
 
         return view('livewire.modification-requests.request-index', [

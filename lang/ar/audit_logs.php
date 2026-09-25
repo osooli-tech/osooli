@@ -75,6 +75,8 @@ return [
         'country' => ['create' => 'إضافة دولة', 'update' => 'تعديل دولة', 'delete' => 'حذف دولة'],
         'engineering_office' => ['create' => 'إضافة مكتب هندسي', 'update' => 'تعديل مكتب هندسي', 'delete' => 'حذف مكتب هندسي'],
         'export_bulk' => 'تصدير شامل للصكوك',
+        'import_apply' => 'تنفيذ استيراد بيانات',
+        'import_undo' => 'التراجع عن استيراد',
         'database' => [
             'sync' => 'مزامنة قواعد البيانات',
             'sync_failed' => 'فشل مزامنة قواعد البيانات',
@@ -101,6 +103,7 @@ return [
         'user' => 'مستخدم',
         'modification_request' => 'طلب تعديل',
         'export' => 'ملف تصدير',
+        'import' => 'ملف استيراد',
         'database' => 'قاعدة البيانات',
     ],
 ];
