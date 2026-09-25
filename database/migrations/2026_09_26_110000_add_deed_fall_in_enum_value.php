@@ -11,13 +11,13 @@ return new class extends Migration
      * Run the migrations.
      *
      * The ArcGIS parcel table marks parcels held by a title deed as
-     * fall_in 'صك' — a category of its own, not one of the plan types nor
+     * fall_in 'الصك' — a category of its own, not one of the plan types nor
      * 'حجة استحكام'.
      */
     public function up(): void
     {
         // A no-op on MariaDB, where the column is a VARCHAR.
-        PortableSchema::addEnumValue('fall_in_enum', 'صك');
+        PortableSchema::addEnumValue('fall_in_enum', 'الصك');
     }
 
     /**

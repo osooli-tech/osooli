@@ -59,7 +59,7 @@ class BoundaryEditor extends Component
     #[On('boundary-edit')]
     public function open(string $level, int $id): void
     {
-        $this->authorize($level);
+        $this->authorizeLevel($level);
 
         $row = DB::table($level)->where('id', $id)->first(['id', 'updated_at']);
         abort_if($row === null, 404);
@@ -182,12 +182,12 @@ class BoundaryEditor extends Component
     private function editing(): array
     {
         abort_if($this->level === null || $this->recordId === null, 404);
-        $this->authorize($this->level);
+        $this->authorizeLevel($this->level);
 
         return [$this->level, $this->recordId];
     }
 
-    private function authorize(string $level): void
+    private function authorizeLevel(string $level): void
     {
         abort_unless(array_key_exists($level, self::LEVELS), 404);
         abort_unless(Auth::user()?->can('reference.edit'), 403);
