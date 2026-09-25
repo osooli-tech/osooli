@@ -5,6 +5,7 @@
     'required' => false,
     'hint' => null,
     'ltr' => false,
+    'readonly' => false,
 ])
 
 {{-- Label, control and error message in one component: a call site cannot
@@ -22,6 +23,7 @@
            type="{{ $type }}"
            wire:model{{ $attributes->get('live') ? '.live.debounce.400ms' : '' }}="{{ $name }}"
            autocomplete="off"
+           @readonly($readonly)
            {{ $attributes->except(['live'])->class([
                'w-full px-3 py-2 text-sm rounded-xl',
                'bg-surface-container dark:bg-[#252b3b]',
@@ -30,6 +32,7 @@
                'focus:outline-none focus:ring-2 focus:ring-primary/40',
                'ltr text-start' => $ltr,
                'border-error ring-1 ring-error/40' => $errors->has($name),
+               'opacity-60 cursor-not-allowed' => $readonly,
            ]) }} />
 
     @if ($hint)

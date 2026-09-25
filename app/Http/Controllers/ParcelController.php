@@ -13,7 +13,9 @@ use App\Services\Parcel\ParcelDocumentRenderService;
 use App\Services\Parcel\ParcelMapSvgService;
 use App\Services\Parcel\ParcelQrCodeService;
 use App\Services\Parcel\ParcelSatelliteImageService;
+use App\Support\Database\Dialect;
 use App\Support\Database\Spatial;
+use App\Support\Geo\GeometryMath;
 use App\Support\OwnerScope;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
@@ -164,11 +166,14 @@ class ParcelController extends Controller
      */
     private function parcelCorners(Parcel $parcel): array
     {
-        /** @var \stdClass|null $row */
-        $row = DB::selectOne(
-            'SELECT ST_AsGeoJSON(ST_Transform(geom, 32638)) AS geom_json FROM parcels WHERE id = ?',
-            [$parcel->id]
-        );
+        // PostGIS reprojects to UTM itself; MariaDB has no ST_Transform, so
+        // the geometry comes back in WGS84 and GeometryMath does the same
+        // projection point by point (see its doc comment for why).
+        $isPostgres = Dialect::isPostgres();
+
+        $row = $isPostgres
+            ? DB::selectOne('SELECT ST_AsGeoJSON(ST_Transform(geom, 32638)) AS geom_json FROM parcels WHERE id = ?', [$parcel->id])
+            : DB::selectOne('SELECT ST_AsGeoJSON(geom) AS geom_json FROM parcels WHERE id = ?', [$parcel->id]);
 
         if ($row?->geom_json === null) {
             return [];
@@ -182,7 +187,9 @@ class ParcelController extends Controller
         // distinct corner.
         return collect($ring)
             ->slice(0, -1)
-            ->map(fn (array $point): array => ['easting' => (float) $point[0], 'northing' => (float) $point[1]])
+            ->map(fn (array $point): array => $isPostgres
+                ? ['easting' => (float) $point[0], 'northing' => (float) $point[1]]
+                : GeometryMath::toUtmZone38N((float) $point[0], (float) $point[1]))
             ->values()
             ->all();
     }

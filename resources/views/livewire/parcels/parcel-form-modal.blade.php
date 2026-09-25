@@ -28,7 +28,8 @@
                             <x-form.input name="form.parcelNo" :label="__('parcels.parcel_no')" />
                             <x-form.input name="form.geoId"
                                           :label="__('parcels.geo_id')"
-                                          :hint="__('parcels.geo_id_hint')"
+                                          :hint="__($form->parcelId ? 'parcels.geo_id_locked_hint' : 'parcels.geo_id_hint')"
+                                          :readonly="(bool) $form->parcelId"
                                           required ltr />
                         </div>
                     </section>
@@ -109,11 +110,11 @@
                             <x-form.input name="form.sourceGdbId"
                                           :label="__('parcels.source_gdb_id')"
                                           type="number" step="1" min="0"
-                                          class="data-tabular" ltr />
+                                          class="data-tabular" ltr readonly />
                             <x-form.input name="form.lastSyncedAt"
                                           :label="__('parcels.last_synced_at')"
                                           type="datetime-local"
-                                          class="data-tabular" ltr />
+                                          class="data-tabular" ltr readonly />
                         </div>
 
                         <p class="text-xs text-on-surface-variant dark:text-on-primary-container/70">

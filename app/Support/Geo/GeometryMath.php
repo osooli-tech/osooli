@@ -74,6 +74,63 @@ final class GeometryMath
     }
 
     /**
+     * A WGS84 lng/lat position projected to UTM zone 38N (EPSG:32638) — the
+     * zone covering every parcel on record, matching the easting/northing a
+     * licensed surveyor's plan states. PostGIS does this with ST_Transform;
+     * MariaDB has no equivalent, so the print report's corner table falls
+     * back to this classic Snyder transverse-Mercator series, accurate to
+     * sub-centimetre for a single UTM zone's span.
+     *
+     * @return array{easting: float, northing: float}
+     */
+    public static function toUtmZone38N(float $lng, float $lat): array
+    {
+        // WGS84 ellipsoid.
+        $a = 6378137.0;
+        $f = 1 / 298.257223563;
+        $k0 = 0.9996;
+        $e2 = $f * (2 - $f);
+        $ep2 = $e2 / (1 - $e2);
+
+        // Zone 38's central meridian: zone * 6 - 183.
+        $phi = deg2rad($lat);
+        $lambda = deg2rad($lng);
+        $lambda0 = deg2rad(45.0);
+
+        $sinPhi = sin($phi);
+        $cosPhi = cos($phi);
+        $tanPhi = tan($phi);
+
+        $n = $a / sqrt(1 - $e2 * $sinPhi ** 2);
+        $t = $tanPhi ** 2;
+        $c = $ep2 * $cosPhi ** 2;
+        $bigA = $cosPhi * ($lambda - $lambda0);
+
+        $m = $a * (
+            (1 - $e2 / 4 - 3 * $e2 ** 2 / 64 - 5 * $e2 ** 3 / 256) * $phi
+            - (3 * $e2 / 8 + 3 * $e2 ** 2 / 32 + 45 * $e2 ** 3 / 1024) * sin(2 * $phi)
+            + (15 * $e2 ** 2 / 256 + 45 * $e2 ** 3 / 1024) * sin(4 * $phi)
+            - (35 * $e2 ** 3 / 3072) * sin(6 * $phi)
+        );
+
+        $easting = $k0 * $n * (
+            $bigA
+            + (1 - $t + $c) * $bigA ** 3 / 6
+            + (5 - 18 * $t + $t ** 2 + 72 * $c - 58 * $ep2) * $bigA ** 5 / 120
+        ) + 500000.0;
+
+        $northing = $k0 * (
+            $m + $n * $tanPhi * (
+                $bigA ** 2 / 2
+                + (5 - $t + 9 * $c + 4 * $c ** 2) * $bigA ** 4 / 24
+                + (61 - 58 * $t + $t ** 2 + 600 * $c - 330 * $ep2) * $bigA ** 6 / 720
+            )
+        );
+
+        return ['easting' => $easting, 'northing' => $northing];
+    }
+
+    /**
      * Why the polygon is invalid, worded as PostGIS words it, or null.
      *
      * @param  list<list<list<array{0: float|int, 1: float|int}>>>  $multiPolygon

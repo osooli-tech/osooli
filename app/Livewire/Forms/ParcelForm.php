@@ -19,6 +19,14 @@ use Livewire\Form;
  * this form has no business making — validity, plausible area, overlap — plus
  * a revision kept of the one it replaces. All of that lives in
  * Parcels\GeometryEditor and App\Support\ParcelGeometry.
+ *
+ * `source_gdb_id` and `last_synced_at` stay off attributes() too, and
+ * unconditionally: they are sync bookkeeping the GDB import writes, not
+ * something a person corrects from a form — the properties below only carry
+ * them for display. `geo_id` is the odd one out: settable once, while
+ * creating (attributes() in store() adds it back), then locked, because it is
+ * the join key every later GDB sync matches this row by — changing it after
+ * the fact orphans the parcel's history instead of updating it.
  */
 class ParcelForm extends Form
 {
@@ -90,9 +98,6 @@ class ParcelForm extends Form
             'landTransaction' => ['nullable', DatabaseEnum::rule('land_transaction')],
             'allocationMethod' => ['nullable', DatabaseEnum::rule('allocation_method')],
             'fallIn' => ['nullable', DatabaseEnum::rule('fall_in')],
-
-            'sourceGdbId' => ['nullable', 'integer', 'min:0'],
-            'lastSyncedAt' => ['nullable', 'date'],
 
             // The bounds mirror the column precision. Postgres rounds a
             // decimal(12,2) or decimal(16,2) silently, so a value that does
@@ -166,7 +171,9 @@ class ParcelForm extends Form
             'parcel.create',
             'parcel',
             null,
-            fn (): Parcel => Parcel::create($this->attributes())
+            // geo_id is only ever set here, while the row does not exist yet
+            // — see the class docblock for why update() never writes it.
+            fn (): Parcel => Parcel::create($this->attributes(includeGeoId: true))
         );
     }
 
@@ -194,23 +201,24 @@ class ParcelForm extends Form
      * Form values mapped onto column names, with blanks stored as NULL so an
      * emptied field does not become an empty string the enum types reject.
      *
-     * `geom` is absent deliberately — see the class docblock.
+     * `geom` is absent deliberately — see the class docblock. So are
+     * `geo_id` (store() adds it back for a brand-new row only) and
+     * `source_gdb_id`/`last_synced_at` (never written from here, in either
+     * direction — see the class docblock).
      *
      * @return array<string, string|int|null>
      */
-    private function attributes(): array
+    private function attributes(bool $includeGeoId = false): array
     {
         return [
             'parcel_no' => $this->orNull($this->parcelNo),
-            'geo_id' => $this->geoId,
+            ...($includeGeoId ? ['geo_id' => $this->geoId] : []),
             'plan_id' => $this->orIntNull($this->planId),
             'parent_parcel_id' => $this->orIntNull($this->parentParcelId),
             'asset_type' => $this->orNull($this->assetType),
             'land_transaction' => $this->orNull($this->landTransaction),
             'allocation_method' => $this->orNull($this->allocationMethod),
             'fall_in' => $this->orNull($this->fallIn),
-            'source_gdb_id' => $this->orIntNull($this->sourceGdbId),
-            'last_synced_at' => $this->orNull($this->lastSyncedAt),
             'm_price' => $this->orNull($this->mPrice),
             'parcel_price' => $this->orNull($this->parcelPrice),
         ];
