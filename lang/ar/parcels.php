@@ -157,6 +157,7 @@ return [
     'corners_section' => 'إحداثيات أركان قطعة الأرض',
     'corner_label' => 'ركن :n',
     'no_corners' => 'تعذّر تحديد إحداثيات الأركان',
+    'corners_too_many' => 'حدود القطعة مفصّلة جدًا لعرضها كجدول (:count نقطة) — راجع خريطة الموقع أعلاه للاطلاع على الشكل الكامل.',
     'proximity_section' => 'القرب من الخدمات',
     'proximity_mosque' => 'أقرب مسجد',
     'proximity_school' => 'أقرب مدرسة',

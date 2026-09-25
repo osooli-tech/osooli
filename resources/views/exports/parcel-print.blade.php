@@ -326,7 +326,9 @@
                 <td>
                     <div class="card-title">@ar(__('parcels.corners_section'))</div>
                     <div class="card-body" style="padding: 0;">
-                        @if (empty($corners))
+                        @if ($cornersOverflow ?? false)
+                            <p class="placeholder">@ar(__('parcels.corners_too_many', ['count' => $cornersCount]))</p>
+                        @elseif (empty($corners))
                             <p class="placeholder">@ar(__('parcels.no_corners'))</p>
                         @else
                             <table class="grid">

@@ -117,6 +117,40 @@ class ParcelPrintTest extends TestCase
         $this->assertSame(1, $pageObjects);
     }
 
+    /**
+     * Regression test for a real production report that ran to four pages: a
+     * digitised, irregular boundary (a traced farm edge) with over a hundred
+     * vertices, every one of them listed as its own "corner" row — nothing
+     * else on the page was wrong, the corners table alone dwarfed the
+     * one-page design. ParcelController caps how many it will list.
+     */
+    public function test_a_highly_detailed_boundary_does_not_explode_the_corners_table(): void
+    {
+        $parcel = $this->makeParcel();
+
+        // A near-circle traced at 150 vertices — a stand-in for a real
+        // irregular farm boundary, not something any parcel would actually
+        // need to be this shape to trigger the same page-count problem.
+        $points = [];
+        for ($i = 0; $i <= 150; $i++) {
+            $angle = 2 * M_PI * ($i % 150) / 150;
+            $points[] = [46.34 + 0.01 * cos($angle), 24.71 + 0.01 * sin($angle)];
+        }
+        $ring = implode(',', array_map(fn (array $p): string => "{$p[0]} {$p[1]}", $points));
+
+        DB::update(
+            "UPDATE parcels SET geom = ST_SetSRID(ST_GeomFromText('MULTIPOLYGON((({$ring})))'), 4326) WHERE id = ?",
+            [$parcel->id]
+        );
+
+        $user = User::factory()->create(['is_active' => true]);
+        $response = $this->actingAs($user)->get(route('parcels.print', $parcel));
+
+        $response->assertOk();
+        $pageObjects = preg_match_all('/\/Type\s*\/Page(?!s)/', $response->getContent());
+        $this->assertSame(1, $pageObjects);
+    }
+
     private function makeParcel(): Parcel
     {
         $country = Country::create(['name_ar' => 'السعودية']);

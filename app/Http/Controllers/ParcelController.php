@@ -26,6 +26,15 @@ use Illuminate\Support\Facades\DB;
 
 class ParcelController extends Controller
 {
+    /**
+     * A digitised, irregular boundary (a traced farm edge, say) can carry
+     * hundreds of vertices — every one of them a real point, but not what a
+     * surveyor's corner table means and, listed in full, enough on its own to
+     * blow the print report past its one-page design. Past this many, the
+     * report shows a plain "boundary is this detailed" note instead.
+     */
+    private const MAX_PRINTED_CORNERS = 20;
+
     public function show(Parcel $parcel): View
     {
         $this->authorizeVisible($parcel);
@@ -140,8 +149,8 @@ class ParcelController extends Controller
             $sitePhoto = $groundPhoto ? $documentRender->dataUri($groundPhoto) : null;
         }
 
-        /** @return list<array{easting: float, northing: float}> */
         $corners = $this->parcelCorners($parcel);
+        $cornersOverflow = count($corners) > self::MAX_PRINTED_CORNERS;
 
         return Pdf::loadView('exports.parcel-print', [
             'parcel' => $parcel,
@@ -151,7 +160,9 @@ class ParcelController extends Controller
             'sitePhoto' => $sitePhoto,
             'reportNumber' => sprintf('SK-%s-%04d', now()->format('Y-m-d'), $parcel->id),
             'centroid' => $centroid,
-            'corners' => $corners,
+            'corners' => $cornersOverflow ? [] : $corners,
+            'cornersOverflow' => $cornersOverflow,
+            'cornersCount' => count($corners),
         ])->setPaper('a4', 'portrait')
             ->download("parcel-{$parcel->parcel_no}.pdf");
     }

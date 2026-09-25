@@ -157,6 +157,7 @@ return [
     'corners_section' => 'Parcel corner coordinates',
     'corner_label' => 'Corner :n',
     'no_corners' => 'Corner coordinates could not be determined',
+    'corners_too_many' => 'This boundary is too detailed to list as a table (:count points) — see the location map above for the full shape.',
     'proximity_section' => 'Proximity to services',
     'proximity_mosque' => 'Nearest mosque',
     'proximity_school' => 'Nearest school',
