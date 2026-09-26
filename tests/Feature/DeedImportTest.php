@@ -414,45 +414,39 @@ class DeedImportTest extends TestCase
     }
 
     /** @return array<string, mixed> the current data as the export page writes it */
-    public function test_the_blank_template_has_every_column_and_imports_once_filled_in(): void
+    public function test_the_template_holds_one_sample_record_that_imports_as_it_is(): void
     {
         $response = $this->get(route('imports.template'))->assertOk();
         $this->assertStringContainsString('attachment', (string) $response->headers->get('Content-Disposition'));
 
         $file = json_decode((string) $response->getContent(), true);
         $this->assertCount(1, $file['features']);
+        $this->assertSame('MultiPolygon', $file['features'][0]['geometry']['type']);
         $this->assertContains('الصك', $file['sokuki']['allowed_values']['fall_in']);
 
         $p = $file['features'][0]['properties'];
-        foreach (['deed_no', 'deed_date_hijri', 'parcel_geo_id', 'plan_no', 'district', 'city', 'region'] as $column) {
-            $this->assertArrayHasKey($column, $p);
-            $this->assertNull($p[$column]);
-        }
-        $this->assertArrayHasKey('national_id', $p['owners'][0]);
-        $this->assertArrayHasKey('border', $p['boundary']['north']);
-        $this->assertArrayHasKey('qrar_no', $p['survey_decisions'][0]);
-        $this->assertArrayHasKey('type', $p['documents'][0]);
-        $this->assertArrayHasKey('district', $p['parcel']['location']);
+        $this->assertSame('DEMO-0001', $p['parcel_geo_id']);
+        $this->assertSame('410100000001', $p['deed']['deed_no']);
+        $this->assertCount(1, $p['owners']);
+        $this->assertSame('1098765432', $p['owners'][0]['national_id']);
+        $this->assertSame('شارع عرض 20 م', $p['boundary']['north']['border']);
+        $this->assertCount(1, $p['survey_decisions']);
+        $this->assertCount(1, $p['documents']);
+        $this->assertSame('الملقا', $p['parcel']['location']['district']['name_ar']);
         // History is not something to fill in.
         $this->assertArrayNotHasKey('meta', $p['deed']);
         $this->assertArrayNotHasKey('meta', $p['parcel']);
 
-        // Only the essentials filled; the example survey decision and
-        // document are left blank, as someone filling it in would.
-        $p['deed_no'] = $p['deed']['deed_no'] = 'TPL-100';
-        $p['parcel_geo_id'] = $p['parcel']['geo_id'] = 'TPL-GEO-1';
-        $p['owners'][0]['name'] = 'مالك من القالب';
-        $p['owners'][0]['national_id'] = '1099999999';
-        $file['features'][0]['properties'] = $p;
-
+        // Uploaded untouched, the sample is a clean record.
         $run = $this->analyse($file);
         $item = $this->items($run['id'])[0];
         $this->assertSame([], $item['errors'], json_encode($item['errors'], JSON_UNESCAPED_UNICODE));
 
         $this->apply($run['id']);
-        $parcel = Parcel::where('geo_id', 'TPL-GEO-1')->firstOrFail();
-        $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', 'TPL-100')->count());
-        $this->assertSame(0, SurveyDecision::where('parcel_id', $parcel->id)->count());
+        $parcel = Parcel::where('geo_id', 'DEMO-0001')->firstOrFail();
+        $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', '410100000001')->count());
+        $this->assertSame(1, SurveyDecision::where('parcel_id', $parcel->id)->where('qrar_no', '12345')->count());
+        $this->assertSame(1, Owner::where('national_id', '1098765432')->count());
     }
 
     private function exported(): array

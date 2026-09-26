@@ -139,7 +139,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     // Every column of the import file and no data: a form to fill in
     Route::get('/imports/template', fn (DeedGeoJsonExporter $exporter) => response($exporter->template(), 200, [
         'Content-Type' => 'application/geo+json; charset=UTF-8',
-        'Content-Disposition' => 'attachment; filename="sokuki-import-template.geojson"',
+        'Content-Disposition' => 'attachment; filename="sokuki-import-sample.geojson"',
     ]))
         ->middleware('can:imports.run')
         ->name('imports.template');

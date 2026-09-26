@@ -170,15 +170,16 @@ final class DeedGeoJsonExporter
     }
 
     /**
-     * A file in the export's own layout with every column and no data: one
-     * feature whose values are all empty, with one owner, one survey
-     * decision and one document to show the shape of each list. Filled in
-     * and uploaded, it imports like any export.
+     * A file in the export's own layout holding a single made-up record: one
+     * deed on one parcel, with one owner, one survey decision and one
+     * document, so every column shows what goes in it. Its values are
+     * replaced with real ones and it is uploaded like any export.
      *
-     * Built by the same feature() the export uses, so a column added there
-     * appears here without a second list to keep in step. The `meta` blocks
-     * are left out — history the importer never reads — and the header
-     * lists the values each fixed-choice column accepts.
+     * The columns come from the same feature() the export uses, so a column
+     * added there appears here without a second list to keep in step; only
+     * the sample values are written out below. The `meta` blocks are left
+     * out — history the importer never reads — and the header lists the
+     * values each fixed-choice column accepts.
      */
     public function template(): string
     {
@@ -198,21 +199,86 @@ final class DeedGeoJsonExporter
         $feature = $this->feature($deed, $parcel, self::GROUPS, []);
         $feature['id'] = null;
 
-        $properties = self::withoutMeta($feature['properties']);
-        $properties['parcel']['location'] = array_fill_keys(['district', 'city', 'region'], ['name_ar' => null, 'name_en' => null]);
-        $properties['documents'] = [['type' => null, 'name' => null, 'status' => null, 'url' => null]];
-        // Records start out live; an empty template has nothing archived.
-        array_walk_recursive($properties, static function (mixed &$value, int|string $key): void {
-            if ($key === 'archived') {
-                $value = null;
-            }
-        });
-        $feature['properties'] = $properties;
-
         $allowed = [];
         foreach (DeedImportAnalyzer::ENUMS as $field => $column) {
             $allowed[$field] = DatabaseEnum::for($column);
         }
+        // A sample value for a fixed-choice column: the first it allows.
+        $choice = static fn (string $field): ?string => $allowed[$field][0] ?? null;
+
+        $sample = [
+            'deed_no' => '410100000001',
+            'deed_date_hijri' => '1445-06-15',
+            'deed_area' => 625.0,
+            'deed_status' => $choice('deed_status'),
+            'deed_class' => $choice('deed_class'),
+        ];
+        $location = [
+            'district' => ['name_ar' => 'الملقا', 'name_en' => 'Al Malqa'],
+            'city' => ['name_ar' => 'الرياض', 'name_en' => 'Riyadh'],
+            'region' => ['name_ar' => 'منطقة الرياض', 'name_en' => 'Riyadh'],
+        ];
+
+        $properties = array_replace_recursive(self::withoutMeta($feature['properties']), $sample, [
+            'parcel_geo_id' => 'DEMO-0001',
+            'parcel_no' => '15',
+            'plan_no' => '3120',
+            'district' => $location['district']['name_ar'],
+            'city' => $location['city']['name_ar'],
+            'region' => $location['region']['name_ar'],
+            'owners_names' => 'محمد عبدالله السالم',
+            'owners_count' => 1,
+            'computed_area_sqm' => 625.0,
+            'deed' => $sample + ['archived' => false],
+            'parcel' => [
+                'geo_id' => 'DEMO-0001',
+                'parcel_no' => '15',
+                'asset_type' => $choice('asset_type'),
+                'land_transaction' => $choice('land_transaction'),
+                'allocation_method' => $choice('allocation_method'),
+                'fall_in' => $choice('fall_in'),
+                'm_price' => 1500.0,
+                'parcel_price' => 937500.0,
+                'computed_area_sqm' => 625.0,
+                'archived' => false,
+                'plan' => ['plan_no' => '3120'],
+                'location' => $location,
+            ],
+            'owners' => [[
+                'name' => 'محمد عبدالله السالم',
+                'national_id' => '1098765432',
+                'phone' => '0555555555',
+                'email' => 'owner@example.com',
+                'whatsapp' => '0555555555',
+                'ownership_share' => 100.0,
+                'archived' => false,
+            ]],
+            'boundary' => [
+                'north' => ['border' => 'شارع عرض 20 م', 'length' => 25.0],
+                'south' => ['border' => 'قطعة رقم 16', 'length' => 25.0],
+                'east' => ['border' => 'قطعة رقم 14', 'length' => 25.0],
+                'west' => ['border' => 'ممر مشاة عرض 6 م', 'length' => 25.0],
+                'measured_area' => 625.0,
+                'matches_deed' => true,
+                'survey_date' => '2024-01-10',
+            ],
+            'survey_decisions' => [[
+                'qrar_no' => '12345',
+                'report_no' => '678',
+                'qrar_source' => $choice('qrar_source'),
+                'folder' => '1',
+            ]],
+        ]);
+        // Documents are uploaded on the site after the import; the entry
+        // only names the file expected, so it carries no link.
+        $properties['documents'] = [['type' => 'صك', 'name' => 'صك-410100000001.pdf', 'status' => null, 'url' => null]];
+        $feature['properties'] = $properties;
+
+        // A 25 m square in Al Malqa, so the file opens as a map layer.
+        [$x, $y, $dx, $dy] = [46.62, 24.80, 0.000247, 0.000226];
+        $feature['geometry'] = ['type' => 'MultiPolygon', 'coordinates' => [[[
+            [$x, $y], [$x + $dx, $y], [$x + $dx, $y + $dy], [$x, $y + $dy], [$x, $y],
+        ]]]];
 
         return self::json([
             'type' => 'FeatureCollection',
