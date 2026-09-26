@@ -73,6 +73,7 @@ return [
         'city' => ['create' => 'City added', 'update' => 'City edited', 'delete' => 'City deleted', 'geometry_edit' => 'City boundary edited', 'geometry_remove' => 'City boundary removed'],
         'region' => ['create' => 'Region added', 'update' => 'Region edited', 'delete' => 'Region deleted', 'geometry_edit' => 'Region boundary edited', 'geometry_remove' => 'Region boundary removed'],
         'country' => ['create' => 'Country added', 'update' => 'Country edited', 'delete' => 'Country deleted', 'geometry_edit' => 'Country boundary edited', 'geometry_remove' => 'Country boundary removed'],
+        'map_layer' => ['update' => 'Custom layer edited', 'delete' => 'Custom layer deleted'],
         'engineering_office' => ['create' => 'Engineering office added', 'update' => 'Engineering office edited', 'delete' => 'Engineering office deleted'],
         'export_bulk' => 'Bulk deed export',
         'import_apply' => 'Data import applied',
@@ -87,6 +88,7 @@ return [
     ],
 
     'targets' => [
+        'map_layer' => 'Custom layer',
         'parcel' => 'Parcel',
         'deed' => 'Deed',
         'owner' => 'Owner',

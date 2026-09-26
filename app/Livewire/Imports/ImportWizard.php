@@ -6,6 +6,8 @@ namespace App\Livewire\Imports;
 
 use App\Enums\ImportStatus;
 use App\Models\ImportBatch;
+use App\Models\MapLayer;
+use App\Services\Import\CustomLayerImporter;
 use App\Services\Import\DisplayLayerImporter;
 use App\Services\Import\GdbImporter;
 use Illuminate\Contracts\View\View;
@@ -118,10 +120,19 @@ final class ImportWizard extends Component
         $int = static fn (mixed $v): ?int => is_numeric($v) && (int) $v > 0 ? (int) $v : null;
         $pick = static fn (mixed $v, array $allowed, string $default): string => in_array($v, $allowed, true) ? (string) $v : $default;
 
+        $customIds = MapLayer::query()->pluck('id')->all();
         $layers = [];
         foreach ((array) ($o['layers'] ?? []) as $choice) {
             if (is_array($choice) && in_array($choice['name'] ?? null, $names, true)) {
-                $layers[] = ['name' => (string) $choice['name'], 'role' => $pick($choice['role'] ?? null, GdbImporter::ROLES, 'ignore')];
+                $target = $int($choice['target'] ?? null);
+                $layers[] = [
+                    'name' => (string) $choice['name'],
+                    'role' => $pick($choice['role'] ?? null, GdbImporter::ROLES, 'ignore'),
+                    // An existing custom layer to add to or replace; null makes a new one.
+                    'target' => in_array($target, $customIds, true) ? $target : null,
+                    'new_name' => mb_substr(trim((string) ($choice['new_name'] ?? '')), 0, 140) ?: (string) $choice['name'],
+                    'mode' => $pick($choice['mode'] ?? null, CustomLayerImporter::MODES, 'replace'),
+                ];
             }
         }
 
@@ -147,7 +158,30 @@ final class ImportWizard extends Component
             'portfolios' => (bool) ($o['portfolios'] ?? false),
             'deedless' => $pick($o['deedless'] ?? null, ['placeholder', 'skip'], 'placeholder'),
             'office_id' => $int($o['office_id'] ?? null),
+            // Recorded on the custom layers this import creates.
+            'source_name' => $this->batch()?->original_filename,
+            'user_id' => auth()->id(),
         ];
+    }
+
+    /**
+     * Point a layer of the file at the one its name resembles — a custom
+     * layer on the map (to add to it) or a built-in role — from the warning
+     * on the review screen.
+     */
+    public function useSimilar(int $index, string $kind, string $value): void
+    {
+        if (! isset($this->options['layers'][$index])) {
+            return;
+        }
+
+        if ($kind === 'custom' && MapLayer::whereKey((int) $value)->exists()) {
+            $this->options['layers'][$index]['role'] = 'custom';
+            $this->options['layers'][$index]['target'] = (int) $value;
+            $this->options['layers'][$index]['mode'] = 'append';
+        } elseif ($kind === 'built_in' && in_array($value, ['parcels', 'projects', 'buildings'], true)) {
+            $this->options['layers'][$index]['role'] = $value;
+        }
     }
 
     /** Back to one of one's own imports — to review it again, or read its result. */
@@ -180,6 +214,7 @@ final class ImportWizard extends Component
 
         return view('livewire.imports.import-wizard', [
             'offices' => is_array($suggested) ? DB::table('engineering_offices')->orderBy('name')->pluck('name', 'id')->all() : [],
+            'customLayers' => is_array($suggested) ? MapLayer::query()->orderBy('name')->get(['id', 'name', 'feature_count']) : collect(),
             'currentBatch' => $batch,
             'recent' => ImportBatch::query()->with('user')->latest()->limit(10)->get(),
         ]);

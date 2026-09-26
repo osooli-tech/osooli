@@ -96,6 +96,12 @@ class Sidebar extends Component
             'permission' => 'imports.create',
         ],
         [
+            'route' => 'map-layers.index',
+            'label' => 'nav.map_layers',
+            'icon' => 'stacks',
+            'permission' => 'imports.create',
+        ],
+        [
             'route' => 'settings.index',
             'label' => 'nav.settings',
             'icon' => 'settings',

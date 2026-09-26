@@ -87,6 +87,7 @@ return [
     'colour_none' => 'بلا تلوين',
     'colour_priced' => 'التسعير',
     'legend' => 'مفتاح الخريطة',
+    'custom_layers' => 'طبقات مخصصة',
     'boundaries' => 'الحدود الإدارية',
     'boundary_regions' => 'حدود المناطق',
     'boundary_cities' => 'حدود المدن',

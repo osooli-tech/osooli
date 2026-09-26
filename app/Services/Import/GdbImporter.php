@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
+use App\Models\MapLayer;
+use App\Support\Database\Spatial;
+use App\Support\Geo\LayerNames;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -31,12 +35,13 @@ final class GdbImporter implements Importer
     /** Plan numbers that mean "no plan", when the file has them. */
     private const PLAN_PLACEHOLDERS = ['بدون', 'لا يوجد', 'لايوجد', '-', '0'];
 
-    public const ROLES = ['parcels', 'projects', 'buildings', 'ignore'];
+    public const ROLES = ['parcels', 'projects', 'buildings', 'custom', 'ignore'];
 
     public function __construct(
         private readonly GdbInspector $inspector,
         private readonly ParcelGeoJsonImporter $parcels,
         private readonly DisplayLayerImporter $display,
+        private readonly CustomLayerImporter $custom,
     ) {}
 
     public function analyze(string $sourcePath): ImportPreview
@@ -69,6 +74,7 @@ final class GdbImporter implements Importer
                     'projects' => DB::table('projects')->count(),
                     'buildings' => DB::table('buildings')->count(),
                 ],
+                'similar' => $this->similarNames($inventory),
                 'suggested' => $this->suggest($inventory, $features),
             ]],
             warnings: $preview->warnings,
@@ -83,18 +89,36 @@ final class GdbImporter implements Importer
         }
 
         $inventory = $this->inspector->inspect($sourcePath, $this->workDir($sourcePath));
-        $roles = [];
+        $choices = [];
         foreach (is_array($options['layers'] ?? null) ? $options['layers'] : [] as $choice) {
             if (is_array($choice) && is_string($choice['name'] ?? null) && in_array($choice['role'] ?? null, self::ROLES, true)) {
-                $roles[$choice['name']] = $choice['role'];
+                $choices[$choice['name']] = $choice;
             }
         }
         $modes = is_array($options['modes'] ?? null) ? $options['modes'] : [];
 
         $result = null;
         $written = [];
+        $customLayers = [];
         foreach ($inventory['layers'] as $layer) {
-            $role = $roles[$layer['name']] ?? $layer['role'];
+            $choice = $choices[$layer['name']] ?? ['role' => $layer['role']];
+            $role = $choice['role'];
+
+            if ($role === 'custom') {
+                $done = $this->custom->import(
+                    file: (string) $layer['file'],
+                    layerId: is_numeric($choice['target'] ?? null) ? (int) $choice['target'] : null,
+                    newName: trim((string) ($choice['new_name'] ?? '')) ?: $layer['name'],
+                    mode: in_array($choice['mode'] ?? null, CustomLayerImporter::MODES, true) ? (string) $choice['mode'] : 'replace',
+                    fields: array_map(static fn (array $f): array => ['name' => $f['name'], 'type' => $f['type']], $layer['fields']),
+                    geometryType: $layer['geometry'],
+                    source: is_string($options['source_name'] ?? null) ? $options['source_name'] : null,
+                    userId: is_numeric($options['user_id'] ?? null) ? (int) $options['user_id'] : null,
+                );
+                $customLayers[$done['name']] = $done['written'];
+
+                continue;
+            }
 
             if ($role === 'parcels' && $result === null) {
                 $result = $this->parcels->importFeatures($this->features((string) $layer['file']), $options);
@@ -115,7 +139,12 @@ final class GdbImporter implements Importer
             updated: $result->updated,
             skipped: $result->skipped,
             errors: $result->errors,
-            details: $result->details + ['projects' => $written['projects'] ?? 0, 'buildings' => $written['buildings'] ?? 0],
+            details: $result->details + [
+                'projects' => $written['projects'] ?? 0,
+                'buildings' => $written['buildings'] ?? 0,
+                'custom' => array_sum($customLayers),
+                'custom_layers' => $customLayers,
+            ],
             warnings: $result->warnings,
         );
     }
@@ -195,33 +224,34 @@ final class GdbImporter implements Importer
      */
     private function suggest(array $inventory, array $features): array
     {
-        $districtCounts = [];
+        // Each District value of the file, with where its parcels actually
+        // lie by the district and city boundaries on record.
+        $byName = [];
         foreach ($features as $feature) {
             $name = trim((string) ($feature['properties']['District'] ?? ''));
             if ($name !== '') {
-                $districtCounts[$name] = ($districtCounts[$name] ?? 0) + 1;
+                $byName[$name][] = $feature;
             }
         }
-        arsort($districtCounts);
+        uasort($byName, static fn (array $a, array $b): int => count($b) <=> count($a));
 
         $districts = [];
         $cities = [];
-        foreach ($districtCounts as $name => $n) {
-            $matches = DB::table('districts as d')
-                ->join('cities as c', 'c.id', '=', 'd.city_id')
-                ->where('d.name_ar', (string) $name)
-                ->limit(10)
-                ->get(['d.id', 'd.city_id', 'c.name_ar as city']);
-
-            $districts[] = [
-                'name' => (string) $name,
-                'count' => $n,
-                'district_id' => $matches->count() === 1 ? (int) $matches[0]->id : null,
-                'city_id' => null,
-                'candidates' => $matches->map(static fn (object $m): array => ['id' => (int) $m->id, 'city' => (string) $m->city])->all(),
-            ];
-            if ($matches->count() === 1) {
-                $cities[(int) $matches[0]->city_id] = ($cities[(int) $matches[0]->city_id] ?? 0) + $n;
+        foreach ($byName as $name => $group) {
+            $row = $this->matchDistrict((string) $name, $group);
+            foreach ($row['map_cities'] as $cityId => $hits) {
+                $cities[$cityId] = ($cities[$cityId] ?? 0) + $hits;
+            }
+            unset($row['map_cities']);
+            $districts[] = $row;
+        }
+        // No city boundaries to go by: the cities of the districts matched.
+        if ($cities === []) {
+            foreach ($districts as $row) {
+                if ($row['district_id'] !== null) {
+                    $cityId = (int) DB::table('districts')->where('id', $row['district_id'])->value('city_id');
+                    $cities[$cityId] = ($cities[$cityId] ?? 0) + $row['count'];
+                }
             }
         }
         arsort($cities);
@@ -240,7 +270,23 @@ final class GdbImporter implements Importer
 
         // A list, not name => role: layer names become Livewire property
         // paths on the review screen, and a path cannot hold any name.
-        $layers = array_map(static fn (array $layer): array => ['name' => $layer['name'], 'role' => $layer['role']], $inventory['layers']);
+        // A custom layer whose name is the name of one on the map already
+        // (bar spelling) is suggested as that layer, replaced; one merely
+        // similar is suggested as new, with a warning beside it.
+        $existing = MapLayer::query()->get(['id', 'name']);
+        $layers = array_map(static function (array $layer) use ($existing): array {
+            $same = $layer['role'] === 'custom'
+                ? $existing->first(fn (MapLayer $m): bool => LayerNames::similarity($m->name, $layer['name']) === 1.0)
+                : null;
+
+            return [
+                'name' => $layer['name'],
+                'role' => $layer['role'],
+                'target' => $same?->id,
+                'new_name' => $layer['name'],
+                'mode' => 'replace',
+            ];
+        }, $inventory['layers']);
 
         return [
             'layers' => $layers,
@@ -262,6 +308,163 @@ final class GdbImporter implements Importer
             'deedless' => 'placeholder',
             'office_id' => DB::table('engineering_offices')->where('name', 'مكتب الإسناد العالمي للاستشارات الهندسية')->value('id'),
         ];
+    }
+
+    /** Parcels per District value located on the map; enough to tell. */
+    private const LOCATE_SAMPLE = 60;
+
+    /** Share of located parcels a district must hold to be suggested by the map. */
+    private const MAP_SHARE = 0.6;
+
+    /**
+     * Which district on record a District value of the file stands for —
+     * by its name, and by where its parcels lie within the district
+     * boundaries on record — and how sure that is.
+     *
+     * @param  list<array<string, mixed>>  $group  the features carrying that name
+     * @return array<string, mixed>
+     */
+    private function matchDistrict(string $name, array $group): array
+    {
+        $byName = DB::table('districts as d')
+            ->join('cities as c', 'c.id', '=', 'd.city_id')
+            ->where('d.name_ar', $name)
+            ->limit(10)
+            ->get(['d.id', 'd.city_id', 'c.name_ar as city']);
+
+        // Where the parcels lie: a sample located against the boundaries.
+        $mapDistricts = [];
+        $mapCities = [];
+        $sampled = 0;
+        foreach (array_slice($group, 0, self::LOCATE_SAMPLE) as $feature) {
+            $where = $this->locate($feature['geometry'] ?? null);
+            if ($where === null) {
+                continue;
+            }
+            $sampled++;
+            if ($where['district'] !== null) {
+                $mapDistricts[$where['district']] = ($mapDistricts[$where['district']] ?? 0) + 1;
+            }
+            if ($where['city'] !== null) {
+                $mapCities[$where['city']] = ($mapCities[$where['city']] ?? 0) + 1;
+            }
+        }
+        arsort($mapDistricts);
+        arsort($mapCities);
+
+        $mapTop = array_key_first($mapDistricts);
+        $share = $mapTop === null || $sampled === 0 ? 0.0 : $mapDistricts[$mapTop] / $sampled;
+        $nameIds = $byName->pluck('id')->map(static fn (mixed $id): int => (int) $id)->all();
+        $nameOne = count($nameIds) === 1 ? $nameIds[0] : null;
+
+        [$districtId, $method, $conflict] = match (true) {
+            // Name and map agree — or the map picks one of several of that name.
+            $mapTop !== null && in_array($mapTop, $nameIds, true) => [$mapTop, 'name_map', null],
+            // The map is clear, the name is spelled otherwise (or clashes).
+            $mapTop !== null && $share >= self::MAP_SHARE => [$mapTop, 'map', $nameOne],
+            $nameOne !== null => [$nameOne, 'name', $mapTop],
+            default => [null, 'none', null],
+        };
+
+        return [
+            'name' => $name,
+            'count' => count($group),
+            'district_id' => $districtId,
+            // For a district that is not matched: made in the city its parcels lie in.
+            'city_id' => $districtId === null ? array_key_first($mapCities) : null,
+            'candidates' => $byName->map(static fn (object $m): array => ['id' => (int) $m->id, 'city' => (string) $m->city])->all(),
+            'method' => $method,
+            'map_share' => (int) round($share * 100),
+            'map_sampled' => $sampled,
+            'conflict' => $conflict === null || $conflict === $districtId ? null : $this->districtLabel($conflict),
+            'map_cities' => $mapCities,
+        ];
+    }
+
+    /**
+     * The district and city a parcel's polygon lies in, by a point on its
+     * surface; null when the shape cannot be read. Boundaries drawn by hand
+     * win over official ones, official over derived or approximate.
+     *
+     * @return array{district: int|null, city: int|null}|null
+     */
+    private function locate(mixed $geometry): ?array
+    {
+        if (! is_array($geometry)) {
+            return null;
+        }
+
+        try {
+            $json = Spatial::multiPolygonJson($geometry);
+        } catch (\InvalidArgumentException) {
+            return null;
+        }
+
+        $order = "CASE boundary_source WHEN 'manual' THEN 0 WHEN 'official' THEN 1 WHEN 'derived' THEN 2 ELSE 3 END";
+        $inside = static fn (string $table): string => "(SELECT t.id FROM {$table} t WHERE t.geom IS NOT NULL AND "
+            .Spatial::boxesIntersect('t.geom', 's.p').' AND ST_Contains(t.geom, s.p) ORDER BY '.str_replace('boundary_source', 't.boundary_source', $order).' LIMIT 1)';
+
+        try {
+            $row = DB::selectOne(
+                'SELECT '.$inside('districts').' AS district_id, '.$inside('cities').' AS city_id
+                 FROM (SELECT ST_PointOnSurface('.Spatial::fromGeoJson().') AS p) s',
+                [$json]
+            );
+        } catch (QueryException) {
+            return null;
+        }
+
+        return [
+            'district' => $row?->district_id === null ? null : (int) $row->district_id,
+            'city' => $row?->city_id === null ? null : (int) $row->city_id,
+        ];
+    }
+
+    private function districtLabel(int $id): string
+    {
+        $row = DB::table('districts as d')->join('cities as c', 'c.id', '=', 'd.city_id')->where('d.id', $id)->first(['d.name_ar', 'c.name_ar as city']);
+
+        return $row === null ? '' : $row->name_ar.' — '.$row->city;
+    }
+
+    /**
+     * For each layer of the file, by position: the layers on record whose
+     * names are close to its own — custom layers, and the built-in parcels,
+     * projects and buildings — so the screen can ask whether it is one of
+     * them before a near-duplicate is made.
+     *
+     * @param  array<string, mixed>  $inventory
+     * @return array<int, list<array{kind: string, id: int|null, role: string|null, name: string, score: float}>>
+     */
+    private function similarNames(array $inventory): array
+    {
+        $candidates = MapLayer::query()->get(['id', 'name'])
+            ->map(static fn (MapLayer $m): array => ['kind' => 'custom', 'id' => $m->id, 'role' => null, 'name' => $m->name])
+            ->all();
+        foreach (LayerNames::BUILT_IN as $role => $names) {
+            foreach ($names as $name) {
+                $candidates[] = ['kind' => 'built_in', 'id' => null, 'role' => $role, 'name' => $name];
+            }
+        }
+
+        $similar = [];
+        foreach ($inventory['layers'] as $i => $layer) {
+            $found = [];
+            foreach (LayerNames::similarTo($layer['name'], array_values($candidates)) as $match) {
+                // A built-in role counts once, under its closest name, and not
+                // at all for the layer already set to it.
+                $key = $match['kind'] === 'custom' ? 'custom:'.$match['id'] : 'role:'.$match['role'];
+                if (isset($found[$key]) || ($match['kind'] === 'built_in' && $match['role'] === $layer['role'])) {
+                    continue;
+                }
+                $found[$key] = $match;
+            }
+            if ($found !== []) {
+                $similar[$i] = array_values($found);
+            }
+        }
+
+        return $similar;
     }
 
     /**

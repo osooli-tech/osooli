@@ -50,6 +50,73 @@
                                 @endif
                             </td>
                         </tr>
+
+                        @php
+                            $choice = $i === false ? null : ($options['layers'][$i] ?? null);
+                            $similar = $gdb['similar'][$loop->index] ?? [];
+                        @endphp
+
+                        {{-- A custom layer: new, or added to / replacing one on the map. --}}
+                        @if (($choice['role'] ?? null) === 'custom')
+                            <tr wire:key="layer-custom-{{ $loop->index }}" class="bg-surface-container/50 dark:bg-white/5">
+                                <td colspan="6" class="px-3 py-2">
+                                    <div class="flex flex-wrap items-center gap-2 text-sm text-on-surface dark:text-white">
+                                        <span class="material-symbols-outlined text-[18px] text-secondary">subdirectory_arrow_left</span>
+                                        <select wire:model.live="options.layers.{{ $i }}.target" class="{{ $select }}">
+                                            <option value="">{{ __('imports.gdb.custom.new') }}</option>
+                                            @foreach ($customLayers as $existing)
+                                                <option value="{{ $existing->id }}">{{ __('imports.gdb.custom.existing', ['name' => $existing->name, 'count' => number_format($existing->feature_count)]) }}</option>
+                                            @endforeach
+                                        </select>
+                                        @if (empty($choice['target']))
+                                            <label class="flex items-center gap-2">
+                                                {{ __('imports.gdb.custom.name') }}
+                                                <input type="text" wire:model.blur="options.layers.{{ $i }}.new_name" maxlength="140"
+                                                       class="{{ $select }} w-56" dir="auto">
+                                            </label>
+                                        @else
+                                            <select wire:model.live="options.layers.{{ $i }}.mode" class="{{ $select }}">
+                                                <option value="replace">{{ __('imports.gdb.custom.replace') }}</option>
+                                                <option value="append">{{ __('imports.gdb.custom.append') }}</option>
+                                            </select>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+
+                        {{-- A name close to a layer on record: ask before a near-duplicate is made. --}}
+                        @php
+                            $relevant = collect($similar)->reject(fn ($m) =>
+                                ($m['kind'] === 'custom' && ($choice['role'] ?? null) === 'custom' && (int) ($choice['target'] ?? 0) === (int) $m['id'])
+                                || ($m['kind'] === 'built_in' && ($choice['role'] ?? null) === $m['role']));
+                        @endphp
+                        @if ($relevant->isNotEmpty() && ($choice['role'] ?? 'ignore') !== 'ignore')
+                            <tr wire:key="layer-similar-{{ $loop->index }}">
+                                <td colspan="6" class="px-3 pb-3">
+                                    <div class="rounded-lg bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+                                        <p class="mb-2 flex items-center gap-1.5 font-medium">
+                                            <span class="material-symbols-outlined text-[18px]">warning</span>
+                                            {{ __('imports.gdb.similar.title', ['name' => $layer['name']]) }}
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach ($relevant as $match)
+                                                <button type="button"
+                                                        wire:click="useSimilar({{ $i }}, '{{ $match['kind'] }}', '{{ $match['kind'] === 'custom' ? $match['id'] : $match['role'] }}')"
+                                                        class="inline-flex items-center gap-1 rounded-lg border border-amber-300 dark:border-amber-700 px-2.5 py-1 text-xs hover:bg-amber-100 dark:hover:bg-amber-900/40">
+                                                    <span class="material-symbols-outlined text-[15px]">merge</span>
+                                                    {{ $match['kind'] === 'custom'
+                                                        ? __('imports.gdb.similar.add_to', ['name' => $match['name']])
+                                                        : __('imports.gdb.similar.use_role', ['role' => __('imports.gdb.roles.'.$match['role'])]) }}
+                                                    <span class="opacity-60">({{ (int) round($match['score'] * 100) }}%)</span>
+                                                </button>
+                                            @endforeach
+                                            <span class="self-center text-xs">{{ __('imports.gdb.similar.or_keep') }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
@@ -184,6 +251,7 @@
                         <tr>
                             <th class="{{ $th }}">{{ __('imports.gdb.district_in_file') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.features') }}</th>
+                            <th class="{{ $th }}">{{ __('imports.gdb.match_method') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.match_district') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.or_create_in') }}</th>
                         </tr>
@@ -200,6 +268,25 @@
                                     @endif
                                 </td>
                                 <td class="{{ $td }} data-tabular">{{ $row['count'] ?? '' }}</td>
+                                <td class="px-3 py-2 text-xs">
+                                    @php
+                                        $method = $row['method'] ?? 'none';
+                                        $badge = [
+                                            'name_map' => 'bg-secondary/15 text-secondary',
+                                            'map' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+                                            'name' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                                            'none' => 'bg-surface-container text-on-surface-variant',
+                                        ][$method] ?? '';
+                                    @endphp
+                                    <span class="inline-block whitespace-nowrap rounded-full px-2 py-0.5 font-semibold {{ $badge }}">
+                                        {{ __('imports.gdb.methods.'.$method, ['share' => $row['map_share'] ?? 0, 'sampled' => $row['map_sampled'] ?? 0]) }}
+                                    </span>
+                                    @if (! empty($row['conflict']))
+                                        <span class="mt-1 block text-amber-700 dark:text-amber-300">
+                                            {{ __('imports.gdb.map_conflict', ['name' => $row['conflict']]) }}
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-3 py-2 min-w-[220px]">
                                     <x-form.search-select name="options.districts.{{ $i }}.district_id" source="districts" live
                                                           :value="$row['district_id'] ?? null" :label="''"

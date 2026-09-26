@@ -10,6 +10,7 @@ use App\Livewire\Imports\ImportWizard;
 use App\Models\ImportBatch;
 use App\Models\User;
 use App\Services\Import\GdbImporter;
+use App\Support\Database\Spatial;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -85,6 +86,24 @@ class GdbReviewTest extends TestCase
         $this->assertSame(0, DB::table('parcels')->count());
     }
 
+    public function test_districts_are_matched_by_where_the_parcels_lie(): void
+    {
+        // On record under another spelling, with a boundary round the parcels.
+        $square = json_encode(['type' => 'MultiPolygon', 'coordinates' => [[[[46.5, 24.7], [46.7, 24.7], [46.7, 24.9], [46.5, 24.9], [46.5, 24.7]]]]]);
+        $district = DB::table('districts')->insertGetId(['name_ar' => 'اوثال الشمالي', 'city_id' => $this->cityId, 'created_at' => now(), 'updated_at' => now()]);
+        foreach ([['districts', $district], ['cities', $this->cityId]] as [$table, $id]) {
+            DB::update("UPDATE {$table} SET geom = ".Spatial::fromGeoJson().", boundary_source = 'official' WHERE id = ?", [$square, $id]);
+        }
+
+        $suggested = app(GdbImporter::class)->analyze($this->zip)->toArray()['details']['gdb']['suggested'];
+        $row = collect($suggested['districts'])->firstWhere('name', 'أوثال');
+
+        $this->assertSame($district, $row['district_id']);
+        $this->assertSame('map', $row['method']);
+        $this->assertSame(100, $row['map_share']);
+        $this->assertSame($this->cityId, $suggested['default_city_id']);
+    }
+
     public function test_commit_applies_the_choices(): void
     {
         // On record already: a value the file leaves empty must survive.
@@ -149,7 +168,10 @@ class GdbReviewTest extends TestCase
         $component->call('confirm');
 
         $options = $batch->fresh()->options;
-        $this->assertSame([['name' => 'Parcel', 'role' => 'parcels'], ['name' => 'Building', 'role' => 'ignore']], $options['layers']);
+        $this->assertSame(
+            [['name' => 'Parcel', 'role' => 'parcels'], ['name' => 'Building', 'role' => 'ignore']],
+            array_map(static fn (array $l): array => ['name' => $l['name'], 'role' => $l['role']], $options['layers'])
+        );
         $this->assertSame($this->cityId, $options['default_city_id']);
 
         Livewire::actingAs($user)->test(ImportWizard::class)->call('open', $other->uuid)->assertNotFound();

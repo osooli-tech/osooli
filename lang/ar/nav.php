@@ -15,6 +15,7 @@ return [
     'documents' => 'المستندات',
     'placement' => 'قطع خارج حيّها',
     'imports_gdb' => 'استيراد Geodatabase والمستندات',
+    'map_layers' => 'الطبقات المخصصة',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
     'presentation_requests' => 'طلبات العروض التقديمية',

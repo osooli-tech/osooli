@@ -77,11 +77,14 @@ final class PortableSchema
         )));
     }
 
-    /** Adds a MultiPolygon column in SRID 4326, indexed where the database allows. */
-    public static function addGeometryColumn(string $table, string $column = 'geom', bool $index = true): void
+    /**
+     * Adds a geometry column in SRID 4326 — MultiPolygon unless another type
+     * is named ("Geometry" takes any) — indexed where the database allows.
+     */
+    public static function addGeometryColumn(string $table, string $column = 'geom', bool $index = true, string $type = 'MultiPolygon'): void
     {
         if (Dialect::isPostgres()) {
-            DB::statement("ALTER TABLE {$table} ADD COLUMN {$column} geometry(MultiPolygon, 4326)");
+            DB::statement("ALTER TABLE {$table} ADD COLUMN {$column} geometry({$type}, 4326)");
 
             if ($index) {
                 DB::statement("CREATE INDEX idx_{$table}_{$column} ON {$table} USING GIST({$column})");
@@ -90,7 +93,7 @@ final class PortableSchema
             return;
         }
 
-        DB::statement("ALTER TABLE {$table} ADD COLUMN {$column} MULTIPOLYGON NULL");
+        DB::statement("ALTER TABLE {$table} ADD COLUMN {$column} ".strtoupper($type).' NULL');
     }
 
     /** Drops an index by name, wherever the dialect keeps it. */

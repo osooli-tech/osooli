@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Building;
+use App\Models\MapLayer;
 use App\Models\Parcel;
 use App\Models\Project;
 use App\Models\User;
@@ -155,6 +156,36 @@ class GeoJsonController extends Controller
                     ],
                 ];
             }
+        }
+
+        return response()->json(['type' => 'FeatureCollection', 'features' => $features]);
+    }
+
+    /**
+     * A custom layer's features, every attribute they were imported with
+     * carried as it came, for the map to show on click.
+     */
+    public function customLayer(MapLayer $layer): JsonResponse
+    {
+        if (! Dialect::isSpatial()) {
+            return response()->json(['type' => 'FeatureCollection', 'features' => []]);
+        }
+
+        $rows = DB::select(
+            'SELECT id, properties, ST_AsGeoJSON(geom, 7) AS geom_json
+             FROM map_layer_features WHERE map_layer_id = ? AND geom IS NOT NULL',
+            [$layer->id]
+        );
+
+        $features = [];
+        foreach ($rows as $row) {
+            $properties = is_string($row->properties) ? json_decode($row->properties, true) : null;
+            $features[] = [
+                'type' => 'Feature',
+                'id' => (int) $row->id,
+                'geometry' => json_decode((string) $row->geom_json, false),
+                'properties' => is_array($properties) ? $properties : [],
+            ];
         }
 
         return response()->json(['type' => 'FeatureCollection', 'features' => $features]);

@@ -36,6 +36,18 @@ final class Spatial
             : "ST_GeomFromGeoJSON({$param})";
     }
 
+    /**
+     * A geometry of any type — point, line, polygon, or a multi or mixed
+     * collection of them — from a GeoJSON bind parameter, in SRID 4326. For
+     * a column declared as plain geometry, which takes any of these.
+     */
+    public static function anyFromGeoJson(string $param = '?'): string
+    {
+        return Dialect::isPostgres()
+            ? "ST_SetSRID(ST_GeomFromGeoJSON({$param}), 4326)"
+            : "ST_GeomFromGeoJSON({$param})";
+    }
+
     /** Area of a geometry expression in square metres. */
     public static function areaSqm(string $geometry): string
     {

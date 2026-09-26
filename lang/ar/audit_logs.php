@@ -73,6 +73,7 @@ return [
         'city' => ['create' => 'إضافة مدينة', 'update' => 'تعديل مدينة', 'delete' => 'حذف مدينة', 'geometry_edit' => 'تعديل حدود مدينة', 'geometry_remove' => 'إزالة حدود مدينة'],
         'region' => ['create' => 'إضافة منطقة', 'update' => 'تعديل منطقة', 'delete' => 'حذف منطقة', 'geometry_edit' => 'تعديل حدود منطقة', 'geometry_remove' => 'إزالة حدود منطقة'],
         'country' => ['create' => 'إضافة دولة', 'update' => 'تعديل دولة', 'delete' => 'حذف دولة', 'geometry_edit' => 'تعديل حدود الدولة', 'geometry_remove' => 'إزالة حدود الدولة'],
+        'map_layer' => ['update' => 'تعديل طبقة مخصصة', 'delete' => 'حذف طبقة مخصصة'],
         'engineering_office' => ['create' => 'إضافة مكتب هندسي', 'update' => 'تعديل مكتب هندسي', 'delete' => 'حذف مكتب هندسي'],
         'export_bulk' => 'تصدير شامل للصكوك',
         'import_apply' => 'تنفيذ استيراد بيانات',
@@ -87,6 +88,7 @@ return [
     ],
 
     'targets' => [
+        'map_layer' => 'طبقة مخصصة',
         'parcel' => 'قطعة',
         'deed' => 'صك',
         'owner' => 'مالك',

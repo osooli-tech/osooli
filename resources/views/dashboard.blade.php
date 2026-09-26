@@ -48,6 +48,7 @@
                  data-projects-url="{{ route('geo.projects') }}"
                  data-boundaries-url="{{ route('geo.boundaries', '__LEVEL__') }}"
                  data-buildings-url="{{ route('geo.buildings') }}"
+                 data-custom-layers="{{ json_encode($customLayers) }}"
                  data-colors="{{ json_encode($mapColors) }}"
                  data-colors-update-url="{{ route('map-colors.update') }}"
                  data-can-edit-colors="{{ auth()->user()?->can('roles.manage') ? '1' : '0' }}"
@@ -179,6 +180,28 @@
                             @endforeach
                         </div>
                     </div>
+
+                    {{-- Custom layers imported from geodatabases — each loads the
+                         first time it is switched on. --}}
+                    @if ($customLayers !== [])
+                        <div>
+                            <p class="text-[10px] font-semibold uppercase tracking-wide
+                                      text-on-surface-variant dark:text-on-primary-container mb-1.5">
+                                {{ __('dashboard.custom_layers') }}
+                            </p>
+                            <div class="space-y-0.5">
+                                @foreach ($customLayers as $layer)
+                                    <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
+                                                  text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">
+                                        <input type="checkbox" data-custom-layer="{{ $layer['id'] }}" @checked($layer['visible'])
+                                               class="accent-secondary w-3.5 h-3.5 shrink-0">
+                                        <span class="inline-block w-3 h-3 rounded-sm shrink-0" style="background: {{ $layer['color'] }}"></span>
+                                        <span class="truncate" dir="auto">{{ $layer['name'] }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- Administrative boundaries — off until asked for: the
                          district layer is detailed and loads for the view. --}}

@@ -181,12 +181,20 @@
 
                 @php
                     $extra = array_filter(array_intersect_key($currentBatch->result['details'] ?? [],
-                        array_flip(['deeds', 'owners', 'boundaries', 'decisions', 'portfolios', 'projects', 'buildings'])));
+                        array_flip(['deeds', 'owners', 'boundaries', 'decisions', 'portfolios', 'projects', 'buildings', 'custom'])));
                 @endphp
                 @if ($extra !== [])
                     <p class="mb-4 text-sm text-on-surface dark:text-white">
                         @foreach ($extra as $key => $n)
                             <span class="me-4 whitespace-nowrap">{{ __('imports.gdb.result.'.$key) }}: <strong class="data-tabular">{{ number_format($n) }}</strong></span>
+                        @endforeach
+                    </p>
+                @endif
+                @if (! empty($currentBatch->result['details']['custom_layers']))
+                    <p class="mb-4 text-sm text-on-surface dark:text-white">
+                        {{ __('imports.gdb.result.custom_layers') }}:
+                        @foreach ($currentBatch->result['details']['custom_layers'] as $name => $n)
+                            <span class="me-3 whitespace-nowrap">{{ $name }} (×{{ number_format($n) }})</span>
                         @endforeach
                     </p>
                 @endif
