@@ -88,12 +88,18 @@ final class GdbConverter
 
         $layer = $this->layerPicker->pick($gdb);
 
+        // ogr2ogr would read a layer name starting with "-" as an option, and
+        // it takes no "--" end-of-options marker (GDAL 3.13 refuses one as an
+        // unknown argument). No real geodatabase layer is named so; refuse it.
+        if (str_starts_with($layer, '-')) {
+            throw new ArchiveException("The geodatabase layer name «{$layer}» cannot be converted.");
+        }
+
         $process = new Process([
-            // "--" stops ogr2ogr from parsing a layer name starting with "-" as an option.
             // -overwrite makes a stale $output from an earlier, incomplete
             // attempt at this $workDir irrelevant rather than version-dependent
             // GDAL behaviour (truncate vs. refuse) deciding what happens to it.
-            $this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', '-overwrite', $output, $gdb, '--', $layer,
+            $this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', '-overwrite', $output, $gdb, $layer,
         ]);
         $process->setTimeout(600);
         $process->run();
