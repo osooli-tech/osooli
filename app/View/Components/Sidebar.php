@@ -9,115 +9,71 @@ use Illuminate\View\Component;
 
 class Sidebar extends Component
 {
-    /** @var array<int, array{route: string, label: string, icon: string, permission: string|null}> */
-    public array $navItems = [
+    /**
+     * The sidebar, in titled groups. Import and export each get a group of
+     * their own, and every entry there carries a `hint` naming the file it
+     * takes or gives, because the three import screens are easy to confuse
+     * by name alone. A group whose entries the user may not see is hidden.
+     *
+     * @var array<int, array{title: string|null, items: array<int, array{route: string, label: string, icon: string, permission: string|null, hint?: string}>}>
+     */
+    public array $navGroups = [
         [
-            'route' => 'dashboard',
-            'label' => 'nav.dashboard',
-            'icon' => 'grid_view',
-            'permission' => null,
+            'title' => null,
+            'items' => [
+                ['route' => 'dashboard', 'label' => 'nav.dashboard', 'icon' => 'grid_view', 'permission' => null],
+            ],
         ],
         [
-            'route' => 'parcels.index',
-            'label' => 'nav.parcels',
-            'icon' => 'map',
-            'permission' => 'parcels.view',
+            'title' => 'nav.group_parcels',
+            'items' => [
+                ['route' => 'parcels.index', 'label' => 'nav.parcels', 'icon' => 'map', 'permission' => 'parcels.view'],
+                ['route' => 'parcels.placement', 'label' => 'nav.placement', 'icon' => 'wrong_location', 'permission' => 'parcels.view'],
+                ['route' => 'owners.index', 'label' => 'nav.owners', 'icon' => 'group', 'permission' => 'parcels.view'],
+            ],
         ],
         [
-            'route' => 'parcels.placement',
-            'label' => 'nav.placement',
-            'icon' => 'wrong_location',
-            'permission' => 'parcels.view',
+            'title' => 'nav.group_documents',
+            'items' => [
+                ['route' => 'documents.index', 'label' => 'nav.documents', 'icon' => 'folder_open', 'permission' => 'documents.download'],
+                ['route' => 'archive.index', 'label' => 'nav.archive', 'icon' => 'inventory_2', 'permission' => 'archive.view'],
+            ],
         ],
         [
-            'route' => 'owners.index',
-            'label' => 'nav.owners',
-            'icon' => 'group',
-            'permission' => 'parcels.view',
+            'title' => 'nav.group_import',
+            'items' => [
+                ['route' => 'imports.index', 'label' => 'nav.import_geojson', 'hint' => 'nav.import_geojson_hint', 'icon' => 'upload_file', 'permission' => 'imports.run'],
+                ['route' => 'imports.gdb', 'label' => 'nav.import_gdb', 'hint' => 'nav.import_gdb_hint', 'icon' => 'database', 'permission' => 'imports.create'],
+                ['route' => 'documents.split', 'label' => 'nav.import_split_pdf', 'hint' => 'nav.import_split_pdf_hint', 'icon' => 'splitscreen', 'permission' => 'documents.upload'],
+            ],
         ],
         [
-            'route' => 'documents.index',
-            'label' => 'nav.documents',
-            'icon' => 'folder_open',
-            'permission' => 'documents.download',
+            'title' => 'nav.group_export',
+            'items' => [
+                ['route' => 'exports.index', 'label' => 'nav.export_deeds', 'hint' => 'nav.export_deeds_hint', 'icon' => 'file_export', 'permission' => 'exports.bulk'],
+            ],
         ],
         [
-            'route' => 'documents.split',
-            'label' => 'nav.split_upload',
-            'icon' => 'splitscreen',
-            'permission' => 'documents.upload',
+            'title' => 'nav.group_map_reference',
+            'items' => [
+                ['route' => 'map-layers.index', 'label' => 'nav.map_layers', 'icon' => 'stacks', 'permission' => 'imports.create'],
+                ['route' => 'reference.index', 'label' => 'nav.reference', 'icon' => 'dataset', 'permission' => 'reference.view'],
+            ],
         ],
         [
-            'route' => 'reference.index',
-            'label' => 'nav.reference',
-            'icon' => 'dataset',
-            'permission' => 'reference.view',
+            'title' => 'nav.group_requests',
+            'items' => [
+                ['route' => 'modification-requests.index', 'label' => 'nav.modification_requests', 'icon' => 'edit_note', 'permission' => 'modification_requests.view'],
+                ['route' => 'presentation-requests.index', 'label' => 'nav.presentation_requests', 'icon' => 'connect_without_contact', 'permission' => 'presentation_requests.view'],
+            ],
         ],
         [
-            'route' => 'exports.index',
-            'label' => 'nav.exports',
-            'icon' => 'file_export',
-            'permission' => 'exports.bulk',
-        ],
-        [
-            'route' => 'imports.index',
-            'label' => 'nav.imports',
-            'icon' => 'upload_file',
-            'permission' => 'imports.run',
-        ],
-        [
-            'route' => 'archive.index',
-            'label' => 'nav.archive',
-            'icon' => 'inventory_2',
-            'permission' => 'archive.view',
-        ],
-        [
-            'route' => 'modification-requests.index',
-            'label' => 'nav.modification_requests',
-            'icon' => 'edit_note',
-            'permission' => 'modification_requests.view',
-        ],
-        [
-            'route' => 'presentation-requests.index',
-            'label' => 'nav.presentation_requests',
-            'icon' => 'connect_without_contact',
-            'permission' => 'presentation_requests.view',
-        ],
-        [
-            'route' => 'users.index',
-            'label' => 'nav.users',
-            'icon' => 'manage_accounts',
-            'permission' => 'users.view',
-        ],
-        [
-            'route' => 'audit-logs.index',
-            'label' => 'nav.audit_logs',
-            'icon' => 'history',
-            'permission' => 'audit_logs.view',
-        ],
-        [
-            'route' => 'imports.gdb',
-            'label' => 'nav.imports_gdb',
-            'icon' => 'database',
-            'permission' => 'imports.create',
-        ],
-        [
-            'route' => 'map-layers.index',
-            'label' => 'nav.map_layers',
-            'icon' => 'stacks',
-            'permission' => 'imports.create',
-        ],
-        [
-            'route' => 'settings.index',
-            'label' => 'nav.settings',
-            'icon' => 'settings',
-            'permission' => 'roles.manage',
-        ],
-        [
-            'route' => 'profile.index',
-            'label' => 'nav.profile',
-            'icon' => 'account_circle',
-            'permission' => null,
+            'title' => 'nav.group_admin',
+            'items' => [
+                ['route' => 'users.index', 'label' => 'nav.users', 'icon' => 'manage_accounts', 'permission' => 'users.view'],
+                ['route' => 'audit-logs.index', 'label' => 'nav.audit_logs', 'icon' => 'history', 'permission' => 'audit_logs.view'],
+                ['route' => 'settings.index', 'label' => 'nav.settings', 'icon' => 'settings', 'permission' => 'roles.manage'],
+            ],
         ],
     ];
 

@@ -12,40 +12,68 @@
 
     {{-- Navigation --}}
     <nav class="flex-grow overflow-y-auto py-4 px-3 space-y-0.5" aria-label="{{ __('nav.main_nav') }}">
-        @foreach ($navItems as $item)
-            @if (is_null($item['permission']) || auth()->user()?->can($item['permission']))
-                @php
-                    // "imports.index" covers imports.* — but not a page that has
-                    // an entry of its own (imports.gdb), or both would light up.
-                    // (rtrim() was used here once; it strips characters, not a
-                    // suffix, so "imports.index" became "imports".)
-                    $routeBase = str_ends_with($item['route'], '.index') ? substr($item['route'], 0, -6) : $item['route'];
-                    $current = request()->route()?->getName();
-                    $ownEntry = $current !== null && $current !== $item['route']
-                        && collect($navItems)->contains('route', $current);
-                    $isActive = request()->routeIs($item['route'])
-                        || (! $ownEntry && request()->routeIs($routeBase.'.*'));
-                    $href      = Route::has($item['route']) ? route($item['route']) : '#';
-                @endphp
+        @php
+            $user = auth()->user();
+            // Every entry across the groups — the active check below needs to
+            // know whether the current page has an entry of its own.
+            $allRoutes = collect($navGroups)->pluck('items')->flatten(1)->pluck('route');
+            $current = request()->route()?->getName();
+        @endphp
 
-                <a href="{{ $href }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                          {{ $isActive
-                              ? 'bg-white/15 text-white border-e-[3px] border-tertiary-container'
-                              : 'text-primary-fixed-dim hover:bg-white/8 hover:text-white' }}"
-                   {{ $isActive ? 'aria-current=page' : '' }}>
-                    <span class="material-symbols-outlined text-[22px] shrink-0"
-                          style="font-variation-settings: 'FILL' {{ $isActive ? 1 : 0 }}, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
-                        {{ $item['icon'] }}
-                    </span>
-                    <span>{{ __($item['label']) }}</span>
-                </a>
+        @foreach ($navGroups as $group)
+            @php
+                $visible = array_filter($group['items'],
+                    fn ($item) => is_null($item['permission']) || $user?->can($item['permission']));
+            @endphp
+
+            @if ($visible)
+                <div class="{{ $group['title'] ? 'pt-4' : '' }} space-y-0.5">
+                    @if ($group['title'])
+                        <p class="px-3 pb-1 text-[11px] font-semibold tracking-wide text-primary-fixed-dim/60">
+                            {{ __($group['title']) }}
+                        </p>
+                    @endif
+
+                    @foreach ($visible as $item)
+                        @php
+                            // "imports.index" covers imports.* — but not a page that has
+                            // an entry of its own (imports.gdb), or both would light up.
+                            // (rtrim() was used here once; it strips characters, not a
+                            // suffix, so "imports.index" became "imports".)
+                            $routeBase = str_ends_with($item['route'], '.index') ? substr($item['route'], 0, -6) : $item['route'];
+                            $ownEntry = $current !== null && $current !== $item['route'] && $allRoutes->contains($current);
+                            $isActive = request()->routeIs($item['route'])
+                                || (! $ownEntry && request()->routeIs($routeBase.'.*'));
+                            $href = Route::has($item['route']) ? route($item['route']) : '#';
+                        @endphp
+
+                        <a href="{{ $href }}"
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                                  {{ $isActive
+                                      ? 'bg-white/15 text-white border-e-[3px] border-tertiary-container'
+                                      : 'text-primary-fixed-dim hover:bg-white/8 hover:text-white' }}"
+                           {{ $isActive ? 'aria-current=page' : '' }}>
+                            <span class="material-symbols-outlined text-[22px] shrink-0"
+                                  style="font-variation-settings: 'FILL' {{ $isActive ? 1 : 0 }}, 'wght' 300, 'GRAD' 0, 'opsz' 24;">
+                                {{ $item['icon'] }}
+                            </span>
+                            <span class="min-w-0">
+                                <span class="block">{{ __($item['label']) }}</span>
+                                @isset($item['hint'])
+                                    <span class="block text-[11px] font-normal leading-snug {{ $isActive ? 'text-white/70' : 'text-primary-fixed-dim/70' }}">
+                                        {{ __($item['hint']) }}
+                                    </span>
+                                @endisset
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
             @endif
         @endforeach
 
         {{-- Planned services. Collapsed by default, and every entry is inert:
              these have no screen yet, so they are shown, not linked. --}}
-        <div x-data="{ servicesOpen: false }" class="pt-1">
+        <div x-data="{ servicesOpen: false }" class="pt-4 mt-3 border-t border-white/10">
             <button type="button" @click="servicesOpen = ! servicesOpen"
                     class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                            text-primary-fixed-dim hover:bg-white/8 hover:text-white transition-all duration-150"
@@ -111,15 +139,20 @@
     {{-- Profile --}}
     <div class="px-4 py-4 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 text-white text-sm font-bold">
-                {{ mb_substr(auth()->user()?->name ?? 'م', 0, 1) }}
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-white text-sm font-medium truncate">{{ auth()->user()?->name }}</p>
-                <p class="text-primary-fixed-dim text-[11px] truncate">
-                    {{ auth()->user()?->roles?->first()?->name ?? '' }}
-                </p>
-            </div>
+            {{-- The profile has no entry in the list above; the user card is its link. --}}
+            <a href="{{ route('profile.index') }}" title="{{ __('nav.profile') }}"
+               class="flex-1 min-w-0 flex items-center gap-3 rounded-xl -m-1 p-1 hover:bg-white/8 transition-colors
+                      {{ request()->routeIs('profile.*') ? 'bg-white/15' : '' }}">
+                <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 text-white text-sm font-bold">
+                    {{ mb_substr(auth()->user()?->name ?? 'م', 0, 1) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white text-sm font-medium truncate">{{ auth()->user()?->name }}</p>
+                    <p class="text-primary-fixed-dim text-[11px] truncate">
+                        {{ auth()->user()?->roles?->first()?->name ?? '' }}
+                    </p>
+                </div>
+            </a>
             <form method="POST" action="{{ route('logout') }}" class="shrink-0">
                 @csrf
                 <button type="submit"
