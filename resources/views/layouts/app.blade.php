@@ -154,6 +154,7 @@
     {{-- Content area — full width on mobile, offset by the sidebar on desktop --}}
     <main class="mt-16 min-h-[calc(100vh-4rem)] p-4 sm:p-6 ms-0"
           :class="{ 'lg:ms-[280px]': sidebarOpen, 'lg:ms-0': ! sidebarOpen, 'transition-all duration-300 ease-in-out': sidebarAnimate }">
+        <x-page-help />
         @yield('content')
     </main>
 
