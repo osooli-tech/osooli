@@ -73,6 +73,29 @@ final class DocumentImporterTest extends TestCase
         return app(DocumentImporter::class);
     }
 
+    public function test_a_many_page_pdf_named_for_no_parcel_is_pointed_to_the_split_upload(): void
+    {
+        $this->makeParcel('131-623', '131', '623');
+
+        // A map series: one file, a page per parcel, a name that names none.
+        $path = $this->tmp.'/series.zip';
+        $zip = new ZipArchive;
+        $zip->open($path, ZipArchive::CREATE);
+        $zip->addFromString('623_image.pdf', '%PDF-1.4
+1 0 obj <</Type /Pages /Count 3>>
+2 0 obj <</Type /Page>>
+3 0 obj <</Type/Page>>
+4 0 obj <</Type /Page >>');
+        $zip->addFromString('131-623.pdf', '%PDF-1.4 fake');
+        $zip->close();
+
+        $preview = $this->importer()->analyze($path);
+
+        $this->assertSame(1, $preview->unmatched);
+        $this->assertStringContainsString('623_image.pdf', $preview->warnings[0]);
+        $this->assertStringContainsString('623_image.pdf (3)', $preview->warnings[1]);
+    }
+
     public function test_analyze_writes_nothing(): void
     {
         $this->makeParcel('91-25', '91', '25', '311608002898');

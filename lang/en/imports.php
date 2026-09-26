@@ -92,6 +92,9 @@ return [
         'no_geo_id' => '{0} All features have a Geo_ID; none are skipped.|{1} :count feature with no Geo_ID is skipped.|{2} :count features with no Geo_ID are skipped.|[3,10] :count features with no Geo_ID are skipped.|[11,99] :count features with no Geo_ID are skipped.|[100,*] :count features with no Geo_ID are skipped.',
         'not_located' => ':count parcels set to be matched by location lie within no district boundary and were matched by name.',
         'plan_elsewhere' => 'Plans the file puts in a district other than theirs on record, left where they are: :plans',
+        'unmatched_files' => ':count file(s) matched no parcel and will be skipped: :files',
+        'multi_page' => 'Multi-page files whose name names no parcel: :files. Upload them from "Upload a multi-parcel PDF", which splits them and matches each page to its parcel.',
+        'no_rule' => 'No file in the archive follows a naming rule: a deed number (e.g. 310101000001.pdf) or "parcel-plan" (e.g. 131-623.pdf).',
         'unknown_values' => 'Unknown values in «:field» were not written: :values',
     ],
     'gdb' => [
