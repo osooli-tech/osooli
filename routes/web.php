@@ -16,6 +16,7 @@ use App\Http\Controllers\PresentationRequestController;
 use App\Http\Controllers\ReferenceOptionsController;
 use App\Http\Controllers\ServiceController;
 use App\Models\MapAppearanceSetting;
+use App\Support\Export\DeedGeoJsonExporter;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
@@ -135,6 +136,13 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/imports', fn () => view('imports.index'))
         ->middleware('can:imports.run')
         ->name('imports.index');
+    // Every column of the import file and no data: a form to fill in
+    Route::get('/imports/template', fn (DeedGeoJsonExporter $exporter) => response($exporter->template(), 200, [
+        'Content-Type' => 'application/geo+json; charset=UTF-8',
+        'Content-Disposition' => 'attachment; filename="sokuki-import-template.geojson"',
+    ]))
+        ->middleware('can:imports.run')
+        ->name('imports.template');
 
     // Archive — archived parcels, deeds and owners, and restoring them
     Route::get('/archive', fn () => view('archive.index'))

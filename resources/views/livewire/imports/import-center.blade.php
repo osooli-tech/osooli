@@ -39,7 +39,12 @@
                 <span class="material-symbols-outlined text-[18px]" wire:loading.class="animate-spin" wire:target="upload,analyse">upload_file</span>
                 {{ __('imports_center.analyse') }}
             </button>
+            <a href="{{ route('imports.template') }}" class="{{ $ghost }}">
+                <span class="material-symbols-outlined text-[18px]">draft</span>
+                {{ __('imports_center.template') }}
+            </a>
         </form>
+        <p class="mt-2 text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('imports_center.template_hint') }}</p>
 
         <ul class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs text-on-surface-variant dark:text-on-primary-container list-disc ps-5">
             @foreach (__('imports_center.rules') as $rule)

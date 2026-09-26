@@ -13,6 +13,7 @@ use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\Plan;
 use App\Models\Region;
+use App\Models\SurveyDecision;
 use App\Models\User;
 use App\Support\Export\DeedExportFilters;
 use App\Support\Export\DeedGeoJsonExporter;
@@ -413,6 +414,47 @@ class DeedImportTest extends TestCase
     }
 
     /** @return array<string, mixed> the current data as the export page writes it */
+    public function test_the_blank_template_has_every_column_and_imports_once_filled_in(): void
+    {
+        $response = $this->get(route('imports.template'))->assertOk();
+        $this->assertStringContainsString('attachment', (string) $response->headers->get('Content-Disposition'));
+
+        $file = json_decode((string) $response->getContent(), true);
+        $this->assertCount(1, $file['features']);
+        $this->assertContains('الصك', $file['sokuki']['allowed_values']['fall_in']);
+
+        $p = $file['features'][0]['properties'];
+        foreach (['deed_no', 'deed_date_hijri', 'parcel_geo_id', 'plan_no', 'district', 'city', 'region'] as $column) {
+            $this->assertArrayHasKey($column, $p);
+            $this->assertNull($p[$column]);
+        }
+        $this->assertArrayHasKey('national_id', $p['owners'][0]);
+        $this->assertArrayHasKey('border', $p['boundary']['north']);
+        $this->assertArrayHasKey('qrar_no', $p['survey_decisions'][0]);
+        $this->assertArrayHasKey('type', $p['documents'][0]);
+        $this->assertArrayHasKey('district', $p['parcel']['location']);
+        // History is not something to fill in.
+        $this->assertArrayNotHasKey('meta', $p['deed']);
+        $this->assertArrayNotHasKey('meta', $p['parcel']);
+
+        // Only the essentials filled; the example survey decision and
+        // document are left blank, as someone filling it in would.
+        $p['deed_no'] = $p['deed']['deed_no'] = 'TPL-100';
+        $p['parcel_geo_id'] = $p['parcel']['geo_id'] = 'TPL-GEO-1';
+        $p['owners'][0]['name'] = 'مالك من القالب';
+        $p['owners'][0]['national_id'] = '1099999999';
+        $file['features'][0]['properties'] = $p;
+
+        $run = $this->analyse($file);
+        $item = $this->items($run['id'])[0];
+        $this->assertSame([], $item['errors'], json_encode($item['errors'], JSON_UNESCAPED_UNICODE));
+
+        $this->apply($run['id']);
+        $parcel = Parcel::where('geo_id', 'TPL-GEO-1')->firstOrFail();
+        $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', 'TPL-100')->count());
+        $this->assertSame(0, SurveyDecision::where('parcel_id', $parcel->id)->count());
+    }
+
     private function exported(): array
     {
         $id = ExportRuns::newId();

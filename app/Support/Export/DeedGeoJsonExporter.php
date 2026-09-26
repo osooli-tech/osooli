@@ -7,10 +7,13 @@ namespace App\Support\Export;
 use App\Models\Deed;
 use App\Models\Owner;
 use App\Models\Parcel;
+use App\Models\ParcelBoundary;
 use App\Models\ParcelPhoto;
 use App\Models\SurveyDecision;
 use App\Models\User;
 use App\Support\Database\Spatial;
+use App\Support\DatabaseEnum;
+use App\Support\Import\DeedImportAnalyzer;
 use BackedEnum;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -164,6 +167,76 @@ final class DeedGeoJsonExporter
         ExportRuns::save($run);
 
         return $run;
+    }
+
+    /**
+     * A file in the export's own layout with every column and no data: one
+     * feature whose values are all empty, with one owner, one survey
+     * decision and one document to show the shape of each list. Filled in
+     * and uploaded, it imports like any export.
+     *
+     * Built by the same feature() the export uses, so a column added there
+     * appears here without a second list to keep in step. The `meta` blocks
+     * are left out — history the importer never reads — and the header
+     * lists the values each fixed-choice column accepts.
+     */
+    public function template(): string
+    {
+        $deed = new Deed;
+        $deed->setRelation('owners', new Collection([new Owner]));
+        $deed->setRelation('archivedBy', null);
+
+        $parcel = new Parcel;
+        foreach (['plan' => null, 'parent' => null, 'archivedBy' => null, 'photos' => new Collection] as $relation => $value) {
+            $parcel->setRelation($relation, $value);
+        }
+        $boundary = new ParcelBoundary;
+        $boundary->setRelation('engineeringOffice', null);
+        $parcel->setRelation('boundary', $boundary);
+        $parcel->setRelation('surveyDecisions', new Collection([new SurveyDecision]));
+
+        $feature = $this->feature($deed, $parcel, self::GROUPS, []);
+        $feature['id'] = null;
+
+        $properties = self::withoutMeta($feature['properties']);
+        $properties['parcel']['location'] = array_fill_keys(['district', 'city', 'region'], ['name_ar' => null, 'name_en' => null]);
+        $properties['documents'] = [['type' => null, 'name' => null, 'status' => null, 'url' => null]];
+        // Records start out live; an empty template has nothing archived.
+        array_walk_recursive($properties, static function (mixed &$value, int|string $key): void {
+            if ($key === 'archived') {
+                $value = null;
+            }
+        });
+        $feature['properties'] = $properties;
+
+        $allowed = [];
+        foreach (DeedImportAnalyzer::ENUMS as $field => $column) {
+            $allowed[$field] = DatabaseEnum::for($column);
+        }
+
+        return self::json([
+            'type' => 'FeatureCollection',
+            'name' => self::FORMAT,
+            'sokuki' => [
+                'format' => self::FORMAT,
+                'version' => self::VERSION,
+                'template' => true,
+                'crs' => 'EPSG:4326',
+                'allowed_values' => $allowed,
+            ],
+            'features' => [$feature],
+        ]);
+    }
+
+    /**
+     * @param  array<mixed>  $data
+     * @return array<mixed>
+     */
+    private static function withoutMeta(array $data): array
+    {
+        unset($data['meta']);
+
+        return array_map(static fn (mixed $value): mixed => is_array($value) ? self::withoutMeta($value) : $value, $data);
     }
 
     /**

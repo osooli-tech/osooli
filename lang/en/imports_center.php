@@ -6,6 +6,8 @@ return [
     'title' => 'Data import',
     'subtitle' => 'Upload a GeoJSON file in the export format — an exported file you edited, or a new one. It is analysed first without writing anything; you review and decide, it is applied once you confirm, and it can be undone within 7 days.',
     'upload_hint' => 'GeoJSON or JSON, or a ZIP containing it (much smaller). Up to 200 MB.',
+    'template' => 'Download blank template',
+    'template_hint' => 'A file with every import column and no data: one feature with empty values, and one owner, survey decision and document to show each list. Its header lists the values each fixed-choice field accepts. Fill it in and upload it here.',
     'analyse' => 'Analyse file',
     'bad_extension' => 'The file must be GeoJSON, JSON or ZIP.',
     'bad_zip' => 'No GeoJSON file was found inside the ZIP.',

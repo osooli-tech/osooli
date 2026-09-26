@@ -50,7 +50,7 @@ final class DeedImportAnalyzer
     private const NUMERIC = ['deed_area', 'm_price', 'parcel_price', 'n_dim', 's_dim', 'e_dim', 'w_dim', 'measured_area'];
 
     /** Field => the column whose fixed list of values it must come from. */
-    private const ENUMS = [
+    public const ENUMS = [
         'deed_status' => 'deed_status', 'deed_class' => 'deed_class', 'asset_type' => 'asset_type',
         'land_transaction' => 'land_transaction', 'allocation_method' => 'allocation_method',
         'fall_in' => 'fall_in', 'qrar_source' => 'qrar_source',
