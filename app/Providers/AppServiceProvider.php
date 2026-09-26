@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Http\Middleware\SetLocale;
-use App\Support\Database\DatabaseSettings;
 use App\Services\Import\ArchiveExtractor;
+use App\Support\Database\DatabaseSettings;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
