@@ -87,6 +87,7 @@ return [
     'colour_none' => 'No colouring',
     'colour_priced' => 'Pricing',
     'legend' => 'Legend',
+    'custom_layers' => 'Custom layers',
     'boundaries' => 'Administrative boundaries',
     'boundary_regions' => 'Region boundaries',
     'boundary_cities' => 'City boundaries',

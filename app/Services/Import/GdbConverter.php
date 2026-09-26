@@ -160,7 +160,9 @@ final class GdbConverter
             throw new ArchiveException("The geodatabase layer name «{$layer}» cannot be converted.");
         }
 
-        $process = new Process([$this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', '-overwrite', $output, $gdb, $layer]);
+        // -dim XY drops any Z or M: heights are not used, and MariaDB's
+        // GeoJSON reader refuses some three-dimensional shapes.
+        $process = new Process([$this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', '-dim', 'XY', '-overwrite', $output, $gdb, $layer]);
         $process->setTimeout(600);
         $process->run();
 

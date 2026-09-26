@@ -16,6 +16,7 @@ return [
     'archive' => 'Archive',
     'documents' => 'Documents',
     'imports_gdb' => 'Geodatabase & document import',
+    'map_layers' => 'Custom map layers',
     'modification_requests' => 'Modification Requests',
     'presentation_requests' => 'Demo Requests',
     'notifications' => 'Notifications',

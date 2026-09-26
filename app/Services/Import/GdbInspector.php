@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
+use App\Support\Geo\LayerNames;
 use Symfony\Component\Process\Process;
 
 /**
@@ -126,21 +127,21 @@ final class GdbInspector
 
     /**
      * What a layer most likely is, from its name and fields: the parcels
-     * layer carries Geo_ID; buildings and projects are named so. Only a
-     * suggestion — the review screen lets it be changed.
+     * layer carries Geo_ID; buildings and projects are named so; any other
+     * layer with a shape becomes a custom map layer. Only a suggestion — the
+     * review screen lets it be changed.
      *
      * @param  list<string>  $fields
      */
     private function role(string $name, array $fields, bool $spatial): string
     {
-        $lower = mb_strtolower($name);
+        $builtIn = LayerNames::builtInRole($name);
 
         return match (true) {
             ! $spatial => 'ignore',
             in_array('Geo_ID', $fields, true) => 'parcels',
-            str_contains($lower, 'build') => 'buildings',
-            str_contains($lower, 'project') => 'projects',
-            default => 'ignore',
+            in_array($builtIn, ['projects', 'buildings'], true) => (string) $builtIn,
+            default => 'custom',
         };
     }
 

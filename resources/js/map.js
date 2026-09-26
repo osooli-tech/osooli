@@ -487,11 +487,93 @@ if (! container) {
         });
         map.on('moveend', refreshBoundaries);
 
+        // ── Custom layers ─────────────────────────────────────────
+        // Layers imported from geodatabases beyond parcels, projects and
+        // buildings: any shape, any attributes. Each is fetched the first
+        // time it is switched on, drawn by what its features are (polygon,
+        // line or point), and shows all its attributes on click.
+        const customLayers = JSON.parse(container.dataset.customLayers || '[]');
+        const customOn = new Set(customLayers.filter((l) => l.visible).map((l) => String(l.id)));
+        const IS_POLYGON = ['match', ['geometry-type'], ['Polygon', 'MultiPolygon'], true, false];
+        const IS_LINE = ['match', ['geometry-type'], ['LineString', 'MultiLineString'], true, false];
+        const IS_POINT = ['match', ['geometry-type'], ['Point', 'MultiPoint'], true, false];
+        const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+
+        function customLayerIds(id) {
+            return [`custom-${id}-fill`, `custom-${id}-line`, `custom-${id}-point`, `custom-${id}-labels`];
+        }
+
+        function addCustomLayer(layer) {
+            const id = String(layer.id);
+            const source = `custom-${id}`;
+            if (map.getSource(source)) return;
+
+            map.addSource(source, { type: 'geojson', data: layer.url });
+            const visibility = customOn.has(id) ? 'visible' : 'none';
+            const colour = layer.color || '#8e44ad';
+
+            map.addLayer({ id: `${source}-fill`, type: 'fill', source, filter: IS_POLYGON,
+                layout: { visibility }, paint: { 'fill-color': colour, 'fill-opacity': 0.25 } });
+            map.addLayer({ id: `${source}-line`, type: 'line', source, filter: ['any', IS_POLYGON, IS_LINE],
+                layout: { visibility }, paint: { 'line-color': colour, 'line-width': 1.8 } });
+            map.addLayer({ id: `${source}-point`, type: 'circle', source, filter: IS_POINT,
+                layout: { visibility }, paint: {
+                    'circle-color': colour, 'circle-radius': 5,
+                    'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5,
+                } });
+            map.addLayer({ id: `${source}-labels`, type: 'symbol', source, minzoom: 13,
+                layout: {
+                    visibility,
+                    'text-field': ['to-string', ['coalesce', ['get', 'Name'], ['get', 'name'], ['get', 'NAME'], '']],
+                    'text-size': 10,
+                    'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                    'text-offset': [0, 1.1],
+                },
+                paint: { 'text-color': colour, 'text-halo-color': '#ffffff', 'text-halo-width': 1.5 } });
+
+            [`${source}-fill`, `${source}-line`, `${source}-point`].forEach((layerId) => {
+                map.on('click', layerId, (e) => {
+                    const rows = Object.entries(e.features[0].properties ?? {})
+                        .filter(([, v]) => v !== null && v !== '' && v !== 'null')
+                        .map(([k, v]) => `<tr><th style="text-align:start;padding:2px 8px 2px 0;opacity:.7">${escapeHtml(k)}</th><td dir="auto">${escapeHtml(v)}</td></tr>`)
+                        .join('');
+                    new mapboxgl.Popup({ maxWidth: '340px' })
+                        .setLngLat(e.lngLat)
+                        .setHTML(`<strong>${escapeHtml(layer.name)}</strong><table style="margin-top:4px;font-size:11px">${rows}</table>`)
+                        .addTo(map);
+                });
+                map.on('mouseenter', layerId, () => { map.getCanvas().style.cursor = 'pointer'; });
+                map.on('mouseleave', layerId, () => { map.getCanvas().style.cursor = ''; });
+            });
+        }
+
+        document.querySelectorAll('input[data-custom-layer]').forEach((box) => {
+            box.addEventListener('change', () => {
+                const id = box.dataset.customLayer;
+                const layer = customLayers.find((l) => String(l.id) === id);
+                if (! layer) return;
+                box.checked ? customOn.add(id) : customOn.delete(id);
+                if (box.checked && ! map.getSource(`custom-${id}`)) {
+                    addCustomLayer(layer);
+                    return;
+                }
+                customLayerIds(id).forEach((layerId) => {
+                    if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', box.checked ? 'visible' : 'none');
+                });
+            });
+        });
+
         function addAllLayers() {
             addBoundaryLayers();
             addParcelLayers();
             addDisplayLayer('projects', container.dataset.projectsUrl, colours.projects_fill);
             addDisplayLayer('buildings', container.dataset.buildingsUrl, colours.buildings_fill);
+            // Last, so points such as wells draw over the parcels. Only the
+            // layers switched on are fetched; a basemap change brings back
+            // the ones already on the map.
+            customLayers.filter((l) => customOn.has(String(l.id))).forEach(addCustomLayer);
         }
 
         // Re-applies a display layer's colour after a client edit — same

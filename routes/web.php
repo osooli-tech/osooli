@@ -17,6 +17,7 @@ use App\Http\Controllers\PresentationRequestController;
 use App\Http\Controllers\ReferenceOptionsController;
 use App\Http\Controllers\ServiceController;
 use App\Models\MapAppearanceSetting;
+use App\Models\MapLayer;
 use App\Support\Export\DeedGeoJsonExporter;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
@@ -54,6 +55,14 @@ Route::middleware('set.locale')->group(function () {
 Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/dashboard', fn () => view('dashboard', [
         'mapColors' => MapAppearanceSetting::current(),
+        'customLayers' => MapLayer::query()->orderBy('name')->get()->map(fn (MapLayer $layer): array => [
+            'id' => $layer->id,
+            'name' => $layer->name,
+            'color' => $layer->color,
+            'geometry' => $layer->geometry_type,
+            'visible' => $layer->visible_by_default,
+            'url' => route('geo.layers.show', $layer),
+        ])->all(),
     ]))->name('dashboard');
 
     // Parcels
@@ -179,6 +188,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/geo/projects', [GeoJsonController::class, 'projects'])->name('geo.projects');
     Route::get('/geo/buildings', [GeoJsonController::class, 'buildings'])->name('geo.buildings');
     Route::get('/geo/boundaries/{level}', [GeoJsonController::class, 'boundaries'])->name('geo.boundaries');
+    Route::get('/geo/layers/{layer}', [GeoJsonController::class, 'customLayer'])->name('geo.layers.show');
 
     // Client-editable map colours (base layer fills + colour-by legend)
     Route::patch('/map-colors', [MapAppearanceSettingsController::class, 'update'])
@@ -190,6 +200,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         // The Geodatabase / document wizard. /imports itself is the review-and-
         // undo import of the export's own file (imports.index, above).
         Route::get('/imports/gdb', fn () => view('imports.gdb'))->name('imports.gdb');
+        Route::get('/map-layers', fn () => view('imports.map-layers'))->name('map-layers.index');
         Route::post('/imports/upload', [ImportUploadController::class, 'create'])->name('imports.upload.create');
         // {uuid} is constrained to the uuid shape so a malformed value 404s
         // at the router instead of reaching the "uuid" column's native
