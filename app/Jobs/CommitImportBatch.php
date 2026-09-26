@@ -50,7 +50,7 @@ final class CommitImportBatch implements ShouldQueue
         }
 
         try {
-            $result = app(ImporterFactory::class)->for($batch->kind)->commit((string) $batch->stored_path);
+            $result = app(ImporterFactory::class)->for($batch->kind)->commit((string) $batch->stored_path, $batch->options ?? []);
 
             $batch->transitionTo(ImportStatus::Completed, [
                 'result' => $result->toArray(),

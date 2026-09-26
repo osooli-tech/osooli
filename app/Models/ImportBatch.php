@@ -18,13 +18,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ImportStatus $status
  * @property array<string, mixed>|null $preview
  * @property array<string, mixed>|null $result
+ * @property array<string, mixed>|null $options
  */
 class ImportBatch extends Model
 {
     protected $fillable = [
         'uuid', 'user_id', 'kind', 'status', 'original_filename',
         'byte_size', 'received_chunks', 'checksum', 'stored_path',
-        'preview', 'result', 'error_message', 'analyzed_at', 'committed_at',
+        'preview', 'options', 'result', 'error_message', 'analyzed_at', 'committed_at',
     ];
 
     protected function casts(): array
@@ -33,6 +34,7 @@ class ImportBatch extends Model
             'kind' => ImportKind::class,
             'status' => ImportStatus::class,
             'preview' => 'array',
+            'options' => 'array',
             'result' => 'array',
             'analyzed_at' => 'datetime',
             'committed_at' => 'datetime',

@@ -114,6 +114,10 @@
                 </p>
             @endif
 
+            @if (is_array($currentBatch->preview['details']['gdb'] ?? null))
+                @include('livewire.imports.partials.gdb-review', ['gdb' => $currentBatch->preview['details']['gdb']])
+            @endif
+
             @if (! empty($currentBatch->preview['warnings']))
                 <ul class="mb-5 list-disc ps-5 text-sm text-amber-700 dark:text-amber-300 space-y-1">
                     @foreach ($currentBatch->preview['warnings'] as $warning)
@@ -175,6 +179,18 @@
                     </div>
                 </dl>
 
+                @php
+                    $extra = array_filter(array_intersect_key($currentBatch->result['details'] ?? [],
+                        array_flip(['deeds', 'owners', 'boundaries', 'decisions', 'portfolios', 'projects', 'buildings'])));
+                @endphp
+                @if ($extra !== [])
+                    <p class="mb-4 text-sm text-on-surface dark:text-white">
+                        @foreach ($extra as $key => $n)
+                            <span class="me-4 whitespace-nowrap">{{ __('imports.gdb.result.'.$key) }}: <strong class="data-tabular">{{ number_format($n) }}</strong></span>
+                        @endforeach
+                    </p>
+                @endif
+
                 @if (! empty($currentBatch->result['warnings']))
                     <ul class="mb-4 list-disc ps-5 text-sm text-amber-700 dark:text-amber-300 space-y-1">
                         @foreach ($currentBatch->result['warnings'] as $warning)
@@ -214,6 +230,7 @@
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('imports.recent.uploader') }}</th>
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('imports.recent.status') }}</th>
                         <th class="text-start px-4 py-3 font-semibold text-on-surface-variant dark:text-on-primary-container">{{ __('imports.recent.date') }}</th>
+                        <th class="px-4 py-3"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant dark:divide-white/10">
@@ -235,10 +252,23 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">{{ $row->created_at->diffForHumans() }}</td>
+                            <td class="px-4 py-3 text-end">
+                                {{-- Only one's own batches reopen; batch() is scoped to its owner. --}}
+                                @if ($row->user_id === auth()->id() && $row->uuid !== $currentBatch?->uuid)
+                                    <button wire:click="open('{{ $row->uuid }}')"
+                                            class="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium
+                                                   text-secondary hover:bg-secondary/10 transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">
+                                            {{ $row->status === ImportStatus::Previewed ? 'fact_check' : 'visibility' }}
+                                        </span>
+                                        {{ $row->status === ImportStatus::Previewed ? __('imports.recent.review') : __('imports.recent.open') }}
+                                    </button>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-10 text-center text-on-surface-variant dark:text-on-primary-container">
+                            <td colspan="5" class="px-4 py-10 text-center text-on-surface-variant dark:text-on-primary-container">
                                 {{ __('imports.recent.empty') }}
                             </td>
                         </tr>

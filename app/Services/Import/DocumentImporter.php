@@ -109,7 +109,8 @@ final class DocumentImporter implements Importer
         return $willUpdate;
     }
 
-    public function commit(string $sourcePath): ImportResult
+    /** @param  array<string, mixed>  $options  unused: a document import has no choices */
+    public function commit(string $sourcePath, array $options = []): ImportResult
     {
         [$rule, $matched, $unmatched, $dir] = $this->inspect($sourcePath);
 

@@ -118,6 +118,63 @@ final class GdbConverter
         return $output;
     }
 
+    /**
+     * The geodatabase inside an uploaded archive, unpacked under $workDir —
+     * reused when an earlier call for the same $workDir already unpacked it.
+     *
+     * @throws ArchiveException
+     */
+    public function extractGeodatabase(string $sourcePath, string $workDir): string
+    {
+        $extractDir = $workDir.'/extracted';
+
+        if (is_dir($extractDir) && ($gdb = $this->findGeodatabase($extractDir)) !== null) {
+            return $gdb;
+        }
+
+        if (! $this->isAvailable()) {
+            throw new ArchiveException(
+                'The ogr2ogr binary (GDAL) was not found, so a geodatabase cannot be converted. '
+                .'Install GDAL, set IMPORT_OGR2OGR_PATH to its full path, or upload a GeoJSON export instead.'
+            );
+        }
+
+        $this->removeDirectory($extractDir);
+        $gdb = $this->findGeodatabase($this->extractor->extract($sourcePath, $extractDir));
+
+        if ($gdb === null) {
+            throw new ArchiveException('No .gdb directory was found inside the archive.');
+        }
+
+        return $gdb;
+    }
+
+    /**
+     * One layer of a geodatabase written out as GeoJSON in EPSG:4326.
+     *
+     * @throws ArchiveException
+     */
+    public function convertLayer(string $gdb, string $layer, string $output): void
+    {
+        if (str_starts_with($layer, '-')) {
+            throw new ArchiveException("The geodatabase layer name «{$layer}» cannot be converted.");
+        }
+
+        $process = new Process([$this->binary(), '-f', 'GeoJSON', '-t_srs', 'EPSG:4326', '-overwrite', $output, $gdb, $layer]);
+        $process->setTimeout(600);
+        $process->run();
+
+        if (! $process->isSuccessful() || ! is_file($output)) {
+            throw new ArchiveException("ogr2ogr failed to convert the layer «{$layer}»: ".trim($process->getErrorOutput()));
+        }
+    }
+
+    /** Removes the unpacked geodatabase once every layer needed has been converted. */
+    public function discardExtracted(string $workDir): void
+    {
+        $this->removeDirectory($workDir.'/extracted');
+    }
+
     private function binary(): string
     {
         return (string) config('imports.ogr2ogr_path', 'ogr2ogr');

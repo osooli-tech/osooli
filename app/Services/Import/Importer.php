@@ -16,6 +16,11 @@ interface Importer
      */
     public function analyze(string $sourcePath): ImportPreview;
 
-    /** Apply the source to the database. Must be idempotent. */
-    public function commit(string $sourcePath): ImportResult;
+    /**
+     * Apply the source to the database. Must be idempotent.
+     *
+     * @param  array<string, mixed>  $options  what was decided on the review
+     *                                         screen; empty means the defaults
+     */
+    public function commit(string $sourcePath, array $options = []): ImportResult;
 }
