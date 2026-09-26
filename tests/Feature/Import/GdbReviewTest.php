@@ -104,6 +104,42 @@ class GdbReviewTest extends TestCase
         $this->assertSame($this->cityId, $suggested['default_city_id']);
     }
 
+    public function test_districts_can_be_chosen_by_location_by_row_and_per_parcel(): void
+    {
+        // A district on record whose boundary holds G-1 and G-2 but not G-3.
+        $mapped = DB::table('districts')->insertGetId(['name_ar' => 'حي الخريطة', 'city_id' => $this->cityId, 'created_at' => now(), 'updated_at' => now()]);
+        $square = json_encode(['type' => 'MultiPolygon', 'coordinates' => [[[[46.595, 24.79], [46.615, 24.79], [46.615, 24.81], [46.595, 24.81], [46.595, 24.79]]]]]);
+        DB::update('UPDATE districts SET geom = '.Spatial::fromGeoJson().", boundary_source = 'official' WHERE id = ?", [$square, $mapped]);
+        $chosen = DB::table('districts')->insertGetId(['name_ar' => 'حي مختار', 'city_id' => $this->cityId, 'created_at' => now(), 'updated_at' => now()]);
+
+        $importer = app(GdbImporter::class);
+        $options = $importer->analyze($this->zip)->toArray()['details']['gdb']['suggested'];
+        $options['default_city_id'] = $this->cityId;
+        foreach ($options['districts'] as $i => $row) {
+            $options['districts'][$i]['district_id'] = null;
+        }
+        $district = fn (string $geo): ?string => DB::table('parcels as p')->join('plans as pl', 'pl.id', '=', 'p.plan_id')
+            ->join('districts as d', 'd.id', '=', 'pl.district_id')->where('p.geo_id', $geo)->value('d.name_ar');
+
+        // By location for all, with G-2 given a district of its own.
+        $options['district_match'] = 'map';
+        $options['parcel_districts'] = [['geo_id' => 'G-2', 'district_id' => $chosen]];
+        $result = $importer->commit($this->zip, $options)->toArray();
+
+        $this->assertSame('حي الخريطة', $district('G-1'));
+        $this->assertSame('حي مختار', $district('G-2'));
+        $this->assertSame('أوثال', $district('G-3'), 'outside every boundary: matched by name');
+        $this->assertSame(0, $result['errors']);
+        // «بدون» parcels keep their district through its stand-in plan.
+        $this->assertSame(1, DB::table('plans')->where('plan_no', 'بدون — أوثال — ثادق')->count());
+
+        // The row set back to "by name" overrides the method for all.
+        $options['districts'][0]['match'] = 'name';
+        $options['parcel_districts'] = [];
+        $importer->commit($this->zip, $options);
+        $this->assertSame('أوثال', $district('G-1'));
+    }
+
     public function test_commit_applies_the_choices(): void
     {
         // On record already: a value the file leaves empty must survive.
@@ -124,7 +160,8 @@ class GdbReviewTest extends TestCase
         $g1 = DB::table('parcels')->where('geo_id', 'G-1')->first();
         $this->assertSame('طلبات احكام', $g1->fall_in);
         $this->assertEquals(999, $g1->m_price, 'an empty M_price leaves the value on record');
-        $this->assertNull($g1->plan_id, '«بدون» means no plan');
+        // «بدون» is no real plan: G-1 sits in its district's stand-in plan.
+        $this->assertSame('بدون — أوثال — ثادق', DB::table('plans')->where('id', $g1->plan_id)->value('plan_no'));
         $this->assertSame(0, DB::table('plans')->where('plan_no', 'بدون')->count());
 
         $this->assertSame('قديم', DB::table('deeds')->where('deed_no', 'D-1')->value('deed_status'));

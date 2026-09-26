@@ -15,8 +15,16 @@
         @foreach ($navItems as $item)
             @if (is_null($item['permission']) || auth()->user()?->can($item['permission']))
                 @php
-                    $routeBase = rtrim($item['route'], '.index');
-                    $isActive  = request()->routeIs($routeBase . '*');
+                    // "imports.index" covers imports.* — but not a page that has
+                    // an entry of its own (imports.gdb), or both would light up.
+                    // (rtrim() was used here once; it strips characters, not a
+                    // suffix, so "imports.index" became "imports".)
+                    $routeBase = str_ends_with($item['route'], '.index') ? substr($item['route'], 0, -6) : $item['route'];
+                    $current = request()->route()?->getName();
+                    $ownEntry = $current !== null && $current !== $item['route']
+                        && collect($navItems)->contains('route', $current);
+                    $isActive = request()->routeIs($item['route'])
+                        || (! $ownEntry && request()->routeIs($routeBase.'.*'));
                     $href      = Route::has($item['route']) ? route($item['route']) : '#';
                 @endphp
 

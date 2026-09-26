@@ -166,6 +166,24 @@ class BoundariesTest extends TestCase
         $this->assertDatabaseHas('districts', ['id' => $this->west->id, 'boundary_source' => null, 'geom' => null]);
     }
 
+    public function test_the_editor_draws_the_nearest_neighbours_first(): void
+    {
+        $this->fixtures();
+        $this->actingAs($this->userWith(['reference.view', 'reference.edit']));
+        $region = Region::firstOrFail();
+        $far = City::create(['region_id' => $region->id, 'name_ar' => 'بعيدة']);
+        $near = City::create(['region_id' => $region->id, 'name_ar' => 'قريبة']);
+        $this->setBoundary('cities', $far->id, $this->square(50.0, 27.0, 0.3), 'derived');
+        $this->setBoundary('cities', $near->id, $this->square(46.4, 24.0, 0.3), 'derived');
+
+        $config = Livewire::test(BoundaryEditor::class)
+            ->call('open', 'cities', $this->west->city_id)
+            ->viewData('config');
+
+        $names = array_column(array_column(json_decode($config['neighbours'], true)['features'], 'properties'), 'name');
+        $this->assertSame(['قريبة', 'بعيدة'], $names);
+    }
+
     public function test_editing_a_boundary_needs_the_reference_edit_permission(): void
     {
         $this->fixtures();
