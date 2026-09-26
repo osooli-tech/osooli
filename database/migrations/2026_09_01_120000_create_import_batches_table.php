@@ -12,7 +12,10 @@ return new class extends Migration
     {
         Schema::create('import_batches', function (Blueprint $table) {
             $table->id();
-            $table->uuid()->unique();
+            // char(36), not the native uuid type: MariaDB only has one from
+            // 10.7, MySQL none, and the app may run on either. The routes
+            // still constrain {uuid} to the uuid shape.
+            $table->char('uuid', 36)->unique();
             $table->foreignId('user_id')->constrained()->restrictOnDelete();
 
             // kind and status are plain strings cast to PHP enums, not native

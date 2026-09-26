@@ -352,12 +352,14 @@ final class ParcelGeoJsonImporter implements Importer
             'n_dim' => $this->num($p['N_Dim'] ?? null), 's_dim' => $this->num($p['S_DIM'] ?? null),
             'e_dim' => $this->num($p['E_Dim'] ?? null), 'w_dim' => $this->num($p['W_Dim'] ?? null),
         ];
-        $boundary = DB::table('parcel_boundaries')->where('parcel_id', $parcelId)->first(['id', 'engineering_office_id']);
+        $boundary = DB::table('parcel_boundaries')->where('parcel_id', $parcelId)->first(['id', 'engineering_office_id', 'measured_area']);
+        // The surveyed area; a feature without one keeps the area on record.
+        $surveyArea = $this->num($p['Survey_Area'] ?? null);
 
         if ($boundary === null) {
             DB::table('parcel_boundaries')->insert($borders + [
                 'parcel_id' => $parcelId,
-                'measured_area' => null,
+                'measured_area' => $surveyArea,
                 'engineering_office_id' => $officeId,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -365,6 +367,7 @@ final class ParcelGeoJsonImporter implements Importer
         } else {
             DB::table('parcel_boundaries')->where('id', $boundary->id)->update($borders + [
                 'engineering_office_id' => $boundary->engineering_office_id ?? $officeId,
+                'measured_area' => $surveyArea ?? $boundary->measured_area,
                 'updated_at' => now(),
             ]);
         }

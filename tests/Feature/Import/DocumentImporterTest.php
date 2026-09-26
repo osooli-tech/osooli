@@ -341,7 +341,8 @@ final class DocumentImporterTest extends TestCase
         // The second archive does not contain 311608002898.pdf at all.
         $this->importer()->commit($this->zipOf(['502134007711.pdf'], 'second.zip'));
 
-        $this->assertDatabaseMissing('parcel_photos', ['parcel_id' => $first], 'a stale extracted copy must not resurrect the deleted document');
+        // A stale extracted copy must not resurrect the deleted document.
+        $this->assertDatabaseMissing('parcel_photos', ['parcel_id' => $first]);
         $this->assertDatabaseHas('parcel_photos', ['parcel_id' => $second]);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Import;
 
 use App\Services\Import\ParcelGeoJsonImporter;
+use App\Support\Database\Dialect;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -261,7 +262,13 @@ final class ParcelGeoJsonImporterTest extends TestCase
             "SELECT ST_GeometryType(geom) AS type, ST_SRID(geom) AS srid FROM parcels WHERE geo_id = '91-25'"
         );
 
-        $this->assertSame('ST_MultiPolygon', $row->type);
-        $this->assertSame(4326, (int) $row->srid);
+        // PostGIS names the type ST_MultiPolygon and stores SRID 4326; MariaDB
+        // says MULTIPOLYGON and, like every geometry column there, SRID 0.
+        if (Dialect::isPostgres()) {
+            $this->assertSame('ST_MultiPolygon', $row->type);
+            $this->assertSame(4326, (int) $row->srid);
+        } else {
+            $this->assertSame('MULTIPOLYGON', strtoupper((string) $row->type));
+        }
     }
 }
