@@ -66,6 +66,17 @@ final class Spatial
         return Dialect::isPostgres() ? 'ST_GeomFromText(?, 4326)' : 'ST_GeomFromText(?)';
     }
 
+    /**
+     * A geometry simplified by the tolerance in one bind parameter, in
+     * degrees. MariaDB has no ST_Simplify, so there the geometry comes back
+     * whole; the tolerance is still bound (and ignored) so the caller's
+     * bindings are the same on both.
+     */
+    public static function simplify(string $geometry): string
+    {
+        return Dialect::isPostgres() ? "ST_Simplify({$geometry}, ?)" : "IF(? IS NULL, {$geometry}, {$geometry})";
+    }
+
     /** A point from two bind parameters, longitude then latitude. */
     public static function point(): string
     {

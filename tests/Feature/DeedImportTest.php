@@ -256,7 +256,7 @@ class DeedImportTest extends TestCase
             'type' => 'Feature',
             'geometry' => null,
             'properties' => [
-                'geo_id' => 'GIS-240-11', 'parcel_no' => '11', 'fall_in' => 'صك',
+                'geo_id' => 'GIS-240-11', 'parcel_no' => '11', 'fall_in' => 'الصك',
                 'n_border' => 'قطعة رقم 10', 'n_dim' => 405.84, 'deed_no' => '262903006602', 'deed_area' => 51750,
             ],
         ];
@@ -270,7 +270,7 @@ class DeedImportTest extends TestCase
         $this->apply($run['id']);
         $parcel = Parcel::where('geo_id', 'GIS-240-11')->first();
         $this->assertNotNull($parcel);
-        $this->assertSame('صك', (string) ($parcel->fall_in?->value ?? $parcel->fall_in));
+        $this->assertSame('الصك', (string) ($parcel->fall_in?->value ?? $parcel->fall_in));
         $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', '262903006602')->count());
     }
 

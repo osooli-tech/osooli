@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Parcels;
 
-use App\Support\Geo\ParcelPlacement;
 use App\Livewire\Forms\DeedForm;
 use App\Livewire\Forms\ParcelForm;
 use App\Models\Deed;
 use App\Models\Parcel;
 use App\Models\Plan;
 use App\Support\Concerns\WritesSafely;
+use App\Support\Geo\ParcelPlacement;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\On;

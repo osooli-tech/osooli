@@ -76,7 +76,7 @@ final class ImportRecord
             foreach ($names as $name) {
                 $value ??= is_array($p[$name]) ? null : $p[$name];
             }
-            if ($nested !== null && $value !== null && ! is_array($value) && (string) $nested !== (string) $value) {
+            if ($nested !== null && $value !== null && (string) $nested !== (string) $value) {
                 $record->conflicts[] = $field;
             }
 

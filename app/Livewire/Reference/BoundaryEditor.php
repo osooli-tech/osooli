@@ -208,21 +208,25 @@ class BoundaryEditor extends Component
         $parent = $config['parent'];
 
         $rows = $parent === null ? [] : DB::select(
-            "SELECT n.name_ar AS name, ST_AsGeoJSON(ST_Simplify(n.geom, ?), 6) AS g
+            'SELECT n.name_ar AS name, ST_AsGeoJSON('.Spatial::simplify('n.geom').", 6) AS g
              FROM {$level} n JOIN {$level} self ON self.id = ?
              WHERE n.id <> self.id AND n.{$parent} = self.{$parent} AND n.geom IS NOT NULL
              LIMIT ".self::MAX_NEIGHBOURS,
             [$config['simplify'], $id]
         );
 
-        return (string) json_encode([
-            'type' => 'FeatureCollection',
-            'features' => array_values(array_filter(array_map(static fn (object $row): ?array => $row->g === null ? null : [
-                'type' => 'Feature',
-                'geometry' => json_decode((string) $row->g, false),
-                'properties' => ['name' => $row->name],
-            ], $rows))),
-        ], JSON_UNESCAPED_UNICODE);
+        $features = [];
+        foreach ($rows as $row) {
+            if ($row->g !== null) {
+                $features[] = [
+                    'type' => 'Feature',
+                    'geometry' => json_decode((string) $row->g, false),
+                    'properties' => ['name' => $row->name],
+                ];
+            }
+        }
+
+        return (string) json_encode(['type' => 'FeatureCollection', 'features' => $features], JSON_UNESCAPED_UNICODE);
     }
 
     /**

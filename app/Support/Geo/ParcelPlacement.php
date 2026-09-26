@@ -25,7 +25,7 @@ final class ParcelPlacement
 {
     /**
      * @return array{status: string, level: string|null, expected: string|null, approximate: bool, actual: array{district: string|null, city: string|null, region: string|null}}
-     *   status: ok, outside, no_boundary (nothing to check against), no_geometry
+     *                                                                                                                                                                           status: ok, outside, no_boundary (nothing to check against), no_geometry
      */
     public static function forParcel(int $parcelId, ?int $districtId = null): array
     {
@@ -91,7 +91,7 @@ final class ParcelPlacement
             return self::result('no_boundary', actual: self::names($actual));
         }
 
-        $inside = ($actual[$expected['level']]['ids'] ?? []) !== [] && in_array($expected['id'], $actual[$expected['level']]['ids'], true);
+        $inside = in_array($expected['id'], $actual[$expected['level']]['ids'], true);
 
         return self::result(
             $inside ? 'ok' : 'outside',
