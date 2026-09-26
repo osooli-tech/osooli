@@ -199,6 +199,7 @@
 
                     {{-- Administrative boundaries — off until asked for: the
                          district layer is detailed and loads for the view. --}}
+                    @can('boundaries.view')
                     <div>
                         <p class="text-[10px] font-semibold uppercase tracking-wide
                                   text-on-surface-variant dark:text-on-primary-container mb-1.5">
@@ -220,6 +221,7 @@
                             @endforeach
                         </div>
                     </div>
+                    @endcan
 
                     {{-- Colour customisation — advanced, admin-only: lets the
                          client pick the map's colours themselves instead of

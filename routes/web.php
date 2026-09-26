@@ -56,7 +56,7 @@ Route::middleware('set.locale')->group(function () {
 Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/dashboard', fn () => view('dashboard', [
         'mapColors' => MapAppearanceSetting::current(),
-        'customLayers' => MapLayer::query()->orderBy('name')->get()->map(fn (MapLayer $layer): array => [
+        'customLayers' => ! auth()->user()?->can('map_layers.view') ? [] : MapLayer::query()->orderBy('name')->get()->map(fn (MapLayer $layer): array => [
             'id' => $layer->id,
             'name' => $layer->name,
             'color' => $layer->color,
@@ -73,7 +73,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/parcels/export/pdf', [ParcelExportController::class, 'pdf'])
         ->middleware(['can:exports.create', 'report.locale'])->name('parcels.export.pdf');
     Route::get('/parcels/placement', fn () => view('parcels.placement'))
-        ->middleware('can:parcels.view')
+        ->middleware('can:parcels.placement')
         ->name('parcels.placement');
     Route::get('/parcels/{parcel}', [ParcelController::class, 'show'])->name('parcels.show');
     Route::get('/parcels/{parcel}/twin', [ParcelController::class, 'twin'])->name('parcels.twin');
@@ -95,7 +95,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/documents', fn () => view('documents.index'))->name('documents.index');
     // One PDF of many parcels' pages, split and filed page by page.
     Route::get('/documents/split', fn () => view('documents.split'))
-        ->middleware('can:documents.upload')
+        ->middleware('can:documents.split')
         ->name('documents.split');
     Route::get('/documents/{photo}/download', [DocumentController::class, 'download'])
         ->middleware('can:documents.download')
@@ -190,21 +190,27 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // GeoJSON API for map
     Route::get('/geo/parcels', [GeoJsonController::class, 'parcels'])->name('geo.parcels');
-    Route::get('/geo/boundaries/{level}', [GeoJsonController::class, 'boundaries'])->name('geo.boundaries');
-    Route::get('/geo/layers/{layer}', [GeoJsonController::class, 'customLayer'])->name('geo.layers.show');
+    Route::get('/geo/boundaries/{level}', [GeoJsonController::class, 'boundaries'])
+        ->middleware('can:boundaries.view')->name('geo.boundaries');
+    Route::get('/geo/layers/{layer}', [GeoJsonController::class, 'customLayer'])
+        ->middleware('can:map_layers.view')->name('geo.layers.show');
 
     // Client-editable map colours (base layer fills + colour-by legend)
     Route::patch('/map-colors', [MapAppearanceSettingsController::class, 'update'])
         ->middleware('can:roles.manage')
         ->name('map-colors.update');
 
+    // Custom map layers: their own permission, not the import's.
+    Route::middleware('can:map_layers.manage')->group(function () {
+        Route::get('/map-layers', fn () => view('imports.map-layers'))->name('map-layers.index');
+        Route::get('/map-layers/{layer}/download', MapLayerDownloadController::class)->name('map-layers.download');
+    });
+
     // Data import
     Route::middleware('can:imports.create')->group(function () {
         // The Geodatabase / document wizard. /imports itself is the review-and-
         // undo import of the export's own file (imports.index, above).
         Route::get('/imports/gdb', fn () => view('imports.gdb'))->name('imports.gdb');
-        Route::get('/map-layers', fn () => view('imports.map-layers'))->name('map-layers.index');
-        Route::get('/map-layers/{layer}/download', MapLayerDownloadController::class)->name('map-layers.download');
         Route::post('/imports/upload', [ImportUploadController::class, 'create'])->name('imports.upload.create');
         // {uuid} is constrained to the uuid shape so a malformed value 404s
         // at the router instead of reaching the "uuid" column's native

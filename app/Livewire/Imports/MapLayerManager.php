@@ -124,6 +124,6 @@ class MapLayerManager extends Component
 
     private function authorizeManage(): void
     {
-        abort_unless(Auth::user()?->can('imports.create'), 403);
+        abort_unless(Auth::user()?->can('map_layers.manage'), 403);
     }
 }

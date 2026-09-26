@@ -35,9 +35,18 @@ return [
         'users' => 'المستخدمون',
         'admin' => 'الإدارة',
         'imports' => 'الاستيراد',
+        'map' => 'الخريطة والحدود والطبقات',
+        'general' => 'عام',
     ],
 
     'perm' => [
+        'help_view' => 'عرض شرح الصفحات (أيقونة «؟»)',
+        'boundaries_view' => 'عرض الحدود الإدارية على الخريطة',
+        'boundaries_edit' => 'رسم الحدود الإدارية وتعديلها',
+        'parcels_placement' => 'مراجعة القطع الواقعة خارج أحيائها',
+        'map_layers_view' => 'عرض الطبقات المخصصة على الخريطة',
+        'map_layers_manage' => 'إدارة الطبقات المخصصة',
+        'documents_split' => 'رفع ملف PDF متعدد القطع',
         'parcels_view' => 'عرض القطع',
         'parcels_view_map' => 'عرض الخريطة',
         'parcels_create' => 'إضافة قطعة',

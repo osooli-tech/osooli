@@ -28,7 +28,7 @@ class Sidebar extends Component
             'title' => 'nav.group_parcels',
             'items' => [
                 ['route' => 'parcels.index', 'label' => 'nav.parcels', 'icon' => 'map', 'permission' => 'parcels.view'],
-                ['route' => 'parcels.placement', 'label' => 'nav.placement', 'icon' => 'wrong_location', 'permission' => 'parcels.view'],
+                ['route' => 'parcels.placement', 'label' => 'nav.placement', 'icon' => 'wrong_location', 'permission' => 'parcels.placement'],
                 ['route' => 'owners.index', 'label' => 'nav.owners', 'icon' => 'group', 'permission' => 'parcels.view'],
             ],
         ],
@@ -44,7 +44,7 @@ class Sidebar extends Component
             'items' => [
                 ['route' => 'imports.index', 'label' => 'nav.import_geojson', 'hint' => 'nav.import_geojson_hint', 'icon' => 'upload_file', 'permission' => 'imports.run'],
                 ['route' => 'imports.gdb', 'label' => 'nav.import_gdb', 'hint' => 'nav.import_gdb_hint', 'icon' => 'database', 'permission' => 'imports.create'],
-                ['route' => 'documents.split', 'label' => 'nav.import_split_pdf', 'hint' => 'nav.import_split_pdf_hint', 'icon' => 'splitscreen', 'permission' => 'documents.upload'],
+                ['route' => 'documents.split', 'label' => 'nav.import_split_pdf', 'hint' => 'nav.import_split_pdf_hint', 'icon' => 'splitscreen', 'permission' => 'documents.split'],
             ],
         ],
         [
@@ -56,7 +56,7 @@ class Sidebar extends Component
         [
             'title' => 'nav.group_map_reference',
             'items' => [
-                ['route' => 'map-layers.index', 'label' => 'nav.map_layers', 'icon' => 'stacks', 'permission' => 'imports.create'],
+                ['route' => 'map-layers.index', 'label' => 'nav.map_layers', 'icon' => 'stacks', 'permission' => 'map_layers.manage'],
                 ['route' => 'reference.index', 'label' => 'nav.reference', 'icon' => 'dataset', 'permission' => 'reference.view'],
             ],
         ],

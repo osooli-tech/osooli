@@ -35,9 +35,18 @@ return [
         'users' => 'Users',
         'admin' => 'Administration',
         'imports' => 'Imports',
+        'map' => 'Map, boundaries and layers',
+        'general' => 'General',
     ],
 
     'perm' => [
+        'help_view' => 'See page explanations (the "?" icon)',
+        'boundaries_view' => 'See administrative boundaries on the map',
+        'boundaries_edit' => 'Draw and edit administrative boundaries',
+        'parcels_placement' => 'Review parcels outside their districts',
+        'map_layers_view' => 'See custom layers on the map',
+        'map_layers_manage' => 'Manage custom layers',
+        'documents_split' => 'Upload a multi-parcel PDF',
         'parcels_view' => 'View parcels',
         'parcels_view_map' => 'View map',
         'parcels_create' => 'Add a parcel',

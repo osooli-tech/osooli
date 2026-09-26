@@ -194,7 +194,7 @@ class BoundaryEditor extends Component
     private function authorizeLevel(string $level): void
     {
         abort_unless(array_key_exists($level, self::LEVELS), 404);
-        abort_unless(Auth::user()?->can('reference.edit'), 403);
+        abort_unless(Auth::user()?->can('boundaries.edit'), 403);
         abort_unless(Dialect::isSpatial(), 404);
     }
 

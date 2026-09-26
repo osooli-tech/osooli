@@ -12,7 +12,7 @@
 @section('content')
     @can('reference.view')
         <livewire:reference.reference-index />
-        @can('reference.edit')
+        @can('boundaries.edit')
             <livewire:reference.boundary-editor />
         @endcan
     @else

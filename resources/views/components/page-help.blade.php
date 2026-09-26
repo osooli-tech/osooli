@@ -10,7 +10,7 @@
     $help = $key !== null && \Illuminate\Support\Facades\Lang::has($key) ? __($key) : null;
 @endphp
 
-@if (is_array($help))
+@if (is_array($help) && auth()->user()?->can('help.view'))
     <div x-data="{ open: false }" x-on:keydown.escape.window="open = false" class="relative shrink-0">
         <button type="button" x-on:click="open = ! open"
                 title="{{ __('help.what_is_this') }}" aria-label="{{ __('help.what_is_this') }}"

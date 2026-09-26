@@ -23,11 +23,12 @@ class RoleManager extends Component
      * here too, and needs a label under `perm` in the settings language files.
      */
     private const GROUPS = [
-        'parcels' => ['parcels.view', 'parcels.view_map', 'parcels.create', 'parcels.edit', 'parcels.edit_geometry', 'parcels.archive'],
+        'parcels' => ['parcels.view', 'parcels.view_map', 'parcels.create', 'parcels.edit', 'parcels.edit_geometry', 'parcels.archive', 'parcels.placement'],
         'deeds' => ['deeds.create', 'deeds.edit', 'deeds.archive', 'ownership.manage'],
         'survey' => ['survey_decisions.edit'],
         'reference' => ['reference.view', 'reference.create', 'reference.edit', 'reference.delete'],
-        'documents' => ['documents.download', 'documents.upload', 'documents.review'],
+        'documents' => ['documents.download', 'documents.upload', 'documents.review', 'documents.split'],
+        'map' => ['boundaries.view', 'boundaries.edit', 'map_layers.view', 'map_layers.manage'],
         'archive' => ['archive.view', 'archive.restore'],
         'exports' => ['exports.create', 'exports.bulk', 'imports.run'],
         'requests' => ['modification_requests.view', 'modification_requests.manage', 'presentation_requests.view'],
@@ -35,6 +36,7 @@ class RoleManager extends Component
         'users' => ['users.view', 'users.create', 'users.edit', 'users.delete'],
         'admin' => ['roles.manage', 'audit_logs.view', 'sync.view', 'database.manage'],
         'imports' => ['imports.create'],
+        'general' => ['help.view'],
     ];
 
     // Create modal

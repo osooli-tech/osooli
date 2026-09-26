@@ -45,7 +45,7 @@ class SplitUpload extends Component
 
     public function mount(): void
     {
-        abort_unless(Auth::user()?->can('documents.upload'), 403);
+        abort_unless(Auth::user()?->can('documents.split'), 403);
     }
 
     /**
@@ -56,7 +56,7 @@ class SplitUpload extends Component
      */
     public function matchPage(string $text): ?array
     {
-        abort_unless(Auth::user()?->can('documents.upload'), 403);
+        abort_unless(Auth::user()?->can('documents.split'), 403);
 
         $text = mb_substr($text, 0, 20000);
 
@@ -120,7 +120,7 @@ class SplitUpload extends Component
      */
     public function searchParcels(string $term): array
     {
-        abort_unless(Auth::user()?->can('documents.upload'), 403);
+        abort_unless(Auth::user()?->can('documents.split'), 403);
 
         $term = trim(mb_substr($term, 0, 100));
         if ($term === '') {
@@ -161,7 +161,7 @@ class SplitUpload extends Component
      */
     public function planParcels(string $planNo): array
     {
-        abort_unless(Auth::user()?->can('documents.upload'), 403);
+        abort_unless(Auth::user()?->can('documents.split'), 403);
 
         $planNo = trim(mb_substr($planNo, 0, 50));
 
@@ -176,7 +176,7 @@ class SplitUpload extends Component
      */
     public function savePiece(array $meta): array
     {
-        abort_unless(Auth::user()?->can('documents.upload'), 403);
+        abort_unless(Auth::user()?->can('documents.split'), 403);
 
         $this->validate([
             'piece' => ['required', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:20480'],

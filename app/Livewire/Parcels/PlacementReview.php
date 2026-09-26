@@ -30,7 +30,7 @@ class PlacementReview extends Component
 
     public function mount(): void
     {
-        abort_unless(Auth::user()?->can('parcels.view'), 403);
+        abort_unless(Auth::user()?->can('parcels.placement'), 403);
     }
 
     public function show(string $level): void

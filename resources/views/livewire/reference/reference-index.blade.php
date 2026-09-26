@@ -162,7 +162,7 @@
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 justify-end">
                                     @if (in_array($tab, ['districts', 'cities', 'regions', 'countries'], true))
-                                        @can('reference.edit')
+                                        @can('boundaries.edit')
                                             <button type="button"
                                                     x-on:click="$dispatch('boundary-edit', { level: '{{ $tab }}', id: {{ $row['id'] }} })"
                                                     class="p-1.5 rounded-lg transition-colors hover:bg-secondary/10 hover:text-secondary

@@ -51,6 +51,13 @@ class RolesAndPermissionsSeeder extends Seeder
         'sync.view',
         'database.manage',
         'imports.create',
+        'help.view',
+        'boundaries.view',
+        'boundaries.edit',
+        'parcels.placement',
+        'map_layers.view',
+        'map_layers.manage',
+        'documents.split',
     ];
 
     private const ROLES = [
@@ -81,6 +88,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'documents.upload',
             'exports.create',
             'modification_requests.view',
+            'help.view',
+            'boundaries.view',
+            'parcels.placement',
+            'map_layers.view',
+            'documents.split',
         ]],
     ];
 
