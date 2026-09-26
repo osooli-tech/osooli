@@ -53,16 +53,8 @@ if (! container) {
         // basemap style, label colours, label halo.
         const isDarkMode = document.documentElement.classList.contains('dark');
 
-        // Without this, Mapbox GL renders Arabic (and other RTL scripts) as
-        // isolated, unjoined letter forms instead of properly shaped text —
-        // harmless while labels were numeric (parcel_no), but the project/
-        // building name labels made it visible.
-        if (! mapboxgl.getRTLTextPluginStatus || mapboxgl.getRTLTextPluginStatus() === 'unavailable') {
-            mapboxgl.setRTLTextPlugin(
-                'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.3.0/mapbox-gl-rtl-text.js',
-                true
-            );
-        }
+        // Arabic label shaping (the RTL text plugin) is set up by
+        // window.loadMapbox, which every map on the site loads through.
 
         const map = new mapboxgl.Map({
             container: 'sakuki-map',

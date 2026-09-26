@@ -107,7 +107,20 @@ window.loadMapbox = function loadMapbox() {
     mapboxLoading = new Promise((resolve, reject) => {
         const script = document.createElement('script');
         script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
-        script.onload = () => resolve(window.mapboxgl);
+        script.onload = () => {
+            // Without this, Mapbox GL draws Arabic as isolated letters in
+            // reverse order. Set here, once, so every map on the site —
+            // the dashboard, the owners page, the polygon and boundary
+            // editors — shapes Arabic labels properly.
+            if (window.mapboxgl.getRTLTextPluginStatus() === 'unavailable') {
+                window.mapboxgl.setRTLTextPlugin(
+                    'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.3.0/mapbox-gl-rtl-text.js',
+                    null,
+                    true
+                );
+            }
+            resolve(window.mapboxgl);
+        };
         script.onerror = () => reject(new Error('mapbox-gl failed to load'));
         document.head.appendChild(script);
     });
