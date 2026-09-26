@@ -58,7 +58,32 @@ class SplitUpload extends Component
     {
         abort_unless(Auth::user()?->can('documents.upload'), 403);
 
-        $scores = MapPageMatcher::scores(mb_substr($text, 0, 20000));
+        $text = mb_substr($text, 0, 20000);
+
+        // A GEO ID or a "parcel-plan" pair on the page settles it outright —
+        // what a survey sheet prints, and what OCR reads most reliably.
+        $pairs = MapPageMatcher::pairs($text);
+        if ($pairs !== []) {
+            $keys = array_map(static fn (array $p): string => $p[0].'-'.$p[1], $pairs);
+            $byGeo = $this->parcels()->whereIn('p.geo_id', $keys)->limit(3)->get();
+            if ($byGeo->count() === 1) {
+                return $this->labelled($byGeo)[0];
+            }
+
+            $byPair = $this->parcels()
+                ->where(function (Builder $q) use ($pairs): void {
+                    foreach ($pairs as [$parcel, $plan]) {
+                        $q->orWhere(fn (Builder $x) => $x->where('p.parcel_no', $parcel)->where('pl.plan_no', $plan));
+                    }
+                })
+                ->limit(3)
+                ->get();
+            if ($byPair->count() === 1) {
+                return $this->labelled($byPair)[0];
+            }
+        }
+
+        $scores = MapPageMatcher::scores($text);
         $numbers = array_slice(array_unique(array_merge(array_keys($scores['parcel']), array_keys($scores['plan']))), 0, 30);
         if ($numbers === []) {
             return null;

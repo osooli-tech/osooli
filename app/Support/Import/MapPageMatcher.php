@@ -42,6 +42,28 @@ final class MapPageMatcher
     ];
 
     /**
+     * Pairs written "parcel-plan" — the GEO ID a survey sheet prints as
+     * "المميز المكاني: 133-623" — each also read the other way round, since
+     * Arabic text may come back reversed. A date such as 1435-03-08 yields
+     * pairs too; they are no parcel on record, so they fall away.
+     *
+     * @return list<array{0: string, 1: string}>
+     */
+    public static function pairs(string $text): array
+    {
+        $text = \Normalizer::normalize($text, \Normalizer::FORM_KC) ?: $text;
+        preg_match_all('#(?<![\d./])(\d{1,6})\s*-\s*(\d{1,6})(?![\d./])#u', $text, $m, PREG_SET_ORDER);
+
+        $pairs = [];
+        foreach ($m as $match) {
+            $pairs[$match[1].'-'.$match[2]] = [$match[1], $match[2]];
+            $pairs[$match[2].'-'.$match[1]] = [$match[2], $match[1]];
+        }
+
+        return array_values(array_slice($pairs, 0, 60));
+    }
+
+    /**
      * @return array{parcel: array<int|string, int>, plan: array<int|string, int>} number => score
      */
     public static function scores(string $text): array

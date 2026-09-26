@@ -83,6 +83,8 @@ return [
         'page' => 'Page',
         'pages' => 'Pages',
         'auto' => 'auto-matched',
+        'auto_ocr' => 'read from image',
+        'ocr_progress' => 'Reading image-only pages (OCR): :done of :total',
         'search_placeholder' => 'Search: parcel and plan number (e.g. 131 623), owner name, or GEO ID',
         'change' => 'change',
         'upload' => 'Split the file and upload the parts',

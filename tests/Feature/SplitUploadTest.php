@@ -62,6 +62,18 @@ class SplitUploadTest extends TestCase
         $this->assertNull(Livewire::test(SplitUpload::class)->instance()->matchPage('صفحة بلا أرقام'));
     }
 
+    public function test_an_image_only_page_is_matched_by_the_geo_id_ocr_reads(): void
+    {
+        $this->actingAs($this->uploader());
+
+        // What Tesseract returned for page 1 of the client's 623.pdf (digits
+        // and dashes only): the GEO ID among coordinates, a date, noise.
+        $ocr = '0 363 4-- 1207531010718424 131-623 85 1 52 53 4 16557 4208 1929 - 39 7 2 0-8 42-8438';
+        $match = Livewire::test(SplitUpload::class)->instance()->matchPage($ocr);
+
+        $this->assertSame((int) DB::table('parcels')->where('geo_id', '131-623')->value('id'), $match['id']);
+    }
+
     public function test_a_part_is_stored_pending_against_its_parcel(): void
     {
         Storage::fake(ParcelPhoto::PRIVATE_DISK);

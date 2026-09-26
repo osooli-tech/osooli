@@ -5,6 +5,7 @@
         'load_failed' => __('documents.split.load_failed'),
         'done' => __('documents.split.done'),
         'matched' => __('documents.split.matched'),
+        'ocr' => __('documents.split.ocr_progress'),
     ]))" class="space-y-4">
 
     {{-- 1. The file: picked, or dropped anywhere on this card --}}
@@ -91,7 +92,8 @@
                                     <p x-show="part(group).parcelId" x-cloak class="flex flex-wrap items-center gap-1 text-sm text-secondary">
                                         <span class="material-symbols-outlined text-[16px]">check_circle</span>
                                         <span x-text="part(group).label"></span>
-                                        <span x-show="part(group).auto" class="rounded-full bg-secondary/15 px-2 py-0.5 text-[10px] font-semibold">{{ __('documents.split.auto') }}</span>
+                                        <span x-show="part(group).auto === 'text'" class="rounded-full bg-secondary/15 px-2 py-0.5 text-[10px] font-semibold">{{ __('documents.split.auto') }}</span>
+                                        <span x-show="part(group).auto === 'ocr'" class="rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold">{{ __('documents.split.auto_ocr') }}</span>
                                         <button type="button" x-on:click="part(group).parcelId = null; part(group).label = ''; part(group).auto = false"
                                                 class="ms-1 text-xs text-on-surface-variant underline">{{ __('documents.split.change') }}</button>
                                     </p>
@@ -165,6 +167,9 @@
     // Both from the CDN, loaded on this screen only, as mapbox-gl is for the map.
     const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
     const PDFLIB = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+    // OCR for pages with no text; it fetches its engine and English model
+    // from the same CDN the first time, then the browser keeps them.
+    const TESSERACT = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
 
     const loadScript = (src, global) => window[global] ? Promise.resolve(window[global]) : new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -232,15 +237,32 @@
                     this.pages = pages;
 
                     // Each page's own text, where it has any, names its parcel.
+                    const unread = [];
                     for (let n = 1; n <= pdf.numPages; n++) {
                         const page = await pdf.getPage(n);
                         const content = await page.getTextContent();
                         const text = content.items.map((i) => i.str).join(' ');
-                        if (text.trim().length < 20) continue;
-                        const match = await $wire.matchPage(text);
-                        if (match) {
-                            const part = this.part({ key: n });
-                            Object.assign(part, { parcelId: match.id, label: match.label, auto: true });
+                        const match = text.trim().length < 20 ? null : await $wire.matchPage(text);
+                        match ? this.matched(n, match, 'text') : unread.push(n);
+                    }
+
+                    // Pages that are only a picture — a scan, or a map exported
+                    // as an image — are read by OCR: digits and dashes only,
+                    // which is what a GEO ID such as "133-623" is made of.
+                    if (unread.length) {
+                        const Tesseract = await loadScript(TESSERACT, 'Tesseract');
+                        const worker = await Tesseract.createWorker('eng');
+                        await worker.setParameters({ tessedit_char_whitelist: '0123456789-', tessedit_pageseg_mode: '11' });
+                        try {
+                            for (const [i, n] of unread.entries()) {
+                                this.progress = labels.ocr.replace(':done', i + 1).replace(':total', unread.length);
+                                const canvas = await this.canvas(n, 2400);
+                                const { data } = await worker.recognize(canvas);
+                                const match = await $wire.matchPage(data.text);
+                                if (match) this.matched(n, match, 'ocr');
+                            }
+                        } finally {
+                            await worker.terminate();
                         }
                     }
                 } catch (e) {
@@ -251,15 +273,27 @@
                 }
             },
 
-            async render(n, width) {
+            async canvas(n, width) {
                 const page = await pdf.getPage(n);
                 const base = page.getViewport({ scale: 1 });
                 const viewport = page.getViewport({ scale: width / base.width });
                 const canvas = document.createElement('canvas');
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
-                await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-                return canvas.toDataURL('image/jpeg', 0.8);
+                // "print" draws without requestAnimationFrame, which browsers
+                // pause in a background tab — so reading a long file carries on
+                // while the person looks at something else.
+                await page.render({ canvasContext: canvas.getContext('2d'), viewport, intent: 'print' }).promise;
+                return canvas;
+            },
+
+            async render(n, width) {
+                return (await this.canvas(n, width)).toDataURL('image/jpeg', 0.8);
+            },
+
+            /** A page matched on its own, from its text or by OCR. */
+            matched(n, match, how) {
+                Object.assign(this.part({ key: n }), { parcelId: match.id, label: match.label, auto: how });
             },
 
             async enlarge(n) {
