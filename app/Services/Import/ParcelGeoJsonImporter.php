@@ -6,6 +6,7 @@ namespace App\Services\Import;
 
 use App\Support\Database\Spatial;
 use App\Support\DatabaseEnum;
+use App\Support\Geo\Locator;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -58,6 +59,14 @@ final class ParcelGeoJsonImporter implements Importer
      * @var array<string, array<string, int>>
      */
     private array $unknown = [];
+
+    /**
+     * Plans the file puts in a district other than the one on record,
+     * plan number => how many parcels; they stay where they are.
+     *
+     * @var array<string, int>
+     */
+    private array $planConflicts = [];
 
     public function analyze(string $sourcePath): ImportPreview
     {
@@ -148,8 +157,9 @@ final class ParcelGeoJsonImporter implements Importer
         $groups = $this->groupByParcelAndDeed($features);
         $o = self::options($options);
         $this->unknown = [];
+        $this->planConflicts = [];
 
-        $stats = ['inserted' => 0, 'updated' => 0, 'deeds' => 0, 'owners' => 0, 'boundaries' => 0, 'decisions' => 0, 'portfolios' => 0, 'errors' => 0];
+        $stats = ['inserted' => 0, 'updated' => 0, 'deeds' => 0, 'owners' => 0, 'boundaries' => 0, 'decisions' => 0, 'portfolios' => 0, 'located' => 0, 'not_located' => 0, 'errors' => 0];
         $warnings = [];
         $skipped = 0;
 
@@ -196,6 +206,17 @@ final class ParcelGeoJsonImporter implements Importer
             $warnings[] = trans_choice('imports.warnings.no_geo_id', $skipped);
         }
 
+        $planConflicts = $this->takePlanConflicts();
+        if ($planConflicts !== []) {
+            $warnings[] = __('imports.warnings.plan_elsewhere', [
+                'plans' => implode('، ', array_map(static fn (string $plan, int $n): string => "{$plan} ({$n})", array_keys($planConflicts), $planConflicts)),
+            ]);
+        }
+
+        if ($stats['not_located'] > 0) {
+            $warnings[] = __('imports.warnings.not_located', ['count' => $stats['not_located']]);
+        }
+
         foreach ($this->takeUnknown() as $field => $values) {
             $warnings[] = __('imports.warnings.unknown_values', [
                 'field' => $field,
@@ -216,6 +237,7 @@ final class ParcelGeoJsonImporter implements Importer
                 'boundaries' => $stats['boundaries'],
                 'decisions' => $stats['decisions'],
                 'portfolios' => $stats['portfolios'],
+                'located' => $stats['located'],
             ],
             warnings: $warnings,
         );
@@ -267,9 +289,9 @@ final class ParcelGeoJsonImporter implements Importer
      * engineering office.
      *
      * @param  array<string, mixed>  $options
-     * @return array{legacy: bool, districts: list<array{name: string, district_id: int|null, city_id: int|null}>,
-     *     default_city_id: int|null, plan_placeholders: list<string>, borders: string, qrar: string,
-     *     folder: string, portfolios: bool, deedless: string, office_id: int|null}
+     * @return array{legacy: bool, districts: list<array{name: string, district_id: int|null, city_id: int|null, match: string}>,
+     *     district_match: string, parcel_districts: array<string, int>, default_city_id: int|null, plan_placeholders: list<string>, borders: string, qrar: string,
+     *     folder: string, portfolios: bool, deedless: string, no_plan: string, office_id: int|null}
      */
     public static function options(array $options): array
     {
@@ -282,6 +304,8 @@ final class ParcelGeoJsonImporter implements Importer
                     'name' => $row['name'],
                     'district_id' => is_numeric($row['district_id'] ?? null) ? (int) $row['district_id'] : null,
                     'city_id' => is_numeric($row['city_id'] ?? null) ? (int) $row['city_id'] : null,
+                    // '' follows the method chosen for all parcels.
+                    'match' => in_array($row['match'] ?? null, ['name', 'map'], true) ? (string) $row['match'] : '',
                 ];
             }
         }
@@ -293,9 +317,19 @@ final class ParcelGeoJsonImporter implements Importer
 
         $pick = static fn (string $key, array $allowed, string $default): string => in_array($options[$key] ?? null, $allowed, true) ? (string) $options[$key] : $default;
 
+        // Parcels given a district of their own on the review screen.
+        $parcelDistricts = [];
+        foreach (is_array($options['parcel_districts'] ?? null) ? $options['parcel_districts'] : [] as $exception) {
+            if (is_array($exception) && is_string($exception['geo_id'] ?? null) && is_numeric($exception['district_id'] ?? null)) {
+                $parcelDistricts[trim($exception['geo_id'])] = (int) $exception['district_id'];
+            }
+        }
+
         return [
             'legacy' => $legacy,
             'districts' => $districts,
+            'district_match' => $pick('district_match', ['name', 'map'], 'name'),
+            'parcel_districts' => $parcelDistricts,
             'default_city_id' => is_numeric($options['default_city_id'] ?? null) ? (int) $options['default_city_id'] : null,
             'plan_placeholders' => array_values(array_filter(array_map(static fn (mixed $v): string => trim((string) $v), (array) $placeholders), static fn (string $v): bool => $v !== '')),
             'borders' => $pick('borders', ['first', 'second', 'prefer_second'], 'first'),
@@ -303,6 +337,8 @@ final class ParcelGeoJsonImporter implements Importer
             'folder' => $pick('folder', ['folder', 'ignore'], 'folder'),
             'portfolios' => (bool) ($options['portfolios'] ?? false),
             'deedless' => $pick('deedless', ['placeholder', 'skip'], 'placeholder'),
+            // A parcel with no real plan: into its district's stand-in plan, or no plan.
+            'no_plan' => $pick('no_plan', ['district_plan', 'none'], $legacy ? 'none' : 'district_plan'),
             'office_id' => is_numeric($options['office_id'] ?? null) ? (int) $options['office_id'] : null,
         ];
     }
@@ -319,7 +355,7 @@ final class ParcelGeoJsonImporter implements Importer
         $geoId = (string) $p['Geo_ID'];
         $deedNo = $this->str($p['Deed_No'] ?? null);
 
-        $districtId = $this->districtFor($this->str($p['District'] ?? null), $o);
+        $districtId = $this->resolveDistrict($geoId, $this->str($p['District'] ?? null), $lead['geometry'] ?? null, $o, $stats);
         $planId = $this->planFor($this->str($p['Plan_No'] ?? null), $districtId, $o);
 
         /*
@@ -557,6 +593,42 @@ final class ParcelGeoJsonImporter implements Importer
     }
 
     /**
+     * The district a parcel is filed under: the one given to that parcel on
+     * the review screen; else, if its District value (or all parcels) is set
+     * to go by location, the district its polygon lies in; else — and
+     * whenever it lies in none — the district its District value stands for.
+     *
+     * @param  array<string, mixed>  $o
+     * @param  array<string, int>  $stats
+     */
+    private function resolveDistrict(string $geoId, ?string $name, mixed $geometry, array $o, array &$stats): ?int
+    {
+        if (isset($o['parcel_districts'][$geoId])) {
+            return $o['parcel_districts'][$geoId];
+        }
+
+        $method = $o['district_match'];
+        foreach ($o['districts'] as $row) {
+            if ($name !== null && trim($row['name']) === $name && $row['match'] !== '') {
+                $method = $row['match'];
+                break;
+            }
+        }
+
+        if ($method === 'map') {
+            $district = Locator::locate($geometry)['district'] ?? null;
+            if ($district !== null) {
+                $stats['located']++;
+
+                return $district;
+            }
+            $stats['not_located']++;
+        }
+
+        return $this->districtFor($name, $o);
+    }
+
+    /**
      * The district a feature's District value stands for: the existing one
      * it was matched to, or one of that name made in the city chosen for it
      * (or the default city). With no city to put it in, none.
@@ -591,38 +663,49 @@ final class ParcelGeoJsonImporter implements Importer
     }
 
     /**
-     * The plan of that number in that district. A placeholder number
-     * ("بدون") or none at all means the parcel has no plan. A plan of the
-     * number with no district yet is taken and given this one.
+     * The plan a parcel is filed under — and through it, its district: a
+     * parcel belongs to a district only by way of its plan.
+     *
+     * Plan numbers are unique across the system, so a number already on
+     * record is that plan: it is given the district if it had none, and kept
+     * where it is if it has another (noted for the result). A placeholder
+     * number ("بدون") or none at all means no real plan: the parcel goes into
+     * the district's own stand-in plan, "بدون — district — city", so it keeps
+     * its district — or into no plan at all, as chosen.
      *
      * @param  array<string, mixed>  $o
      */
     private function planFor(?string $planNo, ?int $districtId, array $o): ?int
     {
         if ($planNo === null || in_array($planNo, $o['plan_placeholders'], true)) {
-            return null;
-        }
-
-        $query = DB::table('plans')->where('plan_no', $planNo);
-        $id = $districtId === null
-            ? (clone $query)->whereNull('district_id')->value('id')
-            : (clone $query)->where('district_id', $districtId)->value('id');
-
-        if ($id === null && $districtId !== null) {
-            $orphan = (clone $query)->whereNull('district_id')->value('id');
-            if ($orphan !== null) {
-                DB::table('plans')->where('id', $orphan)->update(['district_id' => $districtId, 'updated_at' => now()]);
-
-                return (int) $orphan;
+            if ($o['no_plan'] !== 'district_plan' || $districtId === null) {
+                return null;
             }
+
+            $district = DB::table('districts as d')->leftJoin('cities as c', 'c.id', '=', 'd.city_id')
+                ->where('d.id', $districtId)->first(['d.name_ar', 'c.name_ar as city']);
+            $label = $o['plan_placeholders'][0] ?? 'بدون';
+            $planNo = mb_substr(implode(' — ', array_filter([$label, $district?->name_ar, $district?->city])), 0, 100);
         }
 
-        return $id !== null ? (int) $id : (int) DB::table('plans')->insertGetId([
-            'plan_no' => $planNo,
-            'district_id' => $districtId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $plan = DB::table('plans')->where('plan_no', $planNo)->first(['id', 'district_id']);
+
+        if ($plan === null) {
+            return (int) DB::table('plans')->insertGetId([
+                'plan_no' => $planNo,
+                'district_id' => $districtId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        if ($plan->district_id === null && $districtId !== null) {
+            DB::table('plans')->where('id', $plan->id)->update(['district_id' => $districtId, 'updated_at' => now()]);
+        } elseif ($districtId !== null && (int) $plan->district_id !== $districtId) {
+            $this->planConflicts[$planNo] = ($this->planConflicts[$planNo] ?? 0) + 1;
+        }
+
+        return (int) $plan->id;
     }
 
     /**
@@ -693,6 +776,19 @@ final class ParcelGeoJsonImporter implements Importer
         }
 
         return $resolved;
+    }
+
+    /**
+     * The plans noted by planFor() during this import, cleared for the next.
+     *
+     * @return array<string, int>
+     */
+    private function takePlanConflicts(): array
+    {
+        $conflicts = $this->planConflicts;
+        $this->planConflicts = [];
+
+        return $conflicts;
     }
 
     /**

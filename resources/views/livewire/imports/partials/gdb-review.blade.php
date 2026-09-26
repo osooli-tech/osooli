@@ -240,6 +240,19 @@
         <section class="{{ $card }}">
             <h3 class="{{ $h3 }}"><span class="material-symbols-outlined text-[20px]">holiday_village</span>{{ __('imports.gdb.districts') }}</h3>
             <p class="mb-3 {{ $muted }}">{{ __('imports.gdb.districts_hint') }}</p>
+            {{-- How every parcel finds its district, unless a row or a parcel says otherwise. --}}
+            <div class="mb-4 rounded-lg bg-surface-container dark:bg-white/5 p-3">
+                <p class="mb-2 text-sm font-semibold text-on-surface dark:text-white">{{ __('imports.gdb.district_match') }}</p>
+                <div class="space-y-1.5">
+                    @foreach (['name', 'map'] as $choice)
+                        <label class="{{ $radio }}">
+                            <input type="radio" wire:model.live="options.district_match" value="{{ $choice }}" class="mt-1">
+                            <span>{{ __('imports.gdb.district_matches.'.$choice) }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
             <div class="mb-4 max-w-md">
                 <x-form.search-select name="options.default_city_id" source="cities" live
                                       :value="$options['default_city_id'] ?? null"
@@ -252,6 +265,7 @@
                             <th class="{{ $th }}">{{ __('imports.gdb.district_in_file') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.features') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.match_method') }}</th>
+                            <th class="{{ $th }}">{{ __('imports.gdb.row_match') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.match_district') }}</th>
                             <th class="{{ $th }}">{{ __('imports.gdb.or_create_in') }}</th>
                         </tr>
@@ -287,6 +301,13 @@
                                         </span>
                                     @endif
                                 </td>
+                                <td class="px-3 py-2">
+                                    <select wire:model.live="options.districts.{{ $i }}.match" class="{{ $select }}">
+                                        <option value="">{{ __('imports.gdb.row_matches.default', ['method' => __('imports.gdb.row_matches.'.($options['district_match'] ?? 'name'))]) }}</option>
+                                        <option value="name">{{ __('imports.gdb.row_matches.name') }}</option>
+                                        <option value="map">{{ __('imports.gdb.row_matches.map') }}</option>
+                                    </select>
+                                </td>
                                 <td class="px-3 py-2 min-w-[220px]">
                                     <x-form.search-select name="options.districts.{{ $i }}.district_id" source="districts" live
                                                           :value="$row['district_id'] ?? null" :label="''"
@@ -309,6 +330,42 @@
                     </tbody>
                 </table>
             </div>
+
+            {{-- One parcel, its own district — whatever its row or the method says. --}}
+            <div class="mt-5">
+                <p class="mb-1 text-sm font-semibold text-on-surface dark:text-white">{{ __('imports.gdb.parcel_exceptions') }}</p>
+                <p class="mb-2 {{ $muted }}">{{ __('imports.gdb.parcel_exceptions_hint') }}</p>
+                <datalist id="gdb-parcel-ids">
+                    @foreach ($a['parcel_list'] ?? [] as $parcel)
+                        <option value="{{ $parcel['geo_id'] }}">{{ __('imports.gdb.parcel_option', ['no' => $parcel['parcel_no'] ?: '—', 'district' => $parcel['district'] ?: '—']) }}</option>
+                    @endforeach
+                </datalist>
+                <div class="space-y-2">
+                    @foreach ($options['parcel_districts'] ?? [] as $e => $exception)
+                        <div wire:key="parcel-exception-{{ $e }}" class="flex flex-wrap items-end gap-2">
+                            <input type="text" list="gdb-parcel-ids" wire:model.blur="options.parcel_districts.{{ $e }}.geo_id" dir="ltr"
+                                   placeholder="Geo_ID" class="{{ $select }} w-56">
+                            <div class="min-w-[240px]">
+                                <x-form.search-select name="options.parcel_districts.{{ $e }}.district_id" source="districts" live
+                                                      :value="$exception['district_id'] ?? null" :label="''"
+                                                      :placeholder="__('imports.gdb.match_district')" />
+                            </div>
+                            <button type="button" wire:click="removeParcelException({{ $e }})"
+                                    class="p-1.5 rounded-lg text-on-surface-variant hover:bg-error/10 hover:text-error">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                            @php $known = collect($a['parcel_list'] ?? [])->firstWhere('geo_id', $exception['geo_id'] ?? null); @endphp
+                            @if (($exception['geo_id'] ?? '') !== '' && $known === null)
+                                <span class="text-xs text-error">{{ __('imports.gdb.parcel_not_in_file') }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <button type="button" wire:click="addParcelException"
+                        class="mt-2 inline-flex items-center gap-1 rounded-lg border border-outline-variant dark:border-white/10 px-3 py-1 text-xs text-on-surface dark:text-white hover:bg-surface-container">
+                    <span class="material-symbols-outlined text-[16px]">add</span>{{ __('imports.gdb.add_parcel_exception') }}
+                </button>
+            </div>
         </section>
 
         {{-- 5. Plans --}}
@@ -327,6 +384,11 @@
                 <input type="text" wire:model.blur="options.plan_placeholders" class="{{ $select }} mt-1 w-full max-w-md">
             </label>
             <p class="mt-1 {{ $muted }}">{{ __('imports.gdb.plan_placeholders_hint') }}</p>
+            <div class="mt-3 space-y-1.5">
+                @foreach (['district_plan', 'none'] as $choice)
+                    <label class="{{ $radio }}"><input type="radio" wire:model.live="options.no_plan" value="{{ $choice }}" class="mt-1">{{ __('imports.gdb.no_plan.'.$choice) }}</label>
+                @endforeach
+            </div>
         </section>
 
         {{-- 6. Deeds without a number --}}

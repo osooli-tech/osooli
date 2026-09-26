@@ -90,6 +90,8 @@ return [
         // singular vs. plural — kept structurally parallel so both files
         // branch on the same count ranges via trans_choice().
         'no_geo_id' => '{0} All features have a Geo_ID; none are skipped.|{1} :count feature with no Geo_ID is skipped.|{2} :count features with no Geo_ID are skipped.|[3,10] :count features with no Geo_ID are skipped.|[11,99] :count features with no Geo_ID are skipped.|[100,*] :count features with no Geo_ID are skipped.',
+        'not_located' => ':count parcels set to be matched by location lie within no district boundary and were matched by name.',
+        'plan_elsewhere' => 'Plans the file puts in a district other than theirs on record, left where they are: :plans',
         'unknown_values' => 'Unknown values in «:field» were not written: :values',
     ],
     'gdb' => [
@@ -138,6 +140,22 @@ return [
         'district_in_file' => 'District in the file',
         'match_district' => 'Matching district on record',
         'or_create_in' => 'Or create it in city',
+        'district_match' => 'How parcels find their district',
+        'district_matches' => [
+            'name' => 'By name: each parcel takes the district chosen for its District value in the table below.',
+            'map' => 'By location: each parcel takes the district its polygon lies in by the district boundaries, even against the District value in the file. A parcel lying in no district takes the one chosen for its name.',
+        ],
+        'row_match' => 'Method for this district',
+        'row_matches' => [
+            'default' => 'As for all (:method)',
+            'name' => 'By name',
+            'map' => 'By location',
+        ],
+        'parcel_exceptions' => 'Exceptions for single parcels',
+        'parcel_exceptions_hint' => 'Give one parcel the district it is filed under, whatever the method.',
+        'parcel_option' => 'Parcel :no — :district',
+        'parcel_not_in_file' => 'This parcel is not in the file.',
+        'add_parcel_exception' => 'Add a parcel',
         'match_method' => 'Matched by',
         'methods' => [
             'name_map' => 'name and map',
@@ -151,7 +169,11 @@ return [
         'no_city' => 'No city: its parcels stay without a district.',
         'plans' => 'Plans',
         'plan_placeholders' => 'Values that mean "no plan" (comma-separated)',
-        'plan_placeholders_hint' => 'A parcel whose plan is one of these, or empty, is imported without a plan, and no plan of that name is made. Plans are matched on number and district together.',
+        'plan_placeholders_hint' => 'A parcel belongs to its district through its plan. Plan numbers are unique: a plan on record stays in its district, with a warning if the file puts it elsewhere.',
+        'no_plan' => [
+            'district_plan' => 'A parcel with no plan goes into a stand-in plan for its district, named "بدون — district — city", so it keeps its district.',
+            'none' => 'A parcel with no plan stays without one, and its district is not recorded.',
+        ],
         'deeds' => 'Deeds',
         'deeds_counts' => ':with features with a deed number, :without without.',
         'deedless' => [

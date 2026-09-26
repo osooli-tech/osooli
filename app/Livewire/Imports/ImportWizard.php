@@ -139,12 +139,28 @@ final class ImportWizard extends Component
         $districts = [];
         foreach ((array) ($o['districts'] ?? []) as $row) {
             if (is_array($row) && is_string($row['name'] ?? null)) {
-                $districts[] = ['name' => $row['name'], 'district_id' => $int($row['district_id'] ?? null), 'city_id' => $int($row['city_id'] ?? null)];
+                $districts[] = [
+                    'name' => $row['name'],
+                    'district_id' => $int($row['district_id'] ?? null),
+                    'city_id' => $int($row['city_id'] ?? null),
+                    'match' => $pick($row['match'] ?? null, ['name', 'map'], ''),
+                ];
+            }
+        }
+
+        $geoIds = array_column($gdb['analysis']['parcel_list'] ?? [], 'geo_id');
+        $parcelDistricts = [];
+        foreach ((array) ($o['parcel_districts'] ?? []) as $exception) {
+            $districtId = is_array($exception) ? $int($exception['district_id'] ?? null) : null;
+            if ($districtId !== null && in_array($exception['geo_id'] ?? null, $geoIds, true)) {
+                $parcelDistricts[] = ['geo_id' => (string) $exception['geo_id'], 'district_id' => $districtId];
             }
         }
 
         return [
             'layers' => $layers,
+            'district_match' => $pick($o['district_match'] ?? null, ['name', 'map'], 'name'),
+            'parcel_districts' => $parcelDistricts,
             'modes' => [
                 'projects' => $pick($o['modes']['projects'] ?? null, DisplayLayerImporter::MODES, 'replace'),
                 'buildings' => $pick($o['modes']['buildings'] ?? null, DisplayLayerImporter::MODES, 'replace'),
@@ -157,6 +173,7 @@ final class ImportWizard extends Component
             'folder' => $pick($o['folder'] ?? null, ['folder', 'ignore'], 'ignore'),
             'portfolios' => (bool) ($o['portfolios'] ?? false),
             'deedless' => $pick($o['deedless'] ?? null, ['placeholder', 'skip'], 'placeholder'),
+            'no_plan' => $pick($o['no_plan'] ?? null, ['district_plan', 'none'], 'district_plan'),
             'office_id' => $int($o['office_id'] ?? null),
             // Recorded on the custom layers this import creates.
             'source_name' => $this->batch()?->original_filename,
@@ -182,6 +199,18 @@ final class ImportWizard extends Component
         } elseif ($kind === 'built_in' && in_array($value, ['parcels', 'projects', 'buildings'], true)) {
             $this->options['layers'][$index]['role'] = $value;
         }
+    }
+
+    /** One more parcel to give a district of its own, on the review screen. */
+    public function addParcelException(): void
+    {
+        $this->options['parcel_districts'][] = ['geo_id' => '', 'district_id' => null];
+    }
+
+    public function removeParcelException(int $index): void
+    {
+        unset($this->options['parcel_districts'][$index]);
+        $this->options['parcel_districts'] = array_values($this->options['parcel_districts'] ?? []);
     }
 
     /** Back to one of one's own imports — to review it again, or read its result. */

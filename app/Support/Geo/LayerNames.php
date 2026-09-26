@@ -76,7 +76,7 @@ final class LayerNames
      * The candidates similar to $name, most similar first.
      *
      * @param  list<array<string, mixed>>  $candidates  each with a 'name'
-     * @return list<array<string, mixed>>  the same, each with a 'score' added
+     * @return list<array<string, mixed>> the same, each with a 'score' added
      */
     public static function similarTo(string $name, array $candidates): array
     {

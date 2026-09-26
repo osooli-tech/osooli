@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Import;
 
 use App\Models\MapLayer;
-use App\Support\Database\Spatial;
 use App\Support\Geo\LayerNames;
-use Illuminate\Database\QueryException;
+use App\Support\Geo\Locator;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -209,6 +208,12 @@ final class GdbImporter implements Importer
             'qrar' => array_slice($count($features, 'Qrar'), 0, 10, true),
             'folder' => array_slice($count($features, 'Folder'), 0, 10, true),
             'portfolios' => $count($features, 'Real_Estate_portfolio'),
+            // For giving one parcel a district of its own.
+            'parcel_list' => array_slice(array_values(array_filter(array_map(static fn (array $f): array => [
+                'geo_id' => trim((string) ($f['properties']['Geo_ID'] ?? '')),
+                'parcel_no' => trim((string) ($f['properties']['Parcel'] ?? '')),
+                'district' => trim((string) ($f['properties']['District'] ?? '')),
+            ], $features), static fn (array $p): bool => $p['geo_id'] !== '')), 0, 5000),
         ];
     }
 
@@ -294,6 +299,10 @@ final class GdbImporter implements Importer
             // adding would duplicate every shape each time a file is re-run.
             'modes' => ['projects' => 'replace', 'buildings' => 'replace'],
             'districts' => $districts,
+            // By name (the table's matches) for all parcels unless changed;
+            // each row, and each parcel, can be set otherwise.
+            'district_match' => 'name',
+            'parcel_districts' => [],
             'default_city_id' => array_key_first($cities),
             'plan_placeholders' => implode('، ', array_keys($plans) ?: ['بدون']),
             'borders' => 'first',
@@ -306,6 +315,7 @@ final class GdbImporter implements Importer
                 : (array_filter($folder, static fn (string $v): bool => mb_strlen($v) > 20 || str_contains($v, ' ')) !== [] ? 'ignore' : 'folder'),
             'portfolios' => $portfolios !== [],
             'deedless' => 'placeholder',
+            'no_plan' => 'district_plan',
             'office_id' => DB::table('engineering_offices')->where('name', 'مكتب الإسناد العالمي للاستشارات الهندسية')->value('id'),
         ];
     }
@@ -337,7 +347,7 @@ final class GdbImporter implements Importer
         $mapCities = [];
         $sampled = 0;
         foreach (array_slice($group, 0, self::LOCATE_SAMPLE) as $feature) {
-            $where = $this->locate($feature['geometry'] ?? null);
+            $where = Locator::locate($feature['geometry'] ?? null);
             if ($where === null) {
                 continue;
             }
@@ -378,45 +388,7 @@ final class GdbImporter implements Importer
             'map_sampled' => $sampled,
             'conflict' => $conflict === null || $conflict === $districtId ? null : $this->districtLabel($conflict),
             'map_cities' => $mapCities,
-        ];
-    }
-
-    /**
-     * The district and city a parcel's polygon lies in, by a point on its
-     * surface; null when the shape cannot be read. Boundaries drawn by hand
-     * win over official ones, official over derived or approximate.
-     *
-     * @return array{district: int|null, city: int|null}|null
-     */
-    private function locate(mixed $geometry): ?array
-    {
-        if (! is_array($geometry)) {
-            return null;
-        }
-
-        try {
-            $json = Spatial::multiPolygonJson($geometry);
-        } catch (\InvalidArgumentException) {
-            return null;
-        }
-
-        $order = "CASE boundary_source WHEN 'manual' THEN 0 WHEN 'official' THEN 1 WHEN 'derived' THEN 2 ELSE 3 END";
-        $inside = static fn (string $table): string => "(SELECT t.id FROM {$table} t WHERE t.geom IS NOT NULL AND "
-            .Spatial::boxesIntersect('t.geom', 's.p').' AND ST_Contains(t.geom, s.p) ORDER BY '.str_replace('boundary_source', 't.boundary_source', $order).' LIMIT 1)';
-
-        try {
-            $row = DB::selectOne(
-                'SELECT '.$inside('districts').' AS district_id, '.$inside('cities').' AS city_id
-                 FROM (SELECT ST_PointOnSurface('.Spatial::fromGeoJson().') AS p) s',
-                [$json]
-            );
-        } catch (QueryException) {
-            return null;
-        }
-
-        return [
-            'district' => $row?->district_id === null ? null : (int) $row->district_id,
-            'city' => $row?->city_id === null ? null : (int) $row->city_id,
+            'match' => '',
         ];
     }
 
