@@ -12,6 +12,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,11 +24,24 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api/v1',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function (): void {
+            Route::middleware('web')->group(__DIR__.'/../routes/portal.php');
+        },
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             SetLocale::class,
         ]);
+
+        // Redirect a guest to the portal's own login, not the dashboard's,
+        // when the guarded route is under /portal — otherwise auth:owner
+        // would bounce an unauthenticated owner to the internal team's page.
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('portal*')
+            ? route('portal.login')
+            : route('login'));
+        $middleware->redirectUsersTo(fn (Request $request) => $request->is('portal*')
+            ? route('portal.dashboard')
+            : route('dashboard'));
 
         // The API has no session to read a locale from, so it takes the
         // language from the request header instead. Prepended so that a
