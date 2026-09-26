@@ -10,6 +10,7 @@ use App\Http\Controllers\ImportUploadController;
 use App\Http\Controllers\LegalDocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MapAppearanceSettingsController;
+use App\Http\Controllers\MapLayerDownloadController;
 use App\Http\Controllers\OwnerExportController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\ParcelExportController;
@@ -189,8 +190,6 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // GeoJSON API for map
     Route::get('/geo/parcels', [GeoJsonController::class, 'parcels'])->name('geo.parcels');
-    Route::get('/geo/projects', [GeoJsonController::class, 'projects'])->name('geo.projects');
-    Route::get('/geo/buildings', [GeoJsonController::class, 'buildings'])->name('geo.buildings');
     Route::get('/geo/boundaries/{level}', [GeoJsonController::class, 'boundaries'])->name('geo.boundaries');
     Route::get('/geo/layers/{layer}', [GeoJsonController::class, 'customLayer'])->name('geo.layers.show');
 
@@ -205,6 +204,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         // undo import of the export's own file (imports.index, above).
         Route::get('/imports/gdb', fn () => view('imports.gdb'))->name('imports.gdb');
         Route::get('/map-layers', fn () => view('imports.map-layers'))->name('map-layers.index');
+        Route::get('/map-layers/{layer}/download', MapLayerDownloadController::class)->name('map-layers.download');
         Route::post('/imports/upload', [ImportUploadController::class, 'create'])->name('imports.upload.create');
         // {uuid} is constrained to the uuid shape so a malformed value 404s
         // at the router instead of reaching the "uuid" column's native

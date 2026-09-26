@@ -108,15 +108,8 @@ return [
         'import_as' => 'Import into',
         'roles' => [
             'parcels' => 'Parcels and deeds',
-            'projects' => 'Projects',
-            'buildings' => 'Buildings',
             'custom' => 'A custom map layer',
             'ignore' => 'Do not import',
-        ],
-        'mode_label' => 'There are :count :table on record now. On import:',
-        'modes' => [
-            'replace' => 'replace them with the file\'s',
-            'append' => 'add the file\'s to them',
         ],
         'one_parcels_layer' => 'More than one layer is set to parcels; only the first is imported.',
         'field_profile' => 'Fields of :layer',

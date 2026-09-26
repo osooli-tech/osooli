@@ -99,9 +99,12 @@
                     @yield('breadcrumb')
                 </nav>
             @endif
-            <h1 class="text-base font-semibold text-on-surface dark:text-white leading-none truncate">
-                @yield('page-title', __('nav.dashboard'))
-            </h1>
+            <div class="flex items-center gap-1.5 min-w-0">
+                <h1 class="text-base font-semibold text-on-surface dark:text-white leading-none truncate">
+                    @yield('page-title', __('nav.dashboard'))
+                </h1>
+                <x-page-help />
+            </div>
         </div>
 
         {{-- Optional search slot --}}
@@ -154,7 +157,6 @@
     {{-- Content area — full width on mobile, offset by the sidebar on desktop --}}
     <main class="mt-16 min-h-[calc(100vh-4rem)] p-4 sm:p-6 ms-0"
           :class="{ 'lg:ms-[280px]': sidebarOpen, 'lg:ms-0': ! sidebarOpen, 'transition-all duration-300 ease-in-out': sidebarAnimate }">
-        <x-page-help />
         @yield('content')
     </main>
 

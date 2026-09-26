@@ -122,20 +122,6 @@
             </table>
         </div>
 
-        {{-- What happens to projects and buildings already on record. --}}
-        @foreach (['projects', 'buildings'] as $table)
-            @if ($roleUsed($table))
-                <div class="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                    <span class="text-on-surface dark:text-white">
-                        {{ __('imports.gdb.mode_label', ['table' => __('imports.gdb.roles.'.$table), 'count' => number_format($gdb['existing'][$table] ?? 0)]) }}
-                    </span>
-                    <select wire:model.live="options.modes.{{ $table }}" class="{{ $select }}">
-                        <option value="replace">{{ __('imports.gdb.modes.replace') }}</option>
-                        <option value="append">{{ __('imports.gdb.modes.append') }}</option>
-                    </select>
-                </div>
-            @endif
-        @endforeach
         @if (collect($options['layers'] ?? [])->where('role', 'parcels')->count() > 1)
             <p class="mt-3 text-xs text-amber-700 dark:text-amber-300">{{ __('imports.gdb.one_parcels_layer') }}</p>
         @endif

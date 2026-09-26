@@ -53,8 +53,6 @@ class UpdateMapAppearanceSettingsRequest extends FormRequest
         return [
             'parcels_fill' => ['sometimes', $hex],
             'parcels_outline' => ['sometimes', $hex],
-            'projects_fill' => ['sometimes', $hex],
-            'buildings_fill' => ['sometimes', $hex],
             'colour_modes' => ['sometimes', 'array'],
             'colour_modes.*' => ['array'],
             'colour_modes.*.*' => [$hex],

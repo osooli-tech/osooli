@@ -14,8 +14,8 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * The custom map layers: rename, recolour, choose which show when the map
- * opens, or delete. A new name close to another layer's is warned about,
+ * The custom map layers — projects and buildings among them: rename,
+ * recolour, choose which show when the map opens, download, or delete. A new name close to another layer's is warned about,
  * as on import, but not refused — two similar layers can be meant.
  */
 class MapLayerManager extends Component
@@ -70,6 +70,17 @@ class MapLayerManager extends Component
         $this->dispatch('toast', type: 'success', message: __('common.saved'));
     }
 
+    /** Shown or hidden when the map opens, in one click from the list. */
+    public function toggleVisible(int $id): void
+    {
+        $this->authorizeManage();
+
+        $this->writeSafely('map_layer.update', 'map_layer', $id, function () use ($id): void {
+            $layer = MapLayer::findOrFail($id);
+            $layer->update(['visible_by_default' => ! $layer->visible_by_default]);
+        });
+    }
+
     public function cancel(): void
     {
         $this->editing = null;
@@ -92,16 +103,14 @@ class MapLayerManager extends Component
     {
         $layers = MapLayer::query()->orderBy('name')->get();
 
-        // While renaming: the other layers (and built-in ones) the new name
+        // While renaming: the other layers (and the parcels) the new name
         // comes close to.
         $similar = [];
         if ($this->editing !== null && trim($this->name) !== '') {
             $candidates = $layers->where('id', '!=', $this->editing)
                 ->map(fn (MapLayer $l): array => ['name' => $l->name])->values()->all();
-            foreach (LayerNames::BUILT_IN as $names) {
-                foreach ($names as $builtIn) {
-                    $candidates[] = ['name' => $builtIn];
-                }
+            foreach (LayerNames::BUILT_IN['parcels'] as $builtIn) {
+                $candidates[] = ['name' => $builtIn];
             }
             $similar = array_values(array_unique(array_column(LayerNames::similarTo($this->name, $candidates), 'name')));
         }

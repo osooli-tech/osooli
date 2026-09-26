@@ -45,9 +45,7 @@
                  class="w-full h-full bg-surface-container-lowest dark:bg-[#1a1f2e]"
                  data-token="{{ config('services.mapbox.token') }}"
                  data-geojson-url="{{ route('geo.parcels') }}"
-                 data-projects-url="{{ route('geo.projects') }}"
                  data-boundaries-url="{{ route('geo.boundaries', '__LEVEL__') }}"
-                 data-buildings-url="{{ route('geo.buildings') }}"
                  data-custom-layers="{{ json_encode($customLayers) }}"
                  data-colors="{{ json_encode($mapColors) }}"
                  data-colors-update-url="{{ route('map-colors.update') }}"
@@ -55,8 +53,6 @@
                  data-base-color-labels="{{ json_encode([
                      'parcels_fill' => __('dashboard.layer_parcels'),
                      'parcels_outline' => __('dashboard.layer_outlines'),
-                     'projects_fill' => __('dashboard.layer_projects'),
-                     'buildings_fill' => __('dashboard.layer_buildings'),
                  ]) }}">
                 @if (! config('services.mapbox.token'))
                     <div class="flex flex-col items-center justify-center h-full gap-3
@@ -167,8 +163,6 @@
                                 'parcels-fill' => ['dashboard.layer_parcels', 'category'],
                                 'parcels-outline' => ['dashboard.layer_outlines', 'pentagon'],
                                 'parcels-labels' => ['dashboard.show_labels', 'label'],
-                                'projects-fill' => ['dashboard.layer_projects', 'agriculture'],
-                                'buildings-fill' => ['dashboard.layer_buildings', 'home_work'],
                             ] as $layer => [$label, $icon])
                                 <label class="flex items-center gap-2 px-1.5 py-1 rounded-lg cursor-pointer text-xs
                                               text-on-surface dark:text-white hover:bg-surface-container dark:hover:bg-white/5">

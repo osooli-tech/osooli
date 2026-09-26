@@ -8,9 +8,11 @@ use App\Livewire\Imports\MapLayerManager;
 use App\Models\MapLayer;
 use App\Models\User;
 use App\Services\Import\GdbImporter;
+use App\Support\Database\Spatial;
 use App\Support\Geo\LayerNames;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -19,9 +21,9 @@ use Tests\TestCase;
 use ZipArchive;
 
 /**
- * Custom map layers: a geodatabase layer that is not parcels, projects or
- * buildings kept whole and shown on the map, and the warning when its name
- * is close to a layer already there.
+ * Custom map layers: any geodatabase layer other than the parcels —
+ * projects and buildings too — kept whole, shown on the map, downloaded,
+ * and the warning when its name is close to a layer already there.
  */
 class CustomLayersTest extends TestCase
 {
@@ -145,6 +147,67 @@ class CustomLayersTest extends TestCase
         Livewire::test(MapLayerManager::class)->call('delete', $layer->id);
         $this->assertDatabaseMissing('map_layers', ['id' => $layer->id]);
         $this->assertSame(0, DB::table('map_layer_features')->count());
+    }
+
+    public function test_a_layer_is_shown_or_hidden_in_one_click_and_downloaded_whole(): void
+    {
+        $layer = MapLayer::create(['name' => 'المباني']);
+        DB::insert(
+            'INSERT INTO map_layer_features (map_layer_id, properties, geom, created_at, updated_at) VALUES (?, ?, '.Spatial::anyFromGeoJson().', ?, ?)',
+            [$layer->id, json_encode(['Name' => 'سكن', 'Code' => 'Building'], JSON_UNESCAPED_UNICODE), json_encode(['type' => 'Point', 'coordinates' => [46.6, 24.8]]), now(), now()]
+        );
+
+        $viewer = User::factory()->create(['is_active' => true]);
+        $this->actingAs($viewer)->get(route('map-layers.download', $layer))->assertForbidden();
+
+        $admin = User::factory()->create(['is_active' => true]);
+        Permission::firstOrCreate(['name' => 'imports.create', 'guard_name' => 'web']);
+        $admin->givePermissionTo('imports.create');
+        $this->actingAs($admin);
+
+        Livewire::test(MapLayerManager::class)->call('toggleVisible', $layer->id);
+        $this->assertTrue($layer->fresh()->visible_by_default);
+        Livewire::test(MapLayerManager::class)->call('toggleVisible', $layer->id);
+        $this->assertFalse($layer->fresh()->visible_by_default);
+
+        $response = $this->get(route('map-layers.download', $layer))->assertOk();
+        $geojson = json_decode($response->streamedContent(), true);
+
+        $this->assertSame('FeatureCollection', $geojson['type']);
+        $this->assertSame('المباني', $geojson['name']);
+        $this->assertSame(['Name' => 'سكن', 'Code' => 'Building'], $geojson['features'][0]['properties']);
+        $this->assertSame('Point', $geojson['features'][0]['geometry']['type']);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'download', 'target_type' => 'map_layer', 'target_id' => $layer->id]);
+    }
+
+    public function test_projects_and_buildings_on_record_move_into_layers_of_their_own(): void
+    {
+        $migration = require database_path('migrations/2026_09_26_140000_move_projects_and_buildings_to_map_layers.php');
+        $migration->down();
+
+        $square = json_encode(['type' => 'MultiPolygon', 'coordinates' => [[[[46.6, 24.8], [46.61, 24.8], [46.61, 24.81], [46.6, 24.81], [46.6, 24.8]]]]]);
+        foreach ([['buildings', 'سكن', 'Building'], ['buildings', null, 'Building'], ['projects', 'مزرعة', 'FARM']] as [$table, $name, $code]) {
+            $id = DB::table($table)->insertGetId(['name' => $name, 'code' => $code, 'area' => 120.5, 'length' => 44.0, 'created_at' => now(), 'updated_at' => now()]);
+            DB::update("UPDATE {$table} SET geom = ".Spatial::fromGeoJson().' WHERE id = ?', [$square, $id]);
+        }
+        DB::table('map_appearance_settings')->insert(['overrides' => json_encode(['buildings_fill' => '#112233', 'parcels_fill' => '#445566']), 'created_at' => now(), 'updated_at' => now()]);
+
+        $migration->up();
+
+        $buildings = MapLayer::where('name', 'المباني')->sole();
+        $this->assertSame(2, $buildings->feature_count);
+        $this->assertSame('#112233', $buildings->color, 'the colour chosen for them on the map comes along');
+        $this->assertTrue($buildings->visible_by_default);
+        $this->assertSame(['Name', 'Code', 'Shape_Area', 'Shape_Length'], array_column($buildings->fields ?? [], 'name'));
+        $this->assertSame('#c9a84c', MapLayer::where('name', 'المشاريع')->sole()->color);
+
+        $feature = DB::table('map_layer_features')->where('map_layer_id', $buildings->id)->orderBy('id')->first();
+        $this->assertSame(['Name' => 'سكن', 'Code' => 'Building', 'Shape_Area' => 120.5, 'Shape_Length' => 44.0], json_decode($feature->properties, true));
+        $this->assertNotNull($feature->geom);
+
+        $this->assertFalse(Schema::hasTable('projects'));
+        $this->assertFalse(Schema::hasTable('buildings'));
+        $this->assertSame(['parcels_fill' => '#445566'], json_decode((string) DB::table('map_appearance_settings')->value('overrides'), true));
     }
 
     private function requireGdal(): void

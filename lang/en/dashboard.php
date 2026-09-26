@@ -95,8 +95,6 @@ return [
     'visible_layers' => 'Visible layers',
     'layer_parcels' => 'Parcel fill',
     'layer_outlines' => 'Parcel outlines',
-    'layer_projects' => 'Projects',
-    'layer_buildings' => 'Buildings',
     'customise_colours' => 'Customise colours',
     'customise_colours_hint' => 'Changes preview live on the map; press Save to apply them for everyone.',
     'save_colours' => 'Save',

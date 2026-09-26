@@ -8,7 +8,6 @@ use App\Enums\ImportStatus;
 use App\Models\ImportBatch;
 use App\Models\MapLayer;
 use App\Services\Import\CustomLayerImporter;
-use App\Services\Import\DisplayLayerImporter;
 use App\Services\Import\GdbImporter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -162,10 +161,6 @@ final class ImportWizard extends Component
             'layers' => $layers,
             'district_match' => $pick($o['district_match'] ?? null, ['name', 'map'], 'name'),
             'parcel_districts' => $parcelDistricts,
-            'modes' => [
-                'projects' => $pick($o['modes']['projects'] ?? null, DisplayLayerImporter::MODES, 'replace'),
-                'buildings' => $pick($o['modes']['buildings'] ?? null, DisplayLayerImporter::MODES, 'replace'),
-            ],
             'districts' => $districts,
             'default_city_id' => $int($o['default_city_id'] ?? null),
             'plan_placeholders' => mb_substr(trim((string) ($o['plan_placeholders'] ?? '')), 0, 500),
@@ -185,8 +180,8 @@ final class ImportWizard extends Component
 
     /**
      * Point a layer of the file at the one its name resembles — a custom
-     * layer on the map (to add to it) or a built-in role — from the warning
-     * on the review screen.
+     * layer on the map (to add to it) or the parcels — from the warning on
+     * the review screen.
      */
     public function useSimilar(int $index, string $kind, string $value): void
     {
@@ -198,7 +193,7 @@ final class ImportWizard extends Component
             $this->options['layers'][$index]['role'] = 'custom';
             $this->options['layers'][$index]['target'] = (int) $value;
             $this->options['layers'][$index]['mode'] = 'append';
-        } elseif ($kind === 'built_in' && in_array($value, ['parcels', 'projects', 'buildings'], true)) {
+        } elseif ($kind === 'built_in' && $value === 'parcels') {
             $this->options['layers'][$index]['role'] = $value;
         }
     }

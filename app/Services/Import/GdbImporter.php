@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * An uploaded geodatabase: every layer looked at, each put where the review
  * screen said — parcels (with their deeds, owners, boundaries and survey
- * decisions), projects, buildings, or nowhere.
+ * decisions), a custom map layer (projects and buildings among them), or
+ * nowhere.
  *
  * analyze() reports what is in the file and suggests a decision for every
  * choice there is; commit() applies the choices that were confirmed. A plain
@@ -34,12 +35,11 @@ final class GdbImporter implements Importer
     /** Plan numbers that mean "no plan", when the file has them. */
     private const PLAN_PLACEHOLDERS = ['بدون', 'لا يوجد', 'لايوجد', '-', '0'];
 
-    public const ROLES = ['parcels', 'projects', 'buildings', 'custom', 'ignore'];
+    public const ROLES = ['parcels', 'custom', 'ignore'];
 
     public function __construct(
         private readonly GdbInspector $inspector,
         private readonly ParcelGeoJsonImporter $parcels,
-        private readonly DisplayLayerImporter $display,
         private readonly CustomLayerImporter $custom,
     ) {}
 
@@ -69,10 +69,6 @@ final class GdbImporter implements Importer
                 'relationships' => $inventory['relationships'],
                 'system_tables' => $inventory['system_tables'],
                 'analysis' => $this->analysis($features),
-                'existing' => [
-                    'projects' => DB::table('projects')->count(),
-                    'buildings' => DB::table('buildings')->count(),
-                ],
                 'similar' => $this->similarNames($inventory),
                 'suggested' => $this->suggest($inventory, $features),
             ]],
@@ -94,10 +90,7 @@ final class GdbImporter implements Importer
                 $choices[$choice['name']] = $choice;
             }
         }
-        $modes = is_array($options['modes'] ?? null) ? $options['modes'] : [];
-
         $result = null;
-        $written = [];
         $customLayers = [];
         foreach ($inventory['layers'] as $layer) {
             $choice = $choices[$layer['name']] ?? ['role' => $layer['role']];
@@ -121,13 +114,6 @@ final class GdbImporter implements Importer
 
             if ($role === 'parcels' && $result === null) {
                 $result = $this->parcels->importFeatures($this->features((string) $layer['file']), $options);
-            } elseif (in_array($role, DisplayLayerImporter::TABLES, true)) {
-                $mode = $modes[$role] ?? 'replace';
-                if (in_array($mode, DisplayLayerImporter::MODES, true)) {
-                    // A second layer chosen for the same table adds to the first.
-                    $mode = isset($written[$role]) ? 'append' : $mode;
-                    $written[$role] = ($written[$role] ?? 0) + $this->display->import((string) $layer['file'], $role, $mode);
-                }
             }
         }
 
@@ -139,8 +125,6 @@ final class GdbImporter implements Importer
             skipped: $result->skipped,
             errors: $result->errors,
             details: $result->details + [
-                'projects' => $written['projects'] ?? 0,
-                'buildings' => $written['buildings'] ?? 0,
                 'custom' => array_sum($customLayers),
                 'custom_layers' => $customLayers,
             ],
@@ -283,27 +267,30 @@ final class GdbImporter implements Importer
         // paths on the review screen, and a path cannot hold any name.
         // A custom layer whose name is the name of one on the map already
         // (bar spelling) is suggested as that layer, replaced; one merely
-        // similar is suggested as new, with a warning beside it.
+        // similar is suggested as new, with a warning beside it. Projects
+        // and buildings are known under several names ("Buildings",
+        // "المباني"): such a layer goes to the one on the map known as the
+        // same, or else is made under its Arabic name.
         $existing = MapLayer::query()->get(['id', 'name']);
         $layers = array_map(static function (array $layer) use ($existing): array {
+            $kind = LayerNames::builtInRole($layer['name']);
+            $kind = isset(LayerNames::LAYER_NAMES[$kind]) ? $kind : null;
             $same = $layer['role'] === 'custom'
                 ? $existing->first(fn (MapLayer $m): bool => LayerNames::similarity($m->name, $layer['name']) === 1.0)
+                    ?? ($kind === null ? null : $existing->first(fn (MapLayer $m): bool => LayerNames::builtInRole($m->name) === $kind))
                 : null;
 
             return [
                 'name' => $layer['name'],
                 'role' => $layer['role'],
                 'target' => $same?->id,
-                'new_name' => $layer['name'],
+                'new_name' => $kind === null ? $layer['name'] : LayerNames::LAYER_NAMES[$kind],
                 'mode' => 'replace',
             ];
         }, $inventory['layers']);
 
         return [
             'layers' => $layers,
-            // Replace by default: the file is the source of these layers, and
-            // adding would duplicate every shape each time a file is re-run.
-            'modes' => ['projects' => 'replace', 'buildings' => 'replace'],
             'districts' => $districts,
             // By name (the table's matches) for all parcels unless changed;
             // each row, and each parcel, can be set otherwise.
@@ -417,9 +404,9 @@ final class GdbImporter implements Importer
 
     /**
      * For each layer of the file, by position: the layers on record whose
-     * names are close to its own — custom layers, and the built-in parcels,
-     * projects and buildings — so the screen can ask whether it is one of
-     * them before a near-duplicate is made.
+     * names are close to its own — custom layers, and the parcels — so the
+     * screen can ask whether it is one of them before a near-duplicate is
+     * made.
      *
      * @param  array<string, mixed>  $inventory
      * @return array<int, list<array{kind: string, id: int|null, role: string|null, name: string, score: float}>>
@@ -429,10 +416,8 @@ final class GdbImporter implements Importer
         $candidates = MapLayer::query()->get(['id', 'name'])
             ->map(static fn (MapLayer $m): array => ['kind' => 'custom', 'id' => $m->id, 'role' => null, 'name' => $m->name])
             ->all();
-        foreach (LayerNames::BUILT_IN as $role => $names) {
-            foreach ($names as $name) {
-                $candidates[] = ['kind' => 'built_in', 'id' => null, 'role' => $role, 'name' => $name];
-            }
+        foreach (LayerNames::BUILT_IN['parcels'] as $name) {
+            $candidates[] = ['kind' => 'built_in', 'id' => null, 'role' => 'parcels', 'name' => $name];
         }
 
         $similar = [];
