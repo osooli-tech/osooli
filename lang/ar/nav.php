@@ -14,6 +14,7 @@ return [
     'archive' => 'الأرشيف',
     'documents' => 'المستندات',
     'placement' => 'قطع خارج حيّها',
+    'imports_gdb' => 'استيراد Geodatabase والمستندات',
     'owners' => 'الملاك',
     'modification_requests' => 'طلبات التعديل',
     'presentation_requests' => 'طلبات العروض التقديمية',

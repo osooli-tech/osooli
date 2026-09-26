@@ -15,6 +15,7 @@ return [
     'imports' => 'Data import',
     'archive' => 'Archive',
     'documents' => 'Documents',
+    'imports_gdb' => 'Geodatabase & document import',
     'modification_requests' => 'Modification Requests',
     'presentation_requests' => 'Demo Requests',
     'notifications' => 'Notifications',

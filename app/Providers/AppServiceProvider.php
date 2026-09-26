@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Http\Middleware\SetLocale;
 use App\Support\Database\DatabaseSettings;
+use App\Services\Import\ArchiveExtractor;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
         if (! $this->app->runningUnitTests()) {
             $this->app->make(DatabaseSettings::class)->apply();
         }
+        $this->app->bind(ArchiveExtractor::class, fn (): ArchiveExtractor => new ArchiveExtractor(
+            maxEntries: (int) config('imports.max_archive_entries'),
+            maxTotalBytes: (int) config('imports.max_archive_bytes'),
+        ));
     }
 
     public function boot(): void
