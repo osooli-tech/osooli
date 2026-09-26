@@ -274,7 +274,11 @@
                         @foreach ($options['districts'] ?? [] as $i => $row)
                             <tr wire:key="district-{{ $i }}">
                                 <td class="{{ $td }} font-medium">
-                                    {{ $row['name'] }}
+                                    @if ($row['name'] === '')
+                                        <span class="text-on-surface-variant">{{ __('imports.gdb.no_district_name') }}</span>
+                                    @else
+                                        {{ $row['name'] }}
+                                    @endif
                                     @if (count($row['candidates'] ?? []) > 1)
                                         <span class="block text-xs text-amber-700 dark:text-amber-300">
                                             {{ __('imports.gdb.several_matches', ['cities' => collect($row['candidates'])->pluck('city')->implode('، ')]) }}
@@ -315,6 +319,13 @@
                                 </td>
                                 <td class="px-3 py-2 min-w-[200px]">
                                     @if (empty($row['district_id']))
+                                        @if ($row['name'] === '')
+                                            <label class="mb-1 block text-xs text-on-surface-variant dark:text-on-primary-container">
+                                                {{ __('imports.gdb.new_district_name') }}
+                                                <input type="text" wire:model.blur="options.districts.{{ $i }}.new_name" maxlength="150" dir="auto"
+                                                       class="{{ $select }} mt-0.5 w-full">
+                                            </label>
+                                        @endif
                                         <x-form.search-select name="options.districts.{{ $i }}.city_id" source="cities" live
                                                               :value="$row['city_id'] ?? null" :label="''"
                                                               :placeholder="__('imports.gdb.default_city')" />
@@ -424,6 +435,13 @@
                         <option value="{{ $id }}">{{ $name }}</option>
                     @endforeach
                 </select>
+                @if (empty($options['office_id']))
+                    <label class="flex items-center gap-2">
+                        {{ __('imports.gdb.new_office') }}
+                        <input type="text" wire:model.blur="options.office_name" maxlength="150" dir="auto" class="{{ $select }} w-64"
+                               placeholder="{{ __('imports.gdb.new_office_placeholder') }}">
+                    </label>
+                @endif
             </div>
         </section>
 

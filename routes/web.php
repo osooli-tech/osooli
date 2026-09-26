@@ -92,6 +92,10 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
 
     // Documents
     Route::get('/documents', fn () => view('documents.index'))->name('documents.index');
+    // One PDF of many parcels' pages, split and filed page by page.
+    Route::get('/documents/split', fn () => view('documents.split'))
+        ->middleware('can:documents.upload')
+        ->name('documents.split');
     Route::get('/documents/{photo}/download', [DocumentController::class, 'download'])
         ->middleware('can:documents.download')
         ->name('documents.download');

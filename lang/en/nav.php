@@ -15,6 +15,7 @@ return [
     'imports' => 'Data import',
     'archive' => 'Archive',
     'documents' => 'Documents',
+    'split_upload' => 'Upload a multi-parcel PDF',
     'imports_gdb' => 'Geodatabase & document import',
     'map_layers' => 'Custom map layers',
     'modification_requests' => 'Modification Requests',

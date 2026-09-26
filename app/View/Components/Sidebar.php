@@ -42,6 +42,12 @@ class Sidebar extends Component
             'permission' => 'documents.download',
         ],
         [
+            'route' => 'documents.split',
+            'label' => 'nav.split_upload',
+            'icon' => 'splitscreen',
+            'permission' => 'documents.upload',
+        ],
+        [
             'route' => 'reference.index',
             'label' => 'nav.reference',
             'icon' => 'dataset',

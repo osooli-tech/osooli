@@ -13,6 +13,7 @@ return [
     'imports' => 'استيراد البيانات',
     'archive' => 'الأرشيف',
     'documents' => 'المستندات',
+    'split_upload' => 'رفع ملف PDF متعدد القطع',
     'placement' => 'قطع خارج حيّها',
     'imports_gdb' => 'استيراد Geodatabase والمستندات',
     'map_layers' => 'الطبقات المخصصة',

@@ -144,6 +144,7 @@ final class ImportWizard extends Component
                     'district_id' => $int($row['district_id'] ?? null),
                     'city_id' => $int($row['city_id'] ?? null),
                     'match' => $pick($row['match'] ?? null, ['name', 'map'], ''),
+                    'new_name' => mb_substr(trim((string) ($row['new_name'] ?? '')), 0, 150),
                 ];
             }
         }
@@ -175,6 +176,7 @@ final class ImportWizard extends Component
             'deedless' => $pick($o['deedless'] ?? null, ['placeholder', 'skip'], 'placeholder'),
             'no_plan' => $pick($o['no_plan'] ?? null, ['district_plan', 'none'], 'district_plan'),
             'office_id' => $int($o['office_id'] ?? null),
+            'office_name' => mb_substr(trim((string) ($o['office_name'] ?? '')), 0, 150),
             // Recorded on the custom layers this import creates.
             'source_name' => $this->batch()?->original_filename,
             'user_id' => auth()->id(),

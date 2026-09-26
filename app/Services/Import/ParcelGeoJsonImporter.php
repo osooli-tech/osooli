@@ -156,6 +156,9 @@ final class ParcelGeoJsonImporter implements Importer
     {
         $groups = $this->groupByParcelAndDeed($features);
         $o = self::options($options);
+        if (! $o['legacy'] && $o['office_id'] === null && $o['office_name'] !== '') {
+            $o['office_id'] = $this->findOrCreate('engineering_offices', ['name' => $o['office_name']]);
+        }
         $this->unknown = [];
         $this->planConflicts = [];
 
@@ -291,7 +294,7 @@ final class ParcelGeoJsonImporter implements Importer
      * @param  array<string, mixed>  $options
      * @return array{legacy: bool, districts: list<array{name: string, district_id: int|null, city_id: int|null, match: string}>,
      *     district_match: string, parcel_districts: array<string, int>, default_city_id: int|null, plan_placeholders: list<string>, borders: string, qrar: string,
-     *     folder: string, portfolios: bool, deedless: string, no_plan: string, office_id: int|null}
+     *     folder: string, portfolios: bool, deedless: string, no_plan: string, office_id: int|null, office_name: string}
      */
     public static function options(array $options): array
     {
@@ -306,6 +309,8 @@ final class ParcelGeoJsonImporter implements Importer
                     'city_id' => is_numeric($row['city_id'] ?? null) ? (int) $row['city_id'] : null,
                     // '' follows the method chosen for all parcels.
                     'match' => in_array($row['match'] ?? null, ['name', 'map'], true) ? (string) $row['match'] : '',
+                    // The name of the district made for parcels whose District is empty.
+                    'new_name' => trim((string) ($row['new_name'] ?? '')),
                 ];
             }
         }
@@ -340,6 +345,8 @@ final class ParcelGeoJsonImporter implements Importer
             // A parcel with no real plan: into its district's stand-in plan, or no plan.
             'no_plan' => $pick('no_plan', ['district_plan', 'none'], $legacy ? 'none' : 'district_plan'),
             'office_id' => is_numeric($options['office_id'] ?? null) ? (int) $options['office_id'] : null,
+            // An office not on record yet, named on the review screen.
+            'office_name' => mb_substr(trim((string) ($options['office_name'] ?? '')), 0, 150),
         ];
     }
 
@@ -609,7 +616,7 @@ final class ParcelGeoJsonImporter implements Importer
 
         $method = $o['district_match'];
         foreach ($o['districts'] as $row) {
-            if ($name !== null && trim($row['name']) === $name && $row['match'] !== '') {
+            if (trim($row['name']) === (string) $name && $row['match'] !== '') {
                 $method = $row['match'];
                 break;
             }
@@ -637,13 +644,10 @@ final class ParcelGeoJsonImporter implements Importer
      */
     private function districtFor(?string $name, array $o): ?int
     {
-        if ($name === null) {
-            return null;
-        }
-
+        // Parcels whose District is empty share one row, keyed by ''.
         $row = null;
         foreach ($o['districts'] as $candidate) {
-            if (trim($candidate['name']) === $name) {
+            if (trim($candidate['name']) === (string) $name) {
                 $row = $candidate;
                 break;
             }
@@ -651,6 +655,14 @@ final class ParcelGeoJsonImporter implements Importer
 
         if ($row !== null && $row['district_id'] !== null) {
             return $row['district_id'];
+        }
+
+        if ($name === null) {
+            // No name of its own: made under the name chosen for the row.
+            $name = $row['new_name'] ?? '';
+            if ($name === '') {
+                return null;
+            }
         }
 
         $cityId = $row['city_id'] ?? null;

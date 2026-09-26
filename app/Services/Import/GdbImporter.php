@@ -242,6 +242,12 @@ final class GdbImporter implements Importer
 
         $districts = [];
         $cities = [];
+        // Parcels with no District at all: one row, named by where they lie.
+        $unnamed = array_values(array_filter($features, static fn (array $f): bool => trim((string) ($f['properties']['District'] ?? '')) === ''));
+        if ($unnamed !== []) {
+            $byName[''] = $unnamed;
+        }
+
         foreach ($byName as $name => $group) {
             $row = $this->matchDistrict((string) $name, $group);
             foreach ($row['map_cities'] as $cityId => $hits) {
@@ -310,9 +316,10 @@ final class GdbImporter implements Importer
             // decision number.
             'qrar' => $qrar === [] ? 'ignore'
                 : (array_filter($qrar, static fn (string $v): bool => ! is_numeric($v) || (int) $v > 3) !== [] ? 'number' : 'source'),
-            // A folder is a short reference; sentences are notes.
+            // A folder is a short reference with a number in it ("12",
+            // "م-4"); a sentence, or a word such as "قرارات", is a note.
             'folder' => $folder === [] ? 'ignore'
-                : (array_filter($folder, static fn (string $v): bool => mb_strlen($v) > 20 || str_contains($v, ' ')) !== [] ? 'ignore' : 'folder'),
+                : (array_filter($folder, static fn (string $v): bool => mb_strlen($v) > 20 || preg_match('/\d/', $v) !== 1) !== [] ? 'ignore' : 'folder'),
             'portfolios' => $portfolios !== [],
             'deedless' => 'placeholder',
             'no_plan' => 'district_plan',
@@ -339,6 +346,7 @@ final class GdbImporter implements Importer
         $byName = DB::table('districts as d')
             ->join('cities as c', 'c.id', '=', 'd.city_id')
             ->where('d.name_ar', $name)
+            ->where('d.name_ar', '!=', '')
             ->limit(10)
             ->get(['d.id', 'd.city_id', 'c.name_ar as city']);
 
@@ -376,8 +384,16 @@ final class GdbImporter implements Importer
             default => [null, 'none', null],
         };
 
+        // A district made for parcels with no District value is named after
+        // the city they lie in (the file gives nothing better).
+        $cityOfParcels = array_key_first($mapCities);
+        $newName = $name === '' && $cityOfParcels !== null
+            ? (string) DB::table('cities')->where('id', $cityOfParcels)->value('name_ar')
+            : '';
+
         return [
             'name' => $name,
+            'new_name' => $newName,
             'count' => count($group),
             'district_id' => $districtId,
             // For a district that is not matched: made in the city its parcels lie in.

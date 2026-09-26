@@ -156,6 +156,10 @@ return [
         'parcel_option' => 'Parcel :no — :district',
         'parcel_not_in_file' => 'This parcel is not in the file.',
         'add_parcel_exception' => 'Add a parcel',
+        'no_district_name' => '(no district name in the file)',
+        'new_district_name' => 'Name of the new district (suggested from where the parcels lie)',
+        'new_office' => 'or add a new office named',
+        'new_office_placeholder' => 'e.g. Saif Engineering Consultation',
         'match_method' => 'Matched by',
         'methods' => [
             'name_map' => 'name and map',

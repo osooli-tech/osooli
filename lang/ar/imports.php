@@ -149,6 +149,10 @@ return [
         'parcel_option' => 'قطعة :no — :district',
         'parcel_not_in_file' => 'هذه القطعة ليست في الملف.',
         'add_parcel_exception' => 'إضافة قطعة',
+        'no_district_name' => '(بلا اسم حي في الملف)',
+        'new_district_name' => 'اسم الحي الجديد (مقترح من موقع القطع)',
+        'new_office' => 'أو أضف مكتبًا جديدًا باسم',
+        'new_office_placeholder' => 'مثل: سيف للاستشارات الهندسية',
         'match_method' => 'طريقة المطابقة',
         'methods' => [
             'name_map' => 'بالاسم والخريطة',
