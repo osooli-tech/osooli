@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace App\Support\Export;
 
-use App\Models\City;
 use App\Models\Deed;
-use App\Models\District;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelBoundary;
 use App\Models\ParcelPhoto;
-use App\Models\Plan;
-use App\Models\Region;
 use App\Models\SurveyDecision;
 use App\Models\User;
 use App\Support\Database\Spatial;
@@ -20,10 +16,8 @@ use App\Support\DatabaseEnum;
 use App\Support\Import\DeedImportAnalyzer;
 use BackedEnum;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -34,18 +28,18 @@ use Throwable;
  * parcel on record can leave in the file.
  *
  * One feature per deed (or per deedless parcel), carrying the parcel's
- * polygon, so the file opens as a map layer in QGIS or ArcGIS.
+ * polygon, so the file opens as a map layer in QGIS or ArcGIS. Its
+ * properties hold two things:
  *
- * Every piece of information has a column of its own — no nested records —
- * so the attribute table can be read and filled in cell by cell. Lists are
- * numbered columns: `owner_1_name`, `owner_1_national_id` … `owner_2_name`,
- * and likewise `survey_1_…` and `document_1_…`. A file carries as many
- * numbered sets as its fullest record needs, and every feature carries the
- * same columns, so the table stays rectangular.
+ *  - flat columns (deed number, parcel, location, owner names…) that a GIS
+ *    attribute table shows as they are;
+ *  - the full records, nested — every owner with their share, the
+ *    boundaries, each survey decision, each document with a link to it —
+ *    so nothing is lost and the file can be edited and imported back.
  *
- * History — when a record was created, changed, archived and by whom, a
- * document's size and review — has columns too (`deed_created_at` …). The
- * importer reads past them.
+ * Each record also carries a `meta` block — when it was created, last
+ * changed, archived and by whom, and a document's size, uploader and
+ * review. That is history, not data: the importer reads past it.
  *
  * Records are read in chunks and each feature is written as it is built, so
  * memory stays flat however many thousands match.
@@ -54,8 +48,7 @@ final class DeedGeoJsonExporter
 {
     public const FORMAT = 'sokuki-deeds';
 
-    /** 2: one column per value. 1 (still imported) nested owners, boundary… */
-    public const VERSION = 2;
+    public const VERSION = 1;
 
     /** Optional parts of each feature; the deed itself is always included. */
     public const GROUPS = ['geometry', 'parcel', 'owners', 'boundary', 'survey', 'documents'];
@@ -64,17 +57,6 @@ final class DeedGeoJsonExporter
 
     /** Coordinate decimals kept — about a millimetre. */
     private const PRECISION = 8;
-
-    /**
-     * How many numbered owner, survey decision and document columns each
-     * feature carries: as many as the fullest record in the file needs.
-     *
-     * @var array{owners: int, survey: int, documents: int}
-     */
-    private array $slots = ['owners' => 1, 'survey' => 1, 'documents' => 1];
-
-    /** Whether the history columns are written; the sample file leaves them out. */
-    private bool $history = true;
 
     /**
      * Run export `$id` to completion, recording progress in ExportRuns.
@@ -116,9 +98,6 @@ final class DeedGeoJsonExporter
             $run['total'] = (clone $deeds)->count() + ($parcels === null ? 0 : (clone $parcels)->count());
             ExportRuns::save($run);
 
-            $this->slots = $this->slotsFor($deeds, $parcels);
-            $this->history = true;
-
             $handle = fopen($partial, 'wb');
             if ($handle === false) {
                 throw new RuntimeException('Cannot write the export file.');
@@ -133,8 +112,6 @@ final class DeedGeoJsonExporter
                 'groups' => $groups,
                 'count' => $run['total'],
                 'crs' => 'EPSG:4326',
-                'layout' => 'flat',
-                'slots' => $this->slots,
             ]).',"features":[');
 
             $first = true;
@@ -194,19 +171,34 @@ final class DeedGeoJsonExporter
 
     /**
      * A file in the export's own layout holding a single made-up record: one
-     * deed on one parcel, owned by one person, with one survey decision and
-     * one document, so every column shows what goes in it. Three owner and
-     * two survey and document sets are there to show how more are added.
-     * The values are replaced with real ones and the file uploaded like any
-     * export.
+     * deed on one parcel, with one owner, one survey decision and one
+     * document, so every column shows what goes in it. Its values are
+     * replaced with real ones and it is uploaded like any export.
      *
-     * The record is built from unsaved models by the same feature() the
-     * export uses, so a column added there appears here too. The history
-     * columns are left out — nothing to fill in — and the header lists the
+     * The columns come from the same feature() the export uses, so a column
+     * added there appears here without a second list to keep in step; only
+     * the sample values are written out below. The `meta` blocks are left
+     * out — history the importer never reads — and the header lists the
      * values each fixed-choice column accepts.
      */
     public function template(): string
     {
+        $deed = new Deed;
+        $deed->setRelation('owners', new Collection([new Owner]));
+        $deed->setRelation('archivedBy', null);
+
+        $parcel = new Parcel;
+        foreach (['plan' => null, 'parent' => null, 'archivedBy' => null, 'photos' => new Collection] as $relation => $value) {
+            $parcel->setRelation($relation, $value);
+        }
+        $boundary = new ParcelBoundary;
+        $boundary->setRelation('engineeringOffice', null);
+        $parcel->setRelation('boundary', $boundary);
+        $parcel->setRelation('surveyDecisions', new Collection([new SurveyDecision]));
+
+        $feature = $this->feature($deed, $parcel, self::GROUPS, []);
+        $feature['id'] = null;
+
         $allowed = [];
         foreach (DeedImportAnalyzer::ENUMS as $field => $column) {
             $allowed[$field] = DatabaseEnum::for($column);
@@ -214,62 +206,79 @@ final class DeedGeoJsonExporter
         // A sample value for a fixed-choice column: the first it allows.
         $choice = static fn (string $field): ?string => $allowed[$field][0] ?? null;
 
-        $region = (new Region)->forceFill(['name_ar' => 'منطقة الرياض', 'name_en' => 'Riyadh']);
-        $city = (new City)->forceFill(['name_ar' => 'الرياض', 'name_en' => 'Riyadh'])->setRelation('region', $region);
-        $district = (new District)->forceFill(['name_ar' => 'الملقا', 'name_en' => 'Al Malqa'])->setRelation('city', $city);
-        $plan = (new Plan)->forceFill(['plan_no' => '3120'])->setRelation('district', $district);
-
-        $parcel = (new Parcel)->forceFill([
-            'geo_id' => 'DEMO-0001',
-            'parcel_no' => '15',
-            'asset_type' => $choice('asset_type'),
-            'land_transaction' => $choice('land_transaction'),
-            'allocation_method' => $choice('allocation_method'),
-            'fall_in' => $choice('fall_in'),
-            'm_price' => 1500,
-            'parcel_price' => 937500,
-        ]);
-        $parcel->setRelation('plan', $plan);
-        $parcel->setRelation('parent', null);
-        $parcel->setRelation('boundary', (new ParcelBoundary)->forceFill([
-            'n_border' => 'شارع عرض 20 م', 'n_dim' => 25,
-            's_border' => 'قطعة رقم 16', 's_dim' => 25,
-            'e_border' => 'قطعة رقم 14', 'e_dim' => 25,
-            'w_border' => 'ممر مشاة عرض 6 م', 'w_dim' => 25,
-            'measured_area' => 625, 'matches_deed' => true, 'survey_date' => '2024-01-10',
-        ])->setRelation('engineeringOffice', null));
-        $parcel->setRelation('surveyDecisions', new Collection([(new SurveyDecision)->forceFill([
-            'qrar_no' => '12345', 'report_no' => '678', 'qrar_source' => $choice('qrar_source'), 'folder' => '1',
-        ])]));
-        // Documents are uploaded on the site after the import; the sample
-        // only names the file expected, so it carries no link.
-        $parcel->setRelation('photos', new Collection([(new ParcelPhoto)->forceFill([
-            'photo_type' => 'صك', 'original_name' => 'صك-410100000001.pdf',
-        ])]));
-
-        $owner = (new Owner)->forceFill([
-            'name' => 'محمد عبدالله السالم', 'national_id' => '1098765432', 'phone' => '0555555555',
-            'email' => 'owner@example.com', 'whatsapp' => '0555555555',
-        ])->setRelation('pivot', (new Pivot)->forceFill(['ownership_share' => 100]));
-
-        $deed = (new Deed)->forceFill([
+        $sample = [
             'deed_no' => '410100000001',
             'deed_date_hijri' => '1445-06-15',
-            'deed_area' => 625,
+            'deed_area' => 625.0,
             'deed_status' => $choice('deed_status'),
             'deed_class' => $choice('deed_class'),
-        ])->setRelation('owners', new Collection([$owner]));
+        ];
+        $location = [
+            'district' => ['name_ar' => 'الملقا', 'name_en' => 'Al Malqa'],
+            'city' => ['name_ar' => 'الرياض', 'name_en' => 'Riyadh'],
+            'region' => ['name_ar' => 'منطقة الرياض', 'name_en' => 'Riyadh'],
+        ];
+
+        $properties = array_replace_recursive(self::withoutMeta($feature['properties']), $sample, [
+            'parcel_geo_id' => 'DEMO-0001',
+            'parcel_no' => '15',
+            'plan_no' => '3120',
+            'district' => $location['district']['name_ar'],
+            'city' => $location['city']['name_ar'],
+            'region' => $location['region']['name_ar'],
+            'owners_names' => 'محمد عبدالله السالم',
+            'owners_count' => 1,
+            'computed_area_sqm' => 625.0,
+            'deed' => $sample + ['archived' => false],
+            'parcel' => [
+                'geo_id' => 'DEMO-0001',
+                'parcel_no' => '15',
+                'asset_type' => $choice('asset_type'),
+                'land_transaction' => $choice('land_transaction'),
+                'allocation_method' => $choice('allocation_method'),
+                'fall_in' => $choice('fall_in'),
+                'm_price' => 1500.0,
+                'parcel_price' => 937500.0,
+                'computed_area_sqm' => 625.0,
+                'archived' => false,
+                'plan' => ['plan_no' => '3120'],
+                'location' => $location,
+            ],
+            'owners' => [[
+                'name' => 'محمد عبدالله السالم',
+                'national_id' => '1098765432',
+                'phone' => '0555555555',
+                'email' => 'owner@example.com',
+                'whatsapp' => '0555555555',
+                'ownership_share' => 100.0,
+                'archived' => false,
+            ]],
+            'boundary' => [
+                'north' => ['border' => 'شارع عرض 20 م', 'length' => 25.0],
+                'south' => ['border' => 'قطعة رقم 16', 'length' => 25.0],
+                'east' => ['border' => 'قطعة رقم 14', 'length' => 25.0],
+                'west' => ['border' => 'ممر مشاة عرض 6 م', 'length' => 25.0],
+                'measured_area' => 625.0,
+                'matches_deed' => true,
+                'survey_date' => '2024-01-10',
+            ],
+            'survey_decisions' => [[
+                'qrar_no' => '12345',
+                'report_no' => '678',
+                'qrar_source' => $choice('qrar_source'),
+                'folder' => '1',
+            ]],
+        ]);
+        // Documents are uploaded on the site after the import; the entry
+        // only names the file expected, so it carries no link.
+        $properties['documents'] = [['type' => 'صك', 'name' => 'صك-410100000001.pdf', 'status' => null, 'url' => null]];
+        $feature['properties'] = $properties;
 
         // A 25 m square in Al Malqa, so the file opens as a map layer.
         [$x, $y, $dx, $dy] = [46.62, 24.80, 0.000247, 0.000226];
-        $shape = ['area' => 625.0, 'geometry' => ['type' => 'MultiPolygon', 'coordinates' => [[[
+        $feature['geometry'] = ['type' => 'MultiPolygon', 'coordinates' => [[[
             [$x, $y], [$x + $dx, $y], [$x + $dx, $y + $dy], [$x, $y + $dy], [$x, $y],
-        ]]]]];
-
-        $this->slots = ['owners' => 3, 'survey' => 2, 'documents' => 2];
-        $this->history = false;
-        $feature = $this->feature($deed, $parcel, self::GROUPS, [0 => $shape]);
-        $feature['id'] = null;
+        ]]]];
 
         return self::json([
             'type' => 'FeatureCollection',
@@ -279,8 +288,6 @@ final class DeedGeoJsonExporter
                 'version' => self::VERSION,
                 'template' => true,
                 'crs' => 'EPSG:4326',
-                'layout' => 'flat',
-                'slots' => $this->slots,
                 'allowed_values' => $allowed,
             ],
             'features' => [$feature],
@@ -288,34 +295,14 @@ final class DeedGeoJsonExporter
     }
 
     /**
-     * The most owners one deed has, and the most survey decisions and
-     * documents one parcel has, among the records being exported — at least
-     * one of each, so the columns are always there to fill in.
-     *
-     * @param  Builder<Deed>  $deeds
-     * @param  Builder<Parcel>|null  $parcels
-     * @return array{owners: int, survey: int, documents: int}
+     * @param  array<mixed>  $data
+     * @return array<mixed>
      */
-    private function slotsFor(Builder $deeds, ?Builder $parcels): array
+    private static function withoutMeta(array $data): array
     {
-        $most = static fn (string $table, string $key, mixed $in): int => (int) DB::query()
-            ->fromSub(DB::table($table)->selectRaw('COUNT(*) AS n')->whereIn($key, $in)->groupBy($key), 'counts')
-            ->max('n');
+        unset($data['meta']);
 
-        $parcelSets = [(clone $deeds)->reorder()->select('deeds.parcel_id')];
-        if ($parcels !== null) {
-            $parcelSets[] = (clone $parcels)->reorder()->select('parcels.id');
-        }
-        $perParcel = static fn (string $table): int => max(array_map(
-            static fn (Builder $in): int => $most($table, 'parcel_id', $in),
-            $parcelSets
-        ));
-
-        return [
-            'owners' => max(1, $most('deed_owners', 'deed_id', (clone $deeds)->reorder()->select('deeds.id'))),
-            'survey' => max(1, $perParcel('survey_decisions')),
-            'documents' => max(1, $perParcel('parcel_photos')),
-        ];
+        return array_map(static fn (mixed $value): mixed => is_array($value) ? self::withoutMeta($value) : $value, $data);
     }
 
     /**
@@ -381,10 +368,6 @@ final class DeedGeoJsonExporter
     }
 
     /**
-     * One deed (or one deedless parcel) as a feature whose properties are
-     * all plain values, in the order a person reads them: deed, parcel,
-     * location, boundary, owners, survey decisions, documents.
-     *
      * @param  list<string>  $groups
      * @param  array<int, array{geometry: mixed, area: float|null}>  $geometries
      * @return array<string, mixed>
@@ -396,182 +379,167 @@ final class DeedGeoJsonExporter
         $city = $district?->city;
         $region = $city?->region;
         $shape = $parcel === null ? null : ($geometries[(int) $parcel->id] ?? null);
-        $has = static fn (string $group): bool => in_array($group, $groups, true);
+        $owners = $deed !== null && in_array('owners', $groups, true) ? $deed->owners : null;
 
-        $p = [
+        // Flat columns first: what a GIS attribute table shows directly.
+        $properties = [
             'deed_id' => $deed?->id,
             'deed_no' => $deed?->deed_no,
             'deed_date_hijri' => $deed?->deed_date_hijri,
             'deed_area' => self::number($deed?->deed_area),
             'deed_status' => self::scalar($deed?->deed_status),
             'deed_class' => self::scalar($deed?->deed_class),
-        ] + $this->history('deed', $deed);
-
-        $p += [
-            'parcel_id' => $parcel?->id,
             'parcel_geo_id' => $parcel?->geo_id,
             'parcel_no' => $parcel?->parcel_no,
             'parent_geo_id' => $parcel?->parent?->geo_id,
-        ];
-
-        if ($has('parcel')) {
-            $p += [
-                'asset_type' => self::scalar($parcel?->asset_type),
-                'land_transaction' => self::scalar($parcel?->land_transaction),
-                'allocation_method' => self::scalar($parcel?->allocation_method),
-                'fall_in' => self::scalar($parcel?->fall_in),
-                'm_price' => self::number($parcel?->m_price),
-                'parcel_price' => self::number($parcel?->parcel_price),
-            ] + $this->history('parcel', $parcel);
-
-            if ($this->history) {
-                $p['parcel_source_gdb_id'] = $parcel?->source_gdb_id;
-                $p['parcel_last_synced_at'] = self::date($parcel?->last_synced_at);
-            }
-        }
-
-        if ($has('geometry')) {
-            $p['computed_area_sqm'] = $shape['area'] ?? null;
-        }
-
-        $p += [
             'plan_no' => $plan?->plan_no,
             'district' => $district?->name_ar,
-            'district_en' => $district?->name_en,
             'city' => $city?->name_ar,
-            'city_en' => $city?->name_en,
             'region' => $region?->name_ar,
-            'region_en' => $region?->name_en,
         ];
 
-        if ($has('boundary')) {
-            $boundary = $parcel?->boundary;
-            $p += [
-                'n_border' => $boundary?->n_border,
-                'n_dim' => self::number($boundary?->n_dim),
-                's_border' => $boundary?->s_border,
-                's_dim' => self::number($boundary?->s_dim),
-                'e_border' => $boundary?->e_border,
-                'e_dim' => self::number($boundary?->e_dim),
-                'w_border' => $boundary?->w_border,
-                'w_dim' => self::number($boundary?->w_dim),
-                'measured_area' => self::number($boundary?->measured_area),
-                'matches_deed' => $boundary?->matches_deed,
-                'survey_date' => $boundary?->survey_date,
-                'engineering_office' => $boundary?->engineeringOffice?->name,
+        if ($owners !== null) {
+            $properties['owners_names'] = $owners->pluck('name')->implode('، ') ?: null;
+            $properties['owners_count'] = $owners->count();
+        }
+
+        if ($shape !== null) {
+            $properties['computed_area_sqm'] = $shape['area'];
+        }
+
+        // Then the full records, nested. A deedless parcel has no deed block.
+        $properties['deed'] = $deed === null ? null : [
+            'id' => $deed->id,
+            'deed_no' => $deed->deed_no,
+            'deed_date_hijri' => $deed->deed_date_hijri,
+            'deed_area' => self::number($deed->deed_area),
+            'deed_status' => self::scalar($deed->deed_status),
+            'deed_class' => self::scalar($deed->deed_class),
+            'archived' => $deed->deleted_at !== null,
+            'meta' => self::meta($deed),
+        ];
+
+        if (in_array('parcel', $groups, true) && $parcel !== null) {
+            $properties['parcel'] = [
+                'id' => $parcel->id,
+                'geo_id' => $parcel->geo_id,
+                'parcel_no' => $parcel->parcel_no,
+                'parent_geo_id' => $parcel->parent?->geo_id,
+                'asset_type' => self::scalar($parcel->asset_type),
+                'land_transaction' => self::scalar($parcel->land_transaction),
+                'allocation_method' => self::scalar($parcel->allocation_method),
+                'fall_in' => self::scalar($parcel->fall_in),
+                'm_price' => self::number($parcel->m_price),
+                'parcel_price' => self::number($parcel->parcel_price),
+                'computed_area_sqm' => $shape['area'] ?? null,
+                'archived' => $parcel->deleted_at !== null,
+                'plan' => ['plan_no' => $plan?->plan_no],
+                'location' => [
+                    'district' => self::place($district),
+                    'city' => self::place($city),
+                    'region' => self::place($region),
+                ],
+                'meta' => self::meta($parcel) + [
+                    'source_gdb_id' => $parcel->source_gdb_id,
+                    'last_synced_at' => self::date($parcel->last_synced_at),
+                ],
             ];
         }
 
-        if ($has('owners')) {
-            $owners = $deed === null ? [] : $deed->owners->values()->all();
-            foreach ($this->numbered($owners, 'owners') as $n => $owner) {
-                /** @var Owner|null $owner */
-                $p += [
-                    "owner_{$n}_id" => $owner?->id,
-                    "owner_{$n}_name" => $owner?->name,
-                    "owner_{$n}_national_id" => $owner?->national_id,
-                    "owner_{$n}_phone" => $owner?->phone,
-                    "owner_{$n}_email" => $owner?->email,
-                    "owner_{$n}_whatsapp" => $owner?->whatsapp,
-                    "owner_{$n}_share" => self::number($owner?->getRelationValue('pivot')?->getAttribute('ownership_share')),
-                ] + $this->history("owner_{$n}", $owner, archivedBy: false);
-            }
+        if ($owners !== null) {
+            $properties['owners'] = $owners->map(fn (Owner $owner): array => [
+                'id' => $owner->id,
+                'name' => $owner->name,
+                'national_id' => $owner->national_id,
+                'phone' => $owner->phone,
+                'email' => $owner->email,
+                'whatsapp' => $owner->whatsapp,
+                'ownership_share' => self::number($owner->getRelationValue('pivot')?->getAttribute('ownership_share')),
+                'archived' => $owner->deleted_at !== null,
+                'meta' => [
+                    'created_at' => self::date($owner->created_at),
+                    'updated_at' => self::date($owner->updated_at),
+                    'archived_at' => self::date($owner->deleted_at),
+                ],
+            ])->values()->all();
         }
 
-        if ($has('survey')) {
-            $decisions = $parcel === null ? [] : $parcel->surveyDecisions->values()->all();
-            foreach ($this->numbered($decisions, 'survey') as $n => $decision) {
-                /** @var SurveyDecision|null $decision */
-                $p += [
-                    "survey_{$n}_id" => $decision?->id,
-                    "survey_{$n}_qrar_no" => $decision?->qrar_no,
-                    "survey_{$n}_report_no" => $decision?->report_no,
-                    "survey_{$n}_qrar_source" => self::scalar($decision?->qrar_source),
-                    "survey_{$n}_folder" => $decision?->folder,
-                ];
-            }
+        if (in_array('boundary', $groups, true)) {
+            $boundary = $parcel?->boundary;
+            $properties['boundary'] = $boundary === null ? null : [
+                'north' => ['border' => $boundary->n_border, 'length' => self::number($boundary->n_dim)],
+                'south' => ['border' => $boundary->s_border, 'length' => self::number($boundary->s_dim)],
+                'east' => ['border' => $boundary->e_border, 'length' => self::number($boundary->e_dim)],
+                'west' => ['border' => $boundary->w_border, 'length' => self::number($boundary->w_dim)],
+                'measured_area' => self::number($boundary->measured_area),
+                'matches_deed' => $boundary->matches_deed,
+                'survey_date' => $boundary->survey_date,
+                'engineering_office' => $boundary->engineeringOffice?->name,
+            ];
         }
 
-        if ($has('documents')) {
+        if (in_array('survey', $groups, true)) {
+            $properties['survey_decisions'] = ($parcel === null ? collect() : $parcel->surveyDecisions)->map(fn (SurveyDecision $decision): array => [
+                'id' => $decision->id,
+                'qrar_no' => $decision->qrar_no,
+                'report_no' => $decision->report_no,
+                'qrar_source' => self::scalar($decision->qrar_source),
+                'folder' => $decision->folder,
+            ])->values()->all();
+        }
+
+        if (in_array('documents', $groups, true)) {
             // A deed scan belongs to one deed; every other document to the parcel.
-            $documents = $parcel === null ? [] : $parcel->photos
+            $properties['documents'] = ($parcel === null ? collect() : $parcel->photos)
                 ->filter(fn (ParcelPhoto $photo): bool => $photo->deed_id === null || (int) $photo->deed_id === (int) $deed?->id)
-                ->values()->all();
-            foreach ($this->numbered($documents, 'documents') as $n => $photo) {
-                /** @var ParcelPhoto|null $photo */
-                $p += [
-                    "document_{$n}_id" => $photo?->id,
-                    "document_{$n}_type" => self::scalar($photo?->photo_type),
-                    "document_{$n}_name" => $photo?->downloadName(),
-                    "document_{$n}_status" => $photo?->status,
-                    "document_{$n}_url" => $photo?->exists ? route('documents.download', $photo) : null,
-                ];
-                if ($this->history) {
-                    $p += [
-                        "document_{$n}_mime_type" => $photo?->mime_type,
-                        "document_{$n}_size_bytes" => $photo?->size_bytes,
-                        "document_{$n}_uploaded_by" => $photo?->uploader?->name,
-                        "document_{$n}_uploaded_at" => self::date($photo?->created_at),
-                        "document_{$n}_reviewed_by" => $photo?->reviewer?->name,
-                        "document_{$n}_reviewed_at" => self::date($photo?->reviewed_at),
-                        "document_{$n}_rejection_reason" => $photo?->rejection_reason,
-                    ];
-                }
-            }
+                ->map(fn (ParcelPhoto $photo): array => [
+                    'id' => $photo->id,
+                    'type' => self::scalar($photo->photo_type),
+                    'name' => $photo->downloadName(),
+                    'status' => $photo->status,
+                    'url' => route('documents.download', $photo),
+                    'meta' => [
+                        'mime_type' => $photo->mime_type,
+                        'size_bytes' => $photo->size_bytes,
+                        'uploaded_by' => $photo->uploader?->name,
+                        'uploaded_at' => self::date($photo->created_at),
+                        'reviewed_by' => $photo->reviewer?->name,
+                        'reviewed_at' => self::date($photo->reviewed_at),
+                        'rejection_reason' => $photo->rejection_reason,
+                    ],
+                ])->values()->all();
         }
 
         return [
             'type' => 'Feature',
-            'id' => $deed?->id !== null ? 'deed-'.$deed->id : ($parcel?->id !== null ? 'parcel-'.$parcel->id : null),
+            'id' => $deed !== null ? 'deed-'.$deed->id : 'parcel-'.$parcel?->id,
             'geometry' => $shape['geometry'] ?? null,
-            'properties' => $p,
+            'properties' => $properties,
         ];
     }
 
     /**
-     * A list laid out over the file's numbered column sets, 1-based, padded
-     * with nulls to the file's count. Never cut short: a record with more
-     * than was counted keeps them all.
-     *
-     * @template T
-     *
-     * @param  list<T>  $items
-     * @param  'owners'|'survey'|'documents'  $kind
-     * @return array<int, T|null>
-     */
-    private function numbered(array $items, string $kind): array
-    {
-        $slots = max($this->slots[$kind], count($items));
-        $numbered = [];
-        for ($n = 1; $n <= $slots; $n++) {
-            $numbered[$n] = $items[$n - 1] ?? null;
-        }
-
-        return $numbered;
-    }
-
-    /**
-     * When a record was created, last changed, archived, and by whom, as
-     * `{prefix}_created_at` … — or nothing, when history is left out.
+     * When a deed or parcel was created, last changed, archived, and by whom.
      *
      * @return array<string, mixed>
      */
-    private function history(string $prefix, ?Model $record, bool $archivedBy = true): array
+    private static function meta(Model $record): array
     {
-        if (! $this->history) {
-            return [];
-        }
-
-        $columns = [
-            "{$prefix}_created_at" => self::date($record?->getAttribute('created_at')),
-            "{$prefix}_updated_at" => self::date($record?->getAttribute('updated_at')),
-            "{$prefix}_archived_at" => self::date($record?->getAttribute('deleted_at')),
+        return [
+            'created_at' => self::date($record->getAttribute('created_at')),
+            'updated_at' => self::date($record->getAttribute('updated_at')),
+            'archived_at' => self::date($record->getAttribute('deleted_at')),
+            'archived_by' => $record->getRelationValue('archivedBy')?->getAttribute('name'),
         ];
-        if ($archivedBy) {
-            $columns["{$prefix}_archived_by"] = $record?->getRelationValue('archivedBy')?->getAttribute('name');
-        }
+    }
 
-        return $columns;
+    /** @return array{name_ar: string, name_en: string|null}|null */
+    private static function place(?Model $place): ?array
+    {
+        return $place === null ? null : [
+            'name_ar' => (string) $place->getAttribute('name_ar'),
+            'name_en' => $place->getAttribute('name_en'),
+        ];
     }
 
     private static function date(mixed $value): ?string
