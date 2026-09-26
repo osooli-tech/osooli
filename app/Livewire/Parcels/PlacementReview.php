@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Parcels;
 
+use App\Models\District;
+use App\Models\Plan;
+use App\Support\Concerns\WritesSafely;
 use App\Support\Geo\ParcelPlacement;
+use App\Support\Geo\PlacementFix;
 use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
@@ -17,16 +21,24 @@ use Livewire\WithPagination;
  * Every parcel whose polygon lies outside the place its plan says it is in:
  * outside the plan's district where the district has a boundary, otherwise
  * outside the district's city. Each is listed with where it actually is, so
- * the data can be checked in one sitting instead of one save at a time.
+ * the data can be checked in one sitting instead of one save at a time —
+ * and, with the permission, corrected from here (PlacementFix).
  */
 class PlacementReview extends Component
 {
     use WithPagination;
+    use WritesSafely;
 
     private const PER_PAGE = 20;
 
     /** 'district' or 'city' — which boundary the parcels are outside of. */
     public string $level = 'district';
+
+    /** The parcel whose reassign dialog is open. */
+    public ?int $fixing = null;
+
+    /** @var list<array{kind: string, subject_id: int, subject: string, target_id: int, from: string, to: string, parcels: int, located: int, inside: int}> */
+    public array $fixOptions = [];
 
     public function mount(): void
     {
@@ -38,6 +50,54 @@ class PlacementReview extends Component
         abort_unless(in_array($level, ['district', 'city'], true), 404);
         $this->level = $level;
         $this->resetPage();
+    }
+
+    public function openFix(int $parcelId): void
+    {
+        $this->authorizeFix();
+
+        $this->fixing = $parcelId;
+        $this->fixOptions = PlacementFix::options($parcelId);
+    }
+
+    public function closeFix(): void
+    {
+        $this->fixing = null;
+        $this->fixOptions = [];
+    }
+
+    /**
+     * Move the plan to the district, or the district to the city, the
+     * parcel actually lies in — for every parcel sharing it.
+     */
+    public function applyFix(string $kind, int $targetId): void
+    {
+        $this->authorizeFix();
+
+        // Worked out again now: the dialog may have sat open while someone
+        // else moved the same plan.
+        $option = $this->fixing === null ? null : PlacementFix::find($this->fixing, $kind, $targetId);
+        if ($option === null) {
+            $this->closeFix();
+            $this->dispatch('toast', type: 'error', message: __('placement.fix.stale'));
+
+            return;
+        }
+
+        if ($kind === 'plan') {
+            $plan = Plan::query()->findOrFail($option['subject_id']);
+            $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => $targetId]));
+        } else {
+            $district = District::query()->findOrFail($option['subject_id']);
+            $this->writeSafely('district.reassign', 'district', (int) $district->id, fn (): bool => $district->update(['city_id' => $targetId]));
+        }
+
+        $this->closeFix();
+        $this->dispatch('toast', type: 'success', message: __('placement.fix.done_'.$kind, [
+            'subject' => $option['subject'],
+            'to' => $option['to'],
+            'parcels' => $option['parcels'],
+        ]));
     }
 
     public function render(): View
@@ -56,7 +116,24 @@ class PlacementReview extends Component
                 'district' => $this->outside('district')->count(),
                 'city' => $this->outside('city')->count(),
             ],
+            'canFix' => $this->mayFix(),
         ]);
+    }
+
+    /**
+     * Reassigning moves a plan or a district, and so parcels beyond any one
+     * owner's: never for a user limited to some owners' parcels.
+     */
+    private function mayFix(): bool
+    {
+        $user = Auth::user();
+
+        return $user !== null && $user->can('parcels.placement_fix') && OwnerScope::parcelIds($user) === null;
+    }
+
+    private function authorizeFix(): void
+    {
+        abort_unless($this->mayFix(), 403);
     }
 
     /** Live parcels with a polygon, outside the boundary of their plan's district (or city). */

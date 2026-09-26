@@ -44,6 +44,7 @@ return [
         'boundaries_view' => 'See administrative boundaries on the map',
         'boundaries_edit' => 'Draw and edit administrative boundaries',
         'parcels_placement' => 'Review parcels outside their districts',
+        'parcels_placement_fix' => 'Reassign the district and city of parcels from «outside their district»',
         'map_layers_view' => 'See custom layers on the map',
         'map_layers_manage' => 'Manage custom layers',
         'documents_split' => 'Upload a multi-parcel PDF',

@@ -58,6 +58,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'map_layers.view',
         'map_layers.manage',
         'documents.split',
+        'parcels.placement_fix',
     ];
 
     private const ROLES = [

@@ -39,6 +39,10 @@ return [
         ],
         'parcels_placement' => [
             'what' => 'Parcels whose polygon lies outside the district (or city) their plan is recorded in, by the National Address boundaries, with where they actually are.',
+            'steps' => [
+                'The «Reassign» button on each parcel row suggests the correction: move its plan to the district it lies in, or its district to the city it lies in, with how many parcels that covers.',
+                'If the location itself is wrong, open the parcel and correct its polygon.',
+            ],
             'note' => 'These are warnings to review, not certain errors: a boundary may be out of date or approximate. Fix the plan, the polygon or the boundary as the case needs.',
         ],
         'owners_index' => [

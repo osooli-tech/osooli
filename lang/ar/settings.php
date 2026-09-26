@@ -44,6 +44,7 @@ return [
         'boundaries_view' => 'عرض الحدود الإدارية على الخريطة',
         'boundaries_edit' => 'رسم الحدود الإدارية وتعديلها',
         'parcels_placement' => 'مراجعة القطع الواقعة خارج أحيائها',
+        'parcels_placement_fix' => 'إعادة تعيين حي القطع ومدينتها من «قطع خارج حيّها»',
         'map_layers_view' => 'عرض الطبقات المخصصة على الخريطة',
         'map_layers_manage' => 'إدارة الطبقات المخصصة',
         'documents_split' => 'رفع ملف PDF متعدد القطع',
