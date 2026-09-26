@@ -7,10 +7,9 @@ namespace App\Support\Import;
 /**
  * One feature of an import file, read into the shape the analyser works on.
  *
- * Reads what our export writes: one column per value (`deed_no`,
- * `parcel_geo_id`, `n_border`, `owner_1_name`, `survey_2_qrar_no` …). Files
- * from before that layout, with nested `deed`, `parcel`, `owners` records,
- * are still read, and so is a table exported straight from GIS. Nested JSON
+ * Accepts what our export writes (nested `deed`, `parcel`, `owners` …) and,
+ * for a file built by hand or reshaped by GIS software, the flat columns
+ * alongside them (`deed_no`, `parcel_geo_id`, `district` …). Nested JSON
  * that a GIS program turned into a string is decoded back.
  *
  * A part missing from the feature is null and means "leave it alone"; an
@@ -124,15 +123,6 @@ final class ImportRecord
                 'whatsapp' => self::str($o['whatsapp'] ?? null),
                 'ownership_share' => $o['ownership_share'] ?? null,
             ] : null, $p['owners'])));
-        } elseif (($owners = self::numbered($p, 'owner', ['name', 'national_id', 'phone', 'email', 'whatsapp', 'share'])) !== []) {
-            $record->owners = array_map(static fn (array $o): array => [
-                'name' => self::str($o['name']),
-                'national_id' => self::str($o['national_id']),
-                'phone' => self::str($o['phone']),
-                'email' => self::str($o['email']),
-                'whatsapp' => self::str($o['whatsapp']),
-                'ownership_share' => $o['share'],
-            ], $owners);
         }
 
         if (is_array($p['boundary'] ?? null)) {
@@ -162,7 +152,6 @@ final class ImportRecord
             if (array_filter($flat, static fn (mixed $v): bool => $v !== null) !== []) {
                 $record->boundary = $flat;
             }
-            $record->engineeringOffice = self::str($p['engineering_office'] ?? null);
         }
 
         if (is_array($p['survey_decisions'] ?? null)) {
@@ -173,14 +162,6 @@ final class ImportRecord
                 'qrar_source' => self::str($d['qrar_source'] ?? null),
                 'folder' => self::str($d['folder'] ?? null),
             ] : null, $p['survey_decisions'])));
-        } elseif (($decisions = self::numbered($p, 'survey', ['id', 'qrar_no', 'report_no', 'qrar_source', 'folder'])) !== []) {
-            $record->surveyDecisions = array_map(static fn (array $d): array => [
-                'id' => self::int($d['id']),
-                'qrar_no' => self::str($d['qrar_no']),
-                'report_no' => self::str($d['report_no']),
-                'qrar_source' => self::str($d['qrar_source']),
-                'folder' => self::str($d['folder']),
-            ], $decisions);
         }
 
         $record->geometry = is_array($feature['geometry'] ?? null) ? $feature['geometry'] : null;
@@ -192,36 +173,6 @@ final class ImportRecord
     public function label(): string
     {
         return $this->deed['deed_no'] ?? $this->parcel['geo_id'] ?? '—';
-    }
-
-    /**
-     * The sets of numbered columns `{prefix}_1_{field}`, `{prefix}_2_{field}`
-     * … in order, each as field => value. A set whose fields are all empty
-     * is a blank left in the file and is skipped, so no sets at all — or
-     * only blank ones — reads as "nothing said", not "none".
-     *
-     * @param  array<string, mixed>  $p
-     * @param  list<string>  $fields
-     * @return list<array<string, mixed>>
-     */
-    private static function numbered(array $p, string $prefix, array $fields): array
-    {
-        $sets = [];
-        foreach ($p as $key => $value) {
-            if (preg_match('/^'.$prefix.'_(\d+)_(.+)$/', (string) $key, $m) && in_array($m[2], $fields, true)) {
-                $sets[(int) $m[1]][$m[2]] = is_string($value) && trim($value) === '' ? null : $value;
-            }
-        }
-        ksort($sets);
-
-        $filled = [];
-        foreach ($sets as $set) {
-            if (array_filter($set, static fn (mixed $v): bool => $v !== null) !== []) {
-                $filled[] = $set + array_fill_keys($fields, null);
-            }
-        }
-
-        return $filled;
     }
 
     private static function decodeJsonString(mixed $value): mixed

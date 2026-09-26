@@ -1,0 +1,179 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'title' => 'استيراد البيانات',
+    'kind' => [
+        'label' => 'نوع الملف',
+        'gdb' => 'قاعدة بيانات جغرافية (GDB مضغوط)',
+        'documents' => 'مستندات PDF مضغوطة',
+    ],
+    'choose_file' => 'اختر ملفاً',
+    'upload' => 'رفع',
+    'uploading' => 'جارٍ الرفع…',
+    'analyzing' => 'جارٍ الفحص…',
+    'committing' => 'جارٍ الحفظ…',
+    'preview' => [
+        'title' => 'نتيجة الفحص',
+        'total' => 'إجمالي العناصر',
+        'will_create' => 'ستُضاف',
+        // Documents import counts something different under the same shape:
+        // "created" there is parcel–file LINKS (one deed can link to several
+        // parcels), while "unmatched" counts FILES. The two are not a
+        // matched pair, so they get their own, unit-explicit labels instead
+        // of reusing will_create/unmatched — see import-wizard.blade.php.
+        'will_create_links' => 'روابط ملفات بقطع ستُضاف',
+        'will_update' => 'ستُحدَّث',
+        'unmatched' => 'غير مطابقة',
+        'unmatched_files' => 'ملفات غير مرتبطة بأي قطعة',
+        'rule' => 'قاعدة المطابقة',
+        'warnings' => 'تنبيهات',
+    ],
+    'result' => [
+        // See lang/en/imports.php for why this is a separate key from
+        // 'failed' below rather than reusing it.
+        'errors' => 'عناصر بها أخطاء',
+    ],
+    'confirm' => 'تأكيد الاستيراد',
+    'cancel' => 'إلغاء',
+    'completed' => 'اكتمل الاستيراد',
+    'failed' => 'فشل الاستيراد',
+    'start_over' => 'استيراد ملف آخر',
+    'recent' => [
+        'title' => 'آخر عمليات الاستيراد',
+        'file' => 'الملف',
+        'uploader' => 'بواسطة',
+        'status' => 'الحالة',
+        'date' => 'التاريخ',
+        'empty' => 'لا توجد عمليات استيراد بعد.',
+        'review' => 'مراجعة',
+        'open' => 'عرض',
+    ],
+    'status' => [
+        'uploading' => 'جارٍ الرفع',
+        'uploaded' => 'تم الرفع',
+        'analyzing' => 'قيد الفحص',
+        'previewed' => 'بانتظار التأكيد',
+        'committing' => 'قيد الحفظ',
+        'completed' => 'مكتمل',
+        'failed' => 'فشل',
+    ],
+    'errors' => [
+        'extension' => 'نوع الملف غير مدعوم. الأنواع المسموحة: :allowed',
+        'invalid_chunk' => 'جزء الملف المرسل غير صالح.',
+        'not_uploading' => 'انتهت مرحلة الرفع لهذه العملية.',
+        'out_of_order' => 'وصل جزء من الملف بترتيب غير صحيح.',
+        'size_exceeded' => 'تجاوز حجم الملف المرسل الحجم المصرح به لهذه العملية.',
+        'size_mismatch' => 'حجم الملف المستلم (:actual) لا يطابق الحجم المتوقع (:expected).',
+        'invalid_archive' => 'الملف تالف أو لا يطابق النوع المتوقع.',
+        // See lang/en/imports.php for why this key exists.
+        'staged_file_missing' => 'الملف المرحّل لهذا الاستيراد لم يعد متوفراً. يرجى بدء عملية استيراد جديدة.',
+        // Both purely client-side: the JS never receives a server response
+        // for these, so unlike the keys above they are read through
+        // @js(__(...)) in import-wizard.blade.php and handed to
+        // uploadImport() rather than coming back in a JSON body.
+        'stuck_resync' => 'يبدو أن عملية الرفع متوقفة. يرجى المحاولة مرة أخرى.',
+        'unexpected_response' => 'استجاب الخادم بردٍّ غير متوقع. يرجى المحاولة مرة أخرى.',
+    ],
+    'warnings' => [
+        // Arabic noun-number agreement needs more than :count substitution
+        // (singular/dual/few/many/other all take a different noun form), so
+        // this is a trans_choice() string with explicit count branches
+        // rather than a plain __() placeholder — see
+        // ParcelGeoJsonImporter::previewFeatures()/importFeatures().
+        'no_geo_id' => '{0} جميع العناصر تحمل رقم تعريف الأرض (Geo_ID)، ولا يوجد ما يتم تجاهله.|{1} يتم تجاهل عنصر واحد بلا رقم تعريف الأرض (Geo_ID).|{2} يتم تجاهل عنصرين بلا رقم تعريف الأرض (Geo_ID).|[3,10] يتم تجاهل :count عناصر بلا رقم تعريف الأرض (Geo_ID).|[11,99] يتم تجاهل :count عنصرًا بلا رقم تعريف الأرض (Geo_ID).|[100,*] يتم تجاهل :count عنصر بلا رقم تعريف الأرض (Geo_ID).',
+        'unknown_values' => 'قيم غير معروفة في «:field» لم تُكتب: :values',
+    ],
+    'gdb' => [
+        'layers' => 'طبقات الملف',
+        'layer' => 'الطبقة',
+        'geometry' => 'نوع الشكل',
+        'no_geometry' => 'جدول بلا شكل',
+        'features' => 'العناصر',
+        'crs' => 'نظام الإحداثيات',
+        'fields' => 'الحقول',
+        'import_as' => 'تُستورد إلى',
+        'roles' => [
+            'parcels' => 'القطع والصكوك',
+            'projects' => 'المشاريع',
+            'buildings' => 'المباني',
+            'ignore' => 'لا تُستورد',
+        ],
+        'mode_label' => 'في النظام الآن :count من :table. عند الاستيراد:',
+        'modes' => [
+            'replace' => 'استبدالها بما في الملف',
+            'append' => 'إضافة ما في الملف إليها',
+        ],
+        'one_parcels_layer' => 'اختيرت أكثر من طبقة للقطع؛ تُستورد الأولى منها فقط.',
+        'field_profile' => 'حقول الطبقة :layer',
+        'field' => 'الحقل',
+        'type' => 'النوع',
+        'filled' => 'المعبّأ',
+        'distinct' => 'قيم مختلفة',
+        'samples' => 'أمثلة',
+        'empty' => 'فارغ',
+        'attachments' => 'المرفقات والصور وبقية محتوى الملف',
+        'no_attachments' => 'لا يحتوي الملف على جداول مرفقات (صور أو مستندات مخزّنة داخله).',
+        'attachment_tables' => 'جداول مرفقات',
+        'attachments_not_imported' => 'المرفقات المخزّنة داخل الملف لا تُستورد بعد؛ تُرفع المستندات من استيراد المستندات.',
+        'photo_fields' => 'حقول صور (المعبّأ منها)',
+        'no_relationships' => 'لا توجد علاقات بين الجداول.',
+        'relationships' => 'علاقات بين الجداول',
+        'system_tables' => ':count جداول نظام خاصة بـ ArcGIS (GDB_*)، لا تحمل بيانات ولا تُستورد.',
+        'coded_values' => 'قيم الحقول ذات القوائم',
+        'coded_values_hint' => 'كل قيمة في الملف ومقابلها في النظام. القيمة غير المعروفة لا تُكتب، وتبقى القيمة المحفوظة كما هي.',
+        'unknown_value' => 'غير معروفة — لن تُكتب',
+        'districts' => 'الأحياء',
+        'districts_hint' => 'لكل حي في الملف: اختر الحي المطابق في النظام، أو اتركه فارغًا فيُنشأ حي بهذا الاسم في المدينة المختارة له أو في المدينة الافتراضية.',
+        'default_city' => 'المدينة الافتراضية للأحياء الجديدة',
+        'district_in_file' => 'الحي في الملف',
+        'match_district' => 'الحي المطابق في النظام',
+        'or_create_in' => 'أو إنشاؤه في مدينة',
+        'new_district' => 'حي جديد',
+        'several_matches' => 'يوجد حي بالاسم نفسه في أكثر من مدينة: :cities',
+        'no_city' => 'لا مدينة له؛ ستبقى قطعه دون حي.',
+        'plans' => 'المخططات',
+        'plan_placeholders' => 'قيم تعني «بلا مخطط» (افصل بينها بفاصلة)',
+        'plan_placeholders_hint' => 'القطعة التي مخططها إحدى هذه القيم أو فارغ تُستورد بلا مخطط، ولا يُنشأ مخطط بهذا الاسم. المخطط يُطابَق برقمه وحيّه معًا.',
+        'deeds' => 'الصكوك',
+        'deeds_counts' => ':with عنصرًا برقم صك، و:without بلا رقم صك.',
+        'deedless' => [
+            'placeholder' => 'إنشاء صك بلا رقم لكل منها يحمل ملاكها (تبقى الملكية ظاهرة، ويُكمَّل الرقم لاحقًا)',
+            'skip' => 'استيراد القطعة وحدها دون صك ودون ملاك',
+        ],
+        'borders' => 'الحدود والأطوال',
+        'borders_counts' => 'المجموعة الأولى (N_Border…) معبّأة في :first، والثانية (N_Border_2…) في :second، من :total عنصرًا.',
+        'border_sets' => [
+            'first' => 'اعتماد المجموعة الأولى',
+            'second' => 'اعتماد المجموعة الثانية (_2)',
+            'prefer_second' => 'الثانية حيث وُجدت، والأولى فيما سواها',
+        ],
+        'office' => 'المكتب الهندسي للحدود الجديدة:',
+        'no_office' => 'بلا مكتب',
+        'decision' => 'القرار المساحي',
+        'qrar' => [
+            'number' => 'رقم القرار',
+            'source' => 'مصدر القرار (رمز: 1 بلدي، 2 مكتب هندسي، 3 بدون)',
+            'ignore' => 'تجاهله',
+        ],
+        'folder' => [
+            'folder' => 'رقم المجلد',
+            'ignore' => 'تجاهله (ملاحظة لا مجلد)',
+        ],
+        'owners' => 'الملاك والمحافظ',
+        'owners_count' => ':count مالكًا مختلفًا في الملف، يُطابَقون برقم الهوية.',
+        'odd_ids' => 'أرقام هوية ليست من 10 أرقام:',
+        'portfolios' => 'إنشاء محافظ للملاك من الحقل Real_Estate_portfolio (:count محفظة) ووضع كل قطعة في محفظتها',
+        'empty_never_erases' => 'الحقل الفارغ في الملف لا يمسح القيمة المحفوظة في النظام.',
+        'result' => [
+            'deeds' => 'صكوك جديدة',
+            'owners' => 'ملاك جدد',
+            'boundaries' => 'حدود',
+            'decisions' => 'قرارات جديدة',
+            'portfolios' => 'محافظ جديدة',
+            'projects' => 'مشاريع',
+            'buildings' => 'مبانٍ',
+        ],
+    ],
+];

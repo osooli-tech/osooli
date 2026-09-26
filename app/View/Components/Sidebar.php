@@ -90,6 +90,12 @@ class Sidebar extends Component
             'permission' => 'audit_logs.view',
         ],
         [
+            'route' => 'imports.gdb',
+            'label' => 'nav.imports_gdb',
+            'icon' => 'database',
+            'permission' => 'imports.create',
+        ],
+        [
             'route' => 'settings.index',
             'label' => 'nav.settings',
             'icon' => 'settings',

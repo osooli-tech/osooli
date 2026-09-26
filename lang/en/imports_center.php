@@ -7,12 +7,11 @@ return [
     'subtitle' => 'Upload a GeoJSON file in the export format — an exported file you edited, or a new one. It is analysed first without writing anything; you review and decide, it is applied once you confirm, and it can be undone within 7 days.',
     'upload_hint' => 'GeoJSON or JSON, or a ZIP containing it (much smaller). Up to 200 MB.',
     'template' => 'Download sample file',
-    'template_hint' => 'A file with every import column and one made-up record: a deed on a parcel, with an owner, a survey decision, a document and a small polygon that shows on a map. Its header lists the values each fixed-choice field accepts. It has three owner sets and two for survey decisions and documents, only the first filled in. Replace the sample values with your data and upload it here.',
+    'template_hint' => 'A file with every import column and one made-up record: a deed on a parcel, with an owner, a survey decision, a document and a small polygon that shows on a map. Its header lists the values each fixed-choice field accepts. Replace the sample values with your data and upload it here.',
     'analyse' => 'Analyse file',
     'bad_extension' => 'The file must be GeoJSON, JSON or ZIP.',
     'bad_zip' => 'No GeoJSON file was found inside the ZIP.',
     'rules' => [
-        'Every value has a column of its own. To add another owner, fill the next numbered set (owner_2_name, owner_2_national_id …); survey decisions likewise (survey_2_…).',
         'Nothing missing from the file is ever deleted.',
         'An empty value in the file never erases an existing one.',
         'Owners are matched by national ID; look-alikes are put to you.',

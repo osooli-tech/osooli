@@ -1,0 +1,605 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "خالد عبدالعزيز عبدالرحمن المقيرن",
+    "Woner_ID": "1001227220",
+    "Parcel": "91",
+    "Geo_ID": "91-25",
+    "Plan_No": "25",
+    "Deed_No": "311608002898",
+    "Deed_Date": "1442-04-21T00:00:00+00:00",
+    "N_Border": "شارع عرض 15 متر",
+    "S_Border": "قطعة رقم 90",
+    "E_Border": "قطعة رقم 93",
+    "W_Border": "شارع عرض 15 متر",
+    "N_Dim": 101.6,
+    "S_DIM": 101.45,
+    "E_Dim": 100.0,
+    "W_Dim": 100.0,
+    "Area": 10150.48,
+    "N_Border_2": "شارع عرض 15 متر",
+    "S_Border_2": "قطعة رقم 90",
+    "E_Border_2": "قطعة رقم 93",
+    "W_Border_2": "شارع عرض 15 متر",
+    "N_Dim_2": 101.6,
+    "S_Dim_2": 101.45,
+    "E_Dim_2": 100.0,
+    "W_Dim_2": 100.0,
+    "Survey_Area": 10150.48,
+    "Report_No": null,
+    "Folder": "19-02-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 398.9940720851254,
+    "Shape_Area": 9949.270896425904,
+    "M_price": 1500.0,
+    "Parcel_price": 14923906.344638856
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.4105706,
+        24.7656156
+       ],
+       [
+        46.4115275,
+        24.7654229
+       ],
+       [
+        46.4113305,
+        24.7645425
+       ],
+       [
+        46.4103589,
+        24.764735
+       ],
+       [
+        46.4105706,
+        24.7656156
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "علي سلمان علي القريني",
+    "Woner_ID": "1082595792",
+    "Parcel": "401",
+    "Geo_ID": "401-61",
+    "Plan_No": "61",
+    "Deed_No": "911605004832",
+    "Deed_Date": "1444-04-08T00:00:00+00:00",
+    "N_Border": "شارع عرض 15 متر",
+    "S_Border": "قطعة رقم 409",
+    "E_Border": "قطعة رقم 400",
+    "W_Border": "شارع عرض 20 متر",
+    "N_Dim": 50.0,
+    "S_DIM": 50.0,
+    "E_Dim": 60.0,
+    "W_Dim": 60.0,
+    "Area": 3000.0,
+    "N_Border_2": "شارع عرض 15 متر",
+    "S_Border_2": "قطعة رقم 409",
+    "E_Border_2": "قطعة رقم 400",
+    "W_Border_2": "شارع عرض 20 متر",
+    "N_Dim_2": 50.0,
+    "S_Dim_2": 50.0,
+    "E_Dim_2": 60.0,
+    "W_Dim_2": 60.0,
+    "Survey_Area": 3000.0,
+    "Report_No": null,
+    "Folder": "20-02-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 220.04849024241264,
+    "Shape_Area": 3000.310716700679,
+    "M_price": 1500.0,
+    "Parcel_price": 4500466.075051019
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.3625901,
+        24.7546727
+       ],
+       [
+        46.3625194,
+        24.7541329
+       ],
+       [
+        46.3620305,
+        24.7541888
+       ],
+       [
+        46.3620992,
+        24.7547269
+       ],
+       [
+        46.3625901,
+        24.7546727
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "ناصر عبدالله إبراهيم الراشد",
+    "Woner_ID": "1039933948",
+    "Parcel": "28",
+    "Geo_ID": "28-112",
+    "Plan_No": "112",
+    "Deed_No": "211609002244",
+    "Deed_Date": "1439-06-06T00:00:00+00:00",
+    "N_Border": "قطعة رقم 26",
+    "S_Border": "شارع عرض 15 متر",
+    "E_Border": "قطعة رقم 27",
+    "W_Border": "شارع عرض 20 متر",
+    "N_Dim": 150.0,
+    "S_DIM": 150.0,
+    "E_Dim": 80.0,
+    "W_Dim": 80.0,
+    "Area": 12000.0,
+    "N_Border_2": "قطعة رقم 26",
+    "S_Border_2": "شارع عرض 15 متر",
+    "E_Border_2": "قطعة رقم 27",
+    "W_Border_2": "شارع عرض 20 متر",
+    "N_Dim_2": 150.0,
+    "S_Dim_2": 150.0,
+    "E_Dim_2": 80.0,
+    "W_Dim_2": 80.0,
+    "Survey_Area": 12000.0,
+    "Report_No": null,
+    "Folder": "22-02-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 460.0896571474178,
+    "Shape_Area": 12006.137226656472,
+    "M_price": 1500.0,
+    "Parcel_price": 18009205.839984708
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.3485656,
+        24.7818202
+       ],
+       [
+        46.3487416,
+        24.7825248
+       ],
+       [
+        46.350188,
+        24.7822236
+       ],
+       [
+        46.3500121,
+        24.781519
+       ],
+       [
+        46.3485656,
+        24.7818202
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "عبدالرحمن محمد عياد الزغيبي",
+    "Woner_ID": "1002722302",
+    "Parcel": "32",
+    "Geo_ID": "34-82",
+    "Plan_No": "82",
+    "Deed_No": "311602003635",
+    "Deed_Date": "1442-02-07T00:00:00+00:00",
+    "N_Border": "قطعة رقم 308",
+    "S_Border": "قطعة رقم 34",
+    "E_Border": "قطعة رقم 31",
+    "W_Border": "شارع عرض 15 متر",
+    "N_Dim": 100.0,
+    "S_DIM": 100.0,
+    "E_Dim": 100.0,
+    "W_Dim": 100.0,
+    "Area": 10000.0,
+    "N_Border_2": "قطعة رقم 308",
+    "S_Border_2": "قطعة رقم 34",
+    "E_Border_2": "قطعة رقم 31",
+    "W_Border_2": "شارع عرض 15 متر",
+    "N_Dim_2": 100.0,
+    "S_Dim_2": 100.0,
+    "E_Dim_2": 100.0,
+    "W_Dim_2": 100.0,
+    "Survey_Area": 10000.0,
+    "Report_No": null,
+    "Folder": "22-02-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 400.02158577103455,
+    "Shape_Area": 10001.055858190157,
+    "M_price": 1500.0,
+    "Parcel_price": 15001583.787285235
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.3909895,
+        24.7839947
+       ],
+       [
+        46.3910992,
+        24.7848919
+       ],
+       [
+        46.3920823,
+        24.7847896
+       ],
+       [
+        46.3919726,
+        24.7838927
+       ],
+       [
+        46.3909895,
+        24.7839947
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "علي سليمان علي القرني",
+    "Woner_ID": "1082595792",
+    "Parcel": "401",
+    "Geo_ID": "401-2",
+    "Plan_No": "2",
+    "Deed_No": "911605004832",
+    "Deed_Date": "1444-08-14T00:00:00+00:00",
+    "N_Border": "شارع عرض 15 متر",
+    "S_Border": "قطعة رقم 409",
+    "E_Border": "قطعة رقم 400",
+    "W_Border": "شارع عرض 20 متر",
+    "N_Dim": 50.0,
+    "S_DIM": 50.0,
+    "E_Dim": 60.0,
+    "W_Dim": 60.0,
+    "Area": 3000.0,
+    "N_Border_2": "شارع عرض 15 متر",
+    "S_Border_2": "قطعة رقم 409",
+    "E_Border_2": "قطعة رقم 400",
+    "W_Border_2": "شارع عرض 20 متر",
+    "N_Dim_2": 50.0,
+    "S_Dim_2": 50.0,
+    "E_Dim_2": 60.0,
+    "W_Dim_2": 60.0,
+    "Survey_Area": 3000.0,
+    "Report_No": null,
+    "Folder": "22-02-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "الوصيل",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 220.00002154277055,
+    "Shape_Area": 2999.993284532079,
+    "M_price": 1500.0,
+    "Parcel_price": 4499989.926798118
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.4310118,
+        24.7618043
+       ],
+       [
+        46.4314142,
+        24.7620666
+       ],
+       [
+        46.4317599,
+        24.7616263
+       ],
+       [
+        46.4313574,
+        24.7613641
+       ],
+       [
+        46.4310118,
+        24.7618043
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "أحمد بن محمد  عثمان الدهش",
+    "Woner_ID": "1026382711",
+    "Parcel": "34",
+    "Geo_ID": "34-82",
+    "Plan_No": "82",
+    "Deed_No": "396426000969",
+    "Deed_Date": "1442-05-16T00:00:00+00:00",
+    "N_Border": "قطعة رقم 32",
+    "S_Border": "شارع عرض 50 متر",
+    "E_Border": "قطعة رقم 337",
+    "W_Border": "شارع عرض 15 متر",
+    "N_Dim": 100.0,
+    "S_DIM": 100.0,
+    "E_Dim": 100.0,
+    "W_Dim": 100.0,
+    "Area": 10000.0,
+    "N_Border_2": "قطعة رقم 32",
+    "S_Border_2": "شارع عرض 50 متر",
+    "E_Border_2": "قطعة رقم 337",
+    "W_Border_2": "شارع عرض 15 متر",
+    "N_Dim_2": 100.0,
+    "S_Dim_2": 100.0,
+    "E_Dim_2": 100.0,
+    "W_Dim_2": 100.0,
+    "Survey_Area": 10000.0,
+    "Report_No": null,
+    "Folder": "03-03-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 400.06792360756845,
+    "Shape_Area": 10003.378611473176,
+    "M_price": 1500.0,
+    "Parcel_price": 15005067.917209763
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.3908798,
+        24.7830974
+       ],
+       [
+        46.3909895,
+        24.7839947
+       ],
+       [
+        46.3919726,
+        24.7838927
+       ],
+       [
+        46.3918629,
+        24.7829955
+       ],
+       [
+        46.3908798,
+        24.7830974
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "الأمير منصور بن خالد بن مشعل آل سعود",
+    "Woner_ID": "1098648106",
+    "Parcel": "28",
+    "Geo_ID": "28-112",
+    "Plan_No": "112",
+    "Deed_No": "496426007295",
+    "Deed_Date": "1446-07-02T00:00:00+00:00",
+    "N_Border": "قطعة رقم 26",
+    "S_Border": "شارع عرض 15 متر",
+    "E_Border": "قطعة رقم 27",
+    "W_Border": "شارع عرض 20 متر",
+    "N_Dim": 150.0,
+    "S_DIM": 150.0,
+    "E_Dim": 80.0,
+    "W_Dim": 80.0,
+    "Area": 12000.0,
+    "N_Border_2": "قطعة رقم 26",
+    "S_Border_2": "شارع عرض 15 متر",
+    "E_Border_2": "قطعة رقم 27",
+    "W_Border_2": "شارع عرض 20 متر",
+    "N_Dim_2": 150.0,
+    "S_Dim_2": 150.0,
+    "E_Dim_2": 80.0,
+    "W_Dim_2": 80.0,
+    "Survey_Area": 12000.0,
+    "Report_No": null,
+    "Folder": "20-04-2025",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 460.0896571474178,
+    "Shape_Area": 12006.137226656472,
+    "M_price": 1500.0,
+    "Parcel_price": 18009205.839984708
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.3485656,
+        24.7818202
+       ],
+       [
+        46.3487416,
+        24.7825248
+       ],
+       [
+        46.350188,
+        24.7822236
+       ],
+       [
+        46.3500121,
+        24.781519
+       ],
+       [
+        46.3485656,
+        24.7818202
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "Name": "شريك تجريبي",
+    "Woner_ID": "9999999999",
+    "Parcel": "91",
+    "Geo_ID": "91-25",
+    "Plan_No": "25",
+    "Deed_No": "311608002898",
+    "Deed_Date": "1442-04-21T00:00:00+00:00",
+    "N_Border": "شارع عرض 15 متر",
+    "S_Border": "قطعة رقم 90",
+    "E_Border": "قطعة رقم 93",
+    "W_Border": "شارع عرض 15 متر",
+    "N_Dim": 101.6,
+    "S_DIM": 101.45,
+    "E_Dim": 100.0,
+    "W_Dim": 100.0,
+    "Area": 10150.48,
+    "N_Border_2": "شارع عرض 15 متر",
+    "S_Border_2": "قطعة رقم 90",
+    "E_Border_2": "قطعة رقم 93",
+    "W_Border_2": "شارع عرض 15 متر",
+    "N_Dim_2": 101.6,
+    "S_Dim_2": 101.45,
+    "E_Dim_2": 100.0,
+    "W_Dim_2": 100.0,
+    "Survey_Area": 10150.48,
+    "Report_No": null,
+    "Folder": "19-02-2024",
+    "ppp": null,
+    "Deed_Status": "1",
+    "Deed_Class": "1",
+    "Fall_In": "1",
+    "Owner_Type": "1",
+    "Qrar": "2",
+    "District": "العمارية",
+    "Land_Trasaction": "4",
+    "Allocation_Method": "1",
+    "Location_Photo": null,
+    "Shape_Length": 398.9940720851254,
+    "Shape_Area": 9949.270896425904,
+    "M_price": 1500.0,
+    "Parcel_price": 14923906.344638856
+   },
+   "geometry": {
+    "coordinates": [
+     [
+      [
+       [
+        46.4105706,
+        24.7656156
+       ],
+       [
+        46.4115275,
+        24.7654229
+       ],
+       [
+        46.4113305,
+        24.7645425
+       ],
+       [
+        46.4103589,
+        24.764735
+       ],
+       [
+        46.4105706,
+        24.7656156
+       ]
+      ]
+     ]
+    ],
+    "type": "MultiPolygon"
+   }
+  }
+ ]
+}
