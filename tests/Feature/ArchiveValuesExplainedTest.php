@@ -53,14 +53,20 @@ class ArchiveValuesExplainedTest extends TestCase
             ->assertDontSee('القطعة بلا مخطط');
     }
 
-    public function test_pages_explain_themselves(): void
+    public function test_pages_explain_themselves_to_those_allowed_to_see_it(): void
     {
         $user = User::factory()->create(['is_active' => true]);
-        Permission::firstOrCreate(['name' => 'archive.view', 'guard_name' => 'web']);
+        foreach (['archive.view', 'help.view'] as $name) {
+            Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
+        }
         $user->givePermissionTo('archive.view');
         app()->setLocale('ar');
 
-        $this->actingAs($user)->get(route('archive.index'))
+        // Without help.view: no "?" at all.
+        $this->actingAs($user)->get(route('archive.index'))->assertOk()->assertDontSee(__('help.pages.archive_index.what'));
+
+        $user->givePermissionTo('help.view');
+        $this->actingAs($user->fresh())->get(route('archive.index'))
             ->assertOk()
             ->assertSee('ما هذه الصفحة؟')
             ->assertSee(__('help.pages.archive_index.what'));

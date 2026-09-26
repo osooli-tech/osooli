@@ -105,6 +105,10 @@ class CustomLayersTest extends TestCase
         $layer = MapLayer::sole();
 
         $user = User::factory()->create(['is_active' => true]);
+        $this->actingAs($user)->getJson(route('geo.layers.show', $layer))->assertForbidden();
+        Permission::firstOrCreate(['name' => 'map_layers.view', 'guard_name' => 'web']);
+        $user->givePermissionTo('map_layers.view');
+
         $this->actingAs($user)->getJson(route('geo.layers.show', $layer))
             ->assertOk()
             ->assertJsonPath('features.0.geometry.type', 'Point')
@@ -124,8 +128,8 @@ class CustomLayersTest extends TestCase
         Livewire::test(MapLayerManager::class)->assertForbidden();
 
         $admin = User::factory()->create(['is_active' => true]);
-        Permission::firstOrCreate(['name' => 'imports.create', 'guard_name' => 'web']);
-        $admin->givePermissionTo('imports.create');
+        Permission::firstOrCreate(['name' => 'map_layers.manage', 'guard_name' => 'web']);
+        $admin->givePermissionTo('map_layers.manage');
         $this->actingAs($admin);
 
         Livewire::test(MapLayerManager::class)
@@ -161,8 +165,8 @@ class CustomLayersTest extends TestCase
         $this->actingAs($viewer)->get(route('map-layers.download', $layer))->assertForbidden();
 
         $admin = User::factory()->create(['is_active' => true]);
-        Permission::firstOrCreate(['name' => 'imports.create', 'guard_name' => 'web']);
-        $admin->givePermissionTo('imports.create');
+        Permission::firstOrCreate(['name' => 'map_layers.manage', 'guard_name' => 'web']);
+        $admin->givePermissionTo('map_layers.manage');
         $this->actingAs($admin);
 
         Livewire::test(MapLayerManager::class)->call('toggleVisible', $layer->id);

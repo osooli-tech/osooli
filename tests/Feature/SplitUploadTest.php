@@ -124,8 +124,8 @@ class SplitUploadTest extends TestCase
     private function uploader(): User
     {
         $user = User::factory()->create(['is_active' => true]);
-        Permission::firstOrCreate(['name' => 'documents.upload', 'guard_name' => 'web']);
-        $user->givePermissionTo('documents.upload');
+        Permission::firstOrCreate(['name' => 'documents.split', 'guard_name' => 'web']);
+        $user->givePermissionTo('documents.split');
 
         return $user;
     }
