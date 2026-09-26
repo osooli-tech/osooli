@@ -41,7 +41,11 @@ class BoundaryEditor extends Component
         'countries' => ['audit' => 'country', 'parent' => null, 'simplify' => 0.002],
     ];
 
-    /** Most sibling outlines worth drawing; a city can have hundreds of districts. */
+    /**
+     * Most sibling outlines worth drawing — the nearest ones: a region can
+     * have hundreds of cities (Riyadh has 686), and an unordered cut left
+     * out Al Kharj, next door to Riyadh, while drawing towns far away.
+     */
     private const MAX_NEIGHBOURS = 400;
 
     public bool $show = false;
@@ -211,6 +215,7 @@ class BoundaryEditor extends Component
             'SELECT n.name_ar AS name, ST_AsGeoJSON('.Spatial::simplify('n.geom').", 6) AS g
              FROM {$level} n JOIN {$level} self ON self.id = ?
              WHERE n.id <> self.id AND n.{$parent} = self.{$parent} AND n.geom IS NOT NULL
+             ORDER BY CASE WHEN self.geom IS NULL THEN 0 ELSE ST_Distance(ST_Centroid(n.geom), ST_Centroid(self.geom)) END
              LIMIT ".self::MAX_NEIGHBOURS,
             [$config['simplify'], $id]
         );
