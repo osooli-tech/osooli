@@ -93,17 +93,39 @@ class DeedExportTest extends TestCase
 
         $this->assertSame('MultiPolygon', $feature['geometry']['type']);
         $this->assertSame('310101000001', $p['deed_no']);
-        $this->assertSame('محدث', $p['deed']['deed_status']);
-        $this->assertSame('GEO-1', $p['parcel']['geo_id']);
-        $this->assertSame('الرياض', $p['parcel']['location']['city']['name_ar']);
-        $this->assertSame('Riyadh', $p['parcel']['location']['region']['name_en']);
+        $this->assertSame('محدث', $p['deed_status']);
+        $this->assertSame('GEO-1', $p['parcel_geo_id']);
+        $this->assertSame('الرياض', $p['city']);
+        $this->assertSame('Riyadh', $p['region_en']);
         $this->assertEqualsWithDelta(11209, $p['computed_area_sqm'], 20);
-        $this->assertSame(2, $p['owners_count']);
-        $this->assertEqualsCanonicalizing([60.0, 40.0], array_column($p['owners'], 'ownership_share'));
-        $this->assertSame('شارع 20م', $p['boundary']['north']['border']);
-        $this->assertSame('Q-9', $p['survey_decisions'][0]['qrar_no']);
-        $this->assertSame('صك.pdf', $p['documents'][0]['name']);
-        $this->assertStringContainsString('/documents/', $p['documents'][0]['url']);
+        $this->assertEqualsCanonicalizing([60.0, 40.0], [$p['owner_1_share'], $p['owner_2_share']]);
+        $this->assertSame('شارع 20م', $p['n_border']);
+        $this->assertSame('Q-9', $p['survey_1_qrar_no']);
+        $this->assertSame('صك.pdf', $p['document_1_name']);
+        $this->assertStringContainsString('/documents/', $p['document_1_url']);
+
+        // One value per column: nothing nested anywhere.
+        $this->assertSame([], array_filter($p, 'is_array'));
+    }
+
+    public function test_every_feature_carries_the_same_columns(): void
+    {
+        $user = $this->exporter();
+        $this->actingAs($user);
+
+        $building = Parcel::where('geo_id', 'GEO-1')->first();
+        Parcel::create(['geo_id' => 'FLAT-1', 'parcel_no' => '101-1', 'parent_parcel_id' => $building->id]);
+
+        $features = $this->export([], $user)['features'];
+        $columns = array_keys($features[0]['properties']);
+
+        // Two owners on the fullest deed: two numbered owner sets on every row,
+        // the deedless flat's included.
+        $this->assertContains('owner_2_national_id', $columns);
+        $this->assertNotContains('owner_3_name', $columns);
+        foreach ($features as $feature) {
+            $this->assertSame($columns, array_keys($feature['properties']));
+        }
     }
 
     public function test_the_header_names_the_format_for_a_later_import(): void
@@ -146,9 +168,10 @@ class DeedExportTest extends TestCase
         $p = $this->export(['deed_no' => '310101'], $user, ['owners'])['features'][0];
 
         $this->assertNull($p['geometry']);
-        $this->assertArrayHasKey('owners', $p['properties']);
-        $this->assertArrayNotHasKey('boundary', $p['properties']);
-        $this->assertArrayNotHasKey('documents', $p['properties']);
+        $this->assertArrayHasKey('owner_1_name', $p['properties']);
+        $this->assertArrayNotHasKey('n_border', $p['properties']);
+        $this->assertArrayNotHasKey('document_1_name', $p['properties']);
+        $this->assertArrayNotHasKey('survey_1_qrar_no', $p['properties']);
     }
 
     public function test_the_page_runs_an_export_and_only_its_owner_downloads_it(): void
@@ -182,14 +205,16 @@ class DeedExportTest extends TestCase
         // Two deeds plus the flat, which has no deed.
         $this->assertCount(3, $file['features']);
         $this->assertSame('parcel-'.Parcel::where('geo_id', 'FLAT-1')->value('id'), $flat['id']);
-        $this->assertNull($flat['properties']['deed']);
+        $this->assertNull($flat['properties']['deed_no']);
+        $this->assertNull($flat['properties']['owner_1_name']);
         $this->assertSame('GEO-1', $flat['properties']['parent_geo_id']);
-        $this->assertSame('GEO-1', $flat['properties']['parcel']['parent_geo_id']);
 
         $deed = collect($file['features'])->firstWhere('properties.deed_no', '310101000001')['properties'];
-        $this->assertNotNull($deed['deed']['meta']['created_at']);
-        $this->assertNotNull($deed['parcel']['meta']['created_at']);
-        $this->assertSame(['mime_type', 'size_bytes', 'uploaded_by', 'uploaded_at', 'reviewed_by', 'reviewed_at', 'rejection_reason'], array_keys($deed['documents'][0]['meta']));
+        $this->assertNotNull($deed['deed_created_at']);
+        $this->assertNotNull($deed['parcel_created_at']);
+        foreach (['mime_type', 'size_bytes', 'uploaded_by', 'uploaded_at', 'reviewed_by', 'reviewed_at', 'rejection_reason'] as $column) {
+            $this->assertArrayHasKey('document_1_'.$column, $deed);
+        }
 
         // A filter on a deed's own fields leaves deedless parcels out.
         $this->assertSame(1, (new DeedExportFilters(['deed_no' => '310101']))->count($user));

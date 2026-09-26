@@ -96,14 +96,12 @@ class DeedImportTest extends TestCase
     {
         $file = $this->exported();
         $file['features'][0]['properties']['deed_area'] = 12000;
-        $file['features'][0]['properties']['owners'][0]['phone'] = '0555555555';
+        $file['features'][0]['properties']['owner_1_phone'] = '0555555555';
 
         $run = $this->analyse($file);
         $item = $this->items($run['id'])[0];
 
         $this->assertSame('changed', $item['status']);
-        // The visible column was edited, the nested copy was not: noted.
-        $this->assertContains('flat_nested_differ', array_column($item['warnings'], 'code'));
         $this->assertEquals([11200, 12000], $item['deed']['changes']['deed_area']);
         $this->assertSame('update', $item['owners'][0]['action']);
 
@@ -122,10 +120,14 @@ class DeedImportTest extends TestCase
         $file = $this->exported();
         $new = $file['features'][0];
         $new['id'] = 'new';
-        unset($new['properties']['deed_id']);
-        $new['properties']['deed'] = ['deed_no' => '999999', 'deed_area' => 500, 'deed_status' => 'قديم'];
-        $new['properties'] = ['deed_no' => '999999', 'deed_area' => 500, 'deed_status' => 'قديم'] + $new['properties'];
-        $new['properties']['owners'] = [['name' => 'مالك جديد تماما', 'national_id' => '2000000000', 'ownership_share' => 100]];
+        $new['properties'] = ['deed_id' => null, 'deed_no' => '999999', 'deed_area' => 500, 'deed_status' => 'قديم'] + $new['properties'];
+        // Every owner column emptied, then the first set filled with someone new.
+        foreach (array_keys($new['properties']) as $column) {
+            if (str_starts_with($column, 'owner_')) {
+                $new['properties'][$column] = null;
+            }
+        }
+        $new['properties'] = ['owner_1_name' => 'مالك جديد تماما', 'owner_1_national_id' => '2000000000', 'owner_1_share' => 100] + $new['properties'];
         $file['features'][] = $new;
 
         $run = $this->analyse($file);
@@ -144,7 +146,8 @@ class DeedImportTest extends TestCase
     {
         $file = $this->exported();
         // One digit off Salem's national ID: the usual typing slip.
-        $file['features'][0]['properties']['owners'][] = ['name' => 'سالم احمد', 'national_id' => '1000000007', 'ownership_share' => 0];
+        // Added as one more numbered owner set, after the ones the export wrote.
+        $file['features'][0]['properties'] += ['owner_9_name' => 'سالم احمد', 'owner_9_national_id' => '1000000007', 'owner_9_share' => 0];
 
         $run = $this->analyse($file);
         $key = array_key_first($run['decisions_needed']);
@@ -182,7 +185,6 @@ class DeedImportTest extends TestCase
         // A deed_id that belongs to a deed on another parcel.
         $elsewhere = $this->exported()['features'][0];
         $elsewhere['properties']['parcel_geo_id'] = 'GEO-OTHER';
-        $elsewhere['properties']['parcel']['geo_id'] = 'GEO-OTHER';
         $file['features'][] = $elsewhere;
 
         $run = $this->analyse($file);
@@ -302,11 +304,12 @@ class DeedImportTest extends TestCase
     public function test_the_engineering_office_and_deed_match_are_imported(): void
     {
         $file = $this->exported();
-        $file['features'][0]['properties']['boundary'] = [
-            'north' => ['border' => 'شارع 30م', 'length' => 25],
+        $file['features'][0]['properties'] = [
+            'n_border' => 'شارع 30م',
+            'n_dim' => 25,
             'matches_deed' => 'نعم',
             'engineering_office' => 'مكتب الرؤية للاستشارات',
-        ];
+        ] + $file['features'][0]['properties'];
 
         $run = $this->analyse($file);
         $key = array_key_first($run['decisions_needed']);
@@ -338,7 +341,6 @@ class DeedImportTest extends TestCase
         // No district, a new plan: the city with districts is taken.
         $file = $this->exported();
         $file['features'][0]['properties']['district'] = null;
-        $file['features'][0]['properties']['parcel']['location']['district'] = null;
         $file['features'][0]['properties']['plan_no'] = 'P-NEW-2';
         $run = $this->analyse($file);
         $this->assertSame(0, $run['counts']['error']);
@@ -350,9 +352,8 @@ class DeedImportTest extends TestCase
 
         // The deed's number on a second parcel: a deed row of its own there.
         $second = $file['features'][0];
-        unset($second['properties']['deed_id'], $second['properties']['deed']['id']);
+        $second['properties']['deed_id'] = null;
         $second['properties']['parcel_geo_id'] = 'GEO-2ND';
-        $second['properties']['parcel']['geo_id'] = 'GEO-2ND';
         $file['features'][] = $second;
 
         // The very same deed, number and parcel, twice: that is a duplicate.
@@ -426,16 +427,19 @@ class DeedImportTest extends TestCase
 
         $p = $file['features'][0]['properties'];
         $this->assertSame('DEMO-0001', $p['parcel_geo_id']);
-        $this->assertSame('410100000001', $p['deed']['deed_no']);
-        $this->assertCount(1, $p['owners']);
-        $this->assertSame('1098765432', $p['owners'][0]['national_id']);
-        $this->assertSame('شارع عرض 20 م', $p['boundary']['north']['border']);
-        $this->assertCount(1, $p['survey_decisions']);
-        $this->assertCount(1, $p['documents']);
-        $this->assertSame('الملقا', $p['parcel']['location']['district']['name_ar']);
-        // History is not something to fill in.
-        $this->assertArrayNotHasKey('meta', $p['deed']);
-        $this->assertArrayNotHasKey('meta', $p['parcel']);
+        $this->assertSame('410100000001', $p['deed_no']);
+        $this->assertSame('1098765432', $p['owner_1_national_id']);
+        $this->assertSame('شارع عرض 20 م', $p['n_border']);
+        $this->assertSame('12345', $p['survey_1_qrar_no']);
+        $this->assertSame('صك-410100000001.pdf', $p['document_1_name']);
+        $this->assertSame('الملقا', $p['district']);
+        // Room for more: three owner sets and two of the others, left empty.
+        $this->assertNull($p['owner_3_name']);
+        $this->assertNull($p['survey_2_qrar_no']);
+        $this->assertNull($p['document_2_name']);
+        // One value per column, and no history to fill in.
+        $this->assertSame([], array_filter($p, 'is_array'));
+        $this->assertArrayNotHasKey('deed_created_at', $p);
 
         // Uploaded untouched, the sample is a clean record.
         $run = $this->analyse($file);
@@ -447,6 +451,31 @@ class DeedImportTest extends TestCase
         $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', '410100000001')->count());
         $this->assertSame(1, SurveyDecision::where('parcel_id', $parcel->id)->where('qrar_no', '12345')->count());
         $this->assertSame(1, Owner::where('national_id', '1098765432')->count());
+    }
+
+    public function test_a_file_in_the_earlier_nested_layout_still_imports(): void
+    {
+        $file = ['type' => 'FeatureCollection', 'features' => [[
+            'type' => 'Feature',
+            'geometry' => null,
+            'properties' => [
+                'deed' => ['deed_no' => 'OLD-1', 'deed_area' => 300],
+                'parcel' => ['geo_id' => 'OLD-GEO-1', 'parcel_no' => '7'],
+                'owners' => [['name' => 'مالك من ملف قديم', 'national_id' => '1011111111', 'ownership_share' => 100]],
+                'boundary' => ['north' => ['border' => 'شارع 12م', 'length' => 20]],
+                'survey_decisions' => [['qrar_no' => 'OLD-Q', 'qrar_source' => 'بلدي']],
+            ],
+        ]]];
+
+        $run = $this->analyse($file);
+        $this->assertSame([], $this->items($run['id'])[0]['errors']);
+
+        $this->apply($run['id']);
+        $parcel = Parcel::where('geo_id', 'OLD-GEO-1')->firstOrFail();
+        $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', 'OLD-1')->count());
+        $this->assertDatabaseHas('owners', ['national_id' => '1011111111']);
+        $this->assertDatabaseHas('parcel_boundaries', ['parcel_id' => $parcel->id, 'n_border' => 'شارع 12م']);
+        $this->assertSame(1, SurveyDecision::where('parcel_id', $parcel->id)->where('qrar_no', 'OLD-Q')->count());
     }
 
     private function exported(): array
