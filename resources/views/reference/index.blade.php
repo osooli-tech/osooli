@@ -15,6 +15,9 @@
         @can('boundaries.edit')
             <livewire:reference.boundary-editor />
         @endcan
+        @can('parcels.placement_fix')
+            <livewire:reference.plan-placement />
+        @endcan
     @else
         <div class="flex flex-col items-center justify-center py-24 gap-4
                     text-on-surface-variant dark:text-on-primary-container">

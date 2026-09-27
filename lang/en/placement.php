@@ -40,4 +40,12 @@ return [
         'done_plan' => 'Plan :subject moved to «:to» with :parcels parcels.',
         'done_district' => 'District «:subject» moved to the city «:to» with :parcels parcels.',
     ],
+    'plan' => [
+        'button' => 'District by where its parcels lie',
+        'title' => 'District of plan :plan by where its parcels lie',
+        'current' => 'Recorded now: :current',
+        'where' => 'Where its parcels lie (:located of :parcels have a polygon):',
+        'nowhere' => 'None of the plan\'s parcels lie inside a district or city with a boundary, or they have no polygons.',
+        'no_move' => 'No move to suggest: the plan\'s parcels lie in its recorded district, or somewhere with no bounded district. To set the district by hand, use «Edit» on the plan\'s row.',
+    ],
 ];

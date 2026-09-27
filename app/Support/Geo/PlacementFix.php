@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Geo;
 
+use App\Support\Database\Spatial;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -97,6 +98,126 @@ final class PlacementFix
         }
 
         return null;
+    }
+
+    /**
+     * Where a whole plan's parcels lie, and the moves that follow from it:
+     * to each district holding some of them, and — when the plan's district
+     * has no boundary — the district to the city holding most of them.
+     *
+     * @return array{plan: string, current: string, parcels: int, located: int, spread: list<array{name: string, parcels: int}>, options: list<array{kind: string, subject_id: int, subject: string, target_id: int, from: string, to: string, parcels: int, located: int, inside: int}>}|null
+     */
+    public static function forPlan(int $planId): ?array
+    {
+        $plan = DB::table('plans as pl')
+            ->join('districts as d', 'd.id', '=', 'pl.district_id')
+            ->join('cities as c', 'c.id', '=', 'd.city_id')
+            ->where('pl.id', $planId)
+            ->selectRaw('pl.id, pl.plan_no, d.id AS district_id, d.name_ar AS district, c.id AS city_id, c.name_ar AS city, CASE WHEN d.geom IS NULL THEN 0 ELSE 1 END AS district_bounded')
+            ->first();
+
+        if ($plan === null) {
+            return null;
+        }
+
+        $counts = DB::selectOne(
+            'SELECT COUNT(*) AS parcels, SUM(CASE WHEN geom IS NULL THEN 0 ELSE 1 END) AS located
+             FROM parcels WHERE plan_id = ? AND deleted_at IS NULL',
+            [$planId]
+        );
+
+        $districts = self::spread('districts', $planId);
+        $cities = self::spread('cities', $planId);
+        $options = [];
+
+        foreach ($districts as $place) {
+            if ($place->id !== (int) $plan->district_id) {
+                $options[] = [
+                    'kind' => 'plan',
+                    'subject_id' => $planId,
+                    'subject' => (string) $plan->plan_no,
+                    'target_id' => $place->id,
+                    'from' => $plan->district.' — '.$plan->city,
+                    'to' => $place->name.' — '.$place->city,
+                ] + self::counts('districts', 'p.plan_id = ?', $planId, $place->id);
+            }
+        }
+
+        $topCity = $cities[0] ?? null;
+        if ((int) $plan->district_bounded === 0 && $topCity !== null && $topCity->id !== (int) $plan->city_id) {
+            $options[] = [
+                'kind' => 'district',
+                'subject_id' => (int) $plan->district_id,
+                'subject' => (string) $plan->district,
+                'target_id' => $topCity->id,
+                'from' => (string) $plan->city,
+                'to' => $topCity->name,
+            ] + self::counts('cities', 'p.plan_id IN (SELECT id FROM plans WHERE district_id = ?)', (int) $plan->district_id, $topCity->id);
+        }
+
+        // Shown as where the parcels are: districts where any have one,
+        // otherwise the cities.
+        $spread = $districts !== [] ? $districts : $cities;
+
+        return [
+            'plan' => (string) $plan->plan_no,
+            'current' => $plan->district.' — '.$plan->city,
+            'parcels' => (int) ($counts->parcels ?? 0),
+            'located' => (int) ($counts->located ?? 0),
+            'spread' => array_map(static fn (object $p): array => [
+                'name' => $p->city === null ? $p->name : $p->name.' — '.$p->city,
+                'parcels' => $p->parcels,
+            ], $spread),
+            'options' => $options,
+        ];
+    }
+
+    /**
+     * The plan-level option of this kind and target, if it still stands.
+     *
+     * @return array{kind: string, subject_id: int, subject: string, target_id: int, from: string, to: string, parcels: int, located: int, inside: int}|null
+     */
+    public static function findForPlan(int $planId, string $kind, int $targetId): ?array
+    {
+        foreach (self::forPlan($planId)['options'] ?? [] as $option) {
+            if ($option['kind'] === $kind && $option['target_id'] === $targetId) {
+                return $option;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The districts (or cities) with a boundary holding the plan's parcels,
+     * most parcels first.
+     *
+     * @return list<object{id: int, name: string, city: string|null, parcels: int}>
+     */
+    private static function spread(string $table, int $planId): array
+    {
+        $point = 'ST_PointOnSurface(p.geom)';
+        $cityJoin = $table === 'districts' ? 'JOIN cities c ON c.id = t.city_id' : '';
+        $cityName = $table === 'districts' ? 'c.name_ar' : 'NULL';
+
+        $rows = DB::select(
+            "SELECT t.id, t.name_ar AS name, {$cityName} AS city, COUNT(*) AS parcels
+             FROM parcels p
+             JOIN {$table} t ON t.geom IS NOT NULL AND ".Spatial::boxesIntersect('t.geom', $point)." AND ST_Contains(t.geom, {$point})
+             {$cityJoin}
+             WHERE p.plan_id = ? AND p.geom IS NOT NULL AND p.deleted_at IS NULL
+             GROUP BY t.id, t.name_ar".($table === 'districts' ? ', c.name_ar' : '').'
+             ORDER BY COUNT(*) DESC, t.id
+             LIMIT 5',
+            [$planId]
+        );
+
+        return array_map(static fn (object $r): object => (object) [
+            'id' => (int) $r->id,
+            'name' => (string) $r->name,
+            'city' => $r->city === null ? null : (string) $r->city,
+            'parcels' => (int) $r->parcels,
+        ], $rows);
     }
 
     /**

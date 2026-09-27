@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Livewire\Parcels\PlacementReview;
+use App\Livewire\Reference\PlanPlacement;
+use App\Livewire\Reference\ReferenceIndex;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\District;
@@ -101,6 +103,61 @@ class PlacementFixTest extends TestCase
             ->assertDispatched('toast', type: 'error');
 
         $this->assertSame($this->diriyah->id, (int) DB::table('districts')->where('id', $this->district->id)->value('city_id'));
+    }
+
+    public function test_a_plan_is_moved_to_the_district_most_of_its_parcels_lie_in(): void
+    {
+        $this->fixtures();
+        $north = District::create(['city_id' => $this->ammariyah->id, 'name_ar' => 'الشمال']);
+        $south = District::create(['city_id' => $this->ammariyah->id, 'name_ar' => 'الجنوب']);
+        $this->boundary('districts', $north->id, 46.30, 24.85, 0.05, 'official');
+        $this->boundary('districts', $south->id, 46.30, 24.80, 0.05, 'official');
+        $this->parcel('1', '25', 46.31, 24.86);
+        $this->parcel('2', '25', 46.32, 24.87);
+        $this->parcel('3', '25', 46.31, 24.81);
+        $plan = Plan::query()->where('plan_no', '25')->firstOrFail();
+
+        $report = PlacementFix::forPlan($plan->id);
+        $this->assertNotNull($report);
+        $this->assertSame(['الشمال — العمارية', 'الجنوب — العمارية'], array_column($report['spread'], 'name'));
+        $this->assertSame([2, 1], array_column($report['spread'], 'parcels'));
+        $this->assertSame([$north->id, $south->id, $this->ammariyah->id], array_column($report['options'], 'target_id'));
+
+        $this->actingAs($this->userWith(['reference.view', 'parcels.placement_fix']));
+
+        Livewire::test(ReferenceIndex::class)
+            ->call('selectTab', 'plans')
+            ->assertSee(__('placement.plan.button'));
+
+        Livewire::test(PlanPlacement::class)
+            ->dispatch('plan-placement', id: $plan->id)
+            ->assertSet('show', true)
+            ->assertSee('حي المخطط 25 حسب موقع قطعه')
+            ->assertSee('مقترح')
+            ->call('applyFix', 'plan', $north->id)
+            ->assertDispatched('plan-placed')
+            ->assertSet('show', false);
+
+        $this->assertSame($north->id, (int) $plan->fresh()?->district_id);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'plan.reassign', 'target_id' => $plan->id]);
+
+        // Now in its district: nothing more to move there.
+        $this->assertNotContains($north->id, array_column(PlacementFix::forPlan($plan->id)['options'] ?? [], 'target_id'));
+    }
+
+    public function test_the_plan_button_needs_the_permission(): void
+    {
+        $this->fixtures();
+        $this->parcel('1', '25', 46.32, 24.82);
+        $this->actingAs($this->userWith(['reference.view']));
+
+        Livewire::test(ReferenceIndex::class)
+            ->call('selectTab', 'plans')
+            ->assertDontSee(__('placement.plan.button'));
+
+        Livewire::test(PlanPlacement::class)
+            ->dispatch('plan-placement', id: (int) Plan::query()->value('id'))
+            ->assertForbidden();
     }
 
     public function test_reassigning_needs_its_own_permission(): void

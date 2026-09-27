@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Parcels;
 
-use App\Models\District;
-use App\Models\Plan;
-use App\Support\Concerns\WritesSafely;
+use App\Livewire\Concerns\AppliesPlacementFix;
 use App\Support\Geo\ParcelPlacement;
 use App\Support\Geo\PlacementFix;
 use App\Support\OwnerScope;
@@ -26,8 +24,8 @@ use Livewire\WithPagination;
  */
 class PlacementReview extends Component
 {
+    use AppliesPlacementFix;
     use WithPagination;
-    use WritesSafely;
 
     private const PER_PAGE = 20;
 
@@ -54,7 +52,7 @@ class PlacementReview extends Component
 
     public function openFix(int $parcelId): void
     {
-        $this->authorizeFix();
+        $this->authorizePlacementFix();
 
         $this->fixing = $parcelId;
         $this->fixOptions = PlacementFix::options($parcelId);
@@ -72,32 +70,12 @@ class PlacementReview extends Component
      */
     public function applyFix(string $kind, int $targetId): void
     {
-        $this->authorizeFix();
+        $this->authorizePlacementFix();
 
         // Worked out again now: the dialog may have sat open while someone
         // else moved the same plan.
-        $option = $this->fixing === null ? null : PlacementFix::find($this->fixing, $kind, $targetId);
-        if ($option === null) {
-            $this->closeFix();
-            $this->dispatch('toast', type: 'error', message: __('placement.fix.stale'));
-
-            return;
-        }
-
-        if ($kind === 'plan') {
-            $plan = Plan::query()->findOrFail($option['subject_id']);
-            $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => $targetId]));
-        } else {
-            $district = District::query()->findOrFail($option['subject_id']);
-            $this->writeSafely('district.reassign', 'district', (int) $district->id, fn (): bool => $district->update(['city_id' => $targetId]));
-        }
-
+        $this->applyPlacementOption($this->fixing === null ? null : PlacementFix::find($this->fixing, $kind, $targetId));
         $this->closeFix();
-        $this->dispatch('toast', type: 'success', message: __('placement.fix.done_'.$kind, [
-            'subject' => $option['subject'],
-            'to' => $option['to'],
-            'parcels' => $option['parcels'],
-        ]));
     }
 
     public function render(): View
@@ -116,24 +94,8 @@ class PlacementReview extends Component
                 'district' => $this->outside('district')->count(),
                 'city' => $this->outside('city')->count(),
             ],
-            'canFix' => $this->mayFix(),
+            'canFix' => $this->mayFixPlacement(),
         ]);
-    }
-
-    /**
-     * Reassigning moves a plan or a district, and so parcels beyond any one
-     * owner's: never for a user limited to some owners' parcels.
-     */
-    private function mayFix(): bool
-    {
-        $user = Auth::user();
-
-        return $user !== null && $user->can('parcels.placement_fix') && OwnerScope::parcelIds($user) === null;
-    }
-
-    private function authorizeFix(): void
-    {
-        abort_unless($this->mayFix(), 403);
     }
 
     /** Live parcels with a polygon, outside the boundary of their plan's district (or city). */

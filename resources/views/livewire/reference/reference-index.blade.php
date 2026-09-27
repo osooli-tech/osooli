@@ -172,6 +172,14 @@
                                             </button>
                                         @endcan
                                     @endif
+                                    @if ($tab === 'plans' && $canPlace)
+                                        <button type="button"
+                                                x-on:click="$dispatch('plan-placement', { id: {{ $row['id'] }} })"
+                                                class="p-1.5 rounded-lg text-on-surface-variant dark:text-on-primary-container transition-colors hover:bg-secondary/10 hover:text-secondary"
+                                                title="{{ __('placement.plan.button') }}">
+                                            <span class="material-symbols-outlined text-[18px]">my_location</span>
+                                        </button>
+                                    @endif
                                     @can('reference.edit')
                                         <button wire:click="openEdit({{ $row['id'] }})"
                                                 class="p-1.5 rounded-lg text-on-surface-variant dark:text-on-primary-container
