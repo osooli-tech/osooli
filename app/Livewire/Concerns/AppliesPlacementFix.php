@@ -7,8 +7,10 @@ namespace App\Livewire\Concerns;
 use App\Models\District;
 use App\Models\Plan;
 use App\Support\Concerns\WritesSafely;
+use App\Support\Geo\PlacementFix;
 use App\Support\OwnerScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Carrying out a PlacementFix option — moving a plan to another district or
@@ -46,15 +48,7 @@ trait AppliesPlacementFix
             return false;
         }
 
-        $target = $option['target_id'];
-
-        if ($option['kind'] === 'plan') {
-            $plan = Plan::query()->findOrFail($option['subject_id']);
-            $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => $target]));
-        } else {
-            $district = District::query()->findOrFail($option['subject_id']);
-            $this->writeSafely('district.reassign', 'district', (int) $district->id, fn (): bool => $district->update(['city_id' => $target]));
-        }
+        $this->writePlacementOption($option);
 
         $this->dispatch('toast', type: 'success', message: __('placement.fix.done_'.$option['kind'], [
             'subject' => $option['subject'],
@@ -63,5 +57,29 @@ trait AppliesPlacementFix
         ]));
 
         return true;
+    }
+
+    /**
+     * @param  array{kind: string, subject_id: int, subject: string, target_id: int, from: string, to: string, parcels: int, located: int, inside: int}  $option
+     */
+    protected function writePlacementOption(array $option): void
+    {
+        $target = $option['target_id'];
+
+        if ($option['kind'] === 'plan') {
+            $plan = Plan::query()->findOrFail($option['subject_id']);
+            $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => $target]));
+        } elseif ($option['kind'] === 'plan_city') {
+            $plan = Plan::query()->findOrFail($option['subject_id']);
+            $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => PlacementFix::villageDistrict($target)]));
+        } elseif (in_array($option['kind'], ['parcel', 'parcel_city'], true)) {
+            $parcelId = $option['subject_id'];
+            $kind = $option['kind'];
+            $this->writeSafely('parcel.relocate', 'parcel', $parcelId, fn (): int => DB::table('parcels')->where('id', $parcelId)
+                ->update(['plan_id' => PlacementFix::standInPlanFor($kind, $target), 'updated_at' => now()]));
+        } else {
+            $district = District::query()->findOrFail($option['subject_id']);
+            $this->writeSafely('district.reassign', 'district', (int) $district->id, fn (): bool => $district->update(['city_id' => $target]));
+        }
     }
 }

@@ -78,6 +78,29 @@ class PlacementReview extends Component
         $this->closeFix();
     }
 
+    /**
+     * Every listed parcel with no real plan, moved to the official district
+     * (or village) it lies in. Parcels of real plans are left for a decision.
+     */
+    public function relocateStandIns(): void
+    {
+        $this->authorizePlacementFix();
+        @set_time_limit(0);
+
+        $moved = 0;
+        foreach (['district', 'city'] as $level) {
+            foreach ($this->outside($level)->pluck('p.id') as $id) {
+                $option = PlacementFix::options((int) $id)[0] ?? null;
+                if ($option !== null && in_array($option['kind'], ['parcel', 'parcel_city'], true)) {
+                    $this->writePlacementOption($option);
+                    $moved++;
+                }
+            }
+        }
+
+        $this->dispatch('toast', type: 'success', message: __('placement.fix.relocated', ['count' => $moved]));
+    }
+
     public function render(): View
     {
         $page = $this->outside($this->level)->orderBy('p.id')->paginate(self::PER_PAGE);
@@ -95,7 +118,15 @@ class PlacementReview extends Component
                 'city' => $this->outside('city')->count(),
             ],
             'canFix' => $this->mayFixPlacement(),
+            'standIns' => $this->mayFixPlacement() ? $this->standInCount() : 0,
         ]);
+    }
+
+    /** How many listed parcels have no real plan («بدون …»). */
+    private function standInCount(): int
+    {
+        return $this->outside('district')->where('pl.plan_no', 'like', 'بدون%')->count()
+            + $this->outside('city')->where('pl.plan_no', 'like', 'بدون%')->count();
     }
 
     /** Live parcels with a polygon, outside the boundary of their plan's district (or city). */

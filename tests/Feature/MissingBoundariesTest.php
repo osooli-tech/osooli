@@ -177,11 +177,40 @@ class MissingBoundariesTest extends TestCase
             ->assertDispatched('toast', type: 'success')
             ->call('delete', $unused->id);
 
+        // Solve all only moves; drawing from parcels stays a choice.
         $this->assertSame($this->ammariyah->id, (int) DB::table('districts')->where('id', $wadi->id)->value('city_id'));
-        $this->assertSame('parcels', DB::table('districts')->where('id', $wadi->id)->value('boundary_source'));
+        $this->assertNull(DB::table('districts')->where('id', $wadi->id)->value('boundary_source'));
+        $this->assertDatabaseMissing('districts', ['id' => $unused->id]);
+
+        Livewire::test(MissingBoundariesPanel::class)
+            ->dispatch('missing-boundaries')
+            ->call('draw', $wadi->id);
         $shape = json_decode((string) DB::selectOne('SELECT ST_AsGeoJSON(geom) AS g FROM districts WHERE id = ?', [$wadi->id])?->g, true);
         $this->assertCount(2, $shape['coordinates']);
-        $this->assertDatabaseMissing('districts', ['id' => $unused->id]);
+
+        // And taken off again: not an official boundary.
+        Livewire::test(MissingBoundariesPanel::class)
+            ->dispatch('missing-boundaries')
+            ->assertSee(__('boundaries.missing.clear', ['count' => 1]))
+            ->call('clearDrawn');
+        $this->assertNull(DB::table('districts')->where('id', $wadi->id)->value('geom'));
+    }
+
+    public function test_an_empty_district_goes_with_its_empty_stand_in_plans(): void
+    {
+        $this->fixtures();
+        $butayn = District::create(['city_id' => $this->diriyah->id, 'name_ar' => 'بطين-1']);
+        $plan = Plan::create(['plan_no' => 'بدون - بطين-1', 'district_id' => $butayn->id]);
+
+        $this->assertSame('unused', MissingBoundaries::row('districts', $butayn->id)['action'] ?? null);
+
+        $this->actingAs($this->userWith(['boundaries.edit', 'reference.delete']));
+        Livewire::test(MissingBoundariesPanel::class)
+            ->dispatch('missing-boundaries')
+            ->call('delete', $butayn->id);
+
+        $this->assertDatabaseMissing('districts', ['id' => $butayn->id]);
+        $this->assertDatabaseMissing('plans', ['id' => $plan->id]);
     }
 
     public function test_moving_needs_the_reassign_permission_and_the_panel_needs_boundaries_edit(): void

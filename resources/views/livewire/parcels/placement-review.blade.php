@@ -17,6 +17,18 @@
             @endforeach
         </div>
         <p class="mt-3 text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('placement.hint.'.$level) }}</p>
+
+        @if ($standIns > 0)
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary/5 border border-secondary/30 px-4 py-3">
+                <p class="text-sm text-on-surface dark:text-white/90">{{ __('placement.fix.relocate_hint', ['count' => number_format($standIns)]) }}</p>
+                <button type="button" wire:click="relocateStandIns" wire:loading.attr="disabled"
+                        wire:confirm="{{ __('placement.fix.relocate_confirm', ['count' => number_format($standIns)]) }}"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-secondary text-white hover:opacity-90 disabled:opacity-50">
+                    <span class="material-symbols-outlined text-[18px]" wire:loading.class="animate-spin" wire:target="relocateStandIns">move_location</span>
+                    {{ __('placement.fix.relocate', ['count' => number_format($standIns)]) }}
+                </button>
+            </div>
+        @endif
     </div>
 
     <div class="{{ $card }} overflow-hidden">

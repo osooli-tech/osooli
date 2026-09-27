@@ -36,6 +36,7 @@ return [
             'archive' => 'Parcel archived',
             'geometry_edit' => 'Parcel polygon edited',
             'geometry_restore' => 'Earlier polygon restored',
+            'relocate' => 'Parcel moved to its official place',
         ],
         'parcels' => ['restore' => 'Parcel restored from archive'],
         'deed' => [

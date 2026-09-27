@@ -47,11 +47,12 @@ class PlacementFixTest extends TestCase
         $this->parcel('92', '25', 46.33, 24.83);
         $this->parcel('10', '26', 46.34, 24.84);
 
-        $options = PlacementFix::options($first->id);
-        $this->assertCount(1, $options);
-        $this->assertSame('district', $options[0]['kind']);
-        $this->assertSame($this->ammariyah->id, $options[0]['target_id']);
-        $this->assertSame(['parcels' => 3, 'located' => 3, 'inside' => 3], array_intersect_key($options[0], array_flip(['parcels', 'located', 'inside'])));
+        // The whole district to the city — or just this plan, to the village.
+        $options = collect(PlacementFix::options($first->id))->keyBy('kind');
+        $this->assertSame(['plan_city', 'district'], $options->keys()->all());
+        $this->assertSame($this->ammariyah->id, $options['district']['target_id']);
+        $this->assertSame(['parcels' => 3, 'located' => 3, 'inside' => 3], array_intersect_key($options['district'], array_flip(['parcels', 'located', 'inside'])));
+        $this->assertSame(2, $options['plan_city']['parcels']);
 
         $this->actingAs($this->userWith(['parcels.placement', 'parcels.placement_fix']));
 
@@ -158,6 +159,34 @@ class PlacementFixTest extends TestCase
         Livewire::test(PlanPlacement::class)
             ->dispatch('plan-placement', id: (int) Plan::query()->value('id'))
             ->assertForbidden();
+    }
+
+    public function test_parcels_with_no_real_plan_move_one_by_one_to_the_official_place_they_lie_in(): void
+    {
+        $this->fixtures();
+        $north = District::create(['city_id' => $this->ammariyah->id, 'name_ar' => 'الشمال']);
+        $this->boundary('districts', $north->id, 46.30, 24.85, 0.05, 'official');
+        $inNorth = $this->parcel('1', 'بدون - بطين-1', 46.31, 24.86);
+        $inVillage = $this->parcel('2', 'بدون - بطين-1', 46.32, 24.82);
+        $real = $this->parcel('3', '25', 46.33, 24.82);
+
+        $this->assertSame(['parcel', $north->id], [PlacementFix::options($inNorth->id)[0]['kind'], PlacementFix::options($inNorth->id)[0]['target_id']]);
+        $this->assertSame(['parcel_city', $this->ammariyah->id], [PlacementFix::options($inVillage->id)[0]['kind'], PlacementFix::options($inVillage->id)[0]['target_id']]);
+        // A real plan is not split: it moves whole, to a district named after the village.
+        $this->assertContains('plan_city', array_column(PlacementFix::options($real->id), 'kind'));
+
+        $this->actingAs($this->userWith(['parcels.placement', 'parcels.placement_fix']));
+        Livewire::test(PlacementReview::class)
+            ->assertSee(__('placement.fix.relocate', ['count' => 2]))
+            ->call('relocateStandIns')
+            ->assertDispatched('toast', type: 'success');
+
+        $planOf = fn (Parcel $p): string => (string) DB::table('plans')->where('id', $p->fresh()?->plan_id)->value('plan_no');
+        $this->assertSame('بدون — الشمال — العمارية', $planOf($inNorth));
+        $this->assertSame('بدون — العمارية — العمارية', $planOf($inVillage));
+        $this->assertSame('25', $planOf($real));
+        $this->assertDatabaseHas('districts', ['city_id' => $this->ammariyah->id, 'name_ar' => 'العمارية']);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'parcel.relocate', 'target_id' => $inVillage->id]);
     }
 
     public function test_reassigning_needs_its_own_permission(): void

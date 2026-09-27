@@ -35,7 +35,7 @@ return [
             'update' => 'تعديل قطعة',
             'archive' => 'أرشفة قطعة',
             'geometry_edit' => 'تعديل مضلع قطعة',
-            'geometry_restore' => 'استرجاع مضلع سابق',
+            'geometry_restore' => 'استرجاع مضلع سابق', 'relocate' => 'نقل قطعة إلى مكانها الرسمي',
         ],
         'parcels' => ['restore' => 'استرجاع قطعة من الأرشيف'],
         'deed' => [

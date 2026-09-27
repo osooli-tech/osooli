@@ -26,6 +26,9 @@ use Illuminate\Support\Facades\DB;
  */
 final class PlacementFix
 {
+    /** Plan numbers that stand for «no plan»: the importers' stand-in plans. */
+    private const STAND_IN = 'بدون';
+
     /**
      * @return list<array{kind: string, subject_id: int, subject: string, target_id: int, from: string, to: string, parcels: int, located: int, inside: int}>
      */
@@ -33,6 +36,7 @@ final class PlacementFix
     {
         $row = DB::selectOne(
             'SELECT ST_X(ST_PointOnSurface(p.geom)) AS x, ST_Y(ST_PointOnSurface(p.geom)) AS y,
+                    p.parcel_no, p.geo_id,
                     pl.id AS plan_id, pl.plan_no, d.id AS district_id, d.name_ar AS district,
                     CASE WHEN d.geom IS NULL THEN 0 ELSE 1 END AS district_bounded,
                     c.id AS city_id, c.name_ar AS city
@@ -50,36 +54,150 @@ final class PlacementFix
 
         $x = (float) $row->x;
         $y = (float) $row->y;
+        $district = self::officialAt('districts', $x, $y);
+        $city = self::officialAt('cities', $x, $y);
+        $from = $row->district.' — '.$row->city;
+
+        // A parcel with no real plan belongs to no group that must stay
+        // together: it alone goes where it lies.
+        if (self::isStandIn((string) $row->plan_no)) {
+            $place = $district ?? $city;
+            if ($place === null || ($district !== null && $district->id === (int) $row->district_id)) {
+                return [];
+            }
+
+            return [[
+                'kind' => $district !== null ? 'parcel' : 'parcel_city',
+                'subject_id' => $parcelId,
+                'subject' => (string) ($row->geo_id ?? $row->parcel_no),
+                'target_id' => $place->id,
+                'from' => $from,
+                'to' => $place->label,
+                'parcels' => 1,
+                'located' => 1,
+                'inside' => 1,
+            ]];
+        }
+
         $options = [];
 
-        $districts = ParcelPlacement::containing('districts', $x, $y)['ids'];
-        if ($districts !== [] && ! in_array((int) $row->district_id, $districts, true)) {
-            $target = DB::table('districts as d')->join('cities as c', 'c.id', '=', 'd.city_id')
-                ->where('d.id', $districts[0])->first(['d.name_ar', 'c.name_ar as city']);
-
+        if ($district !== null && $district->id !== (int) $row->district_id) {
             $options[] = [
                 'kind' => 'plan',
                 'subject_id' => (int) $row->plan_id,
                 'subject' => (string) $row->plan_no,
-                'target_id' => $districts[0],
-                'from' => $row->district.' — '.$row->city,
-                'to' => $target->name_ar.' — '.$target->city,
-            ] + self::counts('districts', 'p.plan_id = ?', (int) $row->plan_id, $districts[0]);
+                'target_id' => $district->id,
+                'from' => $from,
+                'to' => $district->label,
+            ] + self::counts('districts', 'p.plan_id = ?', (int) $row->plan_id, $district->id);
         }
 
-        $cities = ParcelPlacement::containing('cities', $x, $y)['ids'];
-        if ((int) $row->district_bounded === 0 && $cities !== [] && ! in_array((int) $row->city_id, $cities, true)) {
+        if ($district === null && $city !== null && $city->id !== (int) $row->city_id) {
+            // A village with no districts: the plan goes to a district named
+            // after the village, inside it.
+            $options[] = [
+                'kind' => 'plan_city',
+                'subject_id' => (int) $row->plan_id,
+                'subject' => (string) $row->plan_no,
+                'target_id' => $city->id,
+                'from' => $from,
+                'to' => $city->label,
+            ] + self::counts('cities', 'p.plan_id = ?', (int) $row->plan_id, $city->id);
+        }
+
+        if ((int) $row->district_bounded === 0 && $city !== null && $city->id !== (int) $row->city_id) {
             $options[] = [
                 'kind' => 'district',
                 'subject_id' => (int) $row->district_id,
                 'subject' => (string) $row->district,
-                'target_id' => $cities[0],
+                'target_id' => $city->id,
                 'from' => (string) $row->city,
-                'to' => (string) DB::table('cities')->where('id', $cities[0])->value('name_ar'),
-            ] + self::counts('cities', 'p.plan_id IN (SELECT id FROM plans WHERE district_id = ?)', (int) $row->district_id, $cities[0]);
+                'to' => $city->label,
+            ] + self::counts('cities', 'p.plan_id IN (SELECT id FROM plans WHERE district_id = ?)', (int) $row->district_id, $city->id);
         }
 
         return $options;
+    }
+
+    /** Whether a plan number is a stand-in for «no plan» («بدون …»). */
+    public static function isStandIn(string $planNo): bool
+    {
+        return str_starts_with(trim($planNo), self::STAND_IN);
+    }
+
+    /**
+     * The district a parcel with no real plan goes into, for a target given
+     * as a district (`parcel`) or as a village (`parcel_city`), and the
+     * stand-in plan of that district it is filed under.
+     */
+    public static function standInPlanFor(string $kind, int $targetId): int
+    {
+        $districtId = $kind === 'parcel_city' ? self::villageDistrict($targetId) : $targetId;
+
+        $place = DB::table('districts as d')->join('cities as c', 'c.id', '=', 'd.city_id')
+            ->where('d.id', $districtId)->first(['d.name_ar', 'c.name_ar as city']);
+        $planNo = mb_substr(implode(' — ', [self::STAND_IN, $place?->name_ar, $place?->city]), 0, 50);
+
+        $plan = DB::table('plans')->where('plan_no', $planNo)->first(['id', 'district_id']);
+        if ($plan !== null) {
+            if ((int) $plan->district_id !== $districtId) {
+                DB::table('plans')->where('id', $plan->id)->update(['district_id' => $districtId, 'updated_at' => now()]);
+            }
+
+            return (int) $plan->id;
+        }
+
+        return (int) DB::table('plans')->insertGetId([
+            'plan_no' => $planNo,
+            'district_id' => $districtId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    /**
+     * The district standing for a village that has no districts of its own:
+     * one named after the village, inside it — the one already there, or a
+     * new one.
+     */
+    public static function villageDistrict(int $cityId): int
+    {
+        $name = (string) DB::table('cities')->where('id', $cityId)->value('name_ar');
+        $existing = DB::table('districts')->where('city_id', $cityId)->where('name_ar', $name)->value('id');
+
+        return $existing !== null ? (int) $existing : (int) DB::table('districts')->insertGetId([
+            'city_id' => $cityId,
+            'name_ar' => $name,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    /**
+     * The official place holding the point: a district or city whose
+     * boundary comes from the National Address or was drawn by hand — never
+     * one drawn from parcels, which says where the parcels are, not where
+     * the district is.
+     *
+     * @return object{id: int, label: string}|null
+     */
+    private static function officialAt(string $table, float $x, float $y): ?object
+    {
+        $point = Spatial::point();
+        $city = $table === 'districts' ? ', (SELECT c.name_ar FROM cities c WHERE c.id = t.city_id) AS parent' : ', NULL AS parent';
+        $row = DB::selectOne(
+            "SELECT t.id, t.name_ar{$city} FROM {$table} t
+             WHERE t.geom IS NOT NULL AND (t.boundary_source IS NULL OR t.boundary_source <> 'parcels')
+               AND ".Spatial::boxesIntersect('t.geom', $point)." AND ST_Contains(t.geom, {$point})
+             ORDER BY CASE t.boundary_source WHEN 'manual' THEN 0 WHEN 'official' THEN 1 WHEN 'derived' THEN 2 ELSE 3 END
+             LIMIT 1",
+            [$x, $y, $x, $y]
+        );
+
+        return $row === null ? null : (object) [
+            'id' => (int) $row->id,
+            'label' => $row->parent === null ? (string) $row->name_ar : $row->name_ar.' — '.$row->parent,
+        ];
     }
 
     /**

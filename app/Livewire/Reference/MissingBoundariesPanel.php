@@ -106,14 +106,26 @@ class MissingBoundariesPanel extends Component
             }
         }
 
-        $drawn = 0;
-        foreach (MissingBoundaries::report()['districts'] as $row) {
-            if ($row['action'] === 'draw' && $this->drawOne($row['id'])) {
-                $drawn++;
-            }
+        $this->dispatch('toast', type: 'success', message: __('boundaries.missing.solved', ['moved' => $moved]));
+        $this->refresh();
+    }
+
+    /**
+     * Takes off every boundary drawn from parcels: they say where the parcels
+     * are, not where the district is, so the check falls back to the
+     * official boundary of the city or village again.
+     */
+    public function clearDrawn(): void
+    {
+        $this->authorizeDraw();
+
+        $ids = DB::table('districts')->where('boundary_source', 'parcels')->pluck('id');
+        foreach ($ids as $id) {
+            $this->writeSafely('district.geometry_remove', 'district', (int) $id, fn (): int => DB::table('districts')->where('id', $id)
+                ->update(['geom' => null, 'boundary_source' => null, 'updated_at' => now()]));
         }
 
-        $this->dispatch('toast', type: 'success', message: __('boundaries.missing.solved', ['moved' => $moved, 'drawn' => $drawn]));
+        $this->dispatch('toast', type: 'success', message: __('boundaries.missing.cleared', ['count' => $ids->count()]));
         $this->refresh();
     }
 
@@ -129,7 +141,13 @@ class MissingBoundariesPanel extends Component
             return;
         }
 
-        $this->writeSafely('district.delete', 'district', $districtId, fn (): mixed => District::query()->whereKey($districtId)->delete());
+        // Its empty plans go with it — stand-ins like «بدون - بطين-1» left
+        // behind when their parcels moved to where they lie.
+        $this->writeSafely('district.delete', 'district', $districtId, function () use ($districtId): mixed {
+            Plan::query()->where('district_id', $districtId)->delete();
+
+            return District::query()->whereKey($districtId)->delete();
+        });
         $this->dispatch('toast', type: 'success', message: __('common.deleted'));
         $this->refresh();
     }
@@ -161,6 +179,7 @@ class MissingBoundariesPanel extends Component
         return view('livewire.reference.missing-boundaries-panel', [
             'canMove' => $this->mayFixPlacement(),
             'canDelete' => Auth::user()?->can('reference.delete') === true,
+            'drawnCount' => DB::table('districts')->where('boundary_source', 'parcels')->count(),
         ]);
     }
 

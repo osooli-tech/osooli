@@ -161,11 +161,12 @@ final class MissingBoundaries
             $entry = ['id' => (int) $d->id, 'name' => (string) $d->name_ar, 'parent' => (string) $d->city, 'parcels' => $total, 'target_id' => null, 'target' => null, 'unlocated' => 0];
 
             if ($total === 0) {
-                // Unused (no plan at all), or used by parcels with no polygon.
-                $plans = DB::table('plans')->where('district_id', $d->id)->count();
+                // Unused (no parcel at all, archived ones included, in any of
+                // its plans), or used by parcels with no polygon.
+                $all = DB::table('parcels')->whereIn('plan_id', DB::table('plans')->select('id')->where('district_id', $d->id))->count();
                 $out[] = [
-                    'action' => $plans === 0 ? 'unused' : 'no_geometry',
-                    'unlocated' => $plans === 0 ? 0 : DB::table('parcels')->whereIn('plan_id', DB::table('plans')->select('id')->where('district_id', $d->id))->whereNull('deleted_at')->count(),
+                    'action' => $all === 0 ? 'unused' : 'no_geometry',
+                    'unlocated' => $all,
                 ] + $entry;
 
                 continue;

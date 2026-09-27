@@ -17,8 +17,18 @@
                 </div>
 
                 @php
-                    $solvable = collect($report)->flatten(1)->whereIn('action', ['draw', 'merge', 'move'])->count();
+                    $solvable = collect($report)->flatten(1)->whereIn('action', ['merge', 'move'])->count();
                 @endphp
+                @if ($drawnCount > 0)
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-300/50 px-4 py-3">
+                        <p class="text-sm text-amber-900 dark:text-amber-100">{{ __('boundaries.missing.drawn_hint', ['count' => $drawnCount]) }}</p>
+                        <button type="button" wire:click="clearDrawn" wire:loading.attr="disabled"
+                                wire:confirm="{{ __('boundaries.missing.clear_confirm', ['count' => $drawnCount]) }}"
+                                class="px-4 py-2 rounded-xl text-sm font-medium border border-amber-400 text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900/40 disabled:opacity-50">
+                            {{ __('boundaries.missing.clear', ['count' => $drawnCount]) }}
+                        </button>
+                    </div>
+                @endif
                 @if ($solvable > 0 && $canMove)
                     <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary/5 border border-secondary/30 px-4 py-3">
                         <p class="text-sm text-on-surface dark:text-white/90">{{ __('boundaries.missing.solve_hint', ['count' => $solvable]) }}</p>
