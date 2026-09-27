@@ -27,7 +27,7 @@ class MissingBoundariesPanel extends Component
 
     public bool $show = false;
 
-    /** @var array<string, list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}>> */
+    /** @var array<string, list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}>> */
     public array $report = [];
 
     #[On('missing-boundaries')]
@@ -75,12 +75,74 @@ class MissingBoundariesPanel extends Component
         $this->authorizePlacementFix();
 
         $row = MissingBoundaries::row($level, $id);
-        $target = $row['target_id'] ?? null;
-        if ($row === null || $target === null || ! in_array($row['action'], ['merge', 'move'], true)) {
+        if ($row === null || ! $this->moveRow($level, $row)) {
             $this->dispatch('toast', type: 'error', message: __('placement.fix.stale'));
             $this->refresh();
 
             return;
+        }
+
+        $this->dispatch('toast', type: 'success', message: __('boundaries.missing.moved.'.$level, ['name' => $row['name'], 'target' => $row['target']]));
+        $this->refresh();
+    }
+
+    /**
+     * Everything the report can settle, in order: regions and cities into
+     * the National Address ones, districts into their city (or the bounded
+     * district they are), then every district drawn from its parcels.
+     */
+    public function solveAll(): void
+    {
+        $this->authorizeDraw();
+        $this->authorizePlacementFix();
+        @set_time_limit(0);
+
+        $moved = 0;
+        foreach (['regions', 'cities', 'districts'] as $level) {
+            foreach (MissingBoundaries::report()[$level] as $row) {
+                if ($this->moveRow($level, $row)) {
+                    $moved++;
+                }
+            }
+        }
+
+        $drawn = 0;
+        foreach (MissingBoundaries::report()['districts'] as $row) {
+            if ($row['action'] === 'draw' && $this->drawOne($row['id'])) {
+                $drawn++;
+            }
+        }
+
+        $this->dispatch('toast', type: 'success', message: __('boundaries.missing.solved', ['moved' => $moved, 'drawn' => $drawn]));
+        $this->refresh();
+    }
+
+    /** A district no plan uses: nothing depends on it, so it can go. */
+    public function delete(int $districtId): void
+    {
+        abort_unless(Auth::user()?->can('reference.delete'), 403);
+
+        if ((MissingBoundaries::row('districts', $districtId)['action'] ?? null) !== 'unused') {
+            $this->dispatch('toast', type: 'error', message: __('placement.fix.stale'));
+            $this->refresh();
+
+            return;
+        }
+
+        $this->writeSafely('district.delete', 'district', $districtId, fn (): mixed => District::query()->whereKey($districtId)->delete());
+        $this->dispatch('toast', type: 'success', message: __('common.deleted'));
+        $this->refresh();
+    }
+
+    /**
+     * @param  array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}  $row
+     */
+    private function moveRow(string $level, array $row): bool
+    {
+        $id = $row['id'];
+        $target = $row['target_id'];
+        if ($target === null || ! in_array($row['action'], ['merge', 'move'], true)) {
+            return false;
         }
 
         match ($level.'.'.$row['action']) {
@@ -91,14 +153,14 @@ class MissingBoundariesPanel extends Component
             default => null,
         };
 
-        $this->dispatch('toast', type: 'success', message: __('boundaries.missing.moved.'.$level, ['name' => $row['name'], 'target' => $row['target']]));
-        $this->refresh();
+        return true;
     }
 
     public function render(): View
     {
         return view('livewire.reference.missing-boundaries-panel', [
             'canMove' => $this->mayFixPlacement(),
+            'canDelete' => Auth::user()?->can('reference.delete') === true,
         ]);
     }
 

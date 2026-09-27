@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Livewire\Reference\BoundaryEditor;
 use App\Livewire\Reference\MissingBoundariesPanel;
 use App\Models\City;
 use App\Models\Country;
@@ -126,6 +127,61 @@ class MissingBoundariesTest extends TestCase
         $this->assertSame($this->region->id, (int) DB::table('cities')->where('id', $byName->id)->value('region_id'));
         $this->assertSame($this->ammariyah->id, (int) DB::table('districts')->where('id', $district->id)->value('city_id'));
         $this->assertDatabaseHas('audit_logs', ['action' => 'city.merge', 'target_id' => $byName->id]);
+    }
+
+    public function test_the_editor_shows_a_districts_parcels_and_suggests_a_shape_from_them(): void
+    {
+        $this->fixtures();
+        $farms = District::create(['city_id' => $this->ammariyah->id, 'name_ar' => 'المزارع']);
+        $this->parcel($farms, 'A', 46.31, 24.81);
+        $this->parcel($farms, 'B', 46.33, 24.82);
+
+        $this->actingAs($this->userWith(['reference.view', 'boundaries.edit']));
+        $editor = Livewire::test(BoundaryEditor::class)
+            ->call('open', 'districts', $farms->id)
+            ->assertSee(__('boundaries.suggest'));
+
+        $config = $editor->viewData('config');
+        $this->assertCount(2, json_decode((string) $config['parcels'], true)['features']);
+        $this->assertEqualsWithDelta(46.31, ($config['bounds'][0] + 0.0002), 0.001);
+
+        $instance = $editor->instance();
+        $this->assertInstanceOf(BoundaryEditor::class, $instance);
+        $shape = json_decode((string) $instance->suggest(), true);
+        $this->assertSame('MultiPolygon', $shape['type']);
+
+        // Suggested, not saved.
+        $this->assertNull(DB::table('districts')->where('id', $farms->id)->value('boundary_source'));
+    }
+
+    public function test_solve_all_moves_then_draws_and_a_scattered_district_is_drawn_in_pieces(): void
+    {
+        $this->fixtures();
+        // Filed under الدرعية; two groups of farms 5 km apart in العمارية,
+        // one farm in الدرعية: العمارية holds most, so it goes there.
+        $wadi = District::create(['city_id' => $this->diriyah->id, 'name_ar' => 'الوادي']);
+        $this->parcel($wadi, 'A', 46.31, 24.81);
+        $this->parcel($wadi, 'B', 46.312, 24.811);
+        $this->parcel($wadi, 'C', 46.36, 24.81);
+        $this->parcel($wadi, 'D', 46.55, 24.82);
+        $unused = District::create(['city_id' => $this->diriyah->id, 'name_ar' => 'بطين 2']);
+
+        $this->assertSame(['move', $this->ammariyah->id], [MissingBoundaries::row('districts', $wadi->id)['action'] ?? null, MissingBoundaries::row('districts', $wadi->id)['target_id'] ?? null]);
+        $this->assertSame('unused', MissingBoundaries::row('districts', $unused->id)['action'] ?? null);
+
+        $this->actingAs($this->userWith(['boundaries.edit', 'parcels.placement_fix', 'reference.delete']));
+        Livewire::test(MissingBoundariesPanel::class)
+            ->dispatch('missing-boundaries')
+            ->assertSee('حلّ الكل')
+            ->call('solveAll')
+            ->assertDispatched('toast', type: 'success')
+            ->call('delete', $unused->id);
+
+        $this->assertSame($this->ammariyah->id, (int) DB::table('districts')->where('id', $wadi->id)->value('city_id'));
+        $this->assertSame('parcels', DB::table('districts')->where('id', $wadi->id)->value('boundary_source'));
+        $shape = json_decode((string) DB::selectOne('SELECT ST_AsGeoJSON(geom) AS g FROM districts WHERE id = ?', [$wadi->id])?->g, true);
+        $this->assertCount(2, $shape['coordinates']);
+        $this->assertDatabaseMissing('districts', ['id' => $unused->id]);
     }
 
     public function test_moving_needs_the_reassign_permission_and_the_panel_needs_boundaries_edit(): void

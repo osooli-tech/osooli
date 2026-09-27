@@ -16,6 +16,20 @@
                     </div>
                 </div>
 
+                @php
+                    $solvable = collect($report)->flatten(1)->whereIn('action', ['draw', 'merge', 'move'])->count();
+                @endphp
+                @if ($solvable > 0 && $canMove)
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary/5 border border-secondary/30 px-4 py-3">
+                        <p class="text-sm text-on-surface dark:text-white/90">{{ __('boundaries.missing.solve_hint', ['count' => $solvable]) }}</p>
+                        <button type="button" wire:click="solveAll" wire:loading.attr="disabled"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-secondary text-white hover:opacity-90 disabled:opacity-50">
+                            <span class="material-symbols-outlined text-[18px]" wire:loading.class="animate-spin" wire:target="solveAll">auto_fix_high</span>
+                            {{ __('boundaries.missing.solve_all') }}
+                        </button>
+                    </div>
+                @endif
+
                 @if ($total === 0)
                     <p class="text-sm rounded-xl bg-secondary/5 border border-secondary/30 px-4 py-3 text-on-surface dark:text-white/90">{{ __('boundaries.missing.none') }}</p>
                 @endif
@@ -58,13 +72,19 @@
                                             </td>
                                             <td class="px-3 py-2 data-tabular">{{ number_format($row['parcels']) }}</td>
                                             <td class="px-3 py-2 text-on-surface-variant dark:text-on-primary-container">
-                                                {{ __('boundaries.missing.findings.'.$level.'.'.$row['action'], ['target' => $row['target'], 'parent' => $row['parent']]) }}
+                                                {{ __('boundaries.missing.findings.'.$level.'.'.$row['action'], ['target' => $row['target'], 'parent' => $row['parent'], 'count' => number_format($row['unlocated'])]) }}
                                             </td>
                                             <td class="px-3 py-2 text-end whitespace-nowrap">
                                                 @if ($row['action'] === 'draw')
                                                     <button type="button" wire:click="draw({{ $row['id'] }})" wire:loading.attr="disabled"
                                                             class="px-3 py-1 rounded-lg text-xs font-medium bg-secondary text-white hover:opacity-90 disabled:opacity-50">
                                                         {{ __('boundaries.missing.draw') }}
+                                                    </button>
+                                                @elseif ($row['action'] === 'unused' && $canDelete)
+                                                    <button type="button" wire:click="delete({{ $row['id'] }})" wire:loading.attr="disabled"
+                                                            wire:confirm="{{ __('boundaries.missing.delete_confirm', ['name' => $row['name']]) }}"
+                                                            class="px-3 py-1 rounded-lg text-xs font-medium text-error hover:bg-error/10 disabled:opacity-50">
+                                                        {{ __('boundaries.missing.delete') }}
                                                     </button>
                                                 @elseif (in_array($row['action'], ['merge', 'move'], true) && $canMove)
                                                     <button type="button" wire:click="move('{{ $level }}', {{ $row['id'] }})" wire:loading.attr="disabled"

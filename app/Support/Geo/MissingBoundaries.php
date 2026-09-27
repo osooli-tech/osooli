@@ -36,7 +36,15 @@ final class MissingBoundaries
     private const MARGIN = 0.0005;
 
     /**
-     * @return array{districts: list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}>, cities: list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}>, regions: list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}>}
+     * Degrees, about 1.5 km: parcels further apart than this are separate
+     * groups, each with a boundary of its own — so a district of farms
+     * scattered along a valley is drawn around the farms, not as one hull
+     * over the empty land between them.
+     */
+    private const CLUSTER = 0.015;
+
+    /**
+     * @return array{districts: list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}>, cities: list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}>, regions: list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}>}
      */
     public static function report(): array
     {
@@ -58,9 +66,31 @@ final class MissingBoundaries
             return false;
         }
 
-        $shape = self::hull($districtId);
+        $shape = self::shapeFromParcels($districtId);
         if ($shape === null) {
             return false;
+        }
+
+        DB::update(
+            'UPDATE districts SET geom = '.Spatial::fromGeoJson().", boundary_source = 'parcels', updated_at = ? WHERE id = ? AND geom IS NULL",
+            [$shape, now(), $districtId]
+        );
+
+        return true;
+    }
+
+    /**
+     * A district's boundary as its parcels suggest it: the hull around them
+     * with a margin, less the land of districts that have a boundary, inside
+     * its city where the city has one. GeoJSON, or null when there is
+     * nothing to draw from. Drawn by «ارسم», and offered in the boundary
+     * editor as a starting shape.
+     */
+    public static function shapeFromParcels(int $districtId): ?string
+    {
+        $shape = self::hull($districtId);
+        if ($shape === null) {
+            return null;
         }
 
         // Less the neighbours' land, so the drawn district never overlaps one
@@ -76,7 +106,7 @@ final class MissingBoundaries
                 [$shape, $n->id]
             )?->g);
             if ($shape === null) {
-                return false;
+                return null;
             }
         }
 
@@ -89,23 +119,18 @@ final class MissingBoundaries
                 [$shape, $city]
             )?->g);
             if ($shape === null) {
-                return false;
+                return null;
             }
         }
 
-        DB::update(
-            'UPDATE districts SET geom = '.Spatial::fromGeoJson().", boundary_source = 'parcels', updated_at = ? WHERE id = ? AND geom IS NULL",
-            [$shape, now(), $districtId]
-        );
-
-        return true;
+        return $shape;
     }
 
     /**
      * The row for one record, as the report has it — checked again at the
      * moment of acting, not trusted from when the screen was drawn.
      *
-     * @return array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}|null
+     * @return array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}|null
      */
     public static function row(string $level, int $id): ?array
     {
@@ -119,7 +144,7 @@ final class MissingBoundaries
         return $rows[0] ?? null;
     }
 
-    /** @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}> */
+    /** @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}> */
     private static function districts(?int $only = null): array
     {
         $rows = DB::table('districts as d')->join('cities as c', 'c.id', '=', 'd.city_id')
@@ -133,10 +158,15 @@ final class MissingBoundaries
         foreach ($rows as $d) {
             $where = 'p.plan_id IN (SELECT id FROM plans WHERE district_id = ?)';
             $total = self::located($where, (int) $d->id);
-            $entry = ['id' => (int) $d->id, 'name' => (string) $d->name_ar, 'parent' => (string) $d->city, 'parcels' => $total, 'target_id' => null, 'target' => null];
+            $entry = ['id' => (int) $d->id, 'name' => (string) $d->name_ar, 'parent' => (string) $d->city, 'parcels' => $total, 'target_id' => null, 'target' => null, 'unlocated' => 0];
 
             if ($total === 0) {
-                $out[] = $entry + ['action' => 'no_parcels'];
+                // Unused (no plan at all), or used by parcels with no polygon.
+                $plans = DB::table('plans')->where('district_id', $d->id)->count();
+                $out[] = [
+                    'action' => $plans === 0 ? 'unused' : 'no_geometry',
+                    'unlocated' => $plans === 0 ? 0 : DB::table('parcels')->whereIn('plan_id', DB::table('plans')->select('id')->where('district_id', $d->id))->whereNull('deleted_at')->count(),
+                ] + $entry;
 
                 continue;
             }
@@ -149,12 +179,18 @@ final class MissingBoundaries
                 continue;
             }
 
-            // Do its parcels lie in its city at all?
+            // Its city is the one holding more of its parcels than any other:
+            // a district scattered over several villages goes to the main one,
+            // and is drawn around the parcels there.
             if ((int) $d->city_bounded === 1) {
-                $inCity = self::top('cities', $where, (int) $d->id, null, (int) $d->city_id);
-                if ($inCity === null || $total > $inCity['parcels'] * 2) {
-                    $elsewhere = self::top('cities', $where, (int) $d->id);
-                    $out[] = ['action' => $elsewhere !== null && $total <= $elsewhere['parcels'] * 2 ? 'move' : 'scattered', 'target_id' => $elsewhere['id'] ?? null, 'target' => $elsewhere['name'] ?? null] + $entry;
+                $top = self::top('cities', $where, (int) $d->id);
+                if ($top === null) {
+                    $out[] = $entry + ['action' => 'scattered'];
+
+                    continue;
+                }
+                if ($top['id'] !== (int) $d->city_id) {
+                    $out[] = ['action' => 'move', 'target_id' => $top['id'], 'target' => $top['name']] + $entry;
 
                     continue;
                 }
@@ -166,7 +202,7 @@ final class MissingBoundaries
         return $out;
     }
 
-    /** @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}> */
+    /** @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}> */
     private static function cities(?int $only = null): array
     {
         $rows = DB::table('cities as c')->leftJoin('regions as r', 'r.id', '=', 'c.region_id')
@@ -178,7 +214,7 @@ final class MissingBoundaries
         return self::merges($rows, 'cities', 'p.plan_id IN (SELECT pl.id FROM plans pl JOIN districts d ON d.id = pl.district_id WHERE d.city_id = ?)');
     }
 
-    /** @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}> */
+    /** @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}> */
     private static function regions(?int $only = null): array
     {
         $rows = DB::table('regions as r')->leftJoin('countries as n', 'n.id', '=', 'r.country_id')
@@ -195,14 +231,14 @@ final class MissingBoundaries
      * in, for its children to move there.
      *
      * @param  iterable<object>  $rows
-     * @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null}>
+     * @return list<array{id: int, name: string, parent: string, parcels: int, action: string, target_id: int|null, target: string|null, unlocated: int}>
      */
     private static function merges(iterable $rows, string $table, string $where): array
     {
         $out = [];
         foreach ($rows as $r) {
             $total = self::located($where, (int) $r->id);
-            $entry = ['id' => (int) $r->id, 'name' => (string) $r->name_ar, 'parent' => (string) ($r->region ?? ''), 'parcels' => $total, 'target_id' => null, 'target' => null];
+            $entry = ['id' => (int) $r->id, 'name' => (string) $r->name_ar, 'parent' => (string) ($r->region ?? ''), 'parcels' => $total, 'target_id' => null, 'target' => null, 'unlocated' => 0];
 
             if ($total === 0) {
                 $out[] = $entry + ['action' => 'no_parcels'];
@@ -262,30 +298,92 @@ final class MissingBoundaries
         return $row === null ? null : ['id' => (int) $row->id, 'name' => (string) $row->name_ar, 'parcels' => (int) $row->n];
     }
 
-    /** The hull around a district's parcels with a margin, as GeoJSON. */
+    /**
+     * The hulls around a district's parcels, one per group of neighbouring
+     * parcels, with a margin — only the parcels inside its city where the
+     * city has a boundary. GeoJSON MultiPolygon, or null.
+     */
     private static function hull(int $districtId): ?string
     {
-        $parts = [];
+        $city = DB::table('districts as d')->join('cities as c', 'c.id', '=', 'd.city_id')
+            ->where('d.id', $districtId)->whereNotNull('c.geom')->value('c.id');
+        $point = 'ST_PointOnSurface(p.geom)';
+
         $rows = DB::select(
-            'SELECT ST_AsGeoJSON(ST_ConvexHull(p.geom)) AS g FROM parcels p
-             WHERE p.plan_id IN (SELECT id FROM plans WHERE district_id = ?) AND p.geom IS NOT NULL AND p.deleted_at IS NULL',
-            [$districtId]
+            "SELECT ST_X({$point}) AS x, ST_Y({$point}) AS y, ST_AsGeoJSON(ST_ConvexHull(p.geom)) AS g FROM parcels p"
+            .($city !== null ? " JOIN cities c ON c.id = ? AND ST_Contains(c.geom, {$point})" : '')
+            .' WHERE p.plan_id IN (SELECT id FROM plans WHERE district_id = ?) AND p.geom IS NOT NULL AND p.deleted_at IS NULL',
+            $city !== null ? [$city, $districtId] : [$districtId]
         );
+
+        $points = [];
+        $shapes = [];
         foreach ($rows as $r) {
             $geometry = json_decode((string) $r->g, true);
             if (is_array($geometry) && ($geometry['type'] ?? null) === 'Polygon') {
-                $parts[] = $geometry['coordinates'];
+                $points[] = [(float) $r->x, (float) $r->y];
+                $shapes[] = $geometry['coordinates'];
             }
         }
 
-        if ($parts === []) {
-            return null;
+        $parts = [];
+        foreach (self::clusters($points) as $members) {
+            $hull = self::polygons(DB::selectOne(
+                'SELECT ST_AsGeoJSON(ST_Buffer(ST_ConvexHull('.Spatial::anyFromGeoJson().'), ?)) AS g',
+                [json_encode(['type' => 'MultiPolygon', 'coordinates' => array_map(static fn (int $i): array => $shapes[$i], $members)]), self::MARGIN]
+            )?->g);
+            if ($hull !== null) {
+                array_push($parts, ...json_decode($hull, true)['coordinates']);
+            }
         }
 
-        return self::polygons(DB::selectOne(
-            'SELECT ST_AsGeoJSON(ST_Buffer(ST_ConvexHull('.Spatial::anyFromGeoJson().'), ?)) AS g',
-            [json_encode(['type' => 'MultiPolygon', 'coordinates' => $parts]), self::MARGIN]
-        )?->g);
+        return $parts === [] ? null : (string) json_encode(['type' => 'MultiPolygon', 'coordinates' => $parts]);
+    }
+
+    /**
+     * Groups of points each within CLUSTER of another in the group, found on
+     * a grid of CLUSTER-sized cells so only neighbouring cells are compared.
+     *
+     * @param  list<array{0: float, 1: float}>  $points
+     * @return list<list<int>> indexes into $points
+     */
+    private static function clusters(array $points): array
+    {
+        $parent = array_keys($points);
+        $find = static function (int $i) use (&$parent): int {
+            while ($parent[$i] !== $i) {
+                $parent[$i] = $parent[$parent[$i]];
+                $i = $parent[$i];
+            }
+
+            return $i;
+        };
+
+        $cells = [];
+        foreach ($points as $i => [$x, $y]) {
+            $cells[(int) floor($x / self::CLUSTER).':'.(int) floor($y / self::CLUSTER)][] = $i;
+        }
+
+        foreach ($points as $i => [$x, $y]) {
+            $cx = (int) floor($x / self::CLUSTER);
+            $cy = (int) floor($y / self::CLUSTER);
+            for ($dx = -1; $dx <= 1; $dx++) {
+                for ($dy = -1; $dy <= 1; $dy++) {
+                    foreach ($cells[($cx + $dx).':'.($cy + $dy)] ?? [] as $j) {
+                        if ($j > $i && hypot($points[$j][0] - $x, $points[$j][1] - $y) <= self::CLUSTER) {
+                            $parent[$find($j)] = $find($i);
+                        }
+                    }
+                }
+            }
+        }
+
+        $groups = [];
+        foreach (array_keys($points) as $i) {
+            $groups[$find($i)][] = $i;
+        }
+
+        return array_values($groups);
     }
 
     /**
