@@ -211,6 +211,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         // The Geodatabase / document wizard. /imports itself is the review-and-
         // undo import of the export's own file (imports.index, above).
         Route::get('/imports/gdb', fn () => view('imports.gdb'))->name('imports.gdb');
+        // A Geodatabase with every field the import reads, Arabic aliases and
+        // coded value domains (database/data/templates/build_gdb_template.py).
+        Route::get('/imports/gdb/template', fn () => response()->download(
+            resource_path('templates/sakuki-gdb-template.zip'), 'Sakuki_Template.gdb.zip'
+        ))->name('imports.gdb.template');
         Route::post('/imports/upload', [ImportUploadController::class, 'create'])->name('imports.upload.create');
         // {uuid} is constrained to the uuid shape so a malformed value 404s
         // at the router instead of reaching the "uuid" column's native

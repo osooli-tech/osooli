@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
+use App\Models\Owner;
 use App\Support\Database\Spatial;
 use App\Support\DatabaseEnum;
 use App\Support\Geo\Locator;
@@ -49,7 +50,7 @@ final class ParcelGeoJsonImporter implements Importer
         'deed_class' => ['زراعي', 'سكني', 'صناعي'],
         'qrar_source' => ['بلدي', 'مكتب هندسي', 'بدون'],
         'allocation_method' => ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
-        'fall_in' => ['مخطط زراعي', 'مخطط بلدية'],
+        'fall_in' => ['مخطط زراعي', 'مخطط بلدية', 'طلبات احكام', 'حجة استحكام', 'مخطط', 'الصك'],
     ];
 
     /**
@@ -394,6 +395,16 @@ final class ParcelGeoJsonImporter implements Importer
         ]));
         $isNew ? $stats['inserted']++ : $stats['updated']++;
 
+        // The parent (a building holding this flat), by its GEO ID — when that
+        // parcel is on record already, or came earlier in the file.
+        $parentGeoId = $this->str($p['Parent_Geo_ID'] ?? null);
+        if ($parentGeoId !== null && $parentGeoId !== $geoId) {
+            $parentId = DB::table('parcels')->where('geo_id', $parentGeoId)->value('id');
+            if ($parentId !== null) {
+                DB::table('parcels')->where('id', $parcelId)->update(['parent_parcel_id' => $parentId]);
+            }
+        }
+
         // Geometry — always stored as MultiPolygon
         if (is_array($lead['geometry'] ?? null)) {
             DB::update(
@@ -451,12 +462,30 @@ final class ParcelGeoJsonImporter implements Importer
                 $stats['owners']++;
             }
 
+            // Contact details, where the file has them; an empty one leaves
+            // what is on record.
+            $phone = $this->str($fp['Phone'] ?? null);
+            $contact = $this->filled([
+                'phone' => $phone,
+                'phone_normalized' => $phone === null ? null : (Owner::normalisePhone($phone) ?: null),
+                'email' => $this->str($fp['Email'] ?? null),
+            ]);
+            if ($contact !== []) {
+                DB::table('owners')->where('id', $ownerId)->update($contact + ['updated_at' => now()]);
+            }
+
             DB::table('deed_owners')->insertOrIgnore([
                 'deed_id' => $deedId,
                 'owner_id' => $ownerId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            $share = $this->num($fp['Share'] ?? null);
+            if ($share !== null && $share >= 0 && $share <= 100) {
+                DB::table('deed_owners')->where('deed_id', $deedId)->where('owner_id', $ownerId)
+                    ->update(['ownership_share' => round($share, 2), 'updated_at' => now()]);
+            }
 
             if ($portfolio !== null) {
                 $this->placeInPortfolio($ownerId, $parcelId, $portfolio, $stats);
@@ -493,6 +522,7 @@ final class ParcelGeoJsonImporter implements Importer
             'n_dim' => $this->num($p[$set[4]] ?? null), 's_dim' => $this->num($p[$set[5]] ?? null),
             'e_dim' => $this->num($p[$set[6]] ?? null), 'w_dim' => $this->num($p[$set[7]] ?? null),
             'measured_area' => $this->num($p['Survey_Area'] ?? null),
+            'survey_date' => $this->hijri($p['Survey_Date'] ?? null),
         ]);
         $officeId = $o['legacy'] ? $this->engineeringOfficeId() : $o['office_id'];
         $boundary = DB::table('parcel_boundaries')->where('parcel_id', $parcelId)->first(['id', 'engineering_office_id']);
@@ -530,7 +560,9 @@ final class ParcelGeoJsonImporter implements Importer
     {
         $qrar = $p['Qrar'] ?? null;
         $values = $this->filled([
-            'qrar_no' => $o['qrar'] === 'number' ? $this->str($qrar) : null,
+            // Qrar_No is the decision number wherever a file has it; Qrar is
+            // read as the number, the source code, or not at all, as chosen.
+            'qrar_no' => $this->str($p['Qrar_No'] ?? null) ?? ($o['qrar'] === 'number' ? $this->str($qrar) : null),
             'qrar_source' => $o['qrar'] === 'source' ? $this->enum('qrar_source', $qrar) : null,
             'report_no' => $this->str($p['Report_No'] ?? null),
             'folder' => $o['folder'] === 'folder' ? $this->str($p['Folder'] ?? null) : null,

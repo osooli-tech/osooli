@@ -9,6 +9,8 @@ return [
         'gdb' => 'Geodatabase (zipped GDB)',
         'documents' => 'Zipped PDF documents',
     ],
+    'gdb_template' => 'Download the GDB template',
+    'gdb_template_hint' => 'A Geodatabase with every field the import reads now, among them the price per metre, value, portfolio, owner phone and share, parent parcel, survey date and decision number. Every field has an Arabic alias shown in ArcGIS, and every fixed-choice field its coded value domain. It holds two sample deeds (one with two owners: one feature per owner) and a «Field_Guide» table explaining each field. Fill the Parcels layer with your data, zip it and upload it here.',
     'choose_file' => 'Choose a file',
     'upload' => 'Upload',
     'uploading' => 'Uploading…',
