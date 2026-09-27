@@ -14,6 +14,7 @@
         <livewire:reference.reference-index />
         @can('boundaries.edit')
             <livewire:reference.boundary-editor />
+            <livewire:reference.missing-boundaries-panel />
         @endcan
         @can('parcels.placement_fix')
             <livewire:reference.plan-placement />

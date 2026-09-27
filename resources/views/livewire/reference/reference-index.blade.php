@@ -44,6 +44,15 @@
                 </div>
             </div>
 
+            @can('boundaries.edit')
+                <button type="button" x-on:click="$dispatch('missing-boundaries')"
+                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium shrink-0
+                               border border-outline-variant dark:border-white/10 text-on-surface dark:text-white
+                               hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">border_clear</span>
+                    {{ __('boundaries.missing.button') }}
+                </button>
+            @endcan
             @can('reference.create')
                 <button wire:click="openCreate"
                         class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
