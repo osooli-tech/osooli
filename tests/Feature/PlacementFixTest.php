@@ -189,6 +189,39 @@ class PlacementFixTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'parcel.relocate', 'target_id' => $inVillage->id]);
     }
 
+    public function test_an_estimated_village_boundary_cutting_a_plan_is_widened_to_take_all_of_it(): void
+    {
+        $this->fixtures();
+        // Two villages with estimated boundaries side by side; plan 623 is
+        // filed in أوبير and three of its parcels fall over the line in العمارية.
+        $ubayr = City::create(['region_id' => $this->ammariyah->region_id, 'name_ar' => 'أوبير']);
+        $this->boundary('cities', $ubayr->id, 46.40, 24.80, 0.1, 'approximate');
+        DB::table('cities')->where('id', $this->ammariyah->id)->update(['boundary_source' => 'approximate']);
+        $village = District::create(['city_id' => $ubayr->id, 'name_ar' => 'أوبير']);
+        $this->district = $village;
+        $this->parcel('1', '623', 46.41, 24.82);
+        $this->parcel('2', '623', 46.412, 24.821);
+        $over = $this->parcel('3', '623', 46.395, 24.82);
+
+        $options = collect(PlacementFix::options($over->id))->keyBy('kind');
+        $this->assertTrue($options->has('extend'));
+        $this->assertTrue($options->has('plan_city_extend'));
+        $this->assertSame($ubayr->id, $options['extend']['target_id']);
+
+        $this->actingAs($this->userWith(['parcels.placement', 'parcels.placement_fix']));
+        Livewire::test(PlacementReview::class)
+            ->call('show', 'city')
+            ->assertSee('3-623')
+            ->call('openFix', $over->id)
+            ->assertDontSee('مقترح')
+            ->call('applyFix', 'extend', $ubayr->id)
+            ->assertDispatched('toast', type: 'success')
+            ->assertDontSee('3-623');
+
+        $this->assertSame('manual', DB::table('cities')->where('id', $ubayr->id)->value('boundary_source'));
+        $this->assertDatabaseHas('audit_logs', ['action' => 'city.geometry_extend', 'target_id' => $ubayr->id]);
+    }
+
     public function test_reassigning_needs_its_own_permission(): void
     {
         $this->fixtures();

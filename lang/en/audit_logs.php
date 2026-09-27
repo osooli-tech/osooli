@@ -71,7 +71,7 @@ return [
         ],
         'plan' => ['create' => 'Plan added', 'update' => 'Plan edited', 'delete' => 'Plan deleted', 'reassign' => 'Plan moved to another district'],
         'district' => ['create' => 'District added', 'update' => 'District edited', 'delete' => 'District deleted', 'geometry_edit' => 'District boundary edited', 'geometry_remove' => 'District boundary removed', 'geometry_derive' => 'District boundary drawn from its parcels', 'merge' => 'District plans moved to another district', 'reassign' => 'District moved to another city'],
-        'city' => ['create' => 'City added', 'update' => 'City edited', 'delete' => 'City deleted', 'geometry_edit' => 'City boundary edited', 'geometry_remove' => 'City boundary removed', 'merge' => 'City districts moved to another city'],
+        'city' => ['create' => 'City added', 'update' => 'City edited', 'delete' => 'City deleted', 'geometry_edit' => 'City boundary edited', 'geometry_extend' => 'City boundary widened to take a plan', 'geometry_remove' => 'City boundary removed', 'merge' => 'City districts moved to another city'],
         'region' => ['create' => 'Region added', 'update' => 'Region edited', 'delete' => 'Region deleted', 'geometry_edit' => 'Region boundary edited', 'geometry_remove' => 'Region boundary removed', 'merge' => 'Region cities moved to another region'],
         'country' => ['create' => 'Country added', 'update' => 'Country edited', 'delete' => 'Country deleted', 'geometry_edit' => 'Country boundary edited', 'geometry_remove' => 'Country boundary removed'],
         'map_layer' => ['update' => 'Custom layer edited', 'delete' => 'Custom layer deleted'],

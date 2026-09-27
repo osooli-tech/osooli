@@ -310,11 +310,57 @@ final class MissingBoundaries
             ->where('d.id', $districtId)->whereNotNull('c.geom')->value('c.id');
         $point = 'ST_PointOnSurface(p.geom)';
 
+        return self::hullAround(
+            ($city !== null ? " JOIN cities c ON c.id = ? AND ST_Contains(c.geom, {$point})" : '')
+            .' WHERE p.plan_id IN (SELECT id FROM plans WHERE district_id = ?)',
+            $city !== null ? [$city, $districtId] : [$districtId]
+        );
+    }
+
+    /**
+     * Widens a city's boundary to take in every parcel of a plan: its
+     * boundary joined with the hulls around the plan's parcels. For a
+     * village whose boundary is only an estimate (the land nearer to it
+     * than to any other village), which can cut a plan in two. Saved as
+     * drawn by hand, so a reload of the National Address never undoes it.
+     */
+    public static function extendCity(int $cityId, int $planId): bool
+    {
+        $hull = self::hullAround(' WHERE p.plan_id = ?', [$planId]);
+        if ($hull === null) {
+            return false;
+        }
+
+        $shape = self::polygons(DB::selectOne(
+            'SELECT ST_AsGeoJSON(ST_Union(c.geom, '.Spatial::anyFromGeoJson().')) AS g FROM cities c WHERE c.id = ? AND c.geom IS NOT NULL',
+            [$hull, $cityId]
+        )?->g);
+        if ($shape === null) {
+            return false;
+        }
+
+        DB::update(
+            'UPDATE cities SET geom = '.Spatial::fromGeoJson().", boundary_source = 'manual', updated_at = ? WHERE id = ?",
+            [$shape, now(), $cityId]
+        );
+
+        return true;
+    }
+
+    /**
+     * The hulls around the parcels matching `$tail` (joins and a WHERE on
+     * parcels aliased `p`), one per group of neighbouring parcels, with a
+     * margin. GeoJSON MultiPolygon, or null.
+     *
+     * @param  list<int|string>  $bindings
+     */
+    private static function hullAround(string $tail, array $bindings): ?string
+    {
+        $point = 'ST_PointOnSurface(p.geom)';
         $rows = DB::select(
             "SELECT ST_X({$point}) AS x, ST_Y({$point}) AS y, ST_AsGeoJSON(ST_ConvexHull(p.geom)) AS g FROM parcels p"
-            .($city !== null ? " JOIN cities c ON c.id = ? AND ST_Contains(c.geom, {$point})" : '')
-            .' WHERE p.plan_id IN (SELECT id FROM plans WHERE district_id = ?) AND p.geom IS NOT NULL AND p.deleted_at IS NULL',
-            $city !== null ? [$city, $districtId] : [$districtId]
+            .$tail.' AND p.geom IS NOT NULL AND p.deleted_at IS NULL',
+            $bindings
         );
 
         $points = [];

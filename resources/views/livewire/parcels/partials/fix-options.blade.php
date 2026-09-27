@@ -2,7 +2,13 @@
      Expects $options; the component answers applyFix(kind, targetId). --}}
 @php
     // The option whose target holds the largest share of the parcels it moves.
-    $best = collect($options)->sortByDesc(fn ($o) => $o['located'] > 0 ? $o['inside'] / $o['located'] : 0)->keys()->first();
+    $share = fn ($o) => $o['located'] > 0 ? $o['inside'] / $o['located'] : 0;
+    $ranked = collect($options)->sortByDesc($share);
+    $best = $ranked->keys()->first();
+    // No suggestion when two options settle the same share: the choice is the user's.
+    if ($ranked->count() > 1 && $share($ranked->values()[0]) === $share($ranked->values()[1])) {
+        $best = null;
+    }
 @endphp
 
 @forelse ($options as $i => $option)

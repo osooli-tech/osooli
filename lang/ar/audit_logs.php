@@ -70,7 +70,7 @@ return [
         ],
         'plan' => ['create' => 'إضافة مخطط', 'update' => 'تعديل مخطط', 'delete' => 'حذف مخطط', 'reassign' => 'نقل مخطط إلى حي آخر'],
         'district' => ['create' => 'إضافة حي', 'update' => 'تعديل حي', 'delete' => 'حذف حي', 'geometry_edit' => 'تعديل حدود حي', 'geometry_remove' => 'إزالة حدود حي', 'geometry_derive' => 'رسم حدود حي من مواقع قطعه', 'merge' => 'نقل مخططات حي إلى حي آخر', 'reassign' => 'نقل حي إلى مدينة أخرى'],
-        'city' => ['create' => 'إضافة مدينة', 'update' => 'تعديل مدينة', 'delete' => 'حذف مدينة', 'geometry_edit' => 'تعديل حدود مدينة', 'geometry_remove' => 'إزالة حدود مدينة', 'merge' => 'نقل أحياء مدينة إلى مدينة أخرى'],
+        'city' => ['create' => 'إضافة مدينة', 'update' => 'تعديل مدينة', 'delete' => 'حذف مدينة', 'geometry_edit' => 'تعديل حدود مدينة', 'geometry_extend' => 'توسيع حدود مدينة لتشمل مخططًا', 'geometry_remove' => 'إزالة حدود مدينة', 'merge' => 'نقل أحياء مدينة إلى مدينة أخرى'],
         'region' => ['create' => 'إضافة منطقة', 'update' => 'تعديل منطقة', 'delete' => 'حذف منطقة', 'geometry_edit' => 'تعديل حدود منطقة', 'geometry_remove' => 'إزالة حدود منطقة', 'merge' => 'نقل مدن منطقة إلى منطقة أخرى'],
         'country' => ['create' => 'إضافة دولة', 'update' => 'تعديل دولة', 'delete' => 'حذف دولة', 'geometry_edit' => 'تعديل حدود الدولة', 'geometry_remove' => 'إزالة حدود الدولة'],
         'map_layer' => ['update' => 'تعديل طبقة مخصصة', 'delete' => 'حذف طبقة مخصصة'],

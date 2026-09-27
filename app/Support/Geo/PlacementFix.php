@@ -39,7 +39,7 @@ final class PlacementFix
                     p.parcel_no, p.geo_id,
                     pl.id AS plan_id, pl.plan_no, d.id AS district_id, d.name_ar AS district,
                     CASE WHEN d.geom IS NULL THEN 0 ELSE 1 END AS district_bounded,
-                    c.id AS city_id, c.name_ar AS city
+                    c.id AS city_id, c.name_ar AS city, c.boundary_source AS city_source
              FROM parcels p
              JOIN plans pl ON pl.id = p.plan_id
              JOIN districts d ON d.id = pl.district_id
@@ -103,6 +103,32 @@ final class PlacementFix
                 'from' => $from,
                 'to' => $city->label,
             ] + self::counts('cities', 'p.plan_id = ?', (int) $row->plan_id, $city->id);
+        }
+
+        // An estimated village boundary cutting the plan in two: widen the
+        // village the plan is in to take all of it — or move the plan to the
+        // village the parcel is in and widen that one.
+        $whole = self::counts('cities', 'p.plan_id = ?', (int) $row->plan_id, (int) $row->city_id);
+        $whole['inside'] = $whole['located'];
+        if ((int) $row->district_bounded === 0 && $row->city_source === 'approximate' && $city !== null && $city->id !== (int) $row->city_id) {
+            $options[] = [
+                'kind' => 'extend',
+                'subject_id' => (int) $row->plan_id,
+                'subject' => (string) $row->plan_no,
+                'target_id' => (int) $row->city_id,
+                'from' => (string) $row->city,
+                'to' => (string) $row->city,
+            ] + $whole;
+        }
+        if ($district === null && $city !== null && $city->id !== (int) $row->city_id && $city->source === 'approximate') {
+            $options[] = [
+                'kind' => 'plan_city_extend',
+                'subject_id' => (int) $row->plan_id,
+                'subject' => (string) $row->plan_no,
+                'target_id' => $city->id,
+                'from' => $from,
+                'to' => $city->label,
+            ] + $whole;
         }
 
         if ((int) $row->district_bounded === 0 && $city !== null && $city->id !== (int) $row->city_id) {
@@ -179,14 +205,14 @@ final class PlacementFix
      * one drawn from parcels, which says where the parcels are, not where
      * the district is.
      *
-     * @return object{id: int, label: string}|null
+     * @return object{id: int, label: string, source: string|null}|null
      */
     private static function officialAt(string $table, float $x, float $y): ?object
     {
         $point = Spatial::point();
         $city = $table === 'districts' ? ', (SELECT c.name_ar FROM cities c WHERE c.id = t.city_id) AS parent' : ', NULL AS parent';
         $row = DB::selectOne(
-            "SELECT t.id, t.name_ar{$city} FROM {$table} t
+            "SELECT t.id, t.name_ar, t.boundary_source{$city} FROM {$table} t
              WHERE t.geom IS NOT NULL AND (t.boundary_source IS NULL OR t.boundary_source <> 'parcels')
                AND ".Spatial::boxesIntersect('t.geom', $point)." AND ST_Contains(t.geom, {$point})
              ORDER BY CASE t.boundary_source WHEN 'manual' THEN 0 WHEN 'official' THEN 1 WHEN 'derived' THEN 2 ELSE 3 END
@@ -197,6 +223,7 @@ final class PlacementFix
         return $row === null ? null : (object) [
             'id' => (int) $row->id,
             'label' => $row->parent === null ? (string) $row->name_ar : $row->name_ar.' — '.$row->parent,
+            'source' => $row->boundary_source === null ? null : (string) $row->boundary_source,
         ];
     }
 

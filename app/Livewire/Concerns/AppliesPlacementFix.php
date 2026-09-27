@@ -7,6 +7,7 @@ namespace App\Livewire\Concerns;
 use App\Models\District;
 use App\Models\Plan;
 use App\Support\Concerns\WritesSafely;
+use App\Support\Geo\MissingBoundaries;
 use App\Support\Geo\PlacementFix;
 use App\Support\OwnerScope;
 use Illuminate\Support\Facades\Auth;
@@ -72,6 +73,13 @@ trait AppliesPlacementFix
         } elseif ($option['kind'] === 'plan_city') {
             $plan = Plan::query()->findOrFail($option['subject_id']);
             $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => PlacementFix::villageDistrict($target)]));
+        } elseif ($option['kind'] === 'extend') {
+            $planId = $option['subject_id'];
+            $this->writeSafely('city.geometry_extend', 'city', $target, fn (): bool => MissingBoundaries::extendCity($target, $planId));
+        } elseif ($option['kind'] === 'plan_city_extend') {
+            $plan = Plan::query()->findOrFail($option['subject_id']);
+            $this->writeSafely('plan.reassign', 'plan', (int) $plan->id, fn (): bool => $plan->update(['district_id' => PlacementFix::villageDistrict($target)]));
+            $this->writeSafely('city.geometry_extend', 'city', $target, fn (): bool => MissingBoundaries::extendCity($target, (int) $plan->id));
         } elseif (in_array($option['kind'], ['parcel', 'parcel_city'], true)) {
             $parcelId = $option['subject_id'];
             $kind = $option['kind'];
