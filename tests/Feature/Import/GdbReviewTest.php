@@ -8,6 +8,7 @@ use App\Enums\ImportKind;
 use App\Enums\ImportStatus;
 use App\Livewire\Imports\ImportWizard;
 use App\Models\ImportBatch;
+use App\Models\MapLayer;
 use App\Models\User;
 use App\Services\Import\GdbImporter;
 use App\Support\Database\Spatial;
@@ -71,7 +72,9 @@ class GdbReviewTest extends TestCase
         $gdb = $preview['details']['gdb'];
 
         $this->assertSame(3, $preview['total_items']);
-        $this->assertSame(['Parcel' => 'parcels', 'Building' => 'buildings'], array_column($gdb['layers'], 'role', 'name'));
+        $this->assertSame(['Parcel' => 'parcels', 'Building' => 'custom'], array_column($gdb['layers'], 'role', 'name'));
+        // Buildings are a custom layer, kept under their Arabic name.
+        $this->assertSame('المباني', $gdb['suggested']['layers'][1]['new_name']);
         $this->assertSame([], $gdb['attachments']);
         $this->assertSame(3, collect($gdb['layers'][0]['fields'])->firstWhere('name', 'Geo_ID')['filled']);
 
@@ -154,7 +157,7 @@ class GdbReviewTest extends TestCase
         $result = $importer->commit($this->zip, $options)->toArray();
 
         $this->assertSame(0, $result['errors']);
-        $this->assertSame(2, $result['details']['buildings']);
+        $this->assertSame(['المباني' => 2], $result['details']['custom_layers']);
         $this->assertStringContainsString('قيمة غريبة', implode(' ', $result['warnings']));
 
         $g1 = DB::table('parcels')->where('geo_id', 'G-1')->first();
@@ -171,10 +174,18 @@ class GdbReviewTest extends TestCase
         $this->assertSame(1, DB::table('owner_portfolios')->where('name', 'محفظة أ')->count());
         $this->assertSame('ثادق', DB::table('districts as d')->join('cities as c', 'c.id', '=', 'd.city_id')->where('d.name_ar', 'أوثال')->value('c.name_ar'));
 
-        // Run again: parcels and deeds are updated, buildings replaced — not doubled.
+        // Run again: parcels and deeds are updated, and "Building" is known
+        // as the «المباني» layer made the first time — replaced, not doubled.
+        $options = $importer->analyze($this->zip)->toArray()['details']['gdb']['suggested'];
+        $options['default_city_id'] = $this->cityId;
+        $options['borders'] = 'second';
+        $options['deedless'] = 'skip';
+        $this->assertSame(MapLayer::sole()->id, $options['layers'][1]['target']);
+
         $importer->commit($this->zip, $options);
         $this->assertSame(3, DB::table('parcels')->count());
-        $this->assertSame(2, DB::table('buildings')->count());
+        $this->assertSame(2, MapLayer::sole()->feature_count);
+        $this->assertSame(2, DB::table('map_layer_features')->count());
     }
 
     public function test_the_wizard_keeps_only_valid_choices_and_reopens_only_ones_own_batch(): void

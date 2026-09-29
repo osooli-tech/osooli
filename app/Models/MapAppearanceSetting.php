@@ -32,8 +32,6 @@ class MapAppearanceSetting extends Model
     public const DEFAULTS = [
         'parcels_fill' => '#00b386',
         'parcels_outline' => '#39ff14',
-        'projects_fill' => '#c9a84c',
-        'buildings_fill' => '#4a90d9',
         'colour_modes' => [
             'deed_status' => [
                 'محدث' => '#00b386',

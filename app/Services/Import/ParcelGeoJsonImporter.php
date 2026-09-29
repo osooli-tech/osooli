@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
+use App\Models\Owner;
 use App\Support\Database\Spatial;
 use App\Support\DatabaseEnum;
 use App\Support\Geo\Locator;
@@ -49,7 +50,7 @@ final class ParcelGeoJsonImporter implements Importer
         'deed_class' => ['زراعي', 'سكني', 'صناعي'],
         'qrar_source' => ['بلدي', 'مكتب هندسي', 'بدون'],
         'allocation_method' => ['محدد بدقة', 'محدد حسب الموقع العام', 'لم يتم تحديد الموقع'],
-        'fall_in' => ['مخطط زراعي', 'مخطط بلدية'],
+        'fall_in' => ['مخطط زراعي', 'مخطط بلدية', 'طلبات احكام', 'حجة استحكام', 'مخطط', 'الصك'],
     ];
 
     /**
@@ -156,6 +157,9 @@ final class ParcelGeoJsonImporter implements Importer
     {
         $groups = $this->groupByParcelAndDeed($features);
         $o = self::options($options);
+        if (! $o['legacy'] && $o['office_id'] === null && $o['office_name'] !== '') {
+            $o['office_id'] = $this->findOrCreate('engineering_offices', ['name' => $o['office_name']]);
+        }
         $this->unknown = [];
         $this->planConflicts = [];
 
@@ -291,7 +295,7 @@ final class ParcelGeoJsonImporter implements Importer
      * @param  array<string, mixed>  $options
      * @return array{legacy: bool, districts: list<array{name: string, district_id: int|null, city_id: int|null, match: string}>,
      *     district_match: string, parcel_districts: array<string, int>, default_city_id: int|null, plan_placeholders: list<string>, borders: string, qrar: string,
-     *     folder: string, portfolios: bool, deedless: string, no_plan: string, office_id: int|null}
+     *     folder: string, portfolios: bool, deedless: string, no_plan: string, office_id: int|null, office_name: string}
      */
     public static function options(array $options): array
     {
@@ -306,6 +310,8 @@ final class ParcelGeoJsonImporter implements Importer
                     'city_id' => is_numeric($row['city_id'] ?? null) ? (int) $row['city_id'] : null,
                     // '' follows the method chosen for all parcels.
                     'match' => in_array($row['match'] ?? null, ['name', 'map'], true) ? (string) $row['match'] : '',
+                    // The name of the district made for parcels whose District is empty.
+                    'new_name' => trim((string) ($row['new_name'] ?? '')),
                 ];
             }
         }
@@ -340,6 +346,8 @@ final class ParcelGeoJsonImporter implements Importer
             // A parcel with no real plan: into its district's stand-in plan, or no plan.
             'no_plan' => $pick('no_plan', ['district_plan', 'none'], $legacy ? 'none' : 'district_plan'),
             'office_id' => is_numeric($options['office_id'] ?? null) ? (int) $options['office_id'] : null,
+            // An office not on record yet, named on the review screen.
+            'office_name' => mb_substr(trim((string) ($options['office_name'] ?? '')), 0, 150),
         ];
     }
 
@@ -386,6 +394,16 @@ final class ParcelGeoJsonImporter implements Importer
             'fall_in' => $this->enum('fall_in', $p['Fall_In'] ?? null),
         ]));
         $isNew ? $stats['inserted']++ : $stats['updated']++;
+
+        // The parent (a building holding this flat), by its GEO ID — when that
+        // parcel is on record already, or came earlier in the file.
+        $parentGeoId = $this->str($p['Parent_Geo_ID'] ?? null);
+        if ($parentGeoId !== null && $parentGeoId !== $geoId) {
+            $parentId = DB::table('parcels')->where('geo_id', $parentGeoId)->value('id');
+            if ($parentId !== null) {
+                DB::table('parcels')->where('id', $parcelId)->update(['parent_parcel_id' => $parentId]);
+            }
+        }
 
         // Geometry — always stored as MultiPolygon
         if (is_array($lead['geometry'] ?? null)) {
@@ -444,12 +462,30 @@ final class ParcelGeoJsonImporter implements Importer
                 $stats['owners']++;
             }
 
+            // Contact details, where the file has them; an empty one leaves
+            // what is on record.
+            $phone = $this->str($fp['Phone'] ?? null);
+            $contact = $this->filled([
+                'phone' => $phone,
+                'phone_normalized' => $phone === null ? null : (Owner::normalisePhone($phone) ?: null),
+                'email' => $this->str($fp['Email'] ?? null),
+            ]);
+            if ($contact !== []) {
+                DB::table('owners')->where('id', $ownerId)->update($contact + ['updated_at' => now()]);
+            }
+
             DB::table('deed_owners')->insertOrIgnore([
                 'deed_id' => $deedId,
                 'owner_id' => $ownerId,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
+            $share = $this->num($fp['Share'] ?? null);
+            if ($share !== null && $share >= 0 && $share <= 100) {
+                DB::table('deed_owners')->where('deed_id', $deedId)->where('owner_id', $ownerId)
+                    ->update(['ownership_share' => round($share, 2), 'updated_at' => now()]);
+            }
 
             if ($portfolio !== null) {
                 $this->placeInPortfolio($ownerId, $parcelId, $portfolio, $stats);
@@ -486,6 +522,7 @@ final class ParcelGeoJsonImporter implements Importer
             'n_dim' => $this->num($p[$set[4]] ?? null), 's_dim' => $this->num($p[$set[5]] ?? null),
             'e_dim' => $this->num($p[$set[6]] ?? null), 'w_dim' => $this->num($p[$set[7]] ?? null),
             'measured_area' => $this->num($p['Survey_Area'] ?? null),
+            'survey_date' => $this->hijri($p['Survey_Date'] ?? null),
         ]);
         $officeId = $o['legacy'] ? $this->engineeringOfficeId() : $o['office_id'];
         $boundary = DB::table('parcel_boundaries')->where('parcel_id', $parcelId)->first(['id', 'engineering_office_id']);
@@ -523,7 +560,9 @@ final class ParcelGeoJsonImporter implements Importer
     {
         $qrar = $p['Qrar'] ?? null;
         $values = $this->filled([
-            'qrar_no' => $o['qrar'] === 'number' ? $this->str($qrar) : null,
+            // Qrar_No is the decision number wherever a file has it; Qrar is
+            // read as the number, the source code, or not at all, as chosen.
+            'qrar_no' => $this->str($p['Qrar_No'] ?? null) ?? ($o['qrar'] === 'number' ? $this->str($qrar) : null),
             'qrar_source' => $o['qrar'] === 'source' ? $this->enum('qrar_source', $qrar) : null,
             'report_no' => $this->str($p['Report_No'] ?? null),
             'folder' => $o['folder'] === 'folder' ? $this->str($p['Folder'] ?? null) : null,
@@ -609,7 +648,7 @@ final class ParcelGeoJsonImporter implements Importer
 
         $method = $o['district_match'];
         foreach ($o['districts'] as $row) {
-            if ($name !== null && trim($row['name']) === $name && $row['match'] !== '') {
+            if (trim($row['name']) === (string) $name && $row['match'] !== '') {
                 $method = $row['match'];
                 break;
             }
@@ -637,13 +676,10 @@ final class ParcelGeoJsonImporter implements Importer
      */
     private function districtFor(?string $name, array $o): ?int
     {
-        if ($name === null) {
-            return null;
-        }
-
+        // Parcels whose District is empty share one row, keyed by ''.
         $row = null;
         foreach ($o['districts'] as $candidate) {
-            if (trim($candidate['name']) === $name) {
+            if (trim($candidate['name']) === (string) $name) {
                 $row = $candidate;
                 break;
             }
@@ -651,6 +687,14 @@ final class ParcelGeoJsonImporter implements Importer
 
         if ($row !== null && $row['district_id'] !== null) {
             return $row['district_id'];
+        }
+
+        if ($name === null) {
+            // No name of its own: made under the name chosen for the row.
+            $name = $row['new_name'] ?? '';
+            if ($name === '') {
+                return null;
+            }
         }
 
         $cityId = $row['city_id'] ?? null;

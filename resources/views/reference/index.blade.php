@@ -12,8 +12,12 @@
 @section('content')
     @can('reference.view')
         <livewire:reference.reference-index />
-        @can('reference.edit')
+        @can('boundaries.edit')
             <livewire:reference.boundary-editor />
+            <livewire:reference.missing-boundaries-panel />
+        @endcan
+        @can('parcels.placement_fix')
+            <livewire:reference.plan-placement />
         @endcan
     @else
         <div class="flex flex-col items-center justify-center py-24 gap-4

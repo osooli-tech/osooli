@@ -77,6 +77,16 @@
                             </div>
                         </div>
 
+                        @if ($config['canSuggest'])
+                            <button type="button" x-on:click="suggest()" x-bind:disabled="status !== 'ready' || suggesting"
+                                    class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium
+                                           bg-secondary text-white hover:brightness-110 transition-all disabled:opacity-50">
+                                <span class="material-symbols-outlined text-[16px]" x-bind:class="suggesting && 'animate-spin'" x-text="suggesting ? 'progress_activity' : 'auto_fix_high'"></span>
+                                {{ __('boundaries.suggest') }}
+                            </button>
+                            <p class="text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('boundaries.suggest_hint') }}</p>
+                        @endif
+
                         {{-- Tools --}}
                         <div class="grid grid-cols-2 gap-2">
                             <button type="button" x-on:click="startDrawing()" x-bind:disabled="status !== 'ready'"
@@ -129,6 +139,9 @@
                             <li>{{ __('parcels.geometry_help.add') }}</li>
                             <li>{{ __('parcels.geometry_help.remove') }}</li>
                             <li>{{ __('boundaries.neighbours_hint') }}</li>
+                            @if ($config['parcels'])
+                                <li>{{ __('boundaries.parcels_hint') }}</li>
+                            @endif
                         </ul>
 
                         <p x-show="clientError" x-text="clientError" x-cloak
@@ -246,6 +259,7 @@
             pasteOpen: false,
             pasteText: '',
             pasteError: '',
+            suggesting: false,
 
             init() {
                 if (!config.token || !window.loadMapbox) {
@@ -280,6 +294,7 @@
 
                 map.on('load', () => {
                     this.addNeighbours();
+                    this.addParcels();
                     this.load(original ? toPolygons(original) : []);
                     this.fit();
                     if (!original) draw.changeMode('draw_polygon');
@@ -306,6 +321,29 @@
                         'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
                     },
                     paint: { 'text-color': '#334155', 'text-halo-color': '#ffffff', 'text-halo-width': 1.2 } });
+            },
+
+            addParcels() {
+                let parcels = null;
+                try { parcels = config.parcels ? JSON.parse(config.parcels) : null; } catch (e) { parcels = null; }
+                if (!parcels || !parcels.features || !parcels.features.length) return;
+
+                map.addSource('own-parcels', { type: 'geojson', data: parcels });
+                map.addLayer({ id: 'own-parcels-fill', type: 'fill', source: 'own-parcels',
+                    paint: { 'fill-color': '#006c4e', 'fill-opacity': 0.35 } });
+                map.addLayer({ id: 'own-parcels-outline', type: 'line', source: 'own-parcels',
+                    paint: { 'line-color': '#006c4e', 'line-width': 1.2 } });
+            },
+
+            suggest() {
+                this.suggesting = true;
+                $wire.suggest().then((json) => {
+                    this.suggesting = false;
+                    if (!json) return;
+                    this.load(toPolygons(JSON.parse(json)));
+                    this.fit();
+                    draw.changeMode('simple_select');
+                }).catch(() => { this.suggesting = false; });
             },
 
             load(polygons) {

@@ -44,6 +44,15 @@
                 </div>
             </div>
 
+            @can('boundaries.edit')
+                <button type="button" x-on:click="$dispatch('missing-boundaries')"
+                        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium shrink-0
+                               border border-outline-variant dark:border-white/10 text-on-surface dark:text-white
+                               hover:bg-surface-container dark:hover:bg-white/5 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">border_clear</span>
+                    {{ __('boundaries.missing.button') }}
+                </button>
+            @endcan
             @can('reference.create')
                 <button wire:click="openCreate"
                         class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
@@ -162,7 +171,7 @@
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2 justify-end">
                                     @if (in_array($tab, ['districts', 'cities', 'regions', 'countries'], true))
-                                        @can('reference.edit')
+                                        @can('boundaries.edit')
                                             <button type="button"
                                                     x-on:click="$dispatch('boundary-edit', { level: '{{ $tab }}', id: {{ $row['id'] }} })"
                                                     class="p-1.5 rounded-lg transition-colors hover:bg-secondary/10 hover:text-secondary
@@ -171,6 +180,14 @@
                                                 <span class="material-symbols-outlined text-[18px]">{{ $row['boundary'] === null ? 'polyline' : 'border_outer' }}</span>
                                             </button>
                                         @endcan
+                                    @endif
+                                    @if ($tab === 'plans' && $canPlace)
+                                        <button type="button"
+                                                x-on:click="$dispatch('plan-placement', { id: {{ $row['id'] }} })"
+                                                class="p-1.5 rounded-lg text-on-surface-variant dark:text-on-primary-container transition-colors hover:bg-secondary/10 hover:text-secondary"
+                                                title="{{ __('placement.plan.button') }}">
+                                            <span class="material-symbols-outlined text-[18px]">my_location</span>
+                                        </button>
                                     @endif
                                     @can('reference.edit')
                                         <button wire:click="openEdit({{ $row['id'] }})"

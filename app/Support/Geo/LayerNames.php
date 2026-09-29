@@ -13,11 +13,20 @@ namespace App\Support\Geo;
  */
 final class LayerNames
 {
+    /** The names projects and buildings are kept under as custom layers. */
+    public const LAYER_NAMES = [
+        'projects' => 'المشاريع',
+        'buildings' => 'المباني',
+    ];
+
     /** Names at or above this score are called similar. */
     public const SIMILAR = 0.8;
 
     /**
-     * The built-in layers, by role, under the names they tend to carry.
+     * The layers the platform knows, by role, under the names they tend to
+     * carry. Only parcels are a role of their own; projects and buildings
+     * are custom layers, recognised by name so that "Buildings" in a file
+     * finds the «المباني» layer on the map.
      *
      * @var array<string, list<string>>
      */

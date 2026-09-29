@@ -95,8 +95,6 @@ return [
     'visible_layers' => 'الطبقات الظاهرة',
     'layer_parcels' => 'تعبئة القطع',
     'layer_outlines' => 'حدود القطع',
-    'layer_projects' => 'المشاريع',
-    'layer_buildings' => 'المباني',
     'customise_colours' => 'تخصيص الألوان',
     'customise_colours_hint' => 'التغيير يظهر فورًا على الخريطة، واضغط حفظ ليظهر لكل المستخدمين.',
     'save_colours' => 'حفظ',

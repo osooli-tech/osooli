@@ -16,8 +16,6 @@ if (! container) {
     const DEFAULT_COLOURS = {
         parcels_fill: '#00b386',
         parcels_outline: '#39ff14',
-        projects_fill: '#c9a84c',
-        buildings_fill: '#4a90d9',
         colour_modes: {
             deed_status: { 'محدث': '#00b386', 'قديم': '#d9534f' },
             asset_type: {
@@ -356,55 +354,6 @@ if (! container) {
         });
         document.getElementById('map-filter-clear-btn')?.addEventListener('click', clearMapFilter);
 
-        // Project zones and building footprints are a pure identification
-        // layer — name/shape only, no click-through detail panel like parcels.
-        function addDisplayLayer(id, url, fillColour) {
-            if (! url || map.getSource(id)) return;
-
-            map.addSource(id, { type: 'geojson', data: url });
-
-            map.addLayer({
-                id: `${id}-fill`,
-                type: 'fill',
-                source: id,
-                paint: { 'fill-color': fillColour, 'fill-opacity': 0.25 },
-            });
-
-            map.addLayer({
-                id: `${id}-outline`,
-                type: 'line',
-                source: id,
-                paint: { 'line-color': fillColour, 'line-width': 1.5 },
-            });
-
-            map.addLayer({
-                id: `${id}-labels`,
-                type: 'symbol',
-                source: id,
-                layout: {
-                    'text-field': ['to-string', ['get', 'name']],
-                    'text-size': 10,
-                    'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                    'text-allow-overlap': false,
-                },
-                paint: {
-                    'text-color': fillColour,
-                    'text-halo-color': '#ffffff',
-                    'text-halo-width': 1.5,
-                },
-            });
-
-            map.on('click', `${id}-fill`, (e) => {
-                const p = e.features[0].properties;
-                new mapboxgl.Popup()
-                    .setLngLat(e.lngLat)
-                    .setHTML(`<strong>${p.name ?? ''}</strong>${p.code ? `<br>${p.code}` : ''}`)
-                    .addTo(map);
-            });
-            map.on('mouseenter', `${id}-fill`, () => { map.getCanvas().style.cursor = 'pointer'; });
-            map.on('mouseleave', `${id}-fill`, () => { map.getCanvas().style.cursor = ''; });
-        }
-
         // ── Administrative boundaries ─────────────────────────────
         // Loaded for the current view only, at a simplification to match the
         // zoom, and only for the levels switched on. Cities and districts
@@ -488,10 +437,11 @@ if (! container) {
         map.on('moveend', refreshBoundaries);
 
         // ── Custom layers ─────────────────────────────────────────
-        // Layers imported from geodatabases beyond parcels, projects and
-        // buildings: any shape, any attributes. Each is fetched the first
-        // time it is switched on, drawn by what its features are (polygon,
-        // line or point), and shows all its attributes on click.
+        // Every layer imported from a geodatabase other than the parcels —
+        // projects and buildings among them: any shape, any attributes.
+        // Each is fetched the first time it is switched on, drawn by what its
+        // features are (polygon, line or point), and shows all its
+        // attributes on click.
         const customLayers = JSON.parse(container.dataset.customLayers || '[]');
         const customOn = new Set(customLayers.filter((l) => l.visible).map((l) => String(l.id)));
         const IS_POLYGON = ['match', ['geometry-type'], ['Polygon', 'MultiPolygon'], true, false];
@@ -568,21 +518,10 @@ if (! container) {
         function addAllLayers() {
             addBoundaryLayers();
             addParcelLayers();
-            addDisplayLayer('projects', container.dataset.projectsUrl, colours.projects_fill);
-            addDisplayLayer('buildings', container.dataset.buildingsUrl, colours.buildings_fill);
             // Last, so points such as wells draw over the parcels. Only the
             // layers switched on are fetched; a basemap change brings back
             // the ones already on the map.
             customLayers.filter((l) => customOn.has(String(l.id))).forEach(addCustomLayer);
-        }
-
-        // Re-applies a display layer's colour after a client edit — same
-        // three paint properties addDisplayLayer sets when the layer is born.
-        function setDisplayLayerColour(id, colour) {
-            if (! map.getLayer(`${id}-fill`)) return;
-            map.setPaintProperty(`${id}-fill`, 'fill-color', colour);
-            map.setPaintProperty(`${id}-outline`, 'line-color', colour);
-            map.setPaintProperty(`${id}-labels`, 'text-color', colour);
         }
 
         map.on('load', addAllLayers);
@@ -691,24 +630,15 @@ if (! container) {
         });
 
         // Per-layer visibility, remembered so a basemap switch restores it.
-        // 'projects-fill'/'buildings-fill' each represent a whole display
-        // group (fill + outline + labels) toggled together by one checkbox.
-        const DISPLAY_LAYER_GROUPS = {
-            'projects-fill': ['projects-fill', 'projects-outline', 'projects-labels'],
-            'buildings-fill': ['buildings-fill', 'buildings-outline', 'buildings-labels'],
-        };
         const hiddenLayers = new Set();
 
         document.querySelectorAll('input[data-layer]').forEach((box) => {
             box.addEventListener('change', () => {
                 const id = box.dataset.layer;
                 box.checked ? hiddenLayers.delete(id) : hiddenLayers.add(id);
-                const ids = DISPLAY_LAYER_GROUPS[id] ?? [id];
-                ids.forEach((layerId) => {
-                    if (map.getLayer(layerId)) {
-                        map.setLayoutProperty(layerId, 'visibility', box.checked ? 'visible' : 'none');
-                    }
-                });
+                if (map.getLayer(id)) {
+                    map.setLayoutProperty(id, 'visibility', box.checked ? 'visible' : 'none');
+                }
             });
         });
 
@@ -718,9 +648,7 @@ if (! container) {
             applyColourMode();
             refreshBoundaries();
             hiddenLayers.forEach((id) => {
-                (DISPLAY_LAYER_GROUPS[id] ?? [id]).forEach((layerId) => {
-                    if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', 'none');
-                });
+                if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
             });
         }
 
@@ -733,10 +661,6 @@ if (! container) {
                 map.setPaintProperty('parcels-outline', 'line-color', [
                     'case', ['boolean', ['feature-state', 'selected'], false], '#c9a84c', value,
                 ]);
-            } else if (key === 'projects_fill') {
-                setDisplayLayerColour('projects', value);
-            } else if (key === 'buildings_fill') {
-                setDisplayLayerColour('buildings', value);
             }
         }
 
@@ -790,8 +714,6 @@ if (! container) {
                         colours = data.colors;
                         buildBaseColourPickers();
                         applyColourMode();
-                        setDisplayLayerColour('projects', colours.projects_fill);
-                        setDisplayLayerColour('buildings', colours.buildings_fill);
                         showColourStatus(saveBtn?.dataset.savedLabel ?? 'Saved', false);
                     })
                     .catch(() => showColourStatus(saveBtn?.dataset.failedLabel ?? 'Save failed', true));

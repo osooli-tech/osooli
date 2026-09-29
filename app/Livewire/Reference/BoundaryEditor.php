@@ -7,6 +7,7 @@ namespace App\Livewire\Reference;
 use App\Support\Concerns\WritesSafely;
 use App\Support\Database\Dialect;
 use App\Support\Database\Spatial;
+use App\Support\Geo\MissingBoundaries;
 use App\Support\ParcelGeometry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +48,9 @@ class BoundaryEditor extends Component
      * out Al Kharj, next door to Riyadh, while drawing towns far away.
      */
     private const MAX_NEIGHBOURS = 400;
+
+    /** Most of the record's own parcels drawn under the editor as a guide. */
+    private const MAX_PARCELS = 3000;
 
     public bool $show = false;
 
@@ -95,6 +99,17 @@ class BoundaryEditor extends Component
     }
 
     /**
+     * A district's boundary as its parcels suggest it, to start from: loaded
+     * into the editor, not saved.
+     */
+    public function suggest(): ?string
+    {
+        [$level, $id] = $this->editing();
+
+        return $level === 'districts' ? MissingBoundaries::shapeFromParcels($id) : null;
+    }
+
+    /**
      * Take the boundary off altogether. Running the boundaries seeder again
      * brings back the National Address one, if there is one to bring back.
      */
@@ -120,13 +135,18 @@ class BoundaryEditor extends Component
             ? DB::table($this->level)->where('id', $this->recordId)->first(['id', 'name_ar', 'name_en', 'boundary_source'])
             : null;
 
+        $parcels = $record === null ? null : $this->parcels((string) $this->level, (int) $this->recordId);
+        $bounds = $parcels['bounds'] ?? ($record === null ? null : $this->fallbackBounds((string) $this->level, (int) $this->recordId));
+
         return view('livewire.reference.boundary-editor', [
             'record' => $record,
-            'config' => $record === null ? null : [
+            'config' => $record === null || $bounds === null ? null : [
                 'token' => (string) config('services.mapbox.token'),
                 'geometry' => $this->current((string) $this->level, (int) $this->recordId),
-                'neighbours' => $this->neighbours((string) $this->level, (int) $this->recordId),
-                'bounds' => $this->fallbackBounds((string) $this->level, (int) $this->recordId),
+                'neighbours' => $this->neighbours((string) $this->level, (int) $this->recordId, [($bounds[0] + $bounds[2]) / 2, ($bounds[1] + $bounds[3]) / 2]),
+                'parcels' => $parcels['features'] ?? null,
+                'canSuggest' => $this->level === 'districts' && ($parcels['count'] ?? 0) > 0,
+                'bounds' => $bounds,
                 'i18n' => [
                     'empty' => __('parcels.geometry_errors.empty'),
                     'paste_invalid' => __('parcels.geometry_paste_invalid'),
@@ -194,7 +214,7 @@ class BoundaryEditor extends Component
     private function authorizeLevel(string $level): void
     {
         abort_unless(array_key_exists($level, self::LEVELS), 404);
-        abort_unless(Auth::user()?->can('reference.edit'), 403);
+        abort_unless(Auth::user()?->can('boundaries.edit'), 403);
         abort_unless(Dialect::isSpatial(), 404);
     }
 
@@ -205,8 +225,14 @@ class BoundaryEditor extends Component
         return $row?->g === null ? null : (string) $row->g;
     }
 
-    /** The other boundaries under the same parent, as a FeatureCollection. */
-    private function neighbours(string $level, int $id): string
+    /**
+     * The other boundaries under the same parent, as a FeatureCollection,
+     * nearest first: to the record's own boundary, or — with none drawn yet
+     * — to where its parcels are (`$focus`, longitude and latitude).
+     *
+     * @param  array{0: float, 1: float}  $focus
+     */
+    private function neighbours(string $level, int $id, array $focus): string
     {
         $config = self::LEVELS[$level];
         $parent = $config['parent'];
@@ -215,9 +241,9 @@ class BoundaryEditor extends Component
             'SELECT n.name_ar AS name, ST_AsGeoJSON('.Spatial::simplify('n.geom').", 6) AS g
              FROM {$level} n JOIN {$level} self ON self.id = ?
              WHERE n.id <> self.id AND n.{$parent} = self.{$parent} AND n.geom IS NOT NULL
-             ORDER BY CASE WHEN self.geom IS NULL THEN 0 ELSE ST_Distance(ST_Centroid(n.geom), ST_Centroid(self.geom)) END
-             LIMIT ".self::MAX_NEIGHBOURS,
-            [$config['simplify'], $id]
+             ORDER BY CASE WHEN self.geom IS NULL THEN ST_Distance(ST_Centroid(n.geom), ".Spatial::point().') ELSE ST_Distance(ST_Centroid(n.geom), ST_Centroid(self.geom)) END
+             LIMIT '.self::MAX_NEIGHBOURS,
+            [$config['simplify'], $id, $focus[0], $focus[1]]
         );
 
         $features = [];
@@ -232,6 +258,64 @@ class BoundaryEditor extends Component
         }
 
         return (string) json_encode(['type' => 'FeatureCollection', 'features' => $features], JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * The record's own parcels, drawn under the editor as a guide: a
+     * district's through its plans, a city's through its districts. Null for
+     * a region or country, or when it has no parcel with a polygon.
+     *
+     * @return array{features: string, count: int, bounds: array{0: float, 1: float, 2: float, 3: float}}|null
+     */
+    private function parcels(string $level, int $id): ?array
+    {
+        $where = match ($level) {
+            'districts' => 'p.plan_id IN (SELECT id FROM plans WHERE district_id = ?)',
+            'cities' => 'p.plan_id IN (SELECT pl.id FROM plans pl JOIN districts d ON d.id = pl.district_id WHERE d.city_id = ?)',
+            default => null,
+        };
+        if ($where === null) {
+            return null;
+        }
+
+        $rows = DB::select(
+            "SELECT p.parcel_no, ST_AsGeoJSON(p.geom, 6) AS g FROM parcels p
+             WHERE {$where} AND p.geom IS NOT NULL AND p.deleted_at IS NULL
+             LIMIT ".self::MAX_PARCELS,
+            [$id]
+        );
+        if ($rows === []) {
+            return null;
+        }
+
+        $features = [];
+        [$x1, $y1, $x2, $y2] = [INF, INF, -INF, -INF];
+        foreach ($rows as $row) {
+            $geometry = json_decode((string) $row->g, true);
+            if (! is_array($geometry)) {
+                continue;
+            }
+            array_walk_recursive($geometry['coordinates'], static function ($value, $key) use (&$x1, &$y1, &$x2, &$y2): void {
+                if ($key === 0) {
+                    $x1 = min($x1, (float) $value);
+                    $x2 = max($x2, (float) $value);
+                } else {
+                    $y1 = min($y1, (float) $value);
+                    $y2 = max($y2, (float) $value);
+                }
+            });
+            $features[] = ['type' => 'Feature', 'geometry' => $geometry, 'properties' => ['no' => (string) $row->parcel_no]];
+        }
+
+        if ($features === []) {
+            return null;
+        }
+
+        return [
+            'features' => (string) json_encode(['type' => 'FeatureCollection', 'features' => $features], JSON_UNESCAPED_UNICODE),
+            'count' => count($features),
+            'bounds' => [$x1, $y1, $x2, $y2],
+        ];
     }
 
     /**

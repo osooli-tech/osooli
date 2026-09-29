@@ -26,6 +26,17 @@
                 <option value="documents">{{ __('imports.kind.documents') }}</option>
             </select>
 
+            <div x-show="kind === 'gdb'" class="mb-5 -mt-1 flex flex-wrap items-start gap-3 rounded-xl bg-surface-container dark:bg-white/5 px-4 py-3">
+                <a href="{{ route('imports.gdb.template') }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium shrink-0
+                          border border-outline-variant dark:border-white/10 text-on-surface dark:text-white
+                          hover:bg-surface-container-high dark:hover:bg-white/10 transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    {{ __('imports.gdb_template') }}
+                </a>
+                <p class="flex-1 min-w-[220px] text-xs leading-relaxed text-on-surface-variant dark:text-on-primary-container">{{ __('imports.gdb_template_hint') }}</p>
+            </div>
+
             <label class="block mb-2 text-sm font-medium text-on-surface dark:text-white">
                 {{ __('imports.choose_file') }}
             </label>

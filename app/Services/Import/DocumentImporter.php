@@ -41,11 +41,75 @@ final class DocumentImporter implements Importer
                     'photo_type' => $rule?->photoType()->value,
                     'unmatched_files' => array_slice($unmatched, 0, 50),
                 ],
-                warnings: $unmatched === [] ? [] : [count($unmatched).' file(s) matched no parcel and will be skipped.'],
+                warnings: $this->unmatchedWarnings($unmatched, $dir),
             );
         } finally {
             $this->removeDirectory($dir);
         }
+    }
+
+    /**
+     * What to tell the person about files matched to no parcel: which they
+     * are, and — for a PDF of many pages, a map series or a scan of many
+     * sheets whose name cannot say which parcel it is — where it belongs
+     * instead: the multi-parcel upload, which splits it page by page.
+     *
+     * @param  list<string>  $unmatched  file names
+     * @return list<string>
+     */
+    private function unmatchedWarnings(array $unmatched, string $dir): array
+    {
+        if ($unmatched === []) {
+            return [];
+        }
+
+        $warnings = [__('imports.warnings.unmatched_files', [
+            'count' => count($unmatched),
+            'files' => implode('، ', array_slice($unmatched, 0, 10)).(count($unmatched) > 10 ? '…' : ''),
+        ])];
+
+        $multiPage = [];
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS));
+        foreach ($iterator as $file) {
+            if (count($multiPage) < 5 && in_array($file->getFilename(), $unmatched, true)
+                && ($pages = self::pageCount($file->getPathname())) > 1) {
+                $multiPage[] = $file->getFilename().' ('.$pages.')';
+            }
+        }
+
+        if ($multiPage !== []) {
+            $warnings[] = __('imports.warnings.multi_page', ['files' => implode('، ', $multiPage)]);
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Roughly how many pages a PDF has — its "/Type /Page" objects counted,
+     * read a megabyte at a time so a large scan is never held whole. A PDF
+     * that packs its objects into compressed streams hides them and counts
+     * as none; its file is then only listed as unmatched, which is still true.
+     */
+    private static function pageCount(string $path): int
+    {
+        $handle = @fopen($path, 'rb');
+        if ($handle === false) {
+            return 0;
+        }
+
+        $count = 0;
+        $carry = '';
+        while (! feof($handle)) {
+            $chunk = $carry.fread($handle, 1048576);
+            $count += preg_match_all('#/Type\s*/Page(?![a-zA-Z])#', $chunk);
+            // Keep a tail, so a marker split across two reads is still seen —
+            // but not a marker already counted in this one.
+            $tail = substr($chunk, -16);
+            $carry = preg_match('#/Type\s*/Page(?![a-zA-Z])#', $tail) === 1 ? '' : $tail;
+        }
+        fclose($handle);
+
+        return $count;
     }
 
     /**
@@ -130,7 +194,7 @@ final class DocumentImporter implements Importer
                         'photo_type' => null,
                         'unmatched_files' => array_slice($unmatched, 0, 50),
                     ],
-                    warnings: ['No naming rule matched any file in the archive.'],
+                    warnings: [__('imports.warnings.no_rule')],
                 );
             }
 

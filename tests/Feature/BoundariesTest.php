@@ -104,7 +104,7 @@ class BoundariesTest extends TestCase
         $this->parcel('OUT-1', $this->west, 46.12, 24.02);
         $this->parcel('OUT-CITY', $this->unbounded, 47.5, 25.5);
 
-        $this->actingAs($this->userWith(['parcels.view']));
+        $this->actingAs($this->userWith(['parcels.placement']));
 
         Livewire::test(PlacementReview::class)
             ->assertSee('OUT-1')
@@ -119,7 +119,7 @@ class BoundariesTest extends TestCase
     public function test_the_map_endpoint_returns_the_boundaries_in_view(): void
     {
         $this->fixtures();
-        $this->actingAs($this->userWith(['parcels.view']));
+        $this->actingAs($this->userWith(['boundaries.view']));
 
         $this->getJson(route('geo.boundaries', 'districts').'?bbox=45.9,23.9,46.3,24.3&zoom=12')
             ->assertOk()
@@ -136,7 +136,7 @@ class BoundariesTest extends TestCase
     public function test_a_boundary_drawn_by_hand_is_saved_as_manual_and_audited(): void
     {
         $this->fixtures();
-        $this->actingAs($this->userWith(['reference.view', 'reference.edit']));
+        $this->actingAs($this->userWith(['reference.view', 'boundaries.edit']));
 
         $drawn = json_encode(['type' => 'Polygon', 'coordinates' => [$this->ring(46.2, 24.2, 0.05)]]);
 
@@ -169,7 +169,7 @@ class BoundariesTest extends TestCase
     public function test_the_editor_draws_the_nearest_neighbours_first(): void
     {
         $this->fixtures();
-        $this->actingAs($this->userWith(['reference.view', 'reference.edit']));
+        $this->actingAs($this->userWith(['reference.view', 'boundaries.edit']));
         $region = Region::firstOrFail();
         $far = City::create(['region_id' => $region->id, 'name_ar' => 'بعيدة']);
         $near = City::create(['region_id' => $region->id, 'name_ar' => 'قريبة']);

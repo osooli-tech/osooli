@@ -9,6 +9,7 @@ use App\Models\ArchivedValue;
 use App\Models\Deed;
 use App\Models\Owner;
 use App\Models\Parcel;
+use App\Support\ArchivedValues;
 use App\Support\Concerns\WritesSafely;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -39,6 +40,9 @@ class ArchiveIndex extends Component
 
     public string $search = '';
 
+    /** On the values tab: one kind of correction only (see ArchivedValues::CATEGORIES). */
+    public string $category = '';
+
     #[Locked]
     public ?int $restoringId = null;
 
@@ -53,6 +57,7 @@ class ArchiveIndex extends Component
         if (in_array($tab, self::TYPES, true)) {
             $this->tab = $tab;
             $this->search = '';
+            $this->category = '';
             $this->restoringId = null;
         }
     }
@@ -117,6 +122,7 @@ class ArchiveIndex extends Component
     {
         if ($this->tab === 'values') {
             $builder = ArchivedValue::query();
+            ArchivedValues::scope($builder, $this->category);
 
             if ($this->search !== '') {
                 $term = '%'.$this->search.'%';
@@ -177,8 +183,12 @@ class ArchiveIndex extends Component
 
         abort_unless($user?->can('archive.view'), 403);
 
+        $records = $this->records();
+
         return view('livewire.archive.archive-index', [
-            'records' => $this->records(),
+            'records' => $records,
+            // Record, field, before and now in words, for the values tab.
+            'described' => $this->tab === 'values' ? ArchivedValues::describe($records->toBase()) : [],
             'counts' => $this->counts(),
             'canRestore' => $user->can('archive.restore'),
         ]);

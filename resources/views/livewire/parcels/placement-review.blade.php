@@ -17,6 +17,18 @@
             @endforeach
         </div>
         <p class="mt-3 text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('placement.hint.'.$level) }}</p>
+
+        @if ($standIns > 0)
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary/5 border border-secondary/30 px-4 py-3">
+                <p class="text-sm text-on-surface dark:text-white/90">{{ __('placement.fix.relocate_hint', ['count' => number_format($standIns)]) }}</p>
+                <button type="button" wire:click="relocateStandIns" wire:loading.attr="disabled"
+                        wire:confirm="{{ __('placement.fix.relocate_confirm', ['count' => number_format($standIns)]) }}"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-secondary text-white hover:opacity-90 disabled:opacity-50">
+                    <span class="material-symbols-outlined text-[18px]" wire:loading.class="animate-spin" wire:target="relocateStandIns">move_location</span>
+                    {{ __('placement.fix.relocate', ['count' => number_format($standIns)]) }}
+                </button>
+            </div>
+        @endif
     </div>
 
     <div class="{{ $card }} overflow-hidden">
@@ -49,11 +61,20 @@
                             <td class="px-4 py-3 text-secondary font-medium">
                                 {{ implode(' — ', array_filter([$actual['district'], $actual['city'], $actual['region']])) ?: __('geo_check.unknown_place') }}
                             </td>
-                            <td class="px-4 py-3 text-end">
-                                <a href="{{ route('parcels.show', $row->id) }}" class="inline-flex items-center gap-1 text-secondary hover:underline text-xs">
-                                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
-                                    {{ __('placement.open') }}
-                                </a>
+                            <td class="px-4 py-3 text-end whitespace-nowrap">
+                                <div class="inline-flex items-center gap-3">
+                                    @if ($canFix)
+                                        <button type="button" wire:click="openFix({{ $row->id }})"
+                                                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
+                                            <span class="material-symbols-outlined text-[16px]">edit_location_alt</span>
+                                            {{ __('placement.fix.button') }}
+                                        </button>
+                                    @endif
+                                    <a href="{{ route('parcels.show', $row->id) }}" class="inline-flex items-center gap-1 text-secondary hover:underline text-xs">
+                                        <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                        {{ __('placement.open') }}
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -71,4 +92,29 @@
             <div class="px-4 py-3 border-t border-outline-variant dark:border-white/10">{{ $page->links() }}</div>
         @endif
     </div>
+
+    @if ($fixing !== null)
+        <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4" x-data x-on:keydown.escape.window="$wire.closeFix()">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" wire:click="closeFix"></div>
+
+            <div class="relative z-10 w-full max-w-xl max-h-[90vh] overflow-y-auto bg-surface dark:bg-[#1a1f2e] rounded-2xl shadow-2xl border border-outline-variant dark:border-white/10 p-6 space-y-4">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-[28px] text-primary dark:text-white shrink-0">edit_location_alt</span>
+                    <div class="space-y-1">
+                        <p class="text-base font-bold text-on-surface dark:text-white">{{ __('placement.fix.title') }}</p>
+                        <p class="text-sm text-on-surface-variant dark:text-on-primary-container leading-relaxed">{{ __('placement.fix.why') }}</p>
+                    </div>
+                </div>
+
+                @include('livewire.parcels.partials.fix-options', ['options' => $fixOptions])
+
+                <div class="flex justify-end">
+                    <button type="button" wire:click="closeFix"
+                            class="px-4 py-2 text-sm rounded-xl border border-outline-variant dark:border-white/10 text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container dark:hover:bg-white/5">
+                        {{ __('placement.fix.close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

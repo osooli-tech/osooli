@@ -18,6 +18,7 @@ use App\Models\EngineeringOffice;
 use App\Models\Plan;
 use App\Models\Region;
 use App\Support\Concerns\WritesSafely;
+use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -95,6 +96,10 @@ class ReferenceIndex extends Component
     /** Redraws the table so a row's boundary button shows its new state. */
     #[On('boundary-saved')]
     public function boundarySaved(): void {}
+
+    /** Redraws the table after a plan moved to another district. */
+    #[On('plan-placed')]
+    public function planPlaced(): void {}
 
     public function updatingSearch(): void
     {
@@ -276,6 +281,10 @@ class ReferenceIndex extends Component
             'rows' => $this->rows($page),
             'filtering' => $this->search !== '' || $this->filterRegion !== '' || $this->filterCity !== ''
                 || $this->filterDistrict !== '' || $this->filterUsage !== '' || $this->filteringByCreatedAt(),
+            // The plan's «الحي حسب موقع القطع» button: never for a user
+            // limited to some owners, as the move takes every parcel along.
+            'canPlace' => auth()->user()?->can('parcels.placement_fix') === true
+                && OwnerScope::parcelIds(auth()->user()) === null,
         ]);
     }
 

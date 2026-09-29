@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
-use App\Support\Geo\LayerNames;
 use Symfony\Component\Process\Process;
 
 /**
@@ -87,7 +86,7 @@ final class GdbInspector
                 'geometry' => is_array($geometry) ? (string) ($geometry['type'] ?? '') : null,
                 'count' => $count,
                 'crs' => is_array($geometry) ? $this->crs($geometry['coordinateSystem'] ?? null) : null,
-                'role' => $this->role($name, $fields, is_array($geometry)),
+                'role' => $this->role($fields, is_array($geometry)),
                 'fields' => $this->profile($file, $fields, $types),
             ];
         }
@@ -126,21 +125,18 @@ final class GdbInspector
     }
 
     /**
-     * What a layer most likely is, from its name and fields: the parcels
-     * layer carries Geo_ID; buildings and projects are named so; any other
-     * layer with a shape becomes a custom map layer. Only a suggestion — the
+     * What a layer most likely is, from its fields: the parcels
+     * layer carries Geo_ID; any other layer with a shape — projects and
+     * buildings too — becomes a custom map layer. Only a suggestion — the
      * review screen lets it be changed.
      *
      * @param  list<string>  $fields
      */
-    private function role(string $name, array $fields, bool $spatial): string
+    private function role(array $fields, bool $spatial): string
     {
-        $builtIn = LayerNames::builtInRole($name);
-
         return match (true) {
             ! $spatial => 'ignore',
             in_array('Geo_ID', $fields, true) => 'parcels',
-            in_array($builtIn, ['projects', 'buildings'], true) => (string) $builtIn,
             default => 'custom',
         };
     }

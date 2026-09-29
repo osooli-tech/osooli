@@ -28,6 +28,8 @@ graphify-out/cache
 /tmp_concepts/
 *.zip
 stitch_sakuki_authentication_ui_concepts.zip
+# …except the templates the app hands out (build_gdb_template.py).
+!resources/templates/*.zip
 
 # Renamed project docs (replaced by sakuki_*)
 osooli_*

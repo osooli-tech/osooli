@@ -99,9 +99,12 @@
                     @yield('breadcrumb')
                 </nav>
             @endif
-            <h1 class="text-base font-semibold text-on-surface dark:text-white leading-none truncate">
-                @yield('page-title', __('nav.dashboard'))
-            </h1>
+            <div class="flex items-center gap-1.5 min-w-0">
+                <h1 class="text-base font-semibold text-on-surface dark:text-white leading-none truncate">
+                    @yield('page-title', __('nav.dashboard'))
+                </h1>
+                <x-page-help />
+            </div>
         </div>
 
         {{-- Optional search slot --}}

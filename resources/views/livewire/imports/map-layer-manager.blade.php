@@ -62,9 +62,18 @@
                                     <span class="block">{{ $uploaders[$layer->created_by] ?? '' }} · {{ $layer->updated_at?->diffForHumans() }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-xs">
-                                    {{ $layer->visible_by_default ? __('map_layers.shown') : __('map_layers.hidden') }}
+                                    <button wire:click="toggleVisible({{ $layer->id }})" title="{{ __('map_layers.toggle') }}"
+                                            class="inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-surface-container dark:hover:bg-white/5
+                                                   {{ $layer->visible_by_default ? 'text-secondary' : 'text-on-surface-variant dark:text-on-primary-container' }}">
+                                        <span class="material-symbols-outlined text-[16px]">{{ $layer->visible_by_default ? 'visibility' : 'visibility_off' }}</span>
+                                        {{ $layer->visible_by_default ? __('map_layers.shown') : __('map_layers.hidden') }}
+                                    </button>
                                 </td>
                                 <td class="px-4 py-3 text-end whitespace-nowrap">
+                                    <a href="{{ route('map-layers.download', $layer) }}" title="{{ __('map_layers.download') }}"
+                                       class="inline-block p-1.5 rounded-lg text-on-surface-variant hover:bg-secondary/10 hover:text-secondary">
+                                        <span class="material-symbols-outlined text-[18px] align-middle">download</span>
+                                    </a>
                                     <button wire:click="edit({{ $layer->id }})" title="{{ __('common.edit') }}"
                                             class="p-1.5 rounded-lg text-on-surface-variant hover:bg-primary/10 hover:text-primary">
                                         <span class="material-symbols-outlined text-[18px]">edit</span>

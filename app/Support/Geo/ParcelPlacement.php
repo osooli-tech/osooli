@@ -103,11 +103,12 @@ final class ParcelPlacement
     }
 
     /**
-     * The records of `$table` whose boundary contains the point.
+     * The records of `$table` whose boundary contains the point, the most
+     * trusted boundary first.
      *
      * @return array{ids: list<int>, name: string|null}
      */
-    private static function containing(string $table, float $lng, float $lat): array
+    public static function containing(string $table, float $lng, float $lat): array
     {
         $point = Spatial::point();
         $rows = DB::select(
