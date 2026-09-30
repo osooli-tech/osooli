@@ -47,11 +47,12 @@ class OwnerOtpService
     {
         $ttlMinutes = (int) config('auth.mobile_otp.ttl_minutes', 5);
         $length = self::codeLength();
-        $code = $this->testCode() ?? str_pad((string) random_int(0, 10 ** $length - 1), $length, '0', STR_PAD_LEFT);
+        $testCode = $this->testCodeFor($owner);
+        $code = $testCode ?? str_pad((string) random_int(0, 10 ** $length - 1), $length, '0', STR_PAD_LEFT);
 
         Cache::put($this->cacheKey($owner), $code, now()->addMinutes($ttlMinutes));
 
-        if ($this->testCode() === null) {
+        if ($testCode === null) {
             // TODO: send via SMS provider once credentials are available.
             Log::info('Owner OTP issued', ['owner_id' => $owner->id]);
         }
@@ -90,15 +91,28 @@ class OwnerOtpService
         return "owner_otp_{$owner->id}";
     }
 
-    /** The fixed code accepted while SMS is not wired up — never in production. */
-    private function testCode(): ?string
+    /**
+     * The fixed code accepted while SMS is not wired up. In production it is
+     * limited to the listed test numbers, so a real owner's number never
+     * opens with a code anyone could guess.
+     */
+    private function testCodeFor(Owner $owner): ?string
     {
-        if (app()->environment('production')) {
+        $code = config('auth.mobile_otp.test_code');
+
+        if ($code === null || $code === '') {
             return null;
         }
 
-        $code = config('auth.mobile_otp.test_code');
+        if (app()->environment('production')) {
+            /** @var list<string> $allowed */
+            $allowed = config('auth.mobile_otp.test_phones', []);
+            $phone = $this->normalisePhone((string) $owner->phone);
+            $listed = $phone !== '' && in_array($phone, array_map($this->normalisePhone(...), $allowed), true);
 
-        return $code === null || $code === '' ? null : (string) $code;
+            return $listed ? (string) $code : null;
+        }
+
+        return (string) $code;
     }
 }

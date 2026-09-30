@@ -146,7 +146,8 @@ return [
     |
     | Owners sign in to the mobile app with their phone number plus a one-time
     | code. Until the SMS provider is wired up, `test_code` short-circuits
-    | delivery and accepts a fixed code — never in production.
+    | delivery and accepts a fixed code — in production only for the numbers
+    | listed in `test_phones`.
     |
     */
     'mobile_otp' => [
@@ -154,6 +155,9 @@ return [
         'max_attempts_per_hour' => 5,
         'code_length' => 4,
         'test_code' => env('MOBILE_OTP_TEST_CODE', '6666'),
+        // In production the test code works only for these numbers (comma-separated),
+        // until SMS delivery is live; every other owner gets a random code.
+        'test_phones' => array_values(array_filter(array_map('trim', explode(',', (string) env('MOBILE_OTP_TEST_PHONES', ''))))),
     ],
 
 ];
