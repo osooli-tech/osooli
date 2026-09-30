@@ -106,8 +106,12 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        // The portal shares the browser session with the staff dashboard, so
+        // only the owner is signed out: invalidate() would sign a staff member
+        // out too and expire any dashboard page open in another tab (419).
         Auth::guard('owner')->logout();
-        $request->session()->invalidate();
+        $request->session()->forget('portal_otp_owner_id');
+        $request->session()->regenerate(true);
         $request->session()->regenerateToken();
 
         return redirect()->route('portal.login');

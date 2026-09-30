@@ -71,19 +71,27 @@ return Application::configure(basePath: dirname(__DIR__))
             return null;
         });
 
-        // An owner whose sign-in form outlived its session (a tab left open, a
-        // sign-out elsewhere) starts the sign-in again instead of a bare 419 page.
+        // A form that outlived its session (a tab left open, a sign-out
+        // elsewhere) sends the user back with a message instead of a bare 419 page.
         // (Laravel has already wrapped the TokenMismatchException in a 419 by now.)
         $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
-            if ($e->getStatusCode() === 419 && $e->getPrevious() instanceof TokenMismatchException
-                && $request->is('portal/*') && ! $request->expectsJson()) {
-                // The CSRF check runs before SetLocale, so pick the locale up here.
-                app()->setLocale((string) session('locale', 'ar'));
+            // Livewire answers its own 419s, and JSON callers get the status as is.
+            if ($e->getStatusCode() !== 419 || ! $e->getPrevious() instanceof TokenMismatchException
+                || $request->expectsJson() || $request->hasHeader('X-Livewire')) {
+                return null;
+            }
 
+            // The CSRF check runs before SetLocale, so pick the locale up here.
+            app()->setLocale((string) session('locale', 'ar'));
+
+            if ($request->is('portal/*')) {
                 return redirect()->route('portal.login')->withErrors(['phone' => __('portal.session_expired')]);
             }
 
-            return null;
+            // Staff: back to the form they sent (the login page by default), typed input kept.
+            return redirect()->back(fallback: route('login'))
+                ->withInput($request->except(['_token', 'password', 'password_confirmation', 'otp']))
+                ->withErrors(['session' => __('auth.session_expired')]);
         });
 
         // A missing record and a record owned by someone else are both reported

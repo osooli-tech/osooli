@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Portal;
 
 use App\Models\Owner;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
@@ -79,6 +80,20 @@ class PortalAuthTest extends TestCase
         $this->post(route('portal.logout'))->assertRedirect(route('portal.login'));
 
         $this->assertFalse(Auth::guard('owner')->check());
+    }
+
+    public function test_an_owner_logging_out_leaves_a_staff_sign_in_in_the_same_browser_alone(): void
+    {
+        $staff = User::factory()->create();
+        // A staff sign-in as the browser session holds it (actingAs never writes the session).
+        $this->withSession([Auth::guard('web')->getName() => $staff->id]);
+        $this->post(route('portal.login.submit'), ['phone' => '0500000001']);
+        $this->post(route('portal.otp.verify'), ['otp' => '6666']);
+
+        $this->post(route('portal.logout'));
+
+        $this->assertFalse(session()->has(Auth::guard('owner')->getName()));
+        $this->assertSame($staff->id, session(Auth::guard('web')->getName()));
     }
 
     public function test_a_signed_in_owner_can_reach_the_dashboard(): void

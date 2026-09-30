@@ -27,6 +27,7 @@ return [
     'otp_resend_in' => 'Resend in :seconds seconds',
     'otp_expired' => 'Code expired — please resend',
     'otp_invalid' => 'Invalid verification code',
+    'session_expired' => 'This page expired — please try again',
 
     'otp_email_subject' => 'Verification Code — Sakuki',
     'otp_email_body' => "Your verification code: :otp\n\nValid for 5 minutes.",
