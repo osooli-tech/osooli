@@ -16,6 +16,7 @@ class AuditLog extends Model
 
     protected $fillable = [
         'user_id',
+        'owner_id',
         'action',
         'target_type',
         'target_id',
@@ -33,5 +34,10 @@ class AuditLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(Owner::class);
     }
 }

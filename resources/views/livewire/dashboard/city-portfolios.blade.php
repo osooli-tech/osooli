@@ -117,6 +117,7 @@
                              stroke: { width: 2 },
                          });
                          this.c.render();
+                         window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                      }
                  }">
                 <div x-ref="el"></div>

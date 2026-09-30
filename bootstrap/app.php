@@ -11,7 +11,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,11 +25,24 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api/v1',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function (): void {
+            Route::middleware('web')->group(__DIR__.'/../routes/portal.php');
+        },
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             SetLocale::class,
         ]);
+
+        // Redirect a guest to the portal's own login, not the dashboard's,
+        // when the guarded route is under /portal — otherwise auth:owner
+        // would bounce an unauthenticated owner to the internal team's page.
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('portal*')
+            ? route('portal.login')
+            : route('login'));
+        $middleware->redirectUsersTo(fn (Request $request) => $request->is('portal*')
+            ? route('portal.dashboard')
+            : route('dashboard'));
 
         // The API has no session to read a locale from, so it takes the
         // language from the request header instead. Prepended so that a
@@ -51,6 +66,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(['message' => __('api.unauthenticated')], 401);
+            }
+
+            return null;
+        });
+
+        // An owner whose sign-in form outlived its session (a tab left open, a
+        // sign-out elsewhere) starts the sign-in again instead of a bare 419 page.
+        // (Laravel has already wrapped the TokenMismatchException in a 419 by now.)
+        $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
+            if ($e->getStatusCode() === 419 && $e->getPrevious() instanceof TokenMismatchException
+                && $request->is('portal/*') && ! $request->expectsJson()) {
+                // The CSRF check runs before SetLocale, so pick the locale up here.
+                app()->setLocale((string) session('locale', 'ar'));
+
+                return redirect()->route('portal.login')->withErrors(['phone' => __('portal.session_expired')]);
             }
 
             return null;

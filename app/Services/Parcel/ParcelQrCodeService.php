@@ -37,12 +37,22 @@ class ParcelQrCodeService
 
     public function pngDataUriFor(Parcel $parcel): ?string
     {
+        return $this->pngDataUriForUrl(route('parcels.twin', $parcel));
+    }
+
+    /**
+     * Same as pngDataUriFor(), but for a caller outside the internal
+     * dashboard — the owner portal's print report links back to the
+     * portal's own twin page, not the internal one an owner has no account for.
+     */
+    public function pngDataUriForUrl(string $url): ?string
+    {
         if (! class_exists(Imagick::class)) {
             return null;
         }
 
         $renderer = new ImageRenderer(new RendererStyle(220), new ImagickImageBackEnd);
-        $png = (new Writer($renderer))->writeString(route('parcels.twin', $parcel));
+        $png = (new Writer($renderer))->writeString($url);
 
         return 'data:image/png;base64,'.base64_encode($png);
     }

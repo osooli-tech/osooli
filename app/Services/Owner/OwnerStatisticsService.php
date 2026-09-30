@@ -136,6 +136,92 @@ class OwnerStatisticsService
         ];
     }
 
+    /**
+     * Total/average/largest/smallest deed area — the same four-in-one
+     * aggregate the internal dashboard's KPI cards compute, scoped here to
+     * the owner's own deeds instead of every deed in the system.
+     *
+     * @return array{total: float, avg: float, max: float, min: float}
+     */
+    public function areaExtremes(): array
+    {
+        $row = $this->ownedDeeds()
+            ->selectRaw('
+                COALESCE(SUM(deed_area), 0) AS total,
+                COALESCE(AVG(deed_area), 0) AS avg,
+                COALESCE(MAX(deed_area), 0) AS max_v,
+                COALESCE(MIN(deed_area), 0) AS min_v
+            ')
+            ->first();
+
+        return [
+            'total' => round((float) ($row?->getAttribute('total') ?? 0), 2),
+            'avg' => round((float) ($row?->getAttribute('avg') ?? 0), 2),
+            'max' => round((float) ($row?->getAttribute('max_v') ?? 0), 2),
+            'min' => round((float) ($row?->getAttribute('min_v') ?? 0), 2),
+        ];
+    }
+
+    /** Distinct plans the owner's parcels sit on. */
+    public function plansCount(): int
+    {
+        return Parcel::query()
+            ->whereIn('id', $this->parcelIds())
+            ->distinct('plan_id')
+            ->count('plan_id');
+    }
+
+    /** @return list<array{name: string, parcels_count: int}> */
+    public function byAssetType(): array
+    {
+        return Parcel::query()
+            ->whereIn('id', $this->parcelIds())
+            ->whereNotNull('asset_type')
+            ->selectRaw('asset_type AS name, COUNT(*) AS parcels_count')
+            ->groupBy('asset_type')
+            ->orderByDesc('parcels_count')
+            ->get()
+            ->map(fn (Parcel $row): array => [
+                'name' => (string) $row->getAttribute('name'),
+                'parcels_count' => (int) $row->getAttribute('parcels_count'),
+            ])
+            ->all();
+    }
+
+    /** @return list<array{name: string, parcels_count: int}> */
+    public function byQrarSource(): array
+    {
+        return DB::table('survey_decisions')
+            ->whereIn('parcel_id', $this->parcelIds())
+            ->whereNotNull('qrar_source')
+            ->selectRaw('qrar_source AS name, COUNT(*) AS parcels_count')
+            ->groupBy('qrar_source')
+            ->orderByDesc('parcels_count')
+            ->get()
+            ->map(fn (object $row): array => [
+                'name' => (string) $row->name,
+                'parcels_count' => (int) $row->parcels_count,
+            ])
+            ->all();
+    }
+
+    /** @return list<array{name: string, parcels_count: int}> */
+    public function byEngineeringOffice(): array
+    {
+        return DB::table('parcel_boundaries')
+            ->join('engineering_offices', 'engineering_offices.id', '=', 'parcel_boundaries.engineering_office_id')
+            ->whereIn('parcel_boundaries.parcel_id', $this->parcelIds())
+            ->selectRaw('engineering_offices.name AS name, COUNT(*) AS parcels_count')
+            ->groupBy('engineering_offices.name')
+            ->orderByDesc('parcels_count')
+            ->get()
+            ->map(fn (object $row): array => [
+                'name' => (string) $row->name,
+                'parcels_count' => (int) $row->parcels_count,
+            ])
+            ->all();
+    }
+
     /** @return list<array{name: string, parcels_count: int}> */
     public function byCity(): array
     {

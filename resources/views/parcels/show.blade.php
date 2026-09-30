@@ -707,8 +707,7 @@
     {{-- Mini-map --}}
     <div class="xl:col-span-3 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl overflow-hidden
                 border border-outline-variant dark:border-white/10 shadow-sm min-h-[440px] relative"
-         x-data="parcelMiniMap(@js($parcelGeojson), @js($neighboursGeojson), @js($parcel->parcel_no))"
-         x-init="init()">
+         x-data="parcelMiniMap(@js($parcelGeojson), @js($neighboursGeojson), @js($parcel->parcel_no))">
         @if ($parcelGeojson && config('services.mapbox.token'))
             <div id="parcel-mini-map" class="absolute inset-0 w-full h-full rounded-2xl"></div>
 

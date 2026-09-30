@@ -46,7 +46,8 @@ class OwnerOtpService
     public function issue(Owner $owner): int
     {
         $ttlMinutes = (int) config('auth.mobile_otp.ttl_minutes', 5);
-        $code = $this->testCode() ?? str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $length = self::codeLength();
+        $code = $this->testCode() ?? str_pad((string) random_int(0, 10 ** $length - 1), $length, '0', STR_PAD_LEFT);
 
         Cache::put($this->cacheKey($owner), $code, now()->addMinutes($ttlMinutes));
 
@@ -56,6 +57,12 @@ class OwnerOtpService
         }
 
         return $ttlMinutes * 60;
+    }
+
+    /** How many digits a code has — the portal's code boxes are drawn from it. */
+    public static function codeLength(): int
+    {
+        return (int) config('auth.mobile_otp.code_length', 4);
     }
 
     /** Verifies a code and consumes it so it cannot be replayed. */

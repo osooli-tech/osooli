@@ -116,8 +116,9 @@ class Owner extends Authenticatable
 
     /**
      * Parcels this owner currently holds, reached through each parcel's
-     * active deed (not just any deed they have ever been linked to) — a
+     * held deed (not just any deed they have ever been linked to) — a
      * parcel re-issued to a new owner must stop counting toward the old one.
+     * A deed with no status yet counts; only an Old one is superseded.
      *
      * Every API read must start from here so an owner can only ever see
      * their own parcels.
@@ -127,7 +128,7 @@ class Owner extends Authenticatable
     public function parcels(): Builder
     {
         return Parcel::whereHas(
-            'currentDeed.owners',
+            'heldDeed.owners',
             fn (Builder $query) => $query->whereKey($this->getKey())
         );
     }

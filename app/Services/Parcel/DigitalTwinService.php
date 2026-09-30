@@ -185,15 +185,18 @@ class DigitalTwinService
             'report_no' => $decision?->report_no,
         ])->reject(fn ($value) => $value === null || $value === '');
 
+        $fields = [
+            'asset_type', 'land_transaction', 'allocation_method', 'fall_in',
+            'price', 'deed_no', 'deed_date', 'deed_status', 'deed_class',
+            'boundaries', 'measured_area', 'qrar_no', 'report_no',
+        ];
+
         return [
             'filled' => $filled->count(),
             'total' => self::TRACKED_FIELDS,
             'percent' => (int) round($filled->count() / self::TRACKED_FIELDS * 100),
-            'missing' => collect([
-                'asset_type', 'land_transaction', 'allocation_method', 'fall_in',
-                'price', 'deed_no', 'deed_date', 'deed_status', 'deed_class',
-                'boundaries', 'measured_area', 'qrar_no', 'report_no',
-            ])->reject(fn (string $key) => $filled->has($key))->values(),
+            'fields' => $fields,
+            'missing' => collect($fields)->reject(fn (string $key) => $filled->has($key))->values(),
         ];
     }
 }

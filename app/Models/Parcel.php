@@ -100,6 +100,19 @@ class Parcel extends Model
         );
     }
 
+    // The deed the parcel is held under: the latest one not marked Old. A deed
+    // imported with no status yet still counts — only Old means superseded.
+    /** @return HasOne<Deed, $this> */
+    public function heldDeed(): HasOne
+    {
+        return $this->hasOne(Deed::class)->ofMany(
+            ['id' => 'max'],
+            fn (Builder $query) => $query->where(fn (Builder $q) => $q
+                ->where('deed_status', DeedStatus::Updated->value)
+                ->orWhereNull('deed_status')),
+        );
+    }
+
     /** @return HasOne<ParcelBoundary, $this> */
     public function boundary(): HasOne
     {

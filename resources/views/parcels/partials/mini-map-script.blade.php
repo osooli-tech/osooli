@@ -3,7 +3,7 @@
      Loaded from the CDN rather than Vite, which cannot bundle its WebWorker. --}}
 {{-- Load mapbox-gl from CDN — same approach as dashboard.blade.php to avoid Vite WebWorker bundling issues --}}
 <script>
-function parcelMiniMap(geojson, neighboursJson, parcelNo) {
+function parcelMiniMap(geojson, neighboursJson, parcelNo, opts = {}) {
     return {
         init() {
             if (!geojson || !window.loadMapbox) return;
@@ -17,8 +17,9 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo) {
 
         initMap(mapboxgl, token) {
             mapboxgl.accessToken = token;
-            const isDark = document.documentElement.classList.contains('dark');
-            const streetStyle = isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11';
+            // A page theme toggle updates it; label colours read it on every (re)add.
+            let isDark = document.documentElement.classList.contains('dark');
+            const streetStyle = () => (isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
             const satelliteStyle = 'mapbox://styles/mapbox/satellite-streets-v12';
 
             // Aerial imagery is the default background here — it shows the
@@ -32,9 +33,19 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo) {
             });
 
             map.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true }), 'bottom-left');
-            map.addControl(basemapToggleControl(streetStyle, satelliteStyle, () => addLayers()), 'top-left');
+            const basemapControl = basemapToggleControl(streetStyle, satelliteStyle);
+            map.addControl(basemapControl, 'top-left');
+
+            // The aerial background has no dark variant; only the street one follows the theme.
+            window.addEventListener('sakuki:theme-changed', ({ detail }) => {
+                isDark = detail.dark;
+                if (basemapControl.onSatellite()) return;
+                map.setStyle(streetStyle());
+            });
 
             function addLayers() {
+                // Runs on every style load — the first one and each swap, which wipes layers.
+                if (map.getSource('parcel')) return;
                 const geom = JSON.parse(geojson);
                 const feature = { type: 'Feature', geometry: geom, properties: { parcel_no: parcelNo } };
 
@@ -85,21 +96,37 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo) {
                     ? geom.coordinates.flat(2)
                     : geom.coordinates.flat(1);
                 const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
+                // Portal only (opts.threeD): the parcel stands at its type's
+                // height and colour (opts.massing) among flat neighbours, and
+                // the camera tilts once framed.
+                if (opts.threeD) {
+                    if (map.getSource('neighbours')) {
+                        map.addLayer({ id: 'neighbours-3d', type: 'fill-extrusion', source: 'neighbours',
+                            paint: { 'fill-extrusion-color': '#94a3b8', 'fill-extrusion-height': 0.5, 'fill-extrusion-opacity': 0.45 } });
+                    }
+                    map.addLayer({ id: 'parcel-3d', type: 'fill-extrusion', source: 'parcel',
+                        paint: { 'fill-extrusion-color': opts.massing?.color ?? '#c9a84c', 'fill-extrusion-height': opts.massing?.height ?? 28,
+                                 'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
+                }
+
                 map.fitBounds(
                     [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-                    { padding: 40, maxZoom: 17 }
+                    { padding: 40, maxZoom: opts.threeD ? 16.6 : 17 }
                 );
+                if (opts.threeD) {
+                    map.once('moveend', () => map.easeTo({ pitch: 55, bearing: -22, duration: 1800 }));
+                }
             }
 
-            map.on('load', addLayers);
+            map.on('style.load', addLayers);
         }
     };
 }
 
 // A small Mapbox IControl that switches the mini-map between the aerial
-// (default) background and the plain street style, re-adding the parcel
-// layers every time — setStyle() wipes custom sources on a style swap.
-function basemapToggleControl(streetStyle, satelliteStyle, onStyleReload) {
+// (default) background and the plain street style; the map's 'style.load'
+// handler puts the parcel layers back after each swap.
+function basemapToggleControl(streetStyle, satelliteStyle) {
     let map;
     let onSatellite = true;
     let button;
@@ -115,17 +142,17 @@ function basemapToggleControl(streetStyle, satelliteStyle, onStyleReload) {
             button = document.createElement('button');
             button.type = 'button';
             button.title = title();
-            button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;">${icon()}</span>`;
+            button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;color:#333;">${icon()}</span>`;
             button.addEventListener('click', () => {
                 onSatellite = !onSatellite;
-                map.setStyle(onSatellite ? satelliteStyle : streetStyle);
-                map.once('style.load', onStyleReload);
+                map.setStyle(onSatellite ? satelliteStyle : streetStyle());
                 button.title = title();
-                button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;">${icon()}</span>`;
+                button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;color:#333;">${icon()}</span>`;
             });
             container.appendChild(button);
             return container;
         },
+        onSatellite: () => onSatellite,
         onRemove() {
             button?.parentNode?.parentNode?.removeChild(button.parentNode);
             map = undefined;

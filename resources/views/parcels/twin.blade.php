@@ -205,7 +205,6 @@
                     border border-outline-variant dark:border-white/10 shadow-sm h-[420px] relative"
              @if ($parcelGeojson && config('services.mapbox.token'))
                  x-data="parcelMiniMap(@js($parcelGeojson), @js($neighboursGeojson), @js($parcel->parcel_no))"
-                 x-init="init()"
              @endif>
 
             @if ($parcelGeojson && config('services.mapbox.token'))

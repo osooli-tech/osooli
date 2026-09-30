@@ -33,6 +33,7 @@
                                  stroke: { width: 2 },
                              });
                              this.c.render();
+                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
                     <div x-ref="el"></div>
@@ -62,6 +63,7 @@
                                  stroke: { width: 2 },
                              });
                              this.c.render();
+                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
                     <div x-ref="el"></div>
@@ -108,6 +110,7 @@
                                  grid: { borderColor: 'rgba(0,0,0,0.05)' },
                              });
                              this.c.render();
+                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
                     <div x-ref="el" class="cursor-pointer"></div>
@@ -146,6 +149,7 @@
                                  grid: { borderColor: 'rgba(0,0,0,0.05)' },
                              });
                              this.c.render();
+                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
                     <div x-ref="el" class="cursor-pointer"></div>
@@ -180,6 +184,7 @@
                                  stroke: { width: 2 },
                              });
                              this.c.render();
+                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
                     <div x-ref="el"></div>
@@ -208,6 +213,7 @@
                                  grid: { borderColor: 'rgba(0,0,0,0.05)' },
                              });
                              this.c.render();
+                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
                     <div x-ref="el"></div>

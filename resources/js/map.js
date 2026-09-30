@@ -47,9 +47,9 @@ if (! container) {
         window.loadMapbox().then((mapboxgl) => {
         mapboxgl.accessToken = token;
 
-        // Read once and reused everywhere a colour needs to differ by theme —
-        // basemap style, label colours, label halo.
-        const isDarkMode = document.documentElement.classList.contains('dark');
+        // Reused everywhere a colour needs to differ by theme — basemap
+        // style, label colours, label halo. A page theme toggle updates it.
+        let isDarkMode = document.documentElement.classList.contains('dark');
 
         // Arabic label shaping (the RTL text plugin) is set up by
         // window.loadMapbox, which every map on the site loads through.
@@ -518,13 +518,20 @@ if (! container) {
         function addAllLayers() {
             addBoundaryLayers();
             addParcelLayers();
+            // Lets a page layer its own extras on top (the owner portal's 3D
+            // view) — fired again after a basemap swap, which wipes layers.
+            container.dispatchEvent(new CustomEvent('sakuki:layers-added', { detail: { map } }));
             // Last, so points such as wells draw over the parcels. Only the
             // layers switched on are fetched; a basemap change brings back
             // the ones already on the map.
             customLayers.filter((l) => customOn.has(String(l.id))).forEach(addCustomLayer);
         }
 
-        map.on('load', addAllLayers);
+        let firstLoadDone = false;
+        map.on('load', () => {
+            firstLoadDone = true;
+            addAllLayers();
+        });
 
         // The details panel opens beside the map and narrows the container
         // without the window resizing, which is all Mapbox watches for. The
@@ -725,16 +732,16 @@ if (! container) {
 
         const toggleBasemapBtn = document.getElementById('toggle-basemap');
         const basemapLabel = document.getElementById('basemap-label');
-        const streetStyle = isDarkMode
+        const streetStyle = () => (isDarkMode
             ? 'mapbox://styles/mapbox/dark-v11'
-            : 'mapbox://styles/mapbox/light-v11';
+            : 'mapbox://styles/mapbox/light-v11');
         const satelliteStyle = 'mapbox://styles/mapbox/satellite-streets-v12';
         let onSatellite = false;
 
         if (toggleBasemapBtn && basemapLabel) {
             toggleBasemapBtn.addEventListener('click', () => {
                 onSatellite = ! onSatellite;
-                map.setStyle(onSatellite ? satelliteStyle : streetStyle);
+                map.setStyle(onSatellite ? satelliteStyle : streetStyle());
                 map.once('style.load', () => {
                     addAllLayers();
                     restoreLayerState();
@@ -744,6 +751,20 @@ if (! container) {
                     : basemapLabel.dataset.satelliteLabel ?? 'قمر صناعي';
             });
         }
+
+        // Pages that switch theme in place (the owner portal) announce it, so
+        // the street basemap and label colours follow without a reload.
+        window.addEventListener('sakuki:theme-changed', ({ detail }) => {
+            isDarkMode = detail.dark;
+            if (onSatellite) return;
+            map.setStyle(streetStyle());
+            // Before the first load the pending 'load' handler adds the layers.
+            if (! firstLoadDone) return;
+            map.once('style.load', () => {
+                addAllLayers();
+                restoreLayerState();
+            });
+        });
 
         // ── Search box ──────────────────────────────────────────
         const searchInput = document.getElementById('map-search');

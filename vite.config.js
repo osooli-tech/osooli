@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/auth.js',
                 'resources/js/map.js',
+                'resources/js/portal-map-3d.js',
                 'resources/js/landing.js',
             ],
             refresh: true,

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Owner;
 use App\Models\User;
 
 return [
@@ -44,6 +45,14 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // The owner web portal's own session — entirely separate from the
+        // internal team's `web` guard and the mobile app's `sanctum` tokens,
+        // so an owner's session can never be confused with either.
+        'owner' => [
+            'driver' => 'session',
+            'provider' => 'owners',
+        ],
     ],
 
     /*
@@ -73,6 +82,11 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        'owners' => [
+            'driver' => 'eloquent',
+            'model' => Owner::class,
+        ],
     ],
 
     /*
@@ -138,6 +152,7 @@ return [
     'mobile_otp' => [
         'ttl_minutes' => 5,
         'max_attempts_per_hour' => 5,
+        'code_length' => 4,
         'test_code' => env('MOBILE_OTP_TEST_CODE', '6666'),
     ],
 

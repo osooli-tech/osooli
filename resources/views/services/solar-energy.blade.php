@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends($layout ?? 'layouts.app')
 
 @section('title', __('services.solar_title'))
 @section('page-title', __('services.solar_title'))

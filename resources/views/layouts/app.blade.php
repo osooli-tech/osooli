@@ -10,6 +10,8 @@
         toggleTheme () {
             this.isDark = ! this.isDark;
             localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
+            // After the class lands, so the map redraws in the new theme.
+            this.$nextTick(() => window.dispatchEvent(new CustomEvent('sakuki:theme-changed', { detail: { dark: this.isDark } })));
         },
         sidebarOpen: window.matchMedia('(min-width: 1024px)').matches
             ? localStorage.getItem('sidebarOpen') !== 'false'
