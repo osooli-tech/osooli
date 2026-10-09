@@ -62,15 +62,24 @@ class CreatedAtFilterTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['is_active' => true]));
 
-        // The list's own order is by name, which puts March first.
-        Livewire::test(OwnerIndex::class)
-            ->assertSeeInOrder(['مالك مارس', 'مالك يناير'])
-            ->call('sortByCreated')
-            ->assertSet('createdSort', 'desc')
-            ->assertSeeInOrder(['مالك مارس', 'مالك يناير'])
-            ->call('sortByCreated')
-            ->assertSet('createdSort', 'asc')
-            ->assertSeeInOrder(['مالك يناير', 'مالك مارس']);
+        // The list's own order is by name, which puts March first. Order is read
+        // from the rendered HTML: after a call, assertSeeInOrder falls through to
+        // the raw JSON response, where Arabic is \u-escaped and never matches.
+        $list = Livewire::test(OwnerIndex::class);
+        $this->assertListOrder($list->html(), 'مالك مارس', 'مالك يناير');
+
+        $list->call('sortByCreated')->assertSet('createdSort', 'desc');
+        $this->assertListOrder($list->html(), 'مالك مارس', 'مالك يناير');
+
+        $list->call('sortByCreated')->assertSet('createdSort', 'asc');
+        $this->assertListOrder($list->html(), 'مالك يناير', 'مالك مارس');
+    }
+
+    private function assertListOrder(string $html, string $first, string $second): void
+    {
+        $this->assertNotFalse($a = mb_strpos($html, $first), "{$first} is listed");
+        $this->assertNotFalse($b = mb_strpos($html, $second), "{$second} is listed");
+        $this->assertLessThan($b, $a, "{$first} comes before {$second}");
     }
 
     public function test_reference_tabs_filter_by_date_added_too(): void

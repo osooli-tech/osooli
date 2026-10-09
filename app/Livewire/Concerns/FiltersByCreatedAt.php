@@ -85,7 +85,9 @@ trait FiltersByCreatedAt
     /** The value arrives from the client, so anything not a real date is ignored. */
     private function createdAtDate(string $value): ?Carbon
     {
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+        // createFromFormat rolls an impossible day over (02-30 → 03-02), so the
+        // calendar check has to happen first.
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m) !== 1 || ! checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
             return null;
         }
 

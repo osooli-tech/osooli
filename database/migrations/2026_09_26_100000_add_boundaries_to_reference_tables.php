@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Support\Database\Dialect;
 use App\Support\Database\PortableSchema;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -36,7 +37,7 @@ return new class extends Migration
     public function down(): void
     {
         foreach (self::TABLES as $table) {
-            if (\App\Support\Database\Dialect::isPostgres()) {
+            if (Dialect::isPostgres()) {
                 PortableSchema::dropIndex($table, "idx_{$table}_geom");
             }
 

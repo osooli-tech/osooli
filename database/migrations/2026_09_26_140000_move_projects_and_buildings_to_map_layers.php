@@ -60,9 +60,10 @@ return new class extends Migration
                     $properties = json_encode([
                         'Name' => $row->name,
                         'Code' => $row->code,
-                        'Shape_Area' => $row->area,
-                        'Shape_Length' => $row->length,
-                    ], JSON_UNESCAPED_UNICODE);
+                        // PostgreSQL returns double columns as strings; the fields are Real.
+                        'Shape_Area' => $row->area === null ? null : (float) $row->area,
+                        'Shape_Length' => $row->length === null ? null : (float) $row->length,
+                    ], JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION);
 
                     DB::insert(
                         "INSERT INTO map_layer_features (map_layer_id, properties, geom, created_at, updated_at)
