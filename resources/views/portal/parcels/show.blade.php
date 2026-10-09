@@ -510,9 +510,7 @@
         </div>
 
         @php
-            $isGalleryImage = fn ($photo) => in_array($photo->photo_type, [
-                \App\Enums\PhotoType::Aerial, \App\Enums\PhotoType::Ground,
-            ], true) && blank($photo->storage_disk);
+            $isGalleryImage = fn ($photo) => $photo->isGalleryImage();
             $images = $parcel->photos->filter($isGalleryImage);
             $documents = $parcel->photos->reject($isGalleryImage);
         @endphp
@@ -533,7 +531,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ($images as $photo)
                         <div class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ $photo->photo_url }}"
+                            <img src="{{ route('portal.documents.preview', $photo) }}"
                                  alt="{{ __('parcels.photos_section') }}"
                                  class="w-full h-full object-cover" />
                         </div>

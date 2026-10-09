@@ -50,6 +50,7 @@ class UserIndex extends Component
 
     public function mount(): void
     {
+        $this->mustBeAbleTo('users.view');
         $this->availableRoles = Role::query()->orderBy('name')->pluck('name')->toArray();
     }
 
@@ -71,6 +72,7 @@ class UserIndex extends Component
 
     public function openCreate(): void
     {
+        $this->mustBeAbleTo('users.create');
         $this->resetForm();
         $this->editingId = null;
         $this->showModal = true;
@@ -78,6 +80,7 @@ class UserIndex extends Component
 
     public function openEdit(int $userId): void
     {
+        $this->mustBeAbleTo('users.edit');
         $user = User::with('roles')->findOrFail($userId);
         $this->editingId = $userId;
         $this->formName = $user->name;
@@ -90,6 +93,9 @@ class UserIndex extends Component
 
     public function save(): void
     {
+        // The buttons are hidden by permission, but a Livewire action can be
+        // called directly — so each one is checked here as well.
+        $this->mustBeAbleTo($this->editingId === null ? 'users.create' : 'users.edit');
         $rules = [
             'formName' => ['required', 'string', 'max:255'],
             'formEmail' => ['required', 'email', 'max:255',
@@ -111,6 +117,8 @@ class UserIndex extends Component
             'formPassword' => __('users.password'),
             'formRole' => __('users.role'),
         ]);
+
+        $this->mustBeAllowedToGrant($this->formRole);
 
         if ($this->editingId === null) {
             $user = User::create([
@@ -160,6 +168,7 @@ class UserIndex extends Component
 
     public function toggleActive(int $userId): void
     {
+        $this->mustBeAbleTo('users.edit');
         $user = User::findOrFail($userId);
         $user->update(['is_active' => ! $user->is_active]);
 
@@ -181,6 +190,7 @@ class UserIndex extends Component
 
     public function deleteUser(): void
     {
+        $this->mustBeAbleTo('users.delete');
         if ($this->deletingId === null) {
             return;
         }
@@ -245,6 +255,24 @@ class UserIndex extends Component
             ->latest()
             ->tap(fn ($q) => $this->applyCreatedAt($q, 'users.created_at'))
             ->paginate(20);
+    }
+
+    private function mustBeAbleTo(string $permission): void
+    {
+        abort_unless(Auth::user()?->can($permission) === true, 403);
+    }
+
+    /**
+     * Nobody hands out more than they hold: a role may only be given by
+     * someone who already has every permission in it. Otherwise editing
+     * users would be a way to make oneself super_admin.
+     */
+    private function mustBeAllowedToGrant(string $roleName): void
+    {
+        $actor = Auth::user();
+        $needed = Role::findByName($roleName)->permissions->pluck('name');
+
+        abort_unless($actor !== null && $needed->every(fn (string $p): bool => $actor->can($p)), 403);
     }
 
     public function render(): View

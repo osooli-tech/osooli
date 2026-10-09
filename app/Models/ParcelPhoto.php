@@ -138,6 +138,12 @@ class ParcelPhoto extends Model
      *
      * @return array{disk: string, path: string}
      */
+    /** A site photo (aerial or ground) shown as a picture; everything else is a filed document. */
+    public function isGalleryImage(): bool
+    {
+        return in_array($this->photo_type, [PhotoType::Aerial, PhotoType::Ground], true);
+    }
+
     public function storageLocation(): array
     {
         if ($this->storage_disk !== null && $this->storage_disk !== '') {

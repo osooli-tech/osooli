@@ -465,14 +465,9 @@
             // scans — an <img> tag can render the former but not the latter,
             // so they need their own section rather than one shared gallery.
             //
-            // Only legacy photos go in the gallery: their photo_url is a public
-            // URL. An uploaded file sits on the private disk under a relative
-            // path no <img> can load, and serving it through the download route
-            // would write an audit entry on every page view — so an uploaded
-            // photo is listed with the files, behind the download permission.
-            $isGalleryImage = fn ($photo) => in_array($photo->photo_type, [
-                \App\Enums\PhotoType::Aerial, \App\Enums\PhotoType::Ground,
-            ], true) && blank($photo->storage_disk);
+            // Site photos go in the gallery, loaded through the preview route:
+            // files are private, so no <img> can point at them directly.
+            $isGalleryImage = fn ($photo) => $photo->isGalleryImage();
             $images = $parcel->photos->filter($isGalleryImage);
             $documents = $parcel->photos->reject($isGalleryImage);
         @endphp
@@ -493,7 +488,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ($images as $photo)
                         <div class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ $photo->photo_url }}"
+                            <img src="{{ route('documents.preview', $photo) }}"
                                  alt="{{ __('parcels.photos_section') }}"
                                  class="w-full h-full object-cover" />
                         </div>

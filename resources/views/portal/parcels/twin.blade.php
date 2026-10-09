@@ -432,7 +432,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ($docs['images'] as $image)
                         <div class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ $image->photo_url }}" alt="{{ $image->photo_type ? __('documents.photo_types.'.$image->photo_type->value) : '' }}"
+                            <img src="{{ route('portal.documents.preview', $image) }}" alt="{{ $image->photo_type ? __('documents.photo_types.'.$image->photo_type->value) : '' }}"
                                  loading="lazy" class="w-full h-full object-cover" />
                         </div>
                     @endforeach

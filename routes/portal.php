@@ -29,10 +29,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(function (): void {
     Route::middleware('guest:owner')->group(function (): void {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-        Route::post('/login', [AuthController::class, 'requestOtp'])->name('login.submit');
+        Route::post('/login', [AuthController::class, 'requestOtp'])->middleware('throttle:10,1')->name('login.submit');
         Route::get('/otp', [AuthController::class, 'showOtp'])->name('otp');
-        Route::post('/otp', [AuthController::class, 'verifyOtp'])->name('otp.verify');
-        Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->name('otp.resend');
+        Route::post('/otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:10,1')->name('otp.verify');
+        Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->middleware('throttle:10,1')->name('otp.resend');
     });
 
     Route::middleware('auth:owner')->group(function (): void {
@@ -65,6 +65,7 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
 
         Route::post('/parcels/{parcel}/modification-requests', [ModificationRequestController::class, 'store'])->name('parcels.modification-requests.store');
         Route::get('/parcels/{parcel}/documents', [DocumentController::class, 'index'])->name('parcels.documents');
+        Route::get('/documents/{photo}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::get('/documents/{photo}/download', [DocumentController::class, 'download'])->name('documents.download');
     });
 });

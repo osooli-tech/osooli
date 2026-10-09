@@ -32,6 +32,7 @@ Route::get('/', fn () => view('landing.index'))->name('landing');
 
 // Demo request form, submitted from the landing page CTA modal.
 Route::post('/presentation-requests', [PresentationRequestController::class, 'store'])
+    ->middleware('throttle:5,1')
     ->name('presentation-requests.store');
 
 // Legal pages (public — also linked from the mobile app). Content is
@@ -48,8 +49,8 @@ Route::middleware('set.locale')->group(function () {
 // OTP flow (after successful email + password)
 Route::middleware('set.locale')->group(function () {
     Route::get('/otp', [OtpController::class, 'show'])->name('otp.show');
-    Route::post('/otp/verify', [OtpController::class, 'verify'])->name('otp.verify');
-    Route::post('/otp/resend', [OtpController::class, 'resend'])->name('otp.resend');
+    Route::post('/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:10,1')->name('otp.verify');
+    Route::post('/otp/resend', [OtpController::class, 'resend'])->middleware('throttle:10,1')->name('otp.resend');
 });
 
 // Authenticated routes
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
     Route::get('/documents/split', fn () => view('documents.split'))
         ->middleware('can:documents.split')
         ->name('documents.split');
+    Route::get('/documents/{photo}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
     Route::get('/documents/{photo}/download', [DocumentController::class, 'download'])
         ->middleware('can:documents.download')
         ->name('documents.download');

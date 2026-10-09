@@ -52,7 +52,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Minutes. A mobile token stops working 90 days after it was issued, so a
+    // lost or stolen phone does not stay signed in for ever.
+    'expiration' => (int) env('SANCTUM_TOKEN_EXPIRATION', 60 * 24 * 90),
 
     /*
     |--------------------------------------------------------------------------

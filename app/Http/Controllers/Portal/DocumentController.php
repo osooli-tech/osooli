@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Portal;
 
-use App\Enums\PhotoType;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Owner;
@@ -26,6 +25,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class DocumentController extends Controller
 {
+    /** A site photo shown inline; 404 unless it sits on one of the owner's parcels. Not audited — it is a page view. */
+    public function preview(ParcelPhoto $photo): StreamedResponse
+    {
+        abort_unless(
+            $photo->isGalleryImage() && (new OwnerParcelQuery($this->owner()))->base()->whereKey($photo->parcel_id)->exists(),
+            404
+        );
+
+        $location = $photo->storageLocation();
+        $disk = Storage::disk($location['disk']);
+        abort_unless($disk->exists($location['path']), 404);
+
+        return $disk->response($location['path'], null, ['Cache-Control' => 'private, max-age=3600']);
+    }
+
     public function download(Request $request, ParcelPhoto $photo): StreamedResponse
     {
         $owner = $this->owner();
@@ -67,8 +81,7 @@ class DocumentController extends Controller
         /** @var Parcel $found */
         $found = (new OwnerParcelQuery($this->owner()))->base()->with('photos')->findOrFail($parcel);
 
-        $isGalleryImage = fn (ParcelPhoto $photo): bool => in_array($photo->photo_type, [PhotoType::Aerial, PhotoType::Ground], true)
-            && blank($photo->storage_disk);
+        $isGalleryImage = fn (ParcelPhoto $photo): bool => $photo->isGalleryImage();
 
         return response()->json([
             'documents' => $found->photos->reject($isGalleryImage)->values()->map(fn (ParcelPhoto $photo): array => [
@@ -78,7 +91,7 @@ class DocumentController extends Controller
             ]),
             'images' => $found->photos->filter($isGalleryImage)->values()->map(fn (ParcelPhoto $photo): array => [
                 'id' => $photo->id,
-                'url' => $photo->photo_url,
+                'url' => route('portal.documents.preview', $photo),
             ]),
         ]);
     }

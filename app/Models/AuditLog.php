@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 
 class AuditLog extends Model
 {
@@ -13,6 +14,13 @@ class AuditLog extends Model
 
     // Immutable — rows are never updated after insert
     public $timestamps = false;
+
+    /** The log is a record of what happened: rows are written once, never changed or removed. */
+    protected static function booted(): void
+    {
+        static::updating(fn () => throw new LogicException('Audit log entries are immutable.'));
+        static::deleting(fn () => throw new LogicException('Audit log entries are immutable.'));
+    }
 
     protected $fillable = [
         'user_id',

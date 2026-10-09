@@ -360,7 +360,7 @@
             @if ($docs['survey']->isNotEmpty())
                 <div class="mt-4 pt-3 border-t border-outline-variant dark:border-white/10">
                     @foreach ($docs['survey'] as $file)
-                        <a href="{{ $file->photo_url }}" target="_blank" rel="noopener"
+                        <a href="{{ route('documents.download', $file) }}" target="_blank" rel="noopener"
                            class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container dark:hover:bg-white/5
                                   border border-outline-variant dark:border-white/10 mb-2 last:mb-0 transition-colors">
                             <span class="material-symbols-outlined text-[20px] text-error shrink-0">picture_as_pdf</span>
@@ -396,7 +396,7 @@
                         && $file->deed_id !== null
                         && $file->deed_id !== $parcel->currentDeed?->id;
                 @endphp
-                <a href="{{ $file->photo_url }}" target="_blank" rel="noopener"
+                <a href="{{ route('documents.download', $file) }}" target="_blank" rel="noopener"
                    class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-surface-container dark:hover:bg-white/5
                           border border-outline-variant dark:border-white/10 mb-2 last:mb-0 transition-colors">
                     <span class="material-symbols-outlined text-[20px] text-error shrink-0">picture_as_pdf</span>
@@ -428,9 +428,9 @@
             @if ($docs['images']->isNotEmpty())
                 <div class="grid grid-cols-2 gap-2">
                     @foreach ($docs['images'] as $image)
-                        <a href="{{ $image->photo_url }}" target="_blank" rel="noopener"
+                        <a href="{{ route('documents.preview', $image) }}" target="_blank" rel="noopener"
                            class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ $image->photo_url }}" alt="{{ $image->photo_type ? __('documents.photo_types.'.$image->photo_type->value) : '' }}"
+                            <img src="{{ route('documents.preview', $image) }}" alt="{{ $image->photo_type ? __('documents.photo_types.'.$image->photo_type->value) : '' }}"
                                  loading="lazy" class="w-full h-full object-cover" />
                         </a>
                     @endforeach

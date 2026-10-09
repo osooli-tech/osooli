@@ -24,6 +24,24 @@ class DocumentController extends Controller
      * anyone. Reading the bytes here instead means every one of those checks
      * actually applies to the file, not merely to the click that preceded it.
      */
+    /**
+     * A site photo shown inline on a parcel page. Scoped like download(), but
+     * not audited: it is part of viewing the page, not taking a document away.
+     */
+    public function preview(Request $request, ParcelPhoto $photo): StreamedResponse
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+
+        abort_unless($photo->isGalleryImage() && OwnerScope::canSeeParcel($user, $photo->parcel_id), 404);
+
+        $location = $photo->storageLocation();
+        $disk = Storage::disk($location['disk']);
+        abort_unless($disk->exists($location['path']), 404);
+
+        return $disk->response($location['path'], null, ['Cache-Control' => 'private, max-age=3600']);
+    }
+
     public function download(Request $request, ParcelPhoto $photo): StreamedResponse
     {
         /** @var User|null $user */

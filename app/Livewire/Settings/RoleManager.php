@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Settings;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
@@ -56,6 +57,13 @@ class RoleManager extends Component
 
     // Delete (confirmed via SweetAlert on the frontend — no server-side modal state needed)
     public ?int $deletingRoleId = null;
+
+    public function boot(): void
+    {
+        // Runs on every request to the component, so no action — create,
+        // edit, delete — is reachable without the permission.
+        abort_unless(Auth::user()?->can('roles.manage') === true, 403);
+    }
 
     public function openCreate(): void
     {

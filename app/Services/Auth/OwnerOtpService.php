@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Log;
  */
 class OwnerOtpService
 {
+    /** Wrong codes allowed before the issued code is thrown away. */
+    private const MAX_VERIFY_ATTEMPTS = 5;
+
     /**
      * Finds an owner by phone number, ignoring formatting differences.
      *
@@ -51,6 +54,7 @@ class OwnerOtpService
         $code = $testCode ?? str_pad((string) random_int(0, 10 ** $length - 1), $length, '0', STR_PAD_LEFT);
 
         Cache::put($this->cacheKey($owner), $code, now()->addMinutes($ttlMinutes));
+        Cache::put($this->attemptsKey($owner), 0, now()->addMinutes($ttlMinutes));
 
         if ($testCode === null) {
             // TODO: send via SMS provider once credentials are available.
@@ -71,11 +75,24 @@ class OwnerOtpService
     {
         $cached = Cache::get($this->cacheKey($owner));
 
-        if ($cached === null || ! hash_equals((string) $cached, $code)) {
+        if ($cached === null) {
+            return false;
+        }
+
+        if (! hash_equals((string) $cached, $code)) {
+            // A short code is only safe while guesses are counted: after a few
+            // wrong ones the code is burnt and a new one has to be requested.
+            if (Cache::increment($this->attemptsKey($owner)) >= self::MAX_VERIFY_ATTEMPTS) {
+                Cache::forget($this->cacheKey($owner));
+                Cache::forget($this->attemptsKey($owner));
+                Log::warning('Owner OTP burnt after repeated wrong codes', ['owner_id' => $owner->id]);
+            }
+
             return false;
         }
 
         Cache::forget($this->cacheKey($owner));
+        Cache::forget($this->attemptsKey($owner));
 
         return true;
     }
@@ -89,6 +106,11 @@ class OwnerOtpService
     private function cacheKey(Owner $owner): string
     {
         return "owner_otp_{$owner->id}";
+    }
+
+    private function attemptsKey(Owner $owner): string
+    {
+        return "owner_otp_attempts_{$owner->id}";
     }
 
     /**

@@ -22,11 +22,16 @@ class AuthController extends ApiController
         $phone = (string) $request->validated('phone');
         $throttleKey = $this->throttleKey($phone, (string) $request->ip());
 
-        if (RateLimiter::tooManyAttempts($throttleKey, $this->maxAttempts())) {
+        // The second key ignores the IP: rotating addresses must not buy more codes to guess at.
+        $phoneKey = 'otp-phone:'.$this->otp->normalisePhone($phone);
+
+        if (RateLimiter::tooManyAttempts($throttleKey, $this->maxAttempts())
+            || RateLimiter::tooManyAttempts($phoneKey, $this->maxAttempts() * 2)) {
             return $this->respondError(__('api.too_many_attempts'), Response::HTTP_TOO_MANY_REQUESTS);
         }
 
         RateLimiter::hit($throttleKey, 3600);
+        RateLimiter::hit($phoneKey, 3600);
 
         $owner = $this->otp->findOwnerByPhone($phone);
 

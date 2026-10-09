@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\AuditLog;
 use App\Models\ParcelPhoto;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -27,12 +26,11 @@ class DocumentController extends ApiController
      */
     public function download(Request $request, int $document): StreamedResponse
     {
-        $photo = ParcelPhoto::whereKey($document)
-            ->whereHas(
-                'parcel.deeds.owners',
-                fn (Builder $query) => $query->whereKey($this->owner()->getKey())
-            )
-            ->firstOrFail();
+        $photo = ParcelPhoto::whereKey($document)->firstOrFail();
+
+        // Through the parcels the owner holds now — not any deed they were ever
+        // on, which would keep a former owner's access after a parcel changes hands.
+        abort_unless($this->owner()->parcels()->whereKey($photo->parcel_id)->exists(), 404);
 
         $location = $photo->storageLocation();
         $disk = Storage::disk($location['disk']);
@@ -50,6 +48,7 @@ class DocumentController extends ApiController
         AuditLog::create([
             // Mobile downloads are made by an owner, who is not a dashboard user.
             'user_id' => null,
+            'owner_id' => $this->owner()->getKey(),
             'action' => 'download',
             'target_type' => 'document',
             'target_id' => $photo->id,

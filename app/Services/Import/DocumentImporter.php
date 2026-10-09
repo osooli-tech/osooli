@@ -198,7 +198,7 @@ final class DocumentImporter implements Importer
                 );
             }
 
-            $disk = Storage::disk('public');
+            $disk = Storage::disk(ParcelPhoto::PRIVATE_DISK);
             $created = 0;
             $updated = 0;
 
@@ -206,7 +206,7 @@ final class DocumentImporter implements Importer
                 $stored = $rule->subdirectory().'/'.$entry['filename'];
                 // The extraction directory is removed once this method returns
                 // (see the finally block below), so the PDF bytes must be
-                // copied onto the public disk before that happens — read the
+                // copied onto the private disk before that happens — read the
                 // file out of the extracted tree now, not lazily.
                 $disk->put($stored, (string) file_get_contents($entry['path']));
 
@@ -236,7 +236,7 @@ final class DocumentImporter implements Importer
                             'deed_id' => $link['deed_id'],
                             'photo_type' => $rule->photoType()->value,
                         ],
-                        ['photo_url' => '/storage/'.$stored]
+                        ['photo_url' => $stored, 'storage_disk' => ParcelPhoto::PRIVATE_DISK]
                     );
 
                     $photo->wasRecentlyCreated ? $created++ : $updated++;

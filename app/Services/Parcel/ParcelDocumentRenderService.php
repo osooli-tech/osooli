@@ -6,6 +6,7 @@ namespace App\Services\Parcel;
 
 use App\Models\ParcelPhoto;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Imagick;
 use ImagickException;
 
@@ -38,7 +39,7 @@ class ParcelDocumentRenderService
     /** Returns a data: URI for an <img> src, or null if it could not be rendered. */
     public function dataUri(ParcelPhoto $document): ?string
     {
-        $path = $this->resolvePath($document->photo_url);
+        $path = $this->resolvePath($document);
 
         if ($path === null) {
             return null;
@@ -105,11 +106,11 @@ class ParcelDocumentRenderService
         return "data:image/{$mime};base64,".base64_encode($contents);
     }
 
-    /** photo_url is a public-disk URL such as /storage/documents/deeds/x.pdf. */
-    private function resolvePath(string $photoUrl): ?string
+    /** The file's path on whichever local disk holds it (private, or public for rows not yet moved). */
+    private function resolvePath(ParcelPhoto $document): ?string
     {
-        $relative = ltrim(str_replace('/storage/', '', $photoUrl), '/');
-        $path = storage_path('app/public/'.$relative);
+        $location = $document->storageLocation();
+        $path = Storage::disk($location['disk'])->path($location['path']);
 
         return is_file($path) ? $path : null;
     }

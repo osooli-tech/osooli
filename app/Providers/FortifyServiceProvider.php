@@ -40,6 +40,7 @@ class FortifyServiceProvider extends ServiceProvider
 
             $otp = $user->fixedTestOtp() ?? str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             Cache::put("otp_{$user->id}", $otp, now()->addMinutes(config('auth.otp.ttl_minutes')));
+            Cache::forget("otp_attempts_{$user->id}");
             $request->session()->put('otp_user_id', $user->id);
 
             app()->setLocale(session('locale', 'ar'));

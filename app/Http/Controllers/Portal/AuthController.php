@@ -36,11 +36,16 @@ class AuthController extends Controller
         $phone = (string) $request->string('phone');
         $throttleKey = $this->throttleKey($phone, $request->ip() ?? '');
 
-        if (RateLimiter::tooManyAttempts($throttleKey, $this->maxAttempts())) {
+        // The second key ignores the IP: rotating addresses must not buy more codes to guess at.
+        $phoneKey = 'otp-phone:'.$this->otp->normalisePhone($phone);
+
+        if (RateLimiter::tooManyAttempts($throttleKey, $this->maxAttempts())
+            || RateLimiter::tooManyAttempts($phoneKey, $this->maxAttempts() * 2)) {
             return back()->withErrors(['phone' => __('portal.too_many_attempts')]);
         }
 
         RateLimiter::hit($throttleKey, 3600);
+        RateLimiter::hit($phoneKey, 3600);
 
         $owner = $this->otp->findOwnerByPhone($phone);
 
