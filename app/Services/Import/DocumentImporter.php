@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Import;
 
 use App\Models\ParcelPhoto;
+use App\Support\DocumentVault;
 use FilesystemIterator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -208,7 +209,7 @@ final class DocumentImporter implements Importer
                 // (see the finally block below), so the PDF bytes must be
                 // copied onto the private disk before that happens — read the
                 // file out of the extracted tree now, not lazily.
-                $disk->put($stored, (string) file_get_contents($entry['path']));
+                $disk->put($stored, DocumentVault::seal((string) file_get_contents($entry['path'])));
 
                 foreach ($entry['links'] as $link) {
                     // parcel_photos.photo_type is a native Postgres enum

@@ -8,6 +8,7 @@ use App\Livewire\Forms\OwnershipForm;
 use App\Models\DeedOwner;
 use App\Models\Owner;
 use App\Support\Concerns\WritesSafely;
+use App\Support\NationalId;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -205,9 +206,9 @@ class OwnershipManager extends Component
 
             // The same three columns the owners list searches, so an owner is
             // found the same way on both screens.
-            $owners->where(function (Builder $inner) use ($like): void {
+            $owners->where(function (Builder $inner) use ($like, $term): void {
                 $inner->whereLike('name', $like)
-                    ->orWhereLike('national_id', $like)
+                    ->orWhere('national_id_hash', NationalId::lookup($term))
                     ->orWhereLike('phone', $like);
             });
         }

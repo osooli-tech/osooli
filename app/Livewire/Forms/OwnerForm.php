@@ -6,7 +6,7 @@ namespace App\Livewire\Forms;
 
 use App\Models\Owner;
 use App\Support\Concerns\WritesSafely;
-use Illuminate\Validation\Rule;
+use Closure;
 use Livewire\Form;
 
 /**
@@ -46,11 +46,15 @@ class OwnerForm extends Form
         return [
             'name' => ['required', 'string', 'max:255'],
 
-            // Unique only among rows that have one; the column is nullable and
-            // a partial unique index in Postgres enforces the same shape.
+            // Unique among rows that have one. The number is encrypted, so it
+            // is compared through its fingerprint (the unique index does the same).
             'nationalId' => [
                 'nullable', 'string', 'max:50',
-                Rule::unique('owners', 'national_id')->ignore($this->ownerId),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (Owner::nationalIdTaken((string) $value, $this->ownerId)) {
+                        $fail(__('validation.unique', ['attribute' => __('owners.national_id')]));
+                    }
+                },
             ],
 
             'phone' => ['nullable', 'string', 'regex:/^(?:\+?966|0)?5\d{8}$/'],

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\NationalId;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,9 @@ class ArchivedValue extends Model
         self::assertArchivable($table, $field);
 
         $current = DB::table($table)->where('id', $id)->value($field);
+        if (self::isNationalId($table, $field)) {
+            $current = NationalId::decrypt($current === null ? null : (string) $current);
+        }
 
         if ($current === null || (string) $current !== $value) {
             return false;
@@ -79,6 +83,28 @@ class ArchivedValue extends Model
         self::write($table, $id, $field, $new);
 
         return true;
+    }
+
+    /** An archived national id is the same secret as a current one, so it is kept encrypted too. */
+    public function getValueAttribute(?string $value): ?string
+    {
+        return $this->holdsNationalId() ? NationalId::decrypt($value) : $value;
+    }
+
+    public function setValueAttribute(?string $value): void
+    {
+        $this->attributes['value'] = $this->holdsNationalId() ? NationalId::encrypt($value) : $value;
+    }
+
+    /** record_table and field are filled before value, in the order replace() gives them. */
+    private function holdsNationalId(): bool
+    {
+        return self::isNationalId((string) ($this->attributes['record_table'] ?? ''), (string) ($this->attributes['field'] ?? ''));
+    }
+
+    private static function isNationalId(string $table, string $field): bool
+    {
+        return $table === 'owners' && $field === 'national_id';
     }
 
     /** Put the value back on its record and drop it from the archive. */

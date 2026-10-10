@@ -7,6 +7,7 @@ namespace App\Livewire\Forms;
 use App\Models\ParcelPhoto;
 use App\Support\Concerns\WritesSafely;
 use App\Support\DatabaseEnum;
+use App\Support\DocumentVault;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -144,6 +145,7 @@ class DocumentUploadForm extends Form
         if (! is_string($path) || $path === '') {
             throw new RuntimeException(__('documents.store_failed'));
         }
+        DocumentVault::sealOnDisk(ParcelPhoto::PRIVATE_DISK, $path);
 
         return $this->writeSafely(
             'document.upload',

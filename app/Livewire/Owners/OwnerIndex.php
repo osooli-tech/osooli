@@ -7,6 +7,7 @@ namespace App\Livewire\Owners;
 use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Owner;
 use App\Models\User;
+use App\Support\NationalId;
 use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -67,7 +68,7 @@ class OwnerIndex extends Component
                 $term = '%'.$this->search.'%';
                 $q->where(function ($inner) use ($term): void {
                     $inner->whereLike('name', $term)
-                        ->orWhereLike('national_id', $term)
+                        ->orWhere('national_id_hash', NationalId::lookup($this->search))
                         ->orWhereLike('phone', $term);
                 });
             })

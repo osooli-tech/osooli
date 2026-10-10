@@ -6,6 +6,7 @@ namespace App\Support\Import;
 
 use App\Models\Owner;
 use App\Models\User;
+use App\Support\NationalId;
 use App\Support\ParcelGeometry;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -364,10 +365,26 @@ final class DeedImportApplier
     /** @param  array<string, mixed>  $values */
     private function insert(string $table, array $values): int
     {
-        $id = (int) DB::table($table)->insertGetId($values + ['created_at' => $this->now, 'updated_at' => $this->now]);
+        $id = (int) DB::table($table)->insertGetId($this->forStorage($table, $values) + ['created_at' => $this->now, 'updated_at' => $this->now]);
         $this->undo['created'][$table][] = $id;
 
         return $id;
+    }
+
+    /**
+     * This class writes rows directly, so an owner's national id is encrypted
+     * here the way the Owner model would do it.
+     *
+     * @param  array<string, mixed>  $values
+     * @return array<string, mixed>
+     */
+    private function forStorage(string $table, array $values): array
+    {
+        if ($table !== 'owners' || ! array_key_exists('national_id', $values)) {
+            return $values;
+        }
+
+        return NationalId::columns($values['national_id'] === null ? null : (string) $values['national_id']) + $values;
     }
 
     /** @param  array<string, array{0: mixed, 1: mixed}>  $changes */
@@ -383,6 +400,11 @@ final class DeedImportApplier
         }
 
         $old['updated_at'] = $current['updated_at'] ?? null;
+        $new = $this->forStorage($table, $new);
+        // Undo restores the stored form as it was, fingerprint included.
+        foreach (array_diff_key($new, $old) as $field => $value) {
+            $old[$field] = $current[$field] ?? null;
+        }
         DB::table($table)->where('id', $id)->update($new + ['updated_at' => $this->now]);
         $this->undo['updated'][] = ['table' => $table, 'id' => $id, 'old' => $old];
     }

@@ -60,7 +60,9 @@ final class ArchivedValues
         $ids = static fn (string $table): array => $rows->where('record_table', $table)->pluck('record_id')->unique()->values()->all();
 
         $records = [
-            'owners' => DB::table('owners')->whereIn('id', $ids('owners'))->get(['id', 'name', 'national_id', 'phone'])->keyBy('id'),
+            // Read raw, so the encrypted number is opened here for display.
+            'owners' => DB::table('owners')->whereIn('id', $ids('owners'))->get(['id', 'name', 'national_id', 'phone'])
+                ->each(fn (object $owner) => $owner->national_id = NationalId::decrypt($owner->national_id))->keyBy('id'),
             'deeds' => DB::table('deeds as d')->leftJoin('parcels as p', 'p.id', '=', 'd.parcel_id')
                 ->whereIn('d.id', $ids('deeds'))->get(['d.id', 'd.deed_no', 'd.deed_date_hijri', 'd.parcel_id', 'p.geo_id'])->keyBy('id'),
             'parcel_boundaries' => DB::table('parcel_boundaries as b')->leftJoin('parcels as p', 'p.id', '=', 'b.parcel_id')

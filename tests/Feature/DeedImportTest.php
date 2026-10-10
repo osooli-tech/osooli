@@ -23,6 +23,7 @@ use App\Support\Import\DeedImportApplier;
 use App\Support\Import\DeedImportUndo;
 use App\Support\Import\GeoJsonFeatureStream;
 use App\Support\Import\ImportRuns;
+use App\Support\NationalId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -133,11 +134,11 @@ class DeedImportTest extends TestCase
 
         $this->apply($run['id']);
         $this->assertDatabaseHas('deeds', ['deed_no' => '999999']);
-        $this->assertDatabaseHas('owners', ['national_id' => '2000000000']);
+        $this->assertDatabaseHas('owners', ['national_id_hash' => NationalId::hash('2000000000')]);
 
         app(DeedImportUndo::class)->run($run['id'], $this->user);
         $this->assertDatabaseMissing('deeds', ['deed_no' => '999999']);
-        $this->assertDatabaseMissing('owners', ['national_id' => '2000000000']);
+        $this->assertDatabaseMissing('owners', ['national_id_hash' => NationalId::hash('2000000000')]);
     }
 
     public function test_a_look_alike_owner_waits_for_a_decision(): void
@@ -156,7 +157,7 @@ class DeedImportTest extends TestCase
 
         // "It is Salem": no new owner is created.
         $this->apply($run['id'], [$key => $this->salem->id]);
-        $this->assertDatabaseMissing('owners', ['national_id' => '1000000007']);
+        $this->assertDatabaseMissing('owners', ['national_id_hash' => NationalId::hash('1000000007')]);
     }
 
     public function test_an_unknown_district_can_be_created_on_decision(): void
@@ -446,7 +447,7 @@ class DeedImportTest extends TestCase
         $parcel = Parcel::where('geo_id', 'DEMO-0001')->firstOrFail();
         $this->assertSame(1, Deed::where('parcel_id', $parcel->id)->where('deed_no', '410100000001')->count());
         $this->assertSame(1, SurveyDecision::where('parcel_id', $parcel->id)->where('qrar_no', '12345')->count());
-        $this->assertSame(1, Owner::where('national_id', '1098765432')->count());
+        $this->assertSame(1, Owner::where('national_id_hash', NationalId::hash('1098765432'))->count());
     }
 
     private function exported(): array

@@ -8,6 +8,7 @@ use App\Models\Owner;
 use App\Support\Database\Spatial;
 use App\Support\DatabaseEnum;
 use App\Support\Geo\Locator;
+use App\Support\NationalId;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Throwable;
@@ -447,7 +448,15 @@ final class ParcelGeoJsonImporter implements Importer
             $nationalId = $this->str($fp['Woner_ID'] ?? null);
 
             if ($nationalId !== null) {
-                [$ownerId, $ownerIsNew] = $this->upsert('owners', ['national_id' => $nationalId], ['name' => $name]);
+                // Found by the fingerprint: the stored number is encrypted and cannot be compared.
+                $ownerId = DB::table('owners')->where('national_id_hash', NationalId::lookup($nationalId))->value('id');
+                $ownerIsNew = $ownerId === null;
+                if ($ownerIsNew) {
+                    $ownerId = DB::table('owners')->insertGetId(NationalId::columns($nationalId) + ['name' => $name, 'created_at' => now(), 'updated_at' => now()]);
+                } else {
+                    DB::table('owners')->where('id', $ownerId)->update(['name' => $name, 'updated_at' => now()]);
+                }
+                $ownerId = (int) $ownerId;
             } else {
                 $ownerId = (int) DB::table('owners')->insertGetId([
                     'name' => $name,

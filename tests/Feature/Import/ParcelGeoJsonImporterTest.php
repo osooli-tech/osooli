@@ -6,6 +6,7 @@ namespace Tests\Feature\Import;
 
 use App\Services\Import\ParcelGeoJsonImporter;
 use App\Support\Database\Dialect;
+use App\Support\NationalId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -223,7 +224,7 @@ final class ParcelGeoJsonImporterTest extends TestCase
         $this->importer()->commit($this->fixture());
         $this->importer()->commit($this->fixture());
 
-        $this->assertSame(1, DB::table('owners')->where('national_id', '9999999999')->count());
+        $this->assertSame(1, DB::table('owners')->where('national_id_hash', NationalId::hash('9999999999'))->count());
     }
 
     public function test_it_stores_the_survey_area_as_measured_area(): void

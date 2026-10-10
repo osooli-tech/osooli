@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Owners;
 
 use App\Models\Owner;
+use Closure;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -59,7 +60,11 @@ class OwnerEditForm extends Component
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'nationalId' => ['nullable', 'string', 'max:20'],
+            'nationalId' => ['nullable', 'string', 'max:20', function (string $attribute, mixed $value, Closure $fail): void {
+                if (Owner::nationalIdTaken((string) $value, $this->owner()->getKey())) {
+                    $fail(__('validation.unique', ['attribute' => __('owners.national_id')]));
+                }
+            }],
             'phone' => ['nullable', 'string', 'regex:/^(?:\+?966|0)?5\d{8}$/'],
         ], [], [
             'name' => __('owners.name'),

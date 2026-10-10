@@ -11,6 +11,7 @@ use App\Models\Owner;
 use App\Models\Parcel;
 use App\Support\ArchivedValues;
 use App\Support\Concerns\WritesSafely;
+use App\Support\NationalId;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -145,7 +146,7 @@ class ArchiveIndex extends Component
                 match ($this->tab) {
                     'deeds' => $q->whereLike('deed_no', $term),
                     'owners' => $q->whereLike('name', $term)
-                        ->orWhereLike('national_id', $term),
+                        ->orWhere('national_id_hash', NationalId::lookup($this->search)),
                     default => $q->whereLike('parcel_no', $term)
                         ->orWhereLike('geo_id', $term),
                 };

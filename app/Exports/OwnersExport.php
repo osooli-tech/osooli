@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exports;
 
 use App\Models\Owner;
+use App\Support\NationalId;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -27,7 +28,7 @@ class OwnersExport implements FromQuery, WithHeadings, WithMapping
                 $term = '%'.$this->search.'%';
                 $q->where(function ($inner) use ($term): void {
                     $inner->whereLike('name', $term)
-                        ->orWhereLike('national_id', $term)
+                        ->orWhere('national_id_hash', NationalId::lookup($this->search))
                         ->orWhereLike('phone', $term);
                 });
             })

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Parcel;
 
 use App\Models\ParcelPhoto;
+use App\Support\DocumentVault;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Imagick;
 use ImagickException;
 
@@ -39,23 +39,33 @@ class ParcelDocumentRenderService
     /** Returns a data: URI for an <img> src, or null if it could not be rendered. */
     public function dataUri(ParcelPhoto $document): ?string
     {
-        $path = $this->resolvePath($document);
+        $bytes = DocumentVault::read($document);
 
-        if ($path === null) {
+        if ($bytes === null) {
             return null;
         }
 
-        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-
-        if ($extension === 'pdf') {
-            return $this->rasterisePdfFirstPage($path, $document->id);
-        }
+        $extension = strtolower(pathinfo($document->storageLocation()['path'], PATHINFO_EXTENSION));
 
         if (in_array($extension, self::IMAGE_EXTENSIONS, true)) {
-            return $this->encodeImage($path, $extension);
+            return 'data:image/'.($extension === 'jpg' ? 'jpeg' : $extension).';base64,'.base64_encode($bytes);
         }
 
-        return null;
+        if ($extension !== 'pdf') {
+            return null;
+        }
+
+        // Imagick reads from a path, and the stored file is encrypted: the
+        // opened bytes go to a private temp file that is removed straight after.
+        $path = tempnam(sys_get_temp_dir(), 'doc').'.pdf';
+        file_put_contents($path, $bytes);
+
+        try {
+            return $this->rasterisePdfFirstPage($path, $document->id);
+        } finally {
+            @unlink($path);
+            @unlink(substr($path, 0, -4));
+        }
     }
 
     private function rasterisePdfFirstPage(string $path, int $documentId): ?string
@@ -91,27 +101,5 @@ class ParcelDocumentRenderService
 
             return null;
         }
-    }
-
-    private function encodeImage(string $path, string $extension): ?string
-    {
-        $contents = @file_get_contents($path);
-
-        if ($contents === false) {
-            return null;
-        }
-
-        $mime = $extension === 'jpg' ? 'jpeg' : $extension;
-
-        return "data:image/{$mime};base64,".base64_encode($contents);
-    }
-
-    /** The file's path on whichever local disk holds it (private, or public for rows not yet moved). */
-    private function resolvePath(ParcelPhoto $document): ?string
-    {
-        $location = $document->storageLocation();
-        $path = Storage::disk($location['disk'])->path($location['path']);
-
-        return is_file($path) ? $path : null;
     }
 }

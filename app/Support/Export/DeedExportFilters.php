@@ -7,6 +7,7 @@ namespace App\Support\Export;
 use App\Models\Deed;
 use App\Models\Parcel;
 use App\Models\User;
+use App\Support\NationalId;
 use App\Support\OwnerScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -147,7 +148,7 @@ final class DeedExportFilters
                 $q->whereHas('owners', fn ($o) => $o
                     ->when($archived, fn ($x) => $x->withoutGlobalScope(SoftDeletingScope::class))
                     ->where(fn (Builder $x) => $x->whereLike('name', $term)
-                        ->orWhereLike('national_id', $term)
+                        ->orWhere('national_id_hash', NationalId::lookup((string) $v['owner']))
                         ->orWhereLike('phone', $term)));
             });
 

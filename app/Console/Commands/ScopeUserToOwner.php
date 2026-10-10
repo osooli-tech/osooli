@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Models\Owner;
 use App\Models\User;
+use App\Support\NationalId;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
@@ -35,7 +36,7 @@ class ScopeUserToOwner extends Command
             return self::FAILURE;
         }
 
-        $owner = Owner::where('national_id', $this->argument('national_id'))->first();
+        $owner = Owner::where('national_id_hash', NationalId::lookup((string) $this->argument('national_id')))->first();
 
         if ($owner === null) {
             $this->error("No owner found with national_id {$this->argument('national_id')}.");

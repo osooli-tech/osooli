@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\EncryptedNationalId;
 use App\Enums\DeedStatus;
 use App\Support\Concerns\Archivable;
+use App\Support\NationalId;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,6 +31,31 @@ class Owner extends Authenticatable
     use Archivable, HasApiTokens;
 
     protected $fillable = ['name', 'national_id', 'phone', 'email', 'whatsapp'];
+
+    /** The fingerprint is for lookups only; it never leaves the server. */
+    protected $hidden = ['national_id_hash'];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        // Stored encrypted; the cast also keeps national_id_hash in step.
+        return ['national_id' => EncryptedNationalId::class];
+    }
+
+    /**
+     * Whether another owner (archived ones included) already has this number.
+     * The database enforces the same through the unique index on the
+     * fingerprint; this is the readable answer for a form.
+     */
+    public static function nationalIdTaken(?string $nationalId, ?int $exceptId = null): bool
+    {
+        $hash = NationalId::hash($nationalId);
+
+        return $hash !== null && self::withTrashed()
+            ->where('national_id_hash', $hash)
+            ->when($exceptId !== null, fn ($q) => $q->whereKeyNot($exceptId))
+            ->exists();
+    }
 
     protected static function booted(): void
     {

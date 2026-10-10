@@ -6,6 +6,7 @@ namespace Tests\Feature\Import;
 
 use App\Models\User;
 use App\Services\Import\GdbImporter;
+use App\Support\NationalId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -78,10 +79,10 @@ class GdbTemplateTest extends TestCase
         $this->assertSame('سكني', $deed->deed_class);
 
         $shares = DB::table('deed_owners as o')->join('owners as w', 'w.id', '=', 'o.owner_id')
-            ->where('o.deed_id', $deed->id)->orderBy('w.national_id')->pluck('o.ownership_share')->map(fn ($v) => (float) $v)->all();
+            ->where('o.deed_id', $deed->id)->orderBy('w.id')->pluck('o.ownership_share')->map(fn ($v) => (float) $v)->all();
         $this->assertSame([50.0, 50.0], $shares);
 
-        $owner = DB::table('owners')->where('national_id', '1000000001')->first();
+        $owner = DB::table('owners')->where('national_id_hash', NationalId::hash('1000000001'))->first();
         $this->assertSame('0500000001', $owner->phone);
         $this->assertNotNull($owner->phone_normalized);
         $this->assertSame('owner1@example.com', $owner->email);

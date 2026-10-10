@@ -6,9 +6,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\AuditLog;
 use App\Models\ParcelPhoto;
+use App\Support\DocumentVault;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class DocumentController extends ApiController
 {
@@ -24,7 +24,7 @@ class DocumentController extends ApiController
      * itself rather than a 302 to a public URL: the old link bypassed Laravel
      * entirely once issued, so the token check only ever protected the click.
      */
-    public function download(Request $request, int $document): StreamedResponse
+    public function download(Request $request, int $document): Response
     {
         $photo = ParcelPhoto::whereKey($document)->firstOrFail();
 
@@ -32,14 +32,12 @@ class DocumentController extends ApiController
         // on, which would keep a former owner's access after a parcel changes hands.
         abort_unless($this->owner()->parcels()->whereKey($photo->parcel_id)->exists(), 404);
 
-        $location = $photo->storageLocation();
-        $disk = Storage::disk($location['disk']);
-
-        abort_unless($disk->exists($location['path']), 404);
+        // Opened by the vault (files are encrypted at rest); a missing file is a 404, not a logged download.
+        $response = DocumentVault::response($photo, download: true);
 
         $this->recordDownload($photo, $request);
 
-        return $disk->download($location['path'], $photo->downloadName());
+        return $response;
     }
 
     /** Every document access is auditable, same as the dashboard. */

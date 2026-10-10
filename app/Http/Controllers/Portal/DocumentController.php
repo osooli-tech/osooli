@@ -10,12 +10,12 @@ use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
 use App\Queries\OwnerParcelQuery;
+use App\Support\DocumentVault;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Owner-portal equivalent of the internal DocumentController::download() —
@@ -26,21 +26,17 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class DocumentController extends Controller
 {
     /** A site photo shown inline; 404 unless it sits on one of the owner's parcels. Not audited — it is a page view. */
-    public function preview(ParcelPhoto $photo): StreamedResponse
+    public function preview(ParcelPhoto $photo): Response
     {
         abort_unless(
             $photo->isGalleryImage() && (new OwnerParcelQuery($this->owner()))->base()->whereKey($photo->parcel_id)->exists(),
             404
         );
 
-        $location = $photo->storageLocation();
-        $disk = Storage::disk($location['disk']);
-        abort_unless($disk->exists($location['path']), 404);
-
-        return $disk->response($location['path'], null, ['Cache-Control' => 'private, max-age=3600']);
+        return DocumentVault::response($photo, download: false, headers: ['Cache-Control' => 'private, max-age=3600']);
     }
 
-    public function download(Request $request, ParcelPhoto $photo): StreamedResponse
+    public function download(Request $request, ParcelPhoto $photo): Response
     {
         $owner = $this->owner();
 
@@ -52,10 +48,8 @@ class DocumentController extends Controller
             404
         );
 
-        $location = $photo->storageLocation();
-        $disk = Storage::disk($location['disk']);
-
-        abort_unless($disk->exists($location['path']), 404);
+        // Opened by the vault (files are encrypted at rest); a missing file is a 404, not a logged download.
+        $response = DocumentVault::response($photo, download: true);
 
         AuditLog::create([
             'owner_id' => $owner->id,
@@ -66,7 +60,7 @@ class DocumentController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return $disk->download($location['path'], $photo->downloadName());
+        return $response;
     }
 
     /** The list itself is the Portal\DocumentIndex Livewire component, embedded in the view. */

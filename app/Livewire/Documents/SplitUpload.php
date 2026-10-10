@@ -9,6 +9,7 @@ use App\Models\ParcelPhoto;
 use App\Models\User;
 use App\Support\Concerns\WritesSafely;
 use App\Support\DatabaseEnum;
+use App\Support\DocumentVault;
 use App\Support\Import\MapPageMatcher;
 use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
@@ -196,6 +197,7 @@ class SplitUpload extends Component
         if (! is_string($path) || $path === '') {
             throw new RuntimeException(__('documents.store_failed'));
         }
+        DocumentVault::sealOnDisk(ParcelPhoto::PRIVATE_DISK, $path);
 
         $photo = $this->writeSafely('document.upload', 'document', null, fn (): ParcelPhoto => ParcelPhoto::create([
             'parcel_id' => $parcelId,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Import;
 
 use App\Models\Owner;
+use App\Support\NationalId;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -50,6 +51,8 @@ final class OwnerMatcher
     {
         foreach (DB::table('owners')->select(['id', 'name', 'national_id', 'phone', 'email', 'whatsapp', 'phone_normalized', 'deleted_at'])->orderBy('id')->cursor() as $owner) {
             $id = (int) $owner->id;
+            // Read raw, so decrypted here: everything below compares the number itself.
+            $owner->national_id = NationalId::decrypt($owner->national_id);
             $this->rows[$id] = (array) $owner;
 
             if ($owner->national_id !== null && $owner->national_id !== '') {

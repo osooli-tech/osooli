@@ -7,11 +7,11 @@ namespace App\Http\Controllers;
 use App\Models\AuditLog;
 use App\Models\ParcelPhoto;
 use App\Models\User;
+use App\Support\DocumentVault;
 use App\Support\OwnerScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class DocumentController extends Controller
 {
@@ -28,21 +28,17 @@ class DocumentController extends Controller
      * A site photo shown inline on a parcel page. Scoped like download(), but
      * not audited: it is part of viewing the page, not taking a document away.
      */
-    public function preview(Request $request, ParcelPhoto $photo): StreamedResponse
+    public function preview(Request $request, ParcelPhoto $photo): Response
     {
         /** @var User|null $user */
         $user = $request->user();
 
         abort_unless($photo->isGalleryImage() && OwnerScope::canSeeParcel($user, $photo->parcel_id), 404);
 
-        $location = $photo->storageLocation();
-        $disk = Storage::disk($location['disk']);
-        abort_unless($disk->exists($location['path']), 404);
-
-        return $disk->response($location['path'], null, ['Cache-Control' => 'private, max-age=3600']);
+        return DocumentVault::response($photo, download: false, headers: ['Cache-Control' => 'private, max-age=3600']);
     }
 
-    public function download(Request $request, ParcelPhoto $photo): StreamedResponse
+    public function download(Request $request, ParcelPhoto $photo): Response
     {
         /** @var User|null $user */
         $user = $request->user();
@@ -57,11 +53,9 @@ class DocumentController extends Controller
         // information they are not entitled to.
         abort_unless(OwnerScope::canSeeParcel($user, $photo->parcel_id), 404);
 
-        $location = $photo->storageLocation();
-        $disk = Storage::disk($location['disk']);
-
-        // A row whose file is missing is a broken link, not a server error.
-        abort_unless($disk->exists($location['path']), 404);
+        // Files are encrypted at rest; the vault opens them. A row whose file
+        // is missing is a broken link (404), and is not logged as a download.
+        $response = DocumentVault::response($photo, download: true);
 
         AuditLog::create([
             'user_id' => Auth::id(),
@@ -72,6 +66,6 @@ class DocumentController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return $disk->download($location['path'], $photo->downloadName());
+        return $response;
     }
 }
