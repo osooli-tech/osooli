@@ -125,8 +125,15 @@
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium
                                              bg-primary/10 text-primary dark:bg-primary/20 dark:text-white/90">
-                                    {{ $owner->parcel_count }}
+                                    {{ $owner->parcel_count + $owner->linked_count }}
                                 </span>
+                                @if ($owner->linked_count > 0)
+                                    {{-- The count is the whole holding; the hint says how much of it is in others' names --}}
+                                    <span class="block text-[11px] text-on-surface-variant dark:text-on-primary-container mt-1"
+                                          title="{{ __('owners.linked_hint') }}">
+                                        {{ __('owners.linked_count', ['count' => $owner->linked_count]) }}
+                                    </span>
+                                @endif
                             </td>
 
                             {{-- Deed count — every deed this owner has ever been linked to,
@@ -290,6 +297,38 @@
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    {{-- Parcels this owner handed on but stays the parent owner of: one portfolio per present holder --}}
+                                    @php $linkedGroups = $owner->linked_count > 0 ? app(\App\Services\Owner\LinkedParcelsService::class)->groups($owner, forStaff: true) : []; @endphp
+                                    @if ($linkedGroups !== [])
+                                        <div class="mt-5 pt-4 border-t border-outline-variant dark:border-white/10">
+                                            <h4 class="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant dark:text-on-primary-container mb-3">
+                                                <span class="material-symbols-outlined text-[16px]">family_restroom</span>
+                                                {{ __('owners.linked_portfolios') }}
+                                                <span class="font-normal">— {{ __('owners.linked_hint') }}</span>
+                                            </h4>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                                                @foreach ($linkedGroups as $group)
+                                                    <div class="flex flex-col h-full rounded-xl p-3 bg-surface dark:bg-[#1a2435] border border-outline-variant dark:border-white/10">
+                                                        <p class="font-medium text-sm text-on-surface dark:text-white">{{ __('owners.linked_portfolio_of', ['name' => $group['holder']]) }}</p>
+                                                        <p class="text-xs text-on-surface-variant dark:text-on-primary-container data-tabular mt-1">
+                                                            {{ $group['parcels_count'] }} {{ __('owners.portfolio_parcels_unit') }}
+                                                            · {{ number_format($group['area']) }} {{ __('dashboard.area_unit_sqm') }}
+                                                            @if ($group['value']) · {{ number_format($group['value']) }} {{ __('parcels.sar') }} @endif
+                                                        </p>
+                                                        <div class="flex flex-wrap gap-1.5 mt-2">
+                                                            @foreach ($group['parcels'] as $row)
+                                                                <a href="{{ route('parcels.show', $row['id']) }}"
+                                                                   class="px-2 py-0.5 rounded-full text-[11px] data-tabular bg-primary/10 text-primary dark:bg-white/10 dark:text-white hover:bg-primary/20">
+                                                                    {{ $row['parcel_no'] ?? '—' }}
+                                                                </a>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     {{-- Owner-defined portfolios: splitting this owner's own holdings into
                                          named groups, distinct from the dashboard's city-based portfolios. --}}

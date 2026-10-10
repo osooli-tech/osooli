@@ -10,7 +10,9 @@ use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
 use App\Queries\OwnerParcelQuery;
+use App\Services\Owner\LinkedParcelsService;
 use App\Support\DocumentVault;
+use App\Support\OwnerVisibility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -28,10 +30,7 @@ class DocumentController extends Controller
     /** A site photo shown inline; 404 unless it sits on one of the owner's parcels. Not audited — it is a page view. */
     public function preview(ParcelPhoto $photo): Response
     {
-        abort_unless(
-            $photo->isGalleryImage() && (new OwnerParcelQuery($this->owner()))->base()->whereKey($photo->parcel_id)->exists(),
-            404
-        );
+        abort_unless($photo->isGalleryImage() && OwnerVisibility::canSeeDocument($this->owner(), $photo), 404);
 
         return DocumentVault::response($photo, download: false, headers: ['Cache-Control' => 'private, max-age=3600']);
     }
@@ -43,8 +42,10 @@ class DocumentController extends Controller
         // Mirrors OwnerScope::canSeeParcel for the internal download route: a
         // document id guessed from another parcel is a 404, not a 403 — that
         // way whether it even exists is not information a stranger gets.
+        // The scan of a deed the owner is not on (an earlier holder's) is a 404 as well.
+        // A parcel held under them in another's name opens only if the administrator allows it.
         abort_unless(
-            (new OwnerParcelQuery($owner))->base()->whereKey($photo->parcel_id)->exists(),
+            OwnerVisibility::canSeeDocument($owner, $photo) || app(LinkedParcelsService::class)->canSeeDocument($owner, $photo),
             404
         );
 
@@ -72,8 +73,24 @@ class DocumentController extends Controller
     /** Documents and gallery images of one of the owner's parcels, for the dashboard map's side panel. */
     public function index(int $parcel): JsonResponse
     {
-        /** @var Parcel $found */
-        $found = (new OwnerParcelQuery($this->owner()))->base()->with('photos')->findOrFail($parcel);
+        /** @var Parcel|null $found */
+        $found = (new OwnerParcelQuery($this->owner()))->base()->with('photos')->find($parcel);
+
+        // Not their own: a parcel held under them in another's name, with whatever the settings allow.
+        if ($found === null) {
+            $linked = app(LinkedParcelsService::class);
+
+            return response()->json([
+                'documents' => $linked->documents($linked->find($this->owner(), $parcel))->map(fn (ParcelPhoto $photo): array => [
+                    'id' => $photo->id,
+                    'type' => $photo->photo_type ? __('documents.photo_types.'.$photo->photo_type->value) : null,
+                    'download_url' => route('portal.documents.download', $photo),
+                ])->values(),
+                'images' => [],
+            ]);
+        }
+
+        OwnerVisibility::narrow($found, $this->owner());
 
         $isGalleryImage = fn (ParcelPhoto $photo): bool => $photo->isGalleryImage();
 

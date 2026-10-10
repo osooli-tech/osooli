@@ -61,13 +61,15 @@
             @foreach ([
                 ['route' => 'portal.dashboard', 'label' => 'portal.nav_dashboard', 'icon' => 'grid_view'],
                 ['route' => 'portal.parcels.index', 'label' => 'portal.nav_parcels', 'icon' => 'map'],
+                ...(($hasLinkedParcels ?? false) ? [['route' => 'portal.linked.index', 'label' => 'portal.nav_linked', 'icon' => 'family_restroom']] : []),
                 ['route' => 'portal.documents.index', 'label' => 'portal.nav_documents', 'icon' => 'folder'],
                 ['route' => 'portal.modification-requests.index', 'label' => 'portal.nav_requests', 'icon' => 'edit_note'],
                 ['route' => 'portal.profile', 'label' => 'portal.nav_profile', 'icon' => 'person'],
             ] as $item)
                 @php
                     $isActive = request()->routeIs($item['route'])
-                        || ($item['route'] === 'portal.parcels.index' && request()->routeIs('portal.parcels.*'));
+                        || ($item['route'] === 'portal.parcels.index' && request()->routeIs('portal.parcels.*'))
+                        || ($item['route'] === 'portal.linked.index' && request()->routeIs('portal.linked.*'));
                 @endphp
                 <a href="{{ route($item['route']) }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150

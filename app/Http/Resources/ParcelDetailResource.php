@@ -47,7 +47,11 @@ class ParcelDetailResource extends JsonResource
             'corners' => $this->corners(),
             'geometry' => $this->geometry(),
 
-            'owners' => $this->owners(),
+            'owners' => $this->owners($request->user()?->getKey()),
+            // Names only: who the parcel came from before the caller held it.
+            'previous_owner_names' => $this->resource->relationLoaded('previousHolders')
+                ? $this->resource->getRelation('previousHolders')->pluck('name')->values()->all()
+                : [],
             'deeds' => $this->deeds->map(fn (Deed $deed) => array_merge(
                 (new DeedResource($deed))->toArray($request),
                 ['is_current' => $deed->id === $latestDeedId],
@@ -114,7 +118,7 @@ class ParcelDetailResource extends JsonResource
      *
      * @return list<array<string, mixed>>
      */
-    private function owners(): array
+    private function owners(int|string|null $viewerId): array
     {
         $owners = [];
 
@@ -126,7 +130,8 @@ class ParcelDetailResource extends JsonResource
                 $owners[$owner->id] = [
                     'id' => $owner->id,
                     'name' => $owner->name,
-                    'national_id' => $owner->national_id,
+                    // A co-owner's number is theirs; only the caller's own is returned.
+                    'national_id' => $owner->id === $viewerId ? $owner->national_id : null,
                     'ownership_share' => $share === null ? null : (float) $share,
                 ];
             }

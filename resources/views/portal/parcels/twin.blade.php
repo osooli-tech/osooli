@@ -273,7 +273,8 @@
                     <div class="min-w-0">
                         <p class="font-semibold text-on-surface dark:text-white text-sm">{{ $owner['name'] }}</p>
                         <p class="text-xs text-on-surface-variant dark:text-on-primary-container data-tabular ltr" dir="ltr">
-                            {{ $owner['national_id'] ?: '—' }}
+                            {{-- Only the signed-in owner's own number; a co-owner's is theirs. --}}
+                            {{ $owner['id'] === auth('owner')->id() ? ($owner['national_id'] ?: '—') : '' }}
                         </p>
                     </div>
                     <span class="text-xs text-on-surface-variant dark:text-on-primary-container shrink-0 data-tabular">

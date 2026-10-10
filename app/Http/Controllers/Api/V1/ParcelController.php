@@ -8,6 +8,7 @@ use App\Http\Resources\DocumentResource;
 use App\Http\Resources\ParcelDetailResource;
 use App\Http\Resources\ParcelListResource;
 use App\Http\Resources\ParcelMapResource;
+use App\Support\OwnerVisibility;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -42,6 +43,8 @@ class ParcelController extends ApiController
                 'photos',
             ])
             ->findOrFail($parcel);
+        // Earlier holders' deeds, names and deed scans are not this owner's to see.
+        OwnerVisibility::narrow($model, $this->owner());
 
         return new ParcelDetailResource($model);
     }
@@ -63,6 +66,7 @@ class ParcelController extends ApiController
     public function documents(int $parcel): JsonResponse
     {
         $model = $this->parcels()->base()->with('photos')->findOrFail($parcel);
+        OwnerVisibility::narrow($model, $this->owner());
 
         return $this->respondCollection(
             DocumentResource::collection($model->photos)->resolve()

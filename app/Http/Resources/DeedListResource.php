@@ -23,8 +23,8 @@ class DeedListResource extends JsonResource
     {
         $parcel = $this->parcel;
         $district = $parcel?->plan?->district;
-        // The deed scan is stored against the parcel, typed "صك".
-        $document = $parcel?->photos->firstWhere('photo_type', PhotoType::Deed);
+        // This deed's own scan — the parcel may also hold scans of other people's deeds.
+        $document = $parcel?->photos->first(fn ($photo) => $photo->photo_type === PhotoType::Deed && $photo->deed_id === $this->id);
 
         return [
             'id' => $this->id,

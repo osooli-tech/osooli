@@ -44,6 +44,9 @@ class ParcelForm extends Form
     /** A `parcels.id`, or '' for a top-level parcel. */
     public string $parentParcelId = '';
 
+    /** The owner the parcel stays under in the portal although its deed is in another name. */
+    public string $parentOwnerId = '';
+
     public string $assetType = '';
 
     public string $landTransaction = '';
@@ -89,6 +92,7 @@ class ParcelForm extends Form
 
             'planId' => ['nullable', 'integer', Rule::exists('plans', 'id')],
             'parentParcelId' => $parentParcel,
+            'parentOwnerId' => ['nullable', 'integer', Rule::exists('owners', 'id')],
 
             // A blank value skips every non-implicit rule in Laravel, so
             // 'nullable' alone carries "not chosen" here — all four enum
@@ -129,6 +133,7 @@ class ParcelForm extends Form
             'geoId' => __('parcels.geo_id'),
             'planId' => __('parcels.plan'),
             'parentParcelId' => __('parcels.parent_parcel'),
+            'parentOwnerId' => __('parcels.parent_owner'),
             'assetType' => __('parcels.asset_type'),
             'landTransaction' => __('parcels.land_transaction'),
             'allocationMethod' => __('parcels.allocation_method'),
@@ -148,6 +153,7 @@ class ParcelForm extends Form
         $this->geoId = (string) $parcel->geo_id;
         $this->planId = (string) $parcel->plan_id;
         $this->parentParcelId = (string) $parcel->parent_parcel_id;
+        $this->parentOwnerId = (string) $parcel->parent_owner_id;
         $this->assetType = (string) $parcel->asset_type;
         $this->landTransaction = (string) $parcel->land_transaction;
         $this->allocationMethod = (string) $parcel->allocation_method;
@@ -215,6 +221,7 @@ class ParcelForm extends Form
             ...($includeGeoId ? ['geo_id' => $this->geoId] : []),
             'plan_id' => $this->orIntNull($this->planId),
             'parent_parcel_id' => $this->orIntNull($this->parentParcelId),
+            'parent_owner_id' => $this->orIntNull($this->parentOwnerId),
             'asset_type' => $this->orNull($this->assetType),
             'land_transaction' => $this->orNull($this->landTransaction),
             'allocation_method' => $this->orNull($this->allocationMethod),

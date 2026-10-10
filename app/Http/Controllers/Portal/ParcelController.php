@@ -11,6 +11,7 @@ use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Queries\OwnerParcelQuery;
+use App\Services\Owner\LinkedParcelsService;
 use App\Services\Owner\OwnerInsightsService;
 use App\Services\Owner\OwnerStatisticsService;
 use App\Services\Parcel\DigitalTwinService;
@@ -21,6 +22,7 @@ use App\Services\Parcel\ParcelSatelliteImageService;
 use App\Support\Database\Dialect;
 use App\Support\Database\Spatial;
 use App\Support\Geo\GeometryMath;
+use App\Support\OwnerVisibility;
 use App\Support\ParcelFrontage;
 use App\Support\ParcelMassing;
 use App\Support\ParcelStory;
@@ -44,11 +46,18 @@ class ParcelController extends Controller
     public function index(): View
     {
         $stats = new OwnerStatisticsService($this->owner());
+        $summary = $stats->summary();
+        $portfolio = $stats->portfolio();
 
-        return view('portal.parcels.index', [
-            'summary' => $stats->summary(),
-            'portfolio' => $stats->portfolio(),
-        ]);
+        // Parcels held under the owner in another's name count in the page's totals.
+        $linked = app(LinkedParcelsService::class)->totals($this->owner());
+        $summary['parcels_total'] += $linked['parcels'];
+        $summary['area_total_sqm'] += $linked['area'];
+        if ($linked['value'] !== null) {
+            $portfolio['total_value'] = (float) ($portfolio['total_value'] ?? 0) + $linked['value'];
+        }
+
+        return view('portal.parcels.index', ['summary' => $summary, 'portfolio' => $portfolio]);
     }
 
     public function show(int $parcel, OwnerInsightsService $insights, DigitalTwinService $twin): View
@@ -60,6 +69,8 @@ class ParcelController extends Controller
             ->base()
             ->with(['plan.district', 'parent', 'deeds.owners', 'boundary.engineeringOffice', 'surveyDecisions', 'photos'])
             ->findOrFail($parcel);
+        // Earlier holders' deeds, names and deed scans are not this owner's to see.
+        OwnerVisibility::narrow($found, $owner);
 
         $parcelGeojson = $found->getAttribute('geom_json');
         $neighboursGeojson = $this->neighboursGeojson($found, $parcelGeojson);
@@ -100,6 +111,7 @@ class ParcelController extends Controller
 
         /** @var Parcel $found */
         $found = (new OwnerParcelQuery($owner))->base()->findOrFail($parcel);
+        OwnerVisibility::narrow($found, $owner);
 
         $parcelGeojson = $found->getAttribute('geom_json');
         $lat = $found->getAttribute('centroid_lat');
@@ -139,6 +151,7 @@ class ParcelController extends Controller
             ->base()
             ->with(['photos', 'heldDeed', 'boundary'])
             ->findOrFail($parcel);
+        OwnerVisibility::narrow($found, $owner);
         // The shared print template reads currentDeed; an owner's report shows the deed they hold.
         $found->setRelation('currentDeed', $found->heldDeed);
 

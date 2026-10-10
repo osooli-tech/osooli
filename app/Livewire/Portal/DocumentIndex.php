@@ -8,6 +8,7 @@ use App\Enums\PhotoType;
 use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Owner;
 use App\Models\ParcelPhoto;
+use App\Support\OwnerVisibility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -47,7 +48,7 @@ class DocumentIndex extends Component
         /** @var Owner $owner */
         $owner = Auth::guard('owner')->user();
 
-        return ParcelPhoto::query()->whereIn('parcel_id', $owner->parcels()->pluck('parcels.id'));
+        return OwnerVisibility::documents(ParcelPhoto::query(), $owner);
     }
 
     /** @return LengthAwarePaginator<ParcelPhoto> */

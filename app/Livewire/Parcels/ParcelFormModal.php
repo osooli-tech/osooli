@@ -7,6 +7,7 @@ namespace App\Livewire\Parcels;
 use App\Livewire\Forms\DeedForm;
 use App\Livewire\Forms\ParcelForm;
 use App\Models\Deed;
+use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\Plan;
 use App\Support\Concerns\WritesSafely;
@@ -42,6 +43,9 @@ class ParcelFormModal extends Component
 
     /** @var array<int, string> */
     public array $planOptions = [];
+
+    /** @var array<int, string> owner id => name, for the parent-owner picker */
+    public array $ownerOptions = [];
 
     /** @var array<int, string> */
     public array $parentParcelOptions = [];
@@ -261,6 +265,8 @@ class ParcelFormModal extends Component
             ->get(['id', 'plan_no'])
             ->mapWithKeys(fn (Plan $plan): array => [$plan->id => (string) $plan->plan_no])
             ->all();
+
+        $this->ownerOptions = Owner::query()->orderBy('name')->pluck('name', 'id')->all();
 
         $this->parentParcelOptions = Parcel::query()
             ->whereNull('parent_parcel_id')

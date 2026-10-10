@@ -193,6 +193,13 @@
                 <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-surface-tint text-white flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">pie_chart</span></span>
                 {{ __('portal.ownership_title') }}
             </h2>
+            @if ($parcel->relationLoaded('previousHolders') && $parcel->previousHolders->isNotEmpty())
+                {{-- Where the parcel came from: the earlier holder's name, and nothing else of theirs --}}
+                <p class="flex items-center gap-1.5 text-xs text-on-surface-variant dark:text-on-primary-container -mt-2 mb-4">
+                    <span class="material-symbols-outlined text-[16px]">history</span>
+                    {{ __('portal.acquired_from', ['name' => $parcel->previousHolders->pluck('name')->implode('، ')]) }}
+                </p>
+            @endif
             @if ($holders->isEmpty())
                 <p class="text-sm text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.not_recorded') }}</p>
             @else

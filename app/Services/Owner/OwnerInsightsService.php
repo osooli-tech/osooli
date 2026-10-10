@@ -56,9 +56,20 @@ class OwnerInsightsService
         $rows = $parcels->map(fn (Parcel $parcel): array => $this->row($parcel));
         $priceComparison = $this->priceComparison($rows);
 
+        // Parcels held under the owner in another's name count in the headline
+        // figures; the analysis below stays on what they hold themselves.
+        $linked = app(LinkedParcelsService::class)->totals($owner);
+        $portfolio = $this->portfolio($rows);
+        $portfolio['parcels'] += $linked['parcels'];
+        $portfolio['area'] += $linked['area'];
+        $portfolio['football_pitches'] = $portfolio['area'] / self::FOOTBALL_PITCH_SQM;
+        if ($linked['value'] !== null) {
+            $portfolio['value'] = (float) $portfolio['value'] + $linked['value'];
+        }
+
         return [
             'kpis' => $this->kpis($rows, $priceComparison),
-            'portfolio' => $this->portfolio($rows),
+            'portfolio' => $portfolio,
             'health' => $this->health($rows),
             'alerts' => $this->alerts($rows, $owner),
             'byDistrict' => $this->valueBy($rows, 'district'),

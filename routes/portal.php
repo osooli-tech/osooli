@@ -7,6 +7,7 @@ use App\Http\Controllers\Portal\AuthController;
 use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\DocumentController;
 use App\Http\Controllers\Portal\GeoJsonController;
+use App\Http\Controllers\Portal\LinkedParcelController;
 use App\Http\Controllers\Portal\ModificationRequestController;
 use App\Http\Controllers\Portal\ParcelController;
 use App\Http\Controllers\Portal\ProfileController;
@@ -57,6 +58,10 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
             Route::get('/investment', [ServiceController::class, 'investment'])->name('investment');
             Route::get('/municipal', [ServiceController::class, 'municipal'])->name('municipal');
         });
+
+        // Parcels held under the owner but in someone else's name (parcels.parent_owner_id).
+        Route::get('/linked', [LinkedParcelController::class, 'index'])->name('linked.index');
+        Route::get('/linked/{parcel}', [LinkedParcelController::class, 'show'])->name('linked.show');
 
         Route::get('/documents', [DocumentController::class, 'list'])->name('documents.index');
         Route::get('/modification-requests', [ModificationRequestController::class, 'index'])->name('modification-requests.index');

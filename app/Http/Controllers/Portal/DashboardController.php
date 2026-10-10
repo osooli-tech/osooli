@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Portal;
 use App\Http\Controllers\Controller;
 use App\Models\MapAppearanceSetting;
 use App\Models\Owner;
+use App\Services\Owner\LinkedParcelsService;
 use App\Services\Owner\OwnerInsightsService;
 use App\Services\Owner\OwnerPortfolioService;
 use App\Services\Owner\OwnerStatisticsService;
@@ -36,6 +37,7 @@ class DashboardController extends Controller
             'byQrarSource' => $stats->byQrarSource(),
             'byEngineeringOffice' => $stats->byEngineeringOffice(),
             'ownerPortfolios' => $this->ownerPortfolios($owner),
+            'linkedGroups' => app(LinkedParcelsService::class)->groups($owner),
             'mapColors' => MapAppearanceSetting::current(),
             'massing' => ParcelMassing::categories(),
             'insights' => $insights->for($owner),

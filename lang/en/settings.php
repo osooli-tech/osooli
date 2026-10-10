@@ -86,4 +86,17 @@ return [
         'database_manage' => 'Manage databases and sync',
         'imports_create' => 'Import data',
     ],
+    'linked' => [
+        'title' => 'Linked parcels in the owner portal',
+        'hint' => 'A parcel whose deed names one person but which has a "parent owner" (land a father handed to his child, say) stays visible to the parent owner in their portal. Choose here what they see of it.',
+        'always' => 'Always shown: where the parcel is, its number and plan, its area, and the name of the deed holder.',
+        'show_value' => 'Value and price per m²',
+        'show_value_hint' => 'The estimated value and price per square metre of the linked parcel.',
+        'show_deed' => 'Deed details',
+        'show_deed_hint' => 'The holder\'s deed number, date and status.',
+        'show_documents' => 'Documents',
+        'show_documents_hint' => 'Viewing and downloading the parcel\'s documents, the holder\'s deed scan included.',
+        'save' => 'Save',
+        'saved' => 'Linked-parcel settings saved',
+    ],
 ];

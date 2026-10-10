@@ -406,6 +406,20 @@ final class ParcelGeoJsonImporter implements Importer
             }
         }
 
+        // The parent owner, by national id: the owner this parcel stays under
+        // in the portal although its deed names someone else. A number that is
+        // on no owner yet is reported and changes nothing.
+        $parentOwnerNid = $this->str($p['Parent_Owner_ID'] ?? null);
+        if ($parentOwnerNid !== null) {
+            $parentOwnerId = DB::table('owners')->where('national_id_hash', NationalId::lookup($parentOwnerNid))->value('id');
+            if ($parentOwnerId !== null) {
+                DB::table('parcels')->where('id', $parcelId)->update(['parent_owner_id' => $parentOwnerId]);
+            } else {
+                // Listed with the other values the file gave that could not be written.
+                $this->unknown['Parent_Owner_ID'][$parentOwnerNid] = ($this->unknown['Parent_Owner_ID'][$parentOwnerNid] ?? 0) + 1;
+            }
+        }
+
         // Geometry — always stored as MultiPolygon
         if (is_array($lead['geometry'] ?? null)) {
             DB::update(

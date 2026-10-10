@@ -142,6 +142,29 @@ class Owner extends Authenticatable
     }
 
     /**
+     * Every parcel naming this owner as its parent owner, whoever holds it.
+     *
+     * @return HasMany<Parcel, $this>
+     */
+    public function parcelsUnderParent(): HasMany
+    {
+        return $this->hasMany(Parcel::class, 'parent_owner_id');
+    }
+
+    /**
+     * Parcels held under this owner but in someone else's name
+     * (parcels.parent_owner_id). One they still hold themselves is simply
+     * theirs and is left to parcels().
+     *
+     * @return Builder<Parcel>
+     */
+    public function linkedParcels(): Builder
+    {
+        return Parcel::where('parent_owner_id', $this->getKey())
+            ->whereNotIn('parcels.id', $this->parcels()->select('parcels.id'));
+    }
+
+    /**
      * Parcels this owner currently holds, reached through each parcel's
      * held deed (not just any deed they have ever been linked to) — a
      * parcel re-issued to a new owner must stop counting toward the old one.

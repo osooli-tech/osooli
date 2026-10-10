@@ -44,6 +44,8 @@
             @endcan
         </div>
 
+        <livewire:settings.linked-parcels-settings />
+
         <livewire:settings.role-manager />
     @else
         <div class="flex flex-col items-center justify-center py-24 gap-4

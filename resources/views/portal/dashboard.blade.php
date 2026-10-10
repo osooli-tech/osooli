@@ -915,6 +915,38 @@
         </div>
     </section>
 
+    {{-- Parcels held under the owner in someone else's name: each holder reads as a portfolio --}}
+    @if (! empty($linkedGroups))
+        <section>
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h2 class="flex items-center gap-2 text-sm font-semibold">
+                    <span class="material-symbols-outlined text-[18px] text-tertiary">family_restroom</span>{{ __('portal.linked_title') }}
+                </h2>
+                <a href="{{ route('portal.linked.index') }}" class="text-xs font-medium text-secondary hover:underline">{{ __('portal.profile_view_all') }}</a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                @foreach ($linkedGroups as $group)
+                    <a href="{{ route('portal.linked.index') }}" class="{{ $cardCls }} flex flex-col h-full hover:shadow-md hover:-translate-y-0.5 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="w-10 h-10 shrink-0 rounded-2xl bg-gradient-to-br from-tertiary-container to-tertiary-fixed-dim text-on-tertiary-container flex items-center justify-center font-bold">{{ mb_substr($group['holder'], 0, 1) }}</span>
+                            <h3 class="font-semibold text-sm truncate">{{ $group['holder'] }}</h3>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container mt-3">
+                            <span class="data-tabular">{{ $group['parcels_count'] }} {{ __('owners.portfolio_parcels_unit') }}</span>
+                            <span class="data-tabular">{{ number_format($group['area']) }} {{ __('dashboard.area_unit_sqm') }}</span>
+                        </div>
+                        @if ($group['value'] !== null)
+                            <p class="text-sm font-bold text-secondary data-tabular mt-auto pt-2">
+                                {{ number_format($group['value']) }}
+                                <span class="text-[11px] font-normal text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.currency') }}</span>
+                            </p>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     {{-- Owner's own portfolios --}}
     @if (! empty($ownerPortfolios))
         <section>

@@ -49,6 +49,10 @@
                                            :label="__('parcels.parent_parcel')"
                                            :options="$parentParcelOptions"
                                            :hint="__('parcels.parent_parcel_hint')" />
+                            <x-form.select name="form.parentOwnerId"
+                                           :label="__('parcels.parent_owner')"
+                                           :options="$ownerOptions"
+                                           :hint="__('parcels.parent_owner_hint')" />
                         </div>
 
                         <p class="flex items-start gap-2 text-xs text-on-surface-variant dark:text-on-primary-container/70">

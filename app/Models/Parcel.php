@@ -30,6 +30,7 @@ class Parcel extends Model
         'geo_id',
         'plan_id',
         'parent_parcel_id',
+        'parent_owner_id',
         'geom',
         'asset_type',
         'land_transaction',
@@ -75,6 +76,18 @@ class Parcel extends Model
     public function subUnits(): HasMany
     {
         return $this->hasMany(Parcel::class, 'parent_parcel_id');
+    }
+
+    /**
+     * The owner this parcel stays under although its deed is in another name
+     * (land handed to a child, a holding under its founder). Not ownership:
+     * it only lets that owner go on seeing the parcel in the portal.
+     *
+     * @return BelongsTo<Owner, $this>
+     */
+    public function parentOwner(): BelongsTo
+    {
+        return $this->belongsTo(Owner::class, 'parent_owner_id');
     }
 
     /** @return HasMany<Deed, $this> */

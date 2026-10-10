@@ -12,6 +12,7 @@ use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\ParcelPhoto;
 use App\Services\Owner\OwnerStatisticsService;
+use App\Support\OwnerVisibility;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,7 @@ class ProfileController extends Controller
             'stats' => [
                 'parcels' => $parcelIds->count(),
                 'deeds' => $summary['deeds_active'] + $summary['deeds_expired'],
-                'documents' => ParcelPhoto::whereIn('parcel_id', $parcelIds)->count(),
+                'documents' => OwnerVisibility::documents(ParcelPhoto::query(), $owner)->count(),
                 'pending_requests' => $owner->modificationRequests()
                     ->where('status', ModificationRequestStatus::Pending->value)
                     ->count(),

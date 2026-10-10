@@ -62,6 +62,10 @@ class OwnerIndex extends Component
 
         return Owner::query()
             ->withCount('currentDeeds as parcel_count')
+            // Parcels kept under this owner although held in another's name (see Owner::linkedParcels()).
+            ->withCount(['parcelsUnderParent as linked_count' => fn ($q) => $q->whereDoesntHave(
+                'heldDeed.owners', fn ($o) => $o->whereColumn('owners.id', 'parcels.parent_owner_id')
+            )])
             ->withCount('deeds')
             ->when($ownerIds !== null, fn ($q) => $q->whereIn('id', $ownerIds))
             ->when($this->search !== '', function ($q): void {

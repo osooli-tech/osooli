@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Http\Middleware\SetLocale;
+use App\Models\Owner;
 use App\Services\Import\ArchiveExtractor;
 use App\Support\Database\DatabaseSettings;
+use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -40,6 +44,13 @@ class AppServiceProvider extends ServiceProvider
         // dompdf does not shape Arabic text or apply the bidi algorithm, so any
         // Arabic string renders character-reversed. @ar(...) pre-shapes it into
         // visual order first; used only inside PDF export views.
+        // The portal's sidebar shows "linked parcels" only to an owner who has
+        // some; the layout stays a thin shell and is handed the answer.
+        View::composer('portal.layout', function (ViewContract $view): void {
+            $owner = Auth::guard('owner')->user();
+            $view->with('hasLinkedParcels', $owner instanceof Owner && $owner->linkedParcels()->exists());
+        });
+
         Blade::directive('ar', fn (string $expression) => "<?php echo \App\Support\PdfArabicText::render($expression); ?>");
     }
 }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\AuditLog;
 use App\Models\ParcelPhoto;
 use App\Support\DocumentVault;
+use App\Support\OwnerVisibility;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -28,9 +29,9 @@ class DocumentController extends ApiController
     {
         $photo = ParcelPhoto::whereKey($document)->firstOrFail();
 
-        // Through the parcels the owner holds now — not any deed they were ever
-        // on, which would keep a former owner's access after a parcel changes hands.
-        abort_unless($this->owner()->parcels()->whereKey($photo->parcel_id)->exists(), 404);
+        // On a parcel the owner holds now, and not the scan of a deed they are
+        // not on: neither a former owner nor the next one reads the other's deed.
+        abort_unless(OwnerVisibility::canSeeDocument($this->owner(), $photo), 404);
 
         // Opened by the vault (files are encrypted at rest); a missing file is a 404, not a logged download.
         $response = DocumentVault::response($photo, download: true);

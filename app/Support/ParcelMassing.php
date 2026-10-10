@@ -16,6 +16,8 @@ final class ParcelMassing
 {
     private const LAND_SLAB_M = 1.5;
 
+    public const LINKED = 'linked';
+
     /** @var array<string, array{height: float, color: string}> */
     private const CATEGORIES = [
         'land_residential' => ['height' => self::LAND_SLAB_M, 'color' => '#3fa77f'],
@@ -25,6 +27,8 @@ final class ParcelMassing
         'villa' => ['height' => 9.0, 'color' => '#e6c364'],
         'building' => ['height' => 24.0, 'color' => '#5b7fb0'],
         'warehouse' => ['height' => 8.0, 'color' => '#a0714f'],
+        // Held under the owner in someone else's name — set apart from their own land.
+        self::LINKED => ['height' => self::LAND_SLAB_M, 'color' => '#9b6dd6'],
     ];
 
     /** A parcel with no asset type recorded is treated as land. */
