@@ -60,7 +60,7 @@ class ImportBatch extends Model
      * and this instance is left as it was — it never adopts a status it did
      * not actually manage to write.
      *
-     * @param  array<string, mixed>  $attributes
+     * @param  array<model-property<static>, mixed>  $attributes
      */
     public function transitionTo(ImportStatus $status, array $attributes = []): bool
     {

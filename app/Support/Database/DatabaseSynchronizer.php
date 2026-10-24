@@ -517,7 +517,7 @@ final class DatabaseSynchronizer
     {
         foreach ($connection->getSchemaBuilder()->getIndexes($table) as $index) {
             if ($index['primary']) {
-                return array_values($index['columns']);
+                return $index['columns'];
             }
         }
 
