@@ -1,38 +1,47 @@
-@props(['frontage'])
+@props(['frontage', 'geojson' => null])
 
-{{-- The lot seen from above: streets drawn along the sides that face one,
-     with their widths, and each side's length. North is up; dir=ltr keeps
-     east on the right regardless of page direction. --}}
+{{-- The lot seen from above in its real shape: streets drawn along the edges
+     that face one, with their widths, and each side's length on its edge.
+     North is up; dir=ltr keeps east on the right regardless of page direction. --}}
 @php
     $streets = $frontage['streets'];
     $dims = $frontage['dims'];
-    $sideLine = ['n' => [60, 40, 180, 40], 's' => [60, 160, 180, 160], 'e' => [180, 40, 180, 160], 'w' => [60, 40, 60, 160]];
-    $road = ['n' => [40, 10, 200, 26], 's' => [40, 174, 200, 190], 'e' => [194, 20, 210, 180], 'w' => [30, 20, 46, 180]];
-    $dimPos = ['n' => [120, 54], 's' => [120, 152], 'e' => [168, 104], 'w' => [72, 104]];
-    $roadText = ['n' => [120, 21], 's' => [120, 185], 'e' => [202, 100], 'w' => [38, 100]];
+    $outline = \App\Support\LotOutline::fit($geojson, 62, 42, 116, 116, $dims);
+    $points = collect($outline['points'])->map(fn ($p) => $p[0].','.$p[1])->implode(' ');
+    $roadGap = 13;
+    $labelGap = 9;
 @endphp
 <svg viewBox="0 0 240 200" dir="ltr" {{ $attributes->merge(['class' => 'w-full']) }} role="img" aria-label="{{ __('portal.frontage_title') }}">
-    {{-- streets --}}
+    {{-- streets, one straight road along the outside of each side facing one --}}
     @foreach ($streets as $side => $width)
-        @php [$x1, $y1, $x2, $y2] = $road[$side]; @endphp
-        <rect x="{{ $x1 }}" y="{{ $y1 }}" width="{{ $x2 - $x1 }}" height="{{ $y2 - $y1 }}" rx="4" class="fill-primary/80 dark:fill-primary-fixed-dim/40" />
-        @php [$tx, $ty] = $roadText[$side]; $vertical = in_array($side, ['e', 'w'], true); @endphp
-        <text x="{{ $tx }}" y="{{ $ty }}" text-anchor="middle" dominant-baseline="middle" font-size="9" class="fill-white"
-              @if ($vertical) transform="rotate(-90 {{ $tx }} {{ $ty }})" @endif>
-            {{ __('portal.street') }}{{ $width ? ' '.rtrim(rtrim(number_format($width, 1), '0'), '.').' '.__('portal.metre_short') : '' }}
-        </text>
+        @if ($anchor = $outline['anchors'][$side] ?? null)
+            <line x1="{{ $anchor['x1'] + $anchor['nx'] * $roadGap }}" y1="{{ $anchor['y1'] + $anchor['ny'] * $roadGap }}"
+                  x2="{{ $anchor['x2'] + $anchor['nx'] * $roadGap }}" y2="{{ $anchor['y2'] + $anchor['ny'] * $roadGap }}"
+                  stroke-width="15" stroke-linecap="round" class="stroke-primary/80 dark:stroke-primary-fixed-dim/40" />
+        @endif
+    @endforeach
+    @foreach ($streets as $side => $width)
+        @if ($anchor = $outline['anchors'][$side] ?? null)
+            @php $tx = $anchor['x'] + $anchor['nx'] * $roadGap; $ty = $anchor['y'] + $anchor['ny'] * $roadGap; @endphp
+            <text x="{{ $tx }}" y="{{ $ty }}" text-anchor="middle" dominant-baseline="middle" font-size="9" class="fill-white"
+                  transform="rotate({{ $anchor['angle'] }} {{ $tx }} {{ $ty }})">
+                {{ __('portal.street') }}{{ $width ? ' '.rtrim(rtrim(number_format($width, 1), '0'), '.').' '.__('portal.metre_short') : '' }}
+            </text>
+        @endif
     @endforeach
 
     {{-- the lot --}}
-    <rect x="60" y="40" width="120" height="120" rx="3" class="fill-secondary/15 stroke-secondary" stroke-width="2" />
-    @foreach ($sideLine as $side => [$x1, $y1, $x2, $y2])
-        @if (array_key_exists($side, $streets))
-            <line x1="{{ $x1 }}" y1="{{ $y1 }}" x2="{{ $x2 }}" y2="{{ $y2 }}" class="stroke-tertiary-container" stroke-width="5" stroke-linecap="round" />
+    <polygon points="{{ $points }}" stroke-linejoin="round" class="fill-secondary/15 stroke-secondary" stroke-width="2" />
+    @foreach ($outline['edges'] as $edge)
+        @if (array_key_exists($edge['side'], $streets))
+            <line x1="{{ $edge['x1'] }}" y1="{{ $edge['y1'] }}" x2="{{ $edge['x2'] }}" y2="{{ $edge['y2'] }}" class="stroke-tertiary-container" stroke-width="5" stroke-linecap="round" />
         @endif
-        @if ($dims[$side] !== null)
-            @php [$dx, $dy] = $dimPos[$side]; $vertical = in_array($side, ['e', 'w'], true); @endphp
+    @endforeach
+    @foreach ($dims as $side => $length)
+        @if ($length !== null && ($anchor = $outline['anchors'][$side] ?? null))
+            @php $dx = $anchor['x'] - $anchor['nx'] * $labelGap; $dy = $anchor['y'] - $anchor['ny'] * $labelGap; @endphp
             <text x="{{ $dx }}" y="{{ $dy }}" text-anchor="middle" dominant-baseline="middle" font-size="10" class="fill-on-surface dark:fill-white"
-                  @if ($vertical) transform="rotate(-90 {{ $dx }} {{ $dy }})" @endif>{{ rtrim(rtrim(number_format($dims[$side], 2), '0'), '.') }} {{ __('portal.metre_short') }}</text>
+                  transform="rotate({{ $anchor['angle'] }} {{ $dx }} {{ $dy }})">{{ rtrim(rtrim(number_format($length, 2), '0'), '.') }} {{ __('portal.metre_short') }}</text>
         @endif
     @endforeach
 

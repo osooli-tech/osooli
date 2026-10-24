@@ -296,7 +296,7 @@
                 @endif
             </h2>
             @if ($frontage)
-                <x-portal.frontage-diagram :frontage="$frontage" class="max-w-md mx-auto" />
+                <x-portal.frontage-diagram :frontage="$frontage" :geojson="$parcelGeojson" class="max-w-md mx-auto" />
             @else
                 <p class="text-sm text-on-surface-variant dark:text-on-primary-container py-6 text-center">{{ __('parcels.no_boundary') }}</p>
             @endif

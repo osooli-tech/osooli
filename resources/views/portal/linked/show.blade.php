@@ -35,7 +35,7 @@
                     <h2 class="flex items-center gap-2 text-sm font-semibold mb-3">
                         <span class="material-symbols-outlined text-[18px] text-secondary">straighten</span>{{ __('portal.frontage_title') }}
                     </h2>
-                    <x-portal.frontage-diagram :frontage="$frontage" />
+                    <x-portal.frontage-diagram :frontage="$frontage" :geojson="$parcelGeojson" />
                 </section>
             @endif
 

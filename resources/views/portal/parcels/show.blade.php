@@ -74,7 +74,7 @@
             <span class="material-symbols-outlined text-[18px] text-tertiary">signpost</span>{{ __('portal.frontage_title') }}
         </h2>
         @if ($frontage)
-            <x-portal.frontage-diagram :frontage="$frontage" class="max-w-xs mx-auto" />
+            <x-portal.frontage-diagram :frontage="$frontage" :geojson="$parcelGeojson" class="max-w-xs mx-auto" />
             <div class="grid grid-cols-3 gap-2 mt-3 text-center">
                 <div class="rounded-xl bg-surface-container-low dark:bg-white/5 p-2">
                     <p class="text-base font-bold data-tabular">{{ $frontage['frontage_count'] }}</p>
