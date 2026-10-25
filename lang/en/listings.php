@@ -78,5 +78,6 @@ return [
     'taken_down_msg' => 'The listing was taken down',
     'blocked_msg' => 'This owner will not see the listing',
     'unblocked_msg' => 'The block was removed',
+    'notification' => 'Sale listing request from :name',
     'empty_staff' => 'No listings',
 ];

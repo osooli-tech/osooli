@@ -78,5 +78,6 @@ return [
     'taken_down_msg' => 'أُوقف العرض',
     'blocked_msg' => 'لن يرى هذا المالك العرض',
     'unblocked_msg' => 'أُلغي المنع',
+    'notification' => 'طلب عرض للبيع من :name',
     'empty_staff' => 'لا توجد عروض',
 ];

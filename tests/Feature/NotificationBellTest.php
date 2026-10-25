@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\ListingStatus;
 use App\Livewire\Notifications\NotificationBell;
 use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\Parcel;
+use App\Models\ParcelListing;
 use App\Models\PresentationRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -96,6 +98,37 @@ class NotificationBellTest extends TestCase
         $component = Livewire::actingAs($this->admin())->test(NotificationBell::class);
 
         $component->call('poll')->assertNotDispatched('play-notification-sound');
+    }
+
+    public function test_a_pending_sale_listing_rings_and_opens_that_listing(): void
+    {
+        $listing = $this->createListing(ListingStatus::Pending);
+        $this->createListing(ListingStatus::Approved);
+
+        $user = $this->admin();
+        $user->givePermissionTo(Permission::findOrCreate('listings.view', 'web'));
+
+        Livewire::actingAs($user)
+            ->test(NotificationBell::class)
+            ->assertSet('lastKnownCount', 1)
+            ->assertSeeHtml('href="'.route('listings.index', ['listing' => $listing->id]).'"');
+    }
+
+    public function test_a_sale_listing_does_not_ring_without_the_permission(): void
+    {
+        $this->createListing(ListingStatus::Pending);
+
+        Livewire::actingAs($this->admin())
+            ->test(NotificationBell::class)
+            ->assertSet('lastKnownCount', 0);
+    }
+
+    private function createListing(ListingStatus $status): ParcelListing
+    {
+        $parcel = Parcel::create(['geo_id' => 'L-'.uniqid()]);
+        $owner = Owner::create(['name' => 'بائع']);
+
+        return ParcelListing::create(['parcel_id' => $parcel->id, 'owner_id' => $owner->id, 'contact_phone' => '0555123456', 'status' => $status]);
     }
 
     private function createModificationRequest(): ModificationRequest

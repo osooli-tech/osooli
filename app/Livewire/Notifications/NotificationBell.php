@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Notifications;
 
+use App\Enums\ListingStatus;
 use App\Enums\ModificationRequestStatus;
 use App\Models\ModificationRequest;
+use App\Models\ParcelListing;
 use App\Models\PresentationRequest;
 use App\Models\User;
 use App\Support\OwnerScope;
@@ -42,7 +44,8 @@ class NotificationBell extends Component
     public function count(): int
     {
         return ($this->presentationRequests()?->count() ?? 0)
-            + ($this->modificationRequests()?->count() ?? 0);
+            + ($this->modificationRequests()?->count() ?? 0)
+            + ($this->listingRequests()?->count() ?? 0);
     }
 
     /**
@@ -72,8 +75,18 @@ class NotificationBell extends Component
                 'created_at' => $r->created_at,
             ]);
 
+        $listingRequests = collect($this->listingRequests()?->with(['parcel:id,parcel_no', 'owner:id,name'])->latest()->limit(5)->get())
+            ->map(fn (ParcelListing $l) => [
+                'type' => 'listing_request',
+                'title' => (string) $l->parcel?->parcel_no,
+                'subtitle' => __('listings.notification', ['name' => $l->owner?->name]),
+                'url' => route('listings.index', ['listing' => $l->id]),
+                'created_at' => $l->created_at,
+            ]);
+
         return $presentationRequests
             ->concat($modificationRequests)
+            ->concat($listingRequests)
             ->sortByDesc('created_at')
             ->take(8)
             ->values()
@@ -113,6 +126,27 @@ class NotificationBell extends Component
 
         return ModificationRequest::query()
             ->where('status', ModificationRequestStatus::Pending)
+            ->when($parcelIds !== null, fn (Builder $q) => $q->whereIn('parcel_id', $parcelIds));
+    }
+
+    /**
+     * Sale listings waiting for approval on parcels this user can see — or
+     * null without permission to open the listings page.
+     *
+     * @return Builder<ParcelListing>|null
+     */
+    private function listingRequests(): ?Builder
+    {
+        $user = $this->user();
+
+        if (! $user?->can('listings.view')) {
+            return null;
+        }
+
+        $parcelIds = OwnerScope::parcelIds($user);
+
+        return ParcelListing::query()
+            ->where('status', ListingStatus::Pending)
             ->when($parcelIds !== null, fn (Builder $q) => $q->whereIn('parcel_id', $parcelIds));
     }
 
