@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeedController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\LegalController;
+use App\Http\Controllers\Api\V1\ListingController;
 use App\Http\Controllers\Api\V1\ModificationRequestController;
 use App\Http\Controllers\Api\V1\ParcelController;
 use App\Http\Controllers\Api\V1\ProfileController;
@@ -55,6 +56,13 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function (): void {
     Route::get('deeds', [DeedController::class, 'index'])->name('api.deeds.index');
 
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('api.documents.download');
+
+    // Parcels owners offer for sale; others see an approved one without price, deed or name.
+    Route::get('listings', [ListingController::class, 'index'])->name('api.listings.index');
+    Route::get('listings/mine', [ListingController::class, 'mine'])->name('api.listings.mine');
+    Route::get('listings/{listing}', [ListingController::class, 'show'])->whereNumber('listing')->name('api.listings.show');
+    Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->name('api.listings.destroy');
+    Route::post('parcels/{parcel}/listing', [ListingController::class, 'store'])->whereNumber('parcel')->middleware('throttle:10,1')->name('api.listings.store');
 
     Route::get('modification-requests', [ModificationRequestController::class, 'index'])->name('api.modification-requests.index');
     Route::post('modification-requests', [ModificationRequestController::class, 'store'])->name('api.modification-requests.store');

@@ -64,6 +64,7 @@ class Sidebar extends Component
             'title' => 'nav.group_requests',
             'items' => [
                 ['route' => 'modification-requests.index', 'label' => 'nav.modification_requests', 'icon' => 'edit_note', 'permission' => 'modification_requests.view'],
+                ['route' => 'listings.index', 'label' => 'listings.staff_title', 'icon' => 'storefront', 'permission' => 'listings.view'],
                 ['route' => 'presentation-requests.index', 'label' => 'nav.presentation_requests', 'icon' => 'connect_without_contact', 'permission' => 'presentation_requests.view'],
             ],
         ],

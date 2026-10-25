@@ -22,6 +22,8 @@ return [
     'modification_requests.view' => 'مشاهدة طلبات التعديل',
     'modification_requests.manage' => 'إدارة طلبات التعديل',
     'presentation_requests.view' => 'مشاهدة طلبات العروض التقديمية',
+    'listings.view' => 'مشاهدة الأراضي المعروضة للبيع',
+    'listings.manage' => 'الموافقة على عروض البيع وإدارتها',
     'users.view' => 'مشاهدة المستخدمين',
     'users.create' => 'إضافة مستخدم',
     'users.edit' => 'تعديل مستخدم',

@@ -32,7 +32,7 @@ class RoleManager extends Component
         'map' => ['boundaries.view', 'boundaries.edit', 'map_layers.view', 'map_layers.manage'],
         'archive' => ['archive.view', 'archive.restore'],
         'exports' => ['exports.create', 'exports.bulk', 'imports.run'],
-        'requests' => ['modification_requests.view', 'modification_requests.manage', 'presentation_requests.view'],
+        'requests' => ['modification_requests.view', 'modification_requests.manage', 'presentation_requests.view', 'listings.view', 'listings.manage'],
         'owners' => ['owners.create', 'owners.edit'],
         'users' => ['users.view', 'users.create', 'users.edit', 'users.delete'],
         'admin' => ['roles.manage', 'audit_logs.view', 'sync.view', 'database.manage'],

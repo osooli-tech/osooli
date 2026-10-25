@@ -8,6 +8,7 @@ use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\DocumentController;
 use App\Http\Controllers\Portal\GeoJsonController;
 use App\Http\Controllers\Portal\LinkedParcelController;
+use App\Http\Controllers\Portal\ListingController;
 use App\Http\Controllers\Portal\ModificationRequestController;
 use App\Http\Controllers\Portal\ParcelController;
 use App\Http\Controllers\Portal\ProfileController;
@@ -62,6 +63,12 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
         // Parcels held under the owner but in someone else's name (parcels.parent_owner_id).
         Route::get('/linked', [LinkedParcelController::class, 'index'])->name('linked.index');
         Route::get('/linked/{parcel}', [LinkedParcelController::class, 'show'])->name('linked.show');
+
+        // Parcels owners offer for sale, shown to the others once staff approve them.
+        Route::get('/market', [ListingController::class, 'index'])->name('listings.index');
+        Route::get('/market/{listing}', [ListingController::class, 'show'])->name('listings.show');
+        Route::post('/parcels/{parcel}/listing', [ListingController::class, 'store'])->middleware('throttle:10,1')->name('parcels.listing.store');
+        Route::delete('/listings/{listing}', [ListingController::class, 'destroy'])->name('listings.destroy');
 
         Route::get('/documents', [DocumentController::class, 'list'])->name('documents.index');
         Route::get('/modification-requests', [ModificationRequestController::class, 'index'])->name('modification-requests.index');

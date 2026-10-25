@@ -596,6 +596,53 @@
 
 </div>
 
+{{-- ── Offer for sale ─────────────────────────────────────────────────── --}}
+@php $owner = auth('owner')->user(); @endphp
+<div class="mt-5 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5 border border-outline-variant dark:border-white/10 shadow-sm">
+    <div class="flex items-center gap-2 mb-1">
+        <span class="material-symbols-outlined text-[18px] text-tertiary">sell</span>
+        <h2 class="font-semibold text-on-surface dark:text-white text-sm">{{ __('listings.offer_title') }}</h2>
+    </div>
+    <p class="text-xs text-on-surface-variant dark:text-on-primary-container mb-4">{{ __('listings.offer_hint') }}</p>
+
+    @if (session('listing_status'))
+        <p class="mb-3 text-sm text-secondary font-medium">{{ session('listing_status') }}</p>
+    @endif
+    @if ($errors->listing->any())
+        <p class="mb-3 text-sm text-error">{{ $errors->listing->first() }}</p>
+    @endif
+
+    @if ($openListing)
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <p class="text-sm font-medium">
+                {{ __($openListing->owner_id === $owner->getKey() ? 'listings.offer_open' : 'listings.offer_open_other', ['status' => $openListing->status->label()]) }}
+                <span class="ms-1 text-on-surface-variant dark:text-on-primary-container ltr" dir="ltr">{{ $openListing->contact_phone }}</span>
+            </p>
+            @if ($openListing->owner_id === $owner->getKey())
+                <form method="POST" action="{{ route('portal.listings.destroy', $openListing->id) }}">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-error border border-error/30 hover:bg-error/10 transition-colors">
+                        {{ __('listings.withdraw') }}
+                    </button>
+                </form>
+            @endif
+        </div>
+    @else
+        <form method="POST" action="{{ route('portal.parcels.listing.store', $parcel) }}" class="flex flex-col sm:flex-row sm:items-end gap-3">
+            @csrf
+            <div class="flex-1 max-w-xs">
+                <label class="block text-xs font-medium mb-1 text-on-surface-variant dark:text-on-primary-container">{{ __('listings.contact_phone') }}</label>
+                <input type="tel" name="contact_phone" required dir="ltr" value="{{ old('contact_phone', $owner->phone) }}"
+                       class="w-full px-3 py-2 text-sm rounded-xl bg-surface-container dark:bg-[#252b3b] border border-outline-variant dark:border-white/10 ltr">
+            </div>
+            <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium bg-tertiary-container text-on-tertiary-container hover:opacity-90 transition-opacity">
+                {{ __('listings.offer_submit') }}
+            </button>
+        </form>
+    @endif
+</div>
+
 {{-- ── Data-change requests ───────────────────────────────────────────── --}}
 @php
     $requestOptions = [

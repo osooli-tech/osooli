@@ -108,6 +108,10 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:modification_requests.view')
         ->name('modification-requests.index');
 
+    Route::get('/listings', fn () => view('listings.index'))
+        ->middleware('can:listings.view')
+        ->name('listings.index');
+
     // Presentation (demo) Requests
     Route::get('/presentation-requests', fn () => view('presentation-requests.index'))
         ->middleware('can:presentation_requests.view')

@@ -22,6 +22,8 @@ return [
     'modification_requests.view' => 'View Modification Requests',
     'modification_requests.manage' => 'Manage Modification Requests',
     'presentation_requests.view' => 'View Demo Requests',
+    'listings.view' => 'View Parcels Listed for Sale',
+    'listings.manage' => 'Approve and Manage Sale Listings',
     'users.view' => 'View Users',
     'users.create' => 'Create User',
     'users.edit' => 'Edit User',

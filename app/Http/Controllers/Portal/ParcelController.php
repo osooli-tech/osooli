@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Portal;
 
+use App\Enums\ListingStatus;
 use App\Enums\PhotoType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreModificationRequest;
 use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\Parcel;
+use App\Models\ParcelListing;
 use App\Queries\OwnerParcelQuery;
 use App\Services\Owner\LinkedParcelsService;
 use App\Services\Owner\OwnerInsightsService;
@@ -89,6 +91,7 @@ class ParcelController extends Controller
             'frontage' => ParcelFrontage::read($found->boundary),
             'massing' => $this->massingOf($found),
             'twin' => $twin->for($found),
+            'openListing' => ParcelListing::query()->where('parcel_id', $found->id)->whereIn('status', ListingStatus::openValues())->latest('id')->first(),
             'market' => $found->plan?->district_id === null ? null
                 : ($insights->marketAverages(collect([$found->plan->district_id]), $owner->parcels()->pluck('parcels.id'))[$found->plan->district_id] ?? null),
         ]);
