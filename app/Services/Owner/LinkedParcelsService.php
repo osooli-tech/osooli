@@ -108,6 +108,39 @@ class LinkedParcelsService
         return $parcel->photos->filter(fn (ParcelPhoto $photo): bool => $photo->deed_id === null || $photo->deed_id === $heldDeedId)->values();
     }
 
+    /**
+     * The owner's own holdings as one more portfolio under their own name,
+     * shown first beside the portfolios of the people they handed land to —
+     * so the whole estate reads as portfolios. Null when they hold nothing.
+     *
+     * @return array{holder_id: int, holder: string, own: true, parcels_count: int, area: float, value: float|null, parcels: list<array<string, mixed>>}|null
+     */
+    public function ownGroup(Owner $owner): ?array
+    {
+        $rows = $owner->parcels()
+            ->select('parcels.*')
+            ->with(['plan.district.city', 'heldDeed.owners'])
+            ->orderBy('parcels.parcel_no')
+            ->get()
+            ->map(fn (Parcel $parcel): array => $this->row($parcel, true));
+
+        if ($rows->isEmpty()) {
+            return null;
+        }
+
+        $values = $rows->pluck('value')->filter(static fn ($v): bool => $v !== null);
+
+        return [
+            'holder_id' => (int) $owner->getKey(),
+            'holder' => (string) $owner->name,
+            'own' => true,
+            'parcels_count' => $rows->count(),
+            'area' => (float) $rows->sum('area'),
+            'value' => $values->isEmpty() ? null : (float) $values->sum(),
+            'parcels' => $rows->values()->all(),
+        ];
+    }
+
     /** @return Builder<Parcel> */
     private function query(Owner $owner): Builder
     {

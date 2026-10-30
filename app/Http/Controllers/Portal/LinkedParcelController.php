@@ -22,8 +22,14 @@ class LinkedParcelController extends Controller
 {
     public function index(LinkedParcelsService $linked): View
     {
+        $groups = $linked->groups($this->owner());
+        // The owner's own holdings lead, as their own portfolio beside the ones they handed on.
+        if ($groups !== [] && ($own = $linked->ownGroup($this->owner())) !== null) {
+            array_unshift($groups, $own);
+        }
+
         return view('portal.linked.index', [
-            'groups' => $linked->groups($this->owner()),
+            'groups' => $groups,
             'showValue' => PortalSetting::allows(PortalSetting::SHOW_VALUE),
         ]);
     }

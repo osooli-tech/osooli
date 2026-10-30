@@ -182,6 +182,7 @@ return [
     'linked_no_map' => 'No map for this parcel',
     'acquired_from' => 'Came to you from: :name',
     'linked_portfolio_of' => 'Portfolio of :name',
+    'own_portfolio_hint' => 'Your land, with the deeds in your name',
     'linked_hint' => 'Parcels given to the portfolio\'s holder, with the deed in their name',
     'view_cards' => 'Cards',
     'view_table' => 'Table',

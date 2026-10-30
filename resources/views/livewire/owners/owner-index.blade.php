@@ -299,7 +299,14 @@
                                     </div>
 
                                     {{-- Parcels this owner handed on but stays the parent owner of: one portfolio per present holder --}}
-                                    @php $linkedGroups = $owner->linked_count > 0 ? app(\App\Services\Owner\LinkedParcelsService::class)->groups($owner, forStaff: true) : []; @endphp
+                                    @php
+                                        $linkedService = app(\App\Services\Owner\LinkedParcelsService::class);
+                                        $linkedGroups = $owner->linked_count > 0 ? $linkedService->groups($owner, forStaff: true) : [];
+                                        // Beside the portfolios of those they handed land to, the owner's own holdings read as their own portfolio, first.
+                                        if ($linkedGroups !== [] && ($ownGroup = $linkedService->ownGroup($owner)) !== null) {
+                                            array_unshift($linkedGroups, $ownGroup);
+                                        }
+                                    @endphp
                                     @if ($linkedGroups !== [])
                                         <div class="mt-5 pt-4 border-t border-outline-variant dark:border-white/10">
                                             <h4 class="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant dark:text-on-primary-container mb-3">
@@ -309,7 +316,7 @@
                                             </h4>
                                             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                                                 @foreach ($linkedGroups as $group)
-                                                    <div class="flex flex-col h-full rounded-xl p-3 bg-surface dark:bg-[#1a2435] border border-outline-variant dark:border-white/10">
+                                                    <div class="flex flex-col h-full rounded-xl p-3 bg-surface dark:bg-[#1a2435] border {{ ($group['own'] ?? false) ? 'border-tertiary-container ring-1 ring-tertiary-container/40' : 'border-outline-variant dark:border-white/10' }}">
                                                         <p class="font-medium text-sm text-on-surface dark:text-white">{{ __('owners.linked_portfolio_of', ['name' => $group['holder']]) }}</p>
                                                         <p class="text-xs text-on-surface-variant dark:text-on-primary-container data-tabular mt-1">
                                                             {{ $group['parcels_count'] }} {{ __('owners.portfolio_parcels_unit') }}

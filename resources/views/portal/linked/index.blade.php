@@ -27,7 +27,7 @@
                     <div class="min-w-0">
                         <h2 class="font-semibold truncate">{{ __('portal.linked_portfolio_of', ['name' => $group['holder']]) }}</h2>
                         <p class="flex items-center gap-1 text-xs text-on-surface-variant dark:text-on-primary-container">
-                            <span class="material-symbols-outlined text-[14px]">info</span>{{ __('portal.linked_hint') }}
+                            <span class="material-symbols-outlined text-[14px]">info</span>{{ ($group['own'] ?? false) ? __('portal.own_portfolio_hint') : __('portal.linked_hint') }}
                         </p>
                     </div>
                 </div>
@@ -51,7 +51,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
                 @foreach ($group['parcels'] as $row)
-                    <a href="{{ route('portal.linked.show', $row['id']) }}"
+                    <a href="{{ ($group['own'] ?? false) ? route('portal.parcels.show', $row['id']) : route('portal.linked.show', $row['id']) }}"
                        class="flex flex-col h-full rounded-2xl p-4 border border-outline-variant dark:border-white/10 hover:shadow-md hover:-translate-y-0.5 transition-all">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-lg font-bold data-tabular">{{ $row['parcel_no'] ?? '—' }}</span>

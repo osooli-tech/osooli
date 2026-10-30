@@ -182,6 +182,7 @@ return [
     'linked_no_map' => 'لا توجد خريطة لهذه القطعة',
     'acquired_from' => 'انتقلت إليك من: :name',
     'linked_portfolio_of' => 'محفظة :name',
+    'own_portfolio_hint' => 'أراضيك المسجّلة صكوكها باسمك',
     'linked_hint' => 'قطع معطاة لصاحب المحفظة وصكها باسمه',
     'view_cards' => 'بطاقات',
     'view_table' => 'جدول',

@@ -86,6 +86,24 @@ class LinkedParcelsTest extends TestCase
         $this->get(route('portal.linked.show', $this->sold->id))->assertNotFound();
     }
 
+    public function test_the_parents_own_holdings_lead_as_a_portfolio_in_their_name(): void
+    {
+        $this->actingAs($this->father, 'owner')->get(route('portal.linked.index'))
+            ->assertOk()
+            ->assertSeeInOrder([__('portal.linked_portfolio_of', ['name' => 'الأب']), '503', __('portal.linked_portfolio_of', ['name' => 'الابن']), '501'])
+            ->assertSee(route('portal.parcels.show', Parcel::where('parcel_no', '503')->value('id')), false);
+
+        $this->actingAs(User::factory()->create(['is_active' => true]));
+        $html = Livewire::test(OwnerIndex::class)
+            ->set('search', 'الأب')
+            ->call('toggleExpand', $this->father->id)
+            ->html();
+
+        // After the portfolios' heading: the father's own portfolio, then the son's.
+        $portfolios = (string) strstr($html, 'family_restroom');
+        $this->assertMatchesRegularExpression('/الأب.*503.*الابن.*501/su', $portfolios);
+    }
+
     public function test_a_linked_parcel_never_counts_as_the_parents_own(): void
     {
         $this->assertSame(['503'], $this->father->parcels()->pluck('parcel_no')->all());
