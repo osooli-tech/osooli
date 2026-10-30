@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Portal;
 
 use App\Enums\ListingStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Listings\StoreInquiryRequest;
 use App\Http\Requests\Listings\StoreListingRequest;
 use App\Models\Owner;
 use App\Models\ParcelListing;
@@ -34,6 +35,7 @@ class ListingController extends Controller
         return view('portal.listings.index', [
             'listings' => $page->getCollection()->map(fn (ParcelListing $l): array => $this->listings->present($l))->all(),
             'page' => $page,
+            'map' => $this->listings->marketMap($owner),
             'mine' => ParcelListing::query()
                 ->where('owner_id', $owner->getKey())
                 ->with('parcel:id,parcel_no')
@@ -48,6 +50,17 @@ class ListingController extends Controller
         $found = $this->listings->market($this->owner())->findOrFail($listing);
 
         return view('portal.listings.show', ['listing' => $this->listings->present($found)]);
+    }
+
+    /** The buyer asks Sukooki to put them in touch; the seller's number is never shown to them. */
+    public function interest(StoreInquiryRequest $request, int $listing): RedirectResponse
+    {
+        /** @var ParcelListing $found */
+        $found = $this->listings->market($this->owner())->findOrFail($listing);
+
+        $this->listings->inquire($this->owner(), $found, $request->validated('note'));
+
+        return redirect()->route('portal.listings.show', $found->id)->with('listing_status', __('listings.interest_sent'));
     }
 
     public function store(StoreListingRequest $request, int $parcel): RedirectResponse

@@ -67,6 +67,7 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
         // Parcels owners offer for sale, shown to the others once staff approve them.
         Route::get('/market', [ListingController::class, 'index'])->name('listings.index');
         Route::get('/market/{listing}', [ListingController::class, 'show'])->name('listings.show');
+        Route::post('/market/{listing}/interest', [ListingController::class, 'interest'])->middleware('throttle:10,1')->name('listings.interest');
         Route::post('/parcels/{parcel}/listing', [ListingController::class, 'store'])->middleware('throttle:10,1')->name('parcels.listing.store');
         Route::delete('/listings/{listing}', [ListingController::class, 'destroy'])->name('listings.destroy');
 

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Listings;
 
+use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Models\AuditLog;
+use App\Models\ListingInquiry;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelListing;
@@ -24,6 +26,9 @@ use Illuminate\Validation\ValidationException;
 class ParcelListingService
 {
     private const AUDIT_TARGET = 'parcel_listing';
+
+    /** The market map draws at most this many listings at once. */
+    private const MAP_LIMIT = 500;
 
     /** Kept apart from the parcel page's other form, so each shows only its own errors. */
     public const ERROR_BAG = 'listing';
@@ -100,7 +105,8 @@ class ParcelListingService
 
     /**
      * What another owner may browse: the listing with its parcel's shape,
-     * area and place, and nothing about the deed, the price or the seller.
+     * area, streets and place, and nothing about the deed, the price or the
+     * seller — not even their number; Sukooki puts the two in touch.
      *
      * @return Builder<ParcelListing>
      */
@@ -115,14 +121,48 @@ class ParcelListingService
                 'parcel.heldDeed',
                 'parcel.plan.district.city',
                 'parcel.boundary',
+                'inquiries' => fn ($q) => $q->where('owner_id', $viewer->getKey()),
             ])
             ->latest('reviewed_at');
     }
 
     /**
+     * Every listing the viewer may see as one GeoJSON collection for the
+     * market map — each with only what its popup shows.
+     *
+     * @return array{type: string, features: list<array<string, mixed>>}
+     */
+    public function marketMap(Owner $viewer): array
+    {
+        $features = [];
+        foreach ($this->market($viewer)->limit(self::MAP_LIMIT)->get() as $listing) {
+            $shown = $this->present($listing);
+            if ($shown['geojson'] === null) {
+                continue;
+            }
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => json_decode($shown['geojson'], true),
+                'properties' => [
+                    'id' => $shown['id'],
+                    'area' => $shown['area'],
+                    'asset_type' => $shown['asset_type'],
+                    'place' => collect([$shown['district'], $shown['city']])->filter()->implode(' · '),
+                    'streets' => $shown['streets'],
+                ],
+            ];
+        }
+
+        return ['type' => 'FeatureCollection', 'features' => $features];
+    }
+
+    /**
      * The one shape every surface shows a listing in.
      *
-     * @return array{id: int, area: float|null, asset_type: string|null, district: string|null, city: string|null, geojson: string|null, frontage: array<string, mixed>|null, contact_phone: string, whatsapp: string, listed_at: string|null}
+     * The viewer's own request to be put in touch is included when the
+     * listing came from market(), which loads only theirs.
+     *
+     * @return array{id: int, area: float|null, asset_type: string|null, district: string|null, city: string|null, geojson: string|null, frontage: array<string, mixed>|null, streets: list<array{side: string, width: float|null}>, my_interest: string|null, listed_at: string|null}
      */
     public function present(ParcelListing $listing): array
     {
@@ -130,6 +170,12 @@ class ParcelListingService
         $deedArea = $parcel->heldDeed?->deed_area;
         $computed = $parcel->getAttribute('area_sqm');
         $district = $parcel->plan?->district;
+        $frontage = ParcelFrontage::read($parcel->boundary);
+        $streets = [];
+        foreach ($frontage['streets'] ?? [] as $side => $width) {
+            $streets[] = ['side' => (string) __('portal.side.'.$side), 'width' => $width];
+        }
+        $mine = $listing->relationLoaded('inquiries') ? $listing->inquiries->first() : null;
 
         return [
             'id' => $listing->id,
@@ -138,19 +184,35 @@ class ParcelListingService
             'district' => $district?->name_ar,
             'city' => $district?->city?->name_ar,
             'geojson' => $parcel->getAttribute('geom_json'),
-            'frontage' => ParcelFrontage::read($parcel->boundary),
-            'contact_phone' => $listing->contact_phone,
-            'whatsapp' => self::internationalPhone($listing->contact_phone),
+            'frontage' => $frontage,
+            'streets' => $streets,
+            'my_interest' => $mine?->status->value,
             'listed_at' => $listing->reviewed_at?->toDateString(),
         ];
     }
 
-    /** 05XXXXXXXX, 5XXXXXXXX or +9665XXXXXXXX as 9665XXXXXXXX, the form WhatsApp links take. */
-    public static function internationalPhone(string $phone): string
+    /**
+     * A buyer asking Sukooki to put them in touch with the seller. Asking
+     * again while a request is open changes nothing; a closed one reopens.
+     */
+    public function inquire(Owner $buyer, ParcelListing $listing, ?string $note): ListingInquiry
     {
-        $digits = (string) preg_replace('/\D+/', '', $phone);
+        $inquiry = ListingInquiry::query()->firstOrNew(['parcel_listing_id' => $listing->id, 'owner_id' => $buyer->getKey()]);
 
-        return '966'.substr($digits, -9);
+        if ($inquiry->exists && $inquiry->status !== InquiryStatus::Closed) {
+            return $inquiry;
+        }
+
+        $inquiry->fill(['note' => $note, 'status' => InquiryStatus::New, 'handled_by' => null, 'handled_at' => null])->save();
+        $this->audit('listing_inquiry', $listing, owner: $buyer);
+
+        return $inquiry;
+    }
+
+    public function handleInquiry(ListingInquiry $inquiry, InquiryStatus $status, User $by): void
+    {
+        $inquiry->update(['status' => $status, 'handled_by' => $by->getKey(), 'handled_at' => now()]);
+        $this->audit('listing_inquiry_'.$status->value, $inquiry->listing, user: $by);
     }
 
     /** @param  array<model-property<ParcelListing>, mixed>  $attributes */

@@ -53,6 +53,7 @@
                             <th class="px-5 py-3 text-start">{{ __('listings.col_seller') }}</th>
                             <th class="px-5 py-3 text-start">{{ __('listings.col_phone') }}</th>
                             <th class="px-5 py-3 text-start">{{ __('listings.col_status') }}</th>
+                            <th class="px-5 py-3 text-start">{{ __('listings.col_inquiries') }}</th>
                             <th class="px-5 py-3 text-start hidden md:table-cell">{{ __('listings.col_date') }}</th>
                             <th class="px-5 py-3 text-start">{{ __('listings.col_actions') }}</th>
                         </tr>
@@ -65,6 +66,15 @@
                                 <td class="px-5 py-3.5 ltr" dir="ltr">{{ $item->contact_phone }}</td>
                                 <td class="px-5 py-3.5">
                                     <span class="text-xs font-medium px-2 py-0.5 rounded-lg {{ $chip($item->status) }}">{{ $item->status->label() }}</span>
+                                </td>
+                                <td class="px-5 py-3.5">
+                                    @if ($item->new_inquiries_count > 0)
+                                        <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-lg bg-tertiary-container/40 text-on-tertiary-container dark:text-tertiary-fixed-dim">
+                                            <span class="material-symbols-outlined text-[14px]">front_hand</span>{{ $item->new_inquiries_count }}
+                                        </span>
+                                    @else
+                                        <span class="text-on-surface-variant dark:text-on-primary-container">—</span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-3.5 hidden md:table-cell data-tabular text-on-surface-variant dark:text-on-primary-container">{{ $item->created_at?->format('Y-m-d') }}</td>
                                 <td class="px-5 py-3.5">
@@ -93,6 +103,33 @@
                 </div>
 
                 <div class="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-5">
+                    {{-- The whole parcel, as only staff see it --}}
+                    @php
+                        $parcel = $listing->parcel;
+                        $deed = $parcel?->heldDeed;
+                        $frontage = \App\Support\ParcelFrontage::read($parcel?->boundary);
+                        $streets = collect($frontage['streets'] ?? [])->map(fn ($w, $side) => __('portal.side.'.$side).($w ? ' '.rtrim(rtrim(number_format($w, 1), '0'), '.').' '.__('portal.metre_short') : ''))->implode('، ');
+                        $place = collect([$parcel?->plan?->district?->name_ar, $parcel?->plan?->district?->city?->name_ar])->filter()->implode(' · ');
+                    @endphp
+                    <section class="flex flex-col sm:flex-row gap-4 rounded-xl p-4 bg-surface-container-low dark:bg-white/5">
+                        <x-parcel-shape :geojson="$parcel?->getAttribute('geom_json')" class="w-24 h-24 self-center [&_path]:fill-tertiary-container/30 [&_path]:stroke-tertiary" />
+                        <dl class="flex-1 grid grid-cols-2 gap-3 text-sm">
+                            <div><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.parcel_no') }}</dt><dd class="font-semibold ltr">{{ $parcel?->parcel_no ?? '—' }}</dd></div>
+                            <div><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.plan_no') }}</dt><dd class="font-medium ltr">{{ $parcel?->plan?->plan_no ?? '—' }}</dd></div>
+                            <div><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.deed_no') }}</dt><dd class="font-medium ltr">{{ $deed?->deed_no ?? '—' }}</dd></div>
+                            <div><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.deed_area') }}</dt><dd class="font-medium data-tabular">{{ $deed?->deed_area !== null ? number_format((float) $deed->deed_area, 2).' '.__('dashboard.area_unit_sqm') : '—' }}</dd></div>
+                            <div><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.price') }}</dt><dd class="font-medium data-tabular">{{ $parcel?->parcel_price ? number_format((float) $parcel->parcel_price).' '.__('parcels.sar') : '—' }}</dd></div>
+                            <div><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.asset_type') }}</dt><dd class="font-medium">{{ $parcel?->asset_type ?? '—' }}</dd></div>
+                            <div class="col-span-2"><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.streets') }}</dt><dd class="font-medium">{{ $streets ?: __('listings.no_streets') }}</dd></div>
+                            <div class="col-span-2"><dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.place') }}</dt><dd class="font-medium">{{ $place ?: '—' }}</dd></div>
+                        </dl>
+                    </section>
+                    @if ($parcel)
+                        <a href="{{ route('parcels.show', $parcel->id) }}" target="_blank" class="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline">
+                            <span class="material-symbols-outlined text-[16px]">open_in_new</span>{{ __('listings.open_parcel') }}
+                        </a>
+                    @endif
+
                     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div>
                             <dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.col_seller') }}</dt>
@@ -127,6 +164,36 @@
                     @if ($listing->status === \App\Enums\ListingStatus::Rejected && $listing->rejection_reason)
                         <p class="text-xs text-error">{{ __('listings.rejection_reason', ['reason' => $listing->rejection_reason]) }}</p>
                     @endif
+
+                    {{-- Buyers who asked Sukooki to put them in touch --}}
+                    <section class="border-t border-outline-variant dark:border-white/10 pt-5">
+                        <h4 class="text-sm font-semibold mb-3">{{ __('listings.inquiries_title') }}</h4>
+                        @forelse ($listing->inquiries as $inquiry)
+                            <div class="flex flex-wrap items-start justify-between gap-3 py-2.5 border-b last:border-0 border-outline-variant/50 dark:border-white/5" wire:key="inquiry-{{ $inquiry->id }}">
+                                <div class="min-w-0 text-sm">
+                                    <p class="font-medium">{{ $inquiry->owner?->name ?? '—' }}
+                                        <span class="ms-1 text-xs text-on-surface-variant dark:text-on-primary-container ltr" dir="ltr">{{ $inquiry->owner?->phone }}</span>
+                                    </p>
+                                    @if ($inquiry->note)
+                                        <p class="text-xs text-on-surface-variant dark:text-on-primary-container mt-0.5">{{ $inquiry->note }}</p>
+                                    @endif
+                                    <p class="text-[11px] text-on-surface-variant dark:text-on-primary-container mt-0.5 data-tabular">{{ $inquiry->created_at?->format('Y-m-d H:i') }} · {{ $inquiry->status->label() }}</p>
+                                </div>
+                                @can('listings.manage')
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        @if ($inquiry->status === \App\Enums\InquiryStatus::New)
+                                            <button wire:click="markInquiry({{ $inquiry->id }}, 'contacted')" class="text-xs font-medium text-secondary hover:underline">{{ __('listings.mark_contacted') }}</button>
+                                        @endif
+                                        @if ($inquiry->status !== \App\Enums\InquiryStatus::Closed)
+                                            <button wire:click="markInquiry({{ $inquiry->id }}, 'closed')" class="text-xs font-medium text-on-surface-variant dark:text-on-primary-container hover:underline">{{ __('listings.mark_closed') }}</button>
+                                        @endif
+                                    </div>
+                                @endcan
+                            </div>
+                        @empty
+                            <p class="text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('listings.inquiries_none') }}</p>
+                        @endforelse
+                    </section>
 
                     {{-- Owners this listing is hidden from --}}
                     <section class="border-t border-outline-variant dark:border-white/10 pt-5">

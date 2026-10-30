@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Listings;
 
+use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Models\Owner;
 use App\Models\ParcelListing;
@@ -110,11 +111,29 @@ class ListingIndex extends Component
         $this->dispatch('toast', type: 'success', message: __('listings.unblocked_msg'));
     }
 
+    public function markInquiry(int $inquiryId, string $status, ParcelListingService $listings): void
+    {
+        $this->authorize('listings.manage');
+        $inquiry = $this->current()->inquiries()->findOrFail($inquiryId);
+        $listings->handleInquiry($inquiry, InquiryStatus::from($status), $this->user());
+        $this->dispatch('toast', type: 'success', message: __('listings.inquiry_updated_msg'));
+    }
+
+    /** Staff see the whole parcel — deed, price, holders — and who asked to be put in touch. */
     #[Computed]
     public function viewing(): ?ParcelListing
     {
         return $this->viewingId === null ? null : $this->visible()
-            ->with(['parcel.heldDeed.owners:id,name', 'parcel.plan.district', 'owner:id,name,phone', 'blockedOwners:id,name,phone', 'reviewer:id,name'])
+            ->with([
+                'parcel' => fn ($q) => $q->select('parcels.*')->selectRaw('ST_AsGeoJSON(parcels.geom, 6) AS geom_json'),
+                'parcel.heldDeed.owners:id,name',
+                'parcel.plan.district.city',
+                'parcel.boundary',
+                'owner:id,name,phone',
+                'blockedOwners:id,name,phone',
+                'reviewer:id,name',
+                'inquiries' => fn ($q) => $q->with('owner:id,name,phone')->latest('id'),
+            ])
             ->find($this->viewingId);
     }
 
@@ -152,6 +171,7 @@ class ListingIndex extends Component
     {
         $listings = $this->visible()
             ->with(['parcel:id,parcel_no', 'owner:id,name'])
+            ->withCount(['inquiries as new_inquiries_count' => fn (Builder $q) => $q->where('status', InquiryStatus::New)])
             ->when($this->statusFilter !== 'all', fn (Builder $q) => $q->where('status', ListingStatus::from($this->statusFilter)))
             ->when($this->search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
                 ->whereHas('parcel', fn (Builder $p) => $p->whereLike('parcel_no', '%'.$this->search.'%'))

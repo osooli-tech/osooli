@@ -61,6 +61,7 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function (): void {
     Route::get('listings', [ListingController::class, 'index'])->name('api.listings.index');
     Route::get('listings/mine', [ListingController::class, 'mine'])->name('api.listings.mine');
     Route::get('listings/{listing}', [ListingController::class, 'show'])->whereNumber('listing')->name('api.listings.show');
+    Route::post('listings/{listing}/interest', [ListingController::class, 'interest'])->whereNumber('listing')->middleware('throttle:10,1')->name('api.listings.interest');
     Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->name('api.listings.destroy');
     Route::post('parcels/{parcel}/listing', [ListingController::class, 'store'])->whereNumber('parcel')->middleware('throttle:10,1')->name('api.listings.store');
 

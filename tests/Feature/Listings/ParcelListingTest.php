@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature\Listings;
 
 use App\Enums\DeedStatus;
+use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Livewire\Listings\ListingIndex;
 use App\Models\Deed;
+use App\Models\ListingInquiry;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelListing;
@@ -84,17 +86,19 @@ class ParcelListingTest extends TestCase
         $this->assertSame(1, ParcelListing::count());
     }
 
-    public function test_an_approved_listing_shows_the_parcel_and_phone_but_no_price_deed_or_name(): void
+    public function test_an_approved_listing_shows_the_parcel_but_no_price_deed_name_or_number(): void
     {
         $listing = $this->approvedListing();
 
         $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
-            ->assertOk()->assertSee('600')->assertDontSee('البائع الأول');
+            ->assertOk()->assertSee('600')->assertDontSee('البائع الأول')->assertDontSee('0555123456');
 
         $this->get(route('portal.listings.show', $listing->id))
             ->assertOk()
-            ->assertSee('0555123456')
-            ->assertSee('wa.me/966555123456', false)
+            ->assertSee(__('listings.interest_submit'))
+            ->assertDontSee('0555123456')
+            ->assertDontSee('0500000011')
+            ->assertDontSee('wa.me', false)
             ->assertDontSee('750,000')
             ->assertDontSee('444555')
             ->assertDontSee('9911')
@@ -109,13 +113,13 @@ class ParcelListingTest extends TestCase
 
         $item = $this->getJson(route('api.listings.show', $listing->id))->assertOk()->json('data');
 
-        $this->assertSame('0555123456', $item['contact_phone']);
         $this->assertSame(600.0, (float) $item['area']);
         $this->assertSame('MultiPolygon', $item['geometry']['type']);
         $this->assertEqualsCanonicalizing(
-            ['id', 'area', 'asset_type', 'district', 'city', 'frontage', 'contact_phone', 'whatsapp', 'listed_at', 'geometry'],
+            ['id', 'area', 'asset_type', 'district', 'city', 'frontage', 'streets', 'my_interest', 'listed_at', 'geometry'],
             array_keys($item),
         );
+        $this->assertStringNotContainsString('0555123456', (string) json_encode($item));
         $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(1, 'data');
     }
 
@@ -209,6 +213,71 @@ class ParcelListingTest extends TestCase
         $this->assertSame(ListingStatus::Approved, $listing->status);
         $this->assertSame($manager->id, $listing->reviewed_by);
         $this->assertTrue($listing->blockedOwners()->whereKey($this->viewer->id)->exists());
+    }
+
+    public function test_a_buyer_asks_sukooki_to_put_them_in_touch_once(): void
+    {
+        $listing = $this->approvedListing();
+
+        $this->actingAs($this->viewer, 'owner')
+            ->post(route('portal.listings.interest', $listing->id), ['note' => 'أبغى أعرف السعر'])
+            ->assertRedirect(route('portal.listings.show', $listing->id));
+        $this->post(route('portal.listings.interest', $listing->id), ['note' => 'مرة ثانية']);
+
+        $inquiry = ListingInquiry::sole();
+        $this->assertSame($this->viewer->id, $inquiry->owner_id);
+        $this->assertSame(InquiryStatus::New, $inquiry->status);
+        $this->assertSame('أبغى أعرف السعر', $inquiry->note);
+
+        $this->get(route('portal.listings.show', $listing->id))
+            ->assertSee(__('listings.interest_status', ['status' => InquiryStatus::New->label()]))
+            ->assertDontSee('0555123456');
+
+        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->getJson(route('api.listings.show', $listing->id))->assertJsonPath('data.my_interest', 'new');
+    }
+
+    public function test_a_hidden_owner_cannot_ask_and_the_api_asks_the_same_way(): void
+    {
+        $listing = $this->approvedListing();
+        $hidden = Owner::create(['name' => 'ممنوع', 'national_id' => '1000000015', 'phone' => '0500000015']);
+        $listing->blockedOwners()->attach($hidden->id);
+
+        Sanctum::actingAs($hidden, [], 'sanctum');
+        $this->postJson(route('api.listings.interest', $listing->id))->assertNotFound();
+
+        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->postJson(route('api.listings.interest', $listing->id), ['note' => 'مهتم'])->assertCreated()->assertJsonPath('data.status', 'new');
+        $this->assertSame(1, ListingInquiry::count());
+    }
+
+    public function test_staff_see_the_whole_parcel_and_the_buyer_and_mark_the_request(): void
+    {
+        $listing = $this->approvedListing();
+        $inquiry = ListingInquiry::create(['parcel_listing_id' => $listing->id, 'owner_id' => $this->viewer->id, 'status' => InquiryStatus::New]);
+        $manager = User::factory()->create(['is_active' => true]);
+        $manager->givePermissionTo(Permission::findOrCreate('listings.view', 'web'), Permission::findOrCreate('listings.manage', 'web'));
+
+        Livewire::actingAs($manager)->test(ListingIndex::class)
+            ->set('statusFilter', 'all')
+            ->call('openListing', $listing->id)
+            ->assertSee('444555')
+            ->assertSee('750,000')
+            ->assertSee('0500000013')
+            ->call('markInquiry', $inquiry->id, 'contacted');
+
+        $this->assertSame(InquiryStatus::Contacted, $inquiry->fresh()?->status);
+        $this->assertSame($manager->id, $inquiry->fresh()?->handled_by);
+    }
+
+    public function test_the_market_map_carries_only_the_popup_details(): void
+    {
+        $this->approvedListing();
+
+        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
+            ->assertOk()
+            ->assertViewHas('map', fn (array $map): bool => count($map['features']) === 1
+                && array_keys($map['features'][0]['properties']) === ['id', 'area', 'asset_type', 'place', 'streets']);
     }
 
     private function approvedListing(): ParcelListing

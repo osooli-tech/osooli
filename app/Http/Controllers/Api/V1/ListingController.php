@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Enums\ListingStatus;
+use App\Http\Requests\Listings\StoreInquiryRequest;
 use App\Http\Requests\Listings\StoreListingRequest;
 use App\Models\ParcelListing;
 use App\Services\Listings\ParcelListingService;
@@ -50,6 +51,20 @@ class ListingController extends ApiController
             ->all();
 
         return $this->respondCollection($mine);
+    }
+
+    /** The buyer asks Sukooki to put them in touch; neither side sees the other's number. */
+    public function interest(StoreInquiryRequest $request, int $listing): JsonResponse
+    {
+        $found = $this->listings->market($this->owner())->find($listing);
+
+        if ($found === null) {
+            return $this->respondError(__('api.not_found'), Response::HTTP_NOT_FOUND);
+        }
+
+        $inquiry = $this->listings->inquire($this->owner(), $found, $request->validated('note'));
+
+        return $this->respondCreated(['status' => $inquiry->status->value, 'message' => __('listings.interest_sent')]);
     }
 
     public function store(StoreListingRequest $request, int $parcel): JsonResponse

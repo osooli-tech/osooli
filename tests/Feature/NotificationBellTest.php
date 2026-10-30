@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Livewire\Notifications\NotificationBell;
+use App\Models\ListingInquiry;
 use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\Parcel;
@@ -121,6 +123,21 @@ class NotificationBellTest extends TestCase
         Livewire::actingAs($this->admin())
             ->test(NotificationBell::class)
             ->assertSet('lastKnownCount', 0);
+    }
+
+    public function test_a_buyer_waiting_to_be_put_in_touch_rings_and_opens_the_listing(): void
+    {
+        $listing = $this->createListing(ListingStatus::Approved);
+        $buyer = Owner::create(['name' => 'مشتري']);
+        ListingInquiry::create(['parcel_listing_id' => $listing->id, 'owner_id' => $buyer->id, 'status' => InquiryStatus::New]);
+
+        $user = $this->admin();
+        $user->givePermissionTo(Permission::findOrCreate('listings.view', 'web'));
+
+        Livewire::actingAs($user)
+            ->test(NotificationBell::class)
+            ->assertSet('lastKnownCount', 1)
+            ->assertSeeHtml('href="'.route('listings.index', ['listing' => $listing->id]).'"');
     }
 
     private function createListing(ListingStatus $status): ParcelListing

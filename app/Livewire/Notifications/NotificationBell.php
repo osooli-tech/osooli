@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Notifications;
 
+use App\Enums\InquiryStatus;
 use App\Enums\ListingStatus;
 use App\Enums\ModificationRequestStatus;
+use App\Models\ListingInquiry;
 use App\Models\ModificationRequest;
 use App\Models\ParcelListing;
 use App\Models\PresentationRequest;
@@ -45,7 +47,8 @@ class NotificationBell extends Component
     {
         return ($this->presentationRequests()?->count() ?? 0)
             + ($this->modificationRequests()?->count() ?? 0)
-            + ($this->listingRequests()?->count() ?? 0);
+            + ($this->listingRequests()?->count() ?? 0)
+            + ($this->listingInquiries()?->count() ?? 0);
     }
 
     /**
@@ -84,9 +87,19 @@ class NotificationBell extends Component
                 'created_at' => $l->created_at,
             ]);
 
+        $listingInquiries = collect($this->listingInquiries()?->with(['owner:id,name', 'listing.parcel:id,parcel_no'])->latest()->limit(5)->get())
+            ->map(fn (ListingInquiry $i) => [
+                'type' => 'listing_inquiry',
+                'title' => (string) $i->listing?->parcel?->parcel_no,
+                'subtitle' => __('listings.notification_inquiry', ['name' => $i->owner?->name]),
+                'url' => route('listings.index', ['listing' => $i->parcel_listing_id]),
+                'created_at' => $i->created_at,
+            ]);
+
         return $presentationRequests
             ->concat($modificationRequests)
             ->concat($listingRequests)
+            ->concat($listingInquiries)
             ->sortByDesc('created_at')
             ->take(8)
             ->values()
@@ -148,6 +161,27 @@ class NotificationBell extends Component
         return ParcelListing::query()
             ->where('status', ListingStatus::Pending)
             ->when($parcelIds !== null, fn (Builder $q) => $q->whereIn('parcel_id', $parcelIds));
+    }
+
+    /**
+     * Buyers waiting for Sukooki to put them in touch, on parcels this user
+     * can see — or null without permission to open the listings page.
+     *
+     * @return Builder<ListingInquiry>|null
+     */
+    private function listingInquiries(): ?Builder
+    {
+        $user = $this->user();
+
+        if (! $user?->can('listings.view')) {
+            return null;
+        }
+
+        $parcelIds = OwnerScope::parcelIds($user);
+
+        return ListingInquiry::query()
+            ->where('status', InquiryStatus::New)
+            ->when($parcelIds !== null, fn (Builder $q) => $q->whereHas('listing', fn (Builder $l) => $l->whereIn('parcel_id', $parcelIds)));
     }
 
     private function user(): ?User

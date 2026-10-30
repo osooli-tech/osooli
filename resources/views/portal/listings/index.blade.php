@@ -48,6 +48,26 @@
         </section>
     @endif
 
+    {{-- Every listing on one map; a click opens its area, streets and place --}}
+    @if ($map['features'] !== [] && config('services.mapbox.token'))
+        <section class="relative h-[420px] rounded-2xl overflow-hidden border border-outline-variant dark:border-white/10 shadow-sm"
+                 x-data="marketMap(@js($map), @js(route('portal.listings.show', '__ID__')), @js([
+                     'area' => __('listings.area'),
+                     'streets' => __('listings.streets'),
+                     'type' => __('listings.asset_type'),
+                     'place' => __('listings.place'),
+                     'view' => __('listings.view'),
+                     'none' => __('listings.no_streets'),
+                     'sqm' => __('dashboard.area_unit_sqm'),
+                     'metre' => __('portal.metre_short'),
+                 ]))">
+            <div x-ref="map" class="absolute inset-0 w-full h-full"></div>
+            <p class="absolute top-3 end-3 z-10 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/85 text-white">
+                {{ __('listings.map_hint') }}
+            </p>
+        </section>
+    @endif
+
     @if ($listings === [])
         <div class="flex flex-col items-center justify-center gap-3 py-16 rounded-2xl border border-dashed border-outline-variant dark:border-white/10 text-on-surface-variant dark:text-on-primary-container">
             <span class="material-symbols-outlined text-[48px] opacity-40">storefront</span>
@@ -74,6 +94,10 @@
                             <dd class="font-medium">{{ $listing['asset_type'] ?? '—' }}</dd>
                         </div>
                         <div class="col-span-2">
+                            <dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.streets') }}</dt>
+                            <dd class="font-medium truncate">{{ collect($listing['streets'])->map(fn ($s) => $s['side'].($s['width'] ? ' '.rtrim(rtrim(number_format($s['width'], 1), '0'), '.').' '.__('portal.metre_short') : ''))->implode('، ') ?: __('listings.no_streets') }}</dd>
+                        </div>
+                        <div class="col-span-2">
                             <dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('listings.place') }}</dt>
                             <dd class="font-medium truncate">{{ $place ?: '—' }}</dd>
                         </div>
@@ -89,3 +113,7 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+@include('portal.listings._market-map-script')
+@endpush
