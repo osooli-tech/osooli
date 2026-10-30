@@ -27,6 +27,9 @@ class ListingIndex extends Component
 
     private const OWNER_SEARCH_LIMIT = 8;
 
+    /** The review map draws at most this many listings at once. */
+    private const MAP_LIMIT = 1000;
+
     public string $statusFilter = ListingStatus::Pending->value;
 
     public string $search = '';
@@ -154,6 +157,44 @@ class ListingIndex extends Component
             ->orderBy('name')
             ->limit(self::OWNER_SEARCH_LIMIT)
             ->get(['id', 'name', 'phone']);
+    }
+
+    /**
+     * Every listing this user can see on one map, whatever its status, so a
+     * reviewer sees where the offers are; a click opens the listing here.
+     *
+     * @return array{type: string, features: list<array<string, mixed>>}
+     */
+    #[Computed]
+    public function map(): array
+    {
+        $features = [];
+        $listings = $this->visible()
+            ->with(['parcel' => fn ($q) => $q->select('parcels.id', 'parcels.parcel_no')->selectRaw('ST_AsGeoJSON(parcels.geom, 6) AS geom_json')])
+            ->withCount(['inquiries as new_inquiries_count' => fn (Builder $q) => $q->where('status', InquiryStatus::New)])
+            ->latest('id')
+            ->limit(self::MAP_LIMIT)
+            ->get();
+
+        foreach ($listings as $listing) {
+            $geometry = $listing->parcel?->getAttribute('geom_json');
+            if ($geometry === null) {
+                continue;
+            }
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => json_decode((string) $geometry, true),
+                'properties' => [
+                    'id' => $listing->id,
+                    'parcel_no' => (string) $listing->parcel->parcel_no,
+                    'status' => $listing->status->value,
+                    'status_label' => $listing->status->label(),
+                    'new_inquiries' => (int) $listing->getAttribute('new_inquiries_count'),
+                ],
+            ];
+        }
+
+        return ['type' => 'FeatureCollection', 'features' => $features];
     }
 
     /** @return array<string, int> */

@@ -37,6 +37,24 @@
         @endforeach
     </div>
 
+    {{-- ── Map: every listing, coloured by status; a click opens it here ── --}}
+    @if ($this->map['features'] !== [] && config('services.mapbox.token'))
+        <div wire:ignore class="mb-5 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl border border-outline-variant dark:border-white/10 shadow-sm overflow-hidden"
+             x-data="listingsReviewMap(@js($this->map), @js(['parcel' => __('listings.col_parcel'), 'inquiries' => __('listings.col_inquiries')]))">
+            <div x-ref="map" class="h-[380px] w-full"></div>
+            <div class="flex flex-wrap items-center gap-4 px-4 py-2.5 text-xs text-on-surface-variant dark:text-on-primary-container border-t border-outline-variant dark:border-white/10">
+                @foreach (\App\Enums\ListingStatus::cases() as $s)
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-sm {{ ['pending' => 'bg-tertiary-container', 'approved' => 'bg-secondary', 'rejected' => 'bg-error', 'withdrawn' => 'bg-outline'][$s->value] }}"></span>{{ $s->label() }}
+                    </span>
+                @endforeach
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-sm border-2 border-error-container bg-transparent"></span>{{ __('listings.map_new_interest') }}
+                </span>
+            </div>
+        </div>
+    @endif
+
     {{-- ── Table ── --}}
     <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl border border-outline-variant dark:border-white/10 shadow-sm overflow-hidden">
         @if ($listings->isEmpty())

@@ -79,6 +79,7 @@ return [
     'blocked_msg' => 'لن يرى هذا المالك العرض',
     'unblocked_msg' => 'أُلغي المنع',
     'notification' => 'طلب عرض للبيع من :name',
+    'map_new_interest' => 'فيها مهتمون جدد',
     'empty_staff' => 'لا توجد عروض',
     'streets' => 'الشوارع',
     'no_streets' => 'بدون شارع مسجّل',

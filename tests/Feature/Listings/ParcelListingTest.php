@@ -270,6 +270,21 @@ class ParcelListingTest extends TestCase
         $this->assertSame($manager->id, $inquiry->fresh()?->handled_by);
     }
 
+    public function test_the_review_map_shows_every_listing_with_its_status_and_waiting_buyers(): void
+    {
+        $listing = $this->approvedListing();
+        ListingInquiry::create(['parcel_listing_id' => $listing->id, 'owner_id' => $this->viewer->id, 'status' => InquiryStatus::New]);
+        $viewer = User::factory()->create(['is_active' => true]);
+        $viewer->givePermissionTo(Permission::findOrCreate('listings.view', 'web'));
+
+        $map = Livewire::actingAs($viewer)->test(ListingIndex::class)->instance()->map();
+
+        $this->assertCount(1, $map['features']);
+        $this->assertSame('approved', $map['features'][0]['properties']['status']);
+        $this->assertSame(1, $map['features'][0]['properties']['new_inquiries']);
+        $this->assertSame('9911', $map['features'][0]['properties']['parcel_no']);
+    }
+
     public function test_the_market_map_carries_only_the_popup_details(): void
     {
         $this->approvedListing();

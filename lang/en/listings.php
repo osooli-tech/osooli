@@ -79,6 +79,7 @@ return [
     'blocked_msg' => 'This owner will not see the listing',
     'unblocked_msg' => 'The block was removed',
     'notification' => 'Sale listing request from :name',
+    'map_new_interest' => 'Has new interested buyers',
     'empty_staff' => 'No listings',
     'streets' => 'Streets',
     'no_streets' => 'No street on record',
