@@ -33,7 +33,7 @@ class ListingController extends Controller
         $page = $this->listings->market($owner)->paginate(self::PER_PAGE);
 
         return view('portal.listings.index', [
-            'listings' => $page->getCollection()->map(fn (ParcelListing $l): array => $this->listings->present($l))->all(),
+            'listings' => $page->getCollection()->map(fn (ParcelListing $l): array => $this->listings->present($l, $owner))->all(),
             'page' => $page,
             'map' => $this->listings->marketMap($owner),
             'mine' => ParcelListing::query()
@@ -49,7 +49,7 @@ class ListingController extends Controller
         /** @var ParcelListing $found */
         $found = $this->listings->market($this->owner())->findOrFail($listing);
 
-        return view('portal.listings.show', ['listing' => $this->listings->present($found)]);
+        return view('portal.listings.show', ['listing' => $this->listings->present($found, $this->owner())]);
     }
 
     /** The buyer asks Sukooki to put them in touch; the seller's number is never shown to them. */

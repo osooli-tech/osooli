@@ -30,7 +30,11 @@
                     <p class="mb-3 text-sm text-secondary font-medium">{{ session('listing_status') }}</p>
                 @endif
 
-                @if ($listing['my_interest'] !== null && $listing['my_interest'] !== \App\Enums\InquiryStatus::Closed->value)
+                @if ($listing['is_mine'])
+                    <p class="flex items-center gap-2 text-sm font-medium rounded-xl p-3 bg-secondary/10 text-secondary">
+                        <span class="material-symbols-outlined text-[18px]">storefront</span>{{ __('listings.yours_hint') }}
+                    </p>
+                @elseif ($listing['my_interest'] !== null && $listing['my_interest'] !== \App\Enums\InquiryStatus::Closed->value)
                     <p class="flex items-center gap-2 text-sm font-medium rounded-xl p-3 bg-secondary/10 text-secondary">
                         <span class="material-symbols-outlined text-[18px]">check_circle</span>
                         {{ __('listings.interest_status', ['status' => \App\Enums\InquiryStatus::from($listing['my_interest'])->label()]) }}

@@ -60,6 +60,7 @@
                      'none' => __('listings.no_streets'),
                      'sqm' => __('dashboard.area_unit_sqm'),
                      'metre' => __('portal.metre_short'),
+                     'yours' => __('listings.yours'),
                  ]))">
             <div x-ref="map" class="absolute inset-0 w-full h-full"></div>
             <p class="absolute top-3 end-3 z-10 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/85 text-white">
@@ -81,7 +82,10 @@
                 @php $place = collect([$listing['district'], $listing['city']])->filter()->implode(' · '); @endphp
                 <a href="{{ route('portal.listings.show', $listing['id']) }}"
                    class="flex flex-col h-full rounded-2xl p-4 bg-surface-container-lowest dark:bg-[#1a1f2e] border border-outline-variant dark:border-white/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
-                    <div class="flex items-center justify-center h-36 rounded-xl bg-surface-container-low dark:bg-white/5">
+                    <div class="relative flex items-center justify-center h-36 rounded-xl bg-surface-container-low dark:bg-white/5">
+                        @if ($listing['is_mine'])
+                            <span class="absolute top-2 start-2 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-white">{{ __('listings.yours') }}</span>
+                        @endif
                         <x-parcel-shape :geojson="$listing['geojson']" class="w-28 h-28" />
                     </div>
                     <dl class="mt-4 grid grid-cols-2 gap-3 text-sm flex-1">

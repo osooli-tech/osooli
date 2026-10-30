@@ -25,7 +25,7 @@ function marketMap(collection, urlTemplate, labels) {
 
             map.on('load', () => {
                 map.addSource('listings', { type: 'geojson', data: collection });
-                map.addLayer({ id: 'listings-fill', type: 'fill', source: 'listings', paint: { 'fill-color': '#c9a84c', 'fill-opacity': 0.45 } });
+                map.addLayer({ id: 'listings-fill', type: 'fill', source: 'listings', paint: { 'fill-color': ['case', ['get', 'is_mine'], '#006c4e', '#c9a84c'], 'fill-opacity': 0.45 } });
                 map.addLayer({ id: 'listings-line', type: 'line', source: 'listings', paint: { 'line-color': '#ffe08f', 'line-width': 2 } });
 
                 const bounds = new mapboxgl.LngLatBounds();
@@ -59,6 +59,12 @@ function marketMap(collection, urlTemplate, labels) {
                 row.append(k, v);
                 box.append(row);
             };
+            if (p.is_mine === true || p.is_mine === 'true') {
+                const tag = document.createElement('div');
+                tag.style.cssText = 'font-weight:700; color:#006c4e; margin-bottom:4px;';
+                tag.textContent = labels.yours;
+                box.append(tag);
+            }
             line(labels.area, p.area ? Number(p.area).toLocaleString() + ' ' + labels.sqm : '—');
             line(labels.streets, streets.length
                 ? streets.map((s) => s.side + (s.width ? ' ' + s.width + ' ' + labels.metre : '')).join('، ')

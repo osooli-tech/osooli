@@ -100,7 +100,7 @@ class ListingController extends ApiController
     /** @return array<string, mixed> */
     private function item(ParcelListing $listing): array
     {
-        $shown = $this->listings->present($listing);
+        $shown = $this->listings->present($listing, $this->owner());
         $shown['geometry'] = $shown['geojson'] === null ? null : json_decode($shown['geojson'], true);
         unset($shown['geojson']);
 

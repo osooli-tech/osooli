@@ -118,7 +118,7 @@ class ParcelListingService
                 'parcel' => fn ($q) => $q->select('parcels.id', 'parcels.plan_id', 'parcels.asset_type')
                     ->selectRaw('ST_AsGeoJSON(parcels.geom, 6) AS geom_json')
                     ->selectRaw(Spatial::areaSqm('parcels.geom').' AS area_sqm'),
-                'parcel.heldDeed',
+                'parcel.heldDeed.owners:id',
                 'parcel.plan.district.city',
                 'parcel.boundary',
                 'inquiries' => fn ($q) => $q->where('owner_id', $viewer->getKey()),
@@ -136,7 +136,7 @@ class ParcelListingService
     {
         $features = [];
         foreach ($this->market($viewer)->limit(self::MAP_LIMIT)->get() as $listing) {
-            $shown = $this->present($listing);
+            $shown = $this->present($listing, $viewer);
             if ($shown['geojson'] === null) {
                 continue;
             }
@@ -149,6 +149,7 @@ class ParcelListingService
                     'asset_type' => $shown['asset_type'],
                     'place' => collect([$shown['district'], $shown['city']])->filter()->implode(' · '),
                     'streets' => $shown['streets'],
+                    'is_mine' => $shown['is_mine'],
                 ],
             ];
         }
@@ -162,9 +163,9 @@ class ParcelListingService
      * The viewer's own request to be put in touch is included when the
      * listing came from market(), which loads only theirs.
      *
-     * @return array{id: int, area: float|null, asset_type: string|null, district: string|null, city: string|null, geojson: string|null, frontage: array<string, mixed>|null, streets: list<array{side: string, width: float|null}>, my_interest: string|null, listed_at: string|null}
+     * @return array{id: int, area: float|null, asset_type: string|null, district: string|null, city: string|null, geojson: string|null, frontage: array<string, mixed>|null, streets: list<array{side: string, width: float|null}>, my_interest: string|null, is_mine: bool, listed_at: string|null}
      */
-    public function present(ParcelListing $listing): array
+    public function present(ParcelListing $listing, ?Owner $viewer = null): array
     {
         $parcel = $listing->parcel;
         $deedArea = $parcel->heldDeed?->deed_area;
@@ -187,6 +188,9 @@ class ParcelListingService
             'frontage' => $frontage,
             'streets' => $streets,
             'my_interest' => $mine?->status->value,
+            // The seller and their co-holders: shown their own offer, never asked to be interested in it.
+            'is_mine' => $viewer !== null && ($listing->owner_id === $viewer->getKey()
+                || (bool) $parcel->heldDeed?->owners->contains('id', $viewer->getKey())),
             'listed_at' => $listing->reviewed_at?->toDateString(),
         ];
     }
@@ -197,6 +201,10 @@ class ParcelListingService
      */
     public function inquire(Owner $buyer, ParcelListing $listing, ?string $note): ListingInquiry
     {
+        if ($this->present($listing, $buyer)['is_mine']) {
+            throw ValidationException::withMessages(['note' => __('listings.interest_own')])->errorBag(self::ERROR_BAG);
+        }
+
         $inquiry = ListingInquiry::query()->firstOrNew(['parcel_listing_id' => $listing->id, 'owner_id' => $buyer->getKey()]);
 
         if ($inquiry->exists && $inquiry->status !== InquiryStatus::Closed) {

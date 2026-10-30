@@ -116,7 +116,7 @@ class ParcelListingTest extends TestCase
         $this->assertSame(600.0, (float) $item['area']);
         $this->assertSame('MultiPolygon', $item['geometry']['type']);
         $this->assertEqualsCanonicalizing(
-            ['id', 'area', 'asset_type', 'district', 'city', 'frontage', 'streets', 'my_interest', 'listed_at', 'geometry'],
+            ['id', 'area', 'asset_type', 'district', 'city', 'frontage', 'streets', 'my_interest', 'is_mine', 'listed_at', 'geometry'],
             array_keys($item),
         );
         $this->assertStringNotContainsString('0555123456', (string) json_encode($item));
@@ -136,17 +136,27 @@ class ParcelListingTest extends TestCase
         $this->getJson(route('api.listings.show', $listing->id))->assertNotFound();
     }
 
-    public function test_the_holders_do_not_see_it_in_the_market_but_the_seller_sees_it_as_theirs(): void
+    public function test_the_holders_see_their_own_listing_marked_and_cannot_ask_about_it(): void
     {
-        $this->approvedListing();
+        $listing = $this->approvedListing();
 
         foreach ([$this->seller, $this->partner] as $holder) {
             Sanctum::actingAs($holder, [], 'sanctum');
-            $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(0, 'data');
+            $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.is_mine', true);
+            $this->postJson(route('api.listings.interest', $listing->id))->assertUnprocessable();
         }
+
+        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->getJson(route('api.listings.index'))->assertJsonPath('data.0.is_mine', false);
+
+        $this->actingAs($this->seller, 'owner')->get(route('portal.listings.show', $listing->id))
+            ->assertOk()
+            ->assertSee(__('listings.yours_hint'))
+            ->assertDontSee(__('listings.interest_submit'));
 
         Sanctum::actingAs($this->seller, [], 'sanctum');
         $this->getJson(route('api.listings.mine'))->assertOk()->assertJsonPath('data.0.status', 'approved');
+        $this->assertSame(0, ListingInquiry::count());
     }
 
     public function test_a_parcel_sold_since_drops_out_on_its_own(): void
@@ -292,7 +302,7 @@ class ParcelListingTest extends TestCase
         $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
             ->assertOk()
             ->assertViewHas('map', fn (array $map): bool => count($map['features']) === 1
-                && array_keys($map['features'][0]['properties']) === ['id', 'area', 'asset_type', 'place', 'streets']);
+                && array_keys($map['features'][0]['properties']) === ['id', 'area', 'asset_type', 'place', 'streets', 'is_mine']);
     }
 
     private function approvedListing(): ParcelListing

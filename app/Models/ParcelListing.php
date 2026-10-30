@@ -83,7 +83,7 @@ class ParcelListing extends Model
     /**
      * Listings one owner may see: approved, someone else's, not hidden from
      * them, on a parcel the seller still holds — a parcel sold since drops out
-     * on its own — and not on a parcel the viewer holds too.
+     * on its own. The seller and their co-holders see it too, marked as theirs.
      *
      * @param  Builder<ParcelListing>  $query
      * @return Builder<ParcelListing>
@@ -92,9 +92,7 @@ class ParcelListing extends Model
     {
         return $query
             ->where('parcel_listings.status', ListingStatus::Approved->value)
-            ->where('parcel_listings.owner_id', '!=', $viewer->getKey())
             ->whereDoesntHave('blockedOwners', fn (Builder $q) => $q->whereKey($viewer->getKey()))
-            ->whereHas('parcel.heldDeed.owners', fn (Builder $q) => $q->whereColumn('owners.id', 'parcel_listings.owner_id'))
-            ->whereDoesntHave('parcel.heldDeed.owners', fn (Builder $q) => $q->whereKey($viewer->getKey()));
+            ->whereHas('parcel.heldDeed.owners', fn (Builder $q) => $q->whereColumn('owners.id', 'parcel_listings.owner_id'));
     }
 }
