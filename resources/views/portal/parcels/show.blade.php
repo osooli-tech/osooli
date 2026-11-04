@@ -522,8 +522,7 @@
             $documents = $parcel->photos->reject($isGalleryImage);
         @endphp
 
-        {{-- Photos --}}
-        @if ($images->isNotEmpty())
+        {{-- Photos: the approved ones, and a way for the owner to add more --}}
             <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
                         border border-outline-variant dark:border-white/10 shadow-sm">
                 <div class="flex items-center gap-2 mb-4">
@@ -535,17 +534,53 @@
                         {{ __('parcels.photos_section') }}
                     </h2>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    @foreach ($images as $photo)
-                        <div class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
-                            <img src="{{ route('portal.documents.preview', $photo) }}"
-                                 alt="{{ __('parcels.photos_section') }}"
-                                 class="w-full h-full object-cover" />
-                        </div>
-                    @endforeach
-                </div>
+                @if ($images->isNotEmpty())
+                    <div class="grid grid-cols-2 gap-2">
+                        @foreach ($images as $photo)
+                            <div class="aspect-square rounded-xl overflow-hidden bg-surface-container dark:bg-white/5">
+                                <img src="{{ route('portal.documents.preview', $photo) }}"
+                                     alt="{{ __('parcels.photos_section') }}"
+                                     class="w-full h-full object-cover" />
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- The owner's own uploads still under review, or turned down --}}
+                @if ($myPhotos->isNotEmpty())
+                    <ul class="mt-3 space-y-1.5 text-xs">
+                        @foreach ($myPhotos as $mine)
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate ltr" dir="ltr">{{ $mine->original_name }}</span>
+                                <span class="shrink-0 px-2 py-0.5 rounded-full {{ $mine->status === \App\Models\ParcelPhoto::STATUS_REJECTED ? 'bg-error/10 text-error' : 'bg-tertiary-container/30 text-on-surface dark:text-white' }}">
+                                    {{ $mine->status === \App\Models\ParcelPhoto::STATUS_REJECTED ? __('portal.photo_rejected') : __('portal.photo_pending') }}
+                                </span>
+                            </li>
+                            @if ($mine->status === \App\Models\ParcelPhoto::STATUS_REJECTED && $mine->rejection_reason)
+                                <li class="text-error">{{ $mine->rejection_reason }}</li>
+                            @endif
+                        @endforeach
+                    </ul>
+                @endif
+
+                <form method="POST" action="{{ route('portal.parcels.photos.store', $parcel) }}" enctype="multipart/form-data"
+                      class="mt-4 pt-4 border-t border-outline-variant dark:border-white/10 space-y-2.5">
+                    @csrf
+                    <p class="text-xs font-medium">{{ __('portal.photos_upload_title') }}</p>
+                    <p class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('portal.photos_upload_hint') }}</p>
+                    @if (session('photos_status'))
+                        <p class="text-xs text-secondary font-medium">{{ session('photos_status') }}</p>
+                    @endif
+                    @if ($errors->photos->any())
+                        <p class="text-xs text-error">{{ $errors->photos->first() }}</p>
+                    @endif
+                    <input type="file" name="photos[]" multiple required accept="image/jpeg,image/png,image/webp"
+                           class="block w-full text-xs file:me-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-surface-container file:text-on-surface dark:file:bg-white/10 dark:file:text-white">
+                    <button type="submit" class="w-full px-3 py-1.5 rounded-lg text-xs font-medium bg-primary text-white hover:opacity-90 transition-opacity">
+                        {{ __('portal.photos_upload_submit') }}
+                    </button>
+                </form>
             </div>
-        @endif
 
         {{-- Documents (deed scans, boundary survey cards) — download only,
              through the portal's own owner-scoped, audited download route. --}}

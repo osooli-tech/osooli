@@ -22,12 +22,22 @@ function marketMap(collection, urlTemplate, labels) {
                 zoom: 5,
             });
             map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
+            map.addControl(window.sakukiBasemapToggle({
+                street: () => document.documentElement.classList.contains('dark') ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
+                startOnSatellite: true,
+                labels: { streets: @js(__('parcels.show_streets')), satellite: @js(__('parcels.show_satellite')) },
+            }), 'top-left');
 
-            map.on('load', () => {
+            let framed = false;
+            // Every style load — the first and each basemap switch, which wipes layers.
+            map.on('style.load', () => {
+                if (map.getSource('listings')) return;
                 map.addSource('listings', { type: 'geojson', data: collection });
                 map.addLayer({ id: 'listings-fill', type: 'fill', source: 'listings', paint: { 'fill-color': ['case', ['get', 'is_mine'], '#006c4e', '#c9a84c'], 'fill-opacity': 0.45 } });
                 map.addLayer({ id: 'listings-line', type: 'line', source: 'listings', paint: { 'line-color': '#ffe08f', 'line-width': 2 } });
 
+                if (framed) return;
+                framed = true;
                 const bounds = new mapboxgl.LngLatBounds();
                 const extend = (coords) => (typeof coords[0] === 'number' ? bounds.extend(coords) : coords.forEach(extend));
                 collection.features.forEach((f) => extend(f.geometry.coordinates));

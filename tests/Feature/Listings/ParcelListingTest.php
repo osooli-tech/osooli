@@ -247,6 +247,27 @@ class ParcelListingTest extends TestCase
         $this->getJson(route('api.listings.show', $listing->id))->assertJsonPath('data.my_interest', 'new');
     }
 
+    public function test_the_buyer_keeps_a_list_of_what_they_asked_about(): void
+    {
+        $listing = $this->approvedListing();
+        ListingInquiry::create(['parcel_listing_id' => $listing->id, 'owner_id' => $this->viewer->id, 'status' => InquiryStatus::Contacted]);
+
+        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
+            ->assertOk()
+            ->assertSee(__('listings.interests_title'))
+            ->assertSee(InquiryStatus::Contacted->label());
+
+        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->getJson(route('api.listings.interests'))->assertOk()
+            ->assertJsonPath('data.0.status', 'contacted')
+            ->assertJsonPath('data.0.listing.area', 600);
+
+        // Withdrawn since: the row stays, the parcel's details do not.
+        $listing->update(['status' => ListingStatus::Withdrawn]);
+        $this->getJson(route('api.listings.interests'))->assertOk()->assertJsonPath('data.0.listing', null);
+        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))->assertSee(__('listings.interest_gone'));
+    }
+
     public function test_a_hidden_owner_cannot_ask_and_the_api_asks_the_same_way(): void
     {
         $listing = $this->approvedListing();

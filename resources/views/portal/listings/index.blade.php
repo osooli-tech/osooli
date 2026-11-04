@@ -48,6 +48,52 @@
         </section>
     @endif
 
+    {{-- The parcels this owner asked to be put in touch about --}}
+    @if ($interests !== [])
+        <section class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5 border border-outline-variant dark:border-white/10 shadow-sm">
+            <h2 class="flex items-center gap-2 text-sm font-semibold mb-3">
+                <span class="material-symbols-outlined text-[18px] text-secondary">front_hand</span>{{ __('listings.interests_title') }}
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-outline-variant dark:border-white/10 text-[11px] font-bold text-on-surface-variant dark:text-on-primary-container">
+                            <th class="px-3 py-2 text-start">{{ __('listings.place') }}</th>
+                            <th class="px-3 py-2 text-start">{{ __('listings.area') }}</th>
+                            <th class="px-3 py-2 text-start hidden sm:table-cell">{{ __('listings.streets') }}</th>
+                            <th class="px-3 py-2 text-start">{{ __('listings.interest_asked_at') }}</th>
+                            <th class="px-3 py-2 text-start">{{ __('listings.col_status') }}</th>
+                            <th class="px-3 py-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant/40 dark:divide-white/5">
+                        @foreach ($interests as $row)
+                            @php $item = $row['listing']; @endphp
+                            <tr>
+                                <td class="px-3 py-2.5">
+                                    {{ $item ? (collect([$item['district'], $item['city']])->filter()->implode(' · ') ?: '—') : __('listings.interest_gone') }}
+                                </td>
+                                <td class="px-3 py-2.5 data-tabular">{{ $item && $item['area'] !== null ? number_format($item['area']).' '.__('dashboard.area_unit_sqm') : '—' }}</td>
+                                <td class="px-3 py-2.5 hidden sm:table-cell">
+                                    {{ $item ? (collect($item['streets'])->map(fn ($s) => $s['side'].($s['width'] ? ' '.rtrim(rtrim(number_format($s['width'], 1), '0'), '.').' '.__('portal.metre_short') : ''))->implode('، ') ?: __('listings.no_streets')) : '—' }}
+                                </td>
+                                <td class="px-3 py-2.5 data-tabular">{{ $row['asked_at'] }}</td>
+                                <td class="px-3 py-2.5">
+                                    <span class="text-[11px] px-2 py-0.5 rounded-full {{ $row['status'] === 'new' ? 'bg-tertiary-container/40 text-on-tertiary-container dark:text-tertiary-fixed-dim' : 'bg-secondary/15 text-secondary' }}">{{ $row['status_label'] }}</span>
+                                </td>
+                                <td class="px-3 py-2.5 text-end">
+                                    @if ($item)
+                                        <a href="{{ route('portal.listings.show', $row['listing_id']) }}" class="text-xs font-medium text-secondary hover:underline">{{ __('listings.view') }}</a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @endif
+
     {{-- Every listing on one map; a click opens its area, streets and place --}}
     @if ($map['features'] !== [] && config('services.mapbox.token'))
         <section class="relative h-[420px] rounded-2xl overflow-hidden border border-outline-variant dark:border-white/10 shadow-sm"
@@ -63,7 +109,7 @@
                      'yours' => __('listings.yours'),
                  ]))">
             <div x-ref="map" class="absolute inset-0 w-full h-full"></div>
-            <p class="absolute top-3 end-3 z-10 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/85 text-white">
+            <p class="absolute bottom-8 inset-x-0 mx-auto w-fit z-10 text-xs font-medium px-3 py-1.5 rounded-full bg-primary/85 text-white pointer-events-none">
                 {{ __('listings.map_hint') }}
             </p>
         </section>

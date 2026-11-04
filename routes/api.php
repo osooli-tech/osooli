@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\LegalController;
 use App\Http\Controllers\Api\V1\ListingController;
 use App\Http\Controllers\Api\V1\ModificationRequestController;
 use App\Http\Controllers\Api\V1\ParcelController;
+use App\Http\Controllers\Api\V1\ParcelPhotoController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\SearchController;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,7 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function (): void {
     Route::get('parcels', [ParcelController::class, 'index'])->name('api.parcels.index');
     Route::get('parcels/{parcel}', [ParcelController::class, 'show'])->name('api.parcels.show');
     Route::get('parcels/{parcel}/documents', [ParcelController::class, 'documents'])->name('api.parcels.documents');
+    Route::post('parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->whereNumber('parcel')->middleware('throttle:10,1')->name('api.parcels.photos.store');
 
     Route::get('deeds', [DeedController::class, 'index'])->name('api.deeds.index');
 
@@ -60,6 +62,7 @@ Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function (): void {
     // Parcels owners offer for sale; others see an approved one without price, deed or name.
     Route::get('listings', [ListingController::class, 'index'])->name('api.listings.index');
     Route::get('listings/mine', [ListingController::class, 'mine'])->name('api.listings.mine');
+    Route::get('listings/interests', [ListingController::class, 'interests'])->name('api.listings.interests');
     Route::get('listings/{listing}', [ListingController::class, 'show'])->whereNumber('listing')->name('api.listings.show');
     Route::post('listings/{listing}/interest', [ListingController::class, 'interest'])->whereNumber('listing')->middleware('throttle:10,1')->name('api.listings.interest');
     Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->name('api.listings.destroy');

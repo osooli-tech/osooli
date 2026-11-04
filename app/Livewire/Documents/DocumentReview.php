@@ -175,7 +175,7 @@ class DocumentReview extends Component
 
         return ParcelPhoto::query()
             ->forReview($this->filterStatus !== '' ? $this->filterStatus : null)
-            ->with(['parcel.plan', 'deed'])
+            ->with(['parcel.plan', 'deed', 'ownerUploader:id,name'])
             ->when($allowed !== null, fn (Builder $query) => $query->whereIn('parcel_id', $allowed ?? []))
             ->when($this->search !== '', function (Builder $query): void {
                 $term = '%'.$this->search.'%';

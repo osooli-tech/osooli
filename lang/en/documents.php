@@ -94,4 +94,5 @@ return [
         'parcel_short' => 'Parcel :no',
         'plan_short' => 'Plan :no',
     ],
+    'owner_upload' => 'From the owner',
 ];

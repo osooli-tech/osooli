@@ -118,8 +118,14 @@ function ownersMap() {
 
             this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
             this.map.addControl(new mapboxgl.ScaleControl(), 'bottom-right');
+            this.map.addControl(window.sakukiBasemapToggle({
+                street: () => document.documentElement.classList.contains('dark') ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
+                labels: { streets: @js(__('parcels.show_streets')), satellite: @js(__('parcels.show_satellite')) },
+            }), 'top-left');
 
-            this.map.on('load', () => {
+            // Every style load — the first and each basemap switch, which wipes layers.
+            this.map.on('style.load', () => {
+                if (this.map.getSource('parcels')) return;
                 this.map.addSource('parcels', { type: 'geojson', data: this.empty() });
 
                 this.map.addLayer({
@@ -144,16 +150,16 @@ function ownersMap() {
                     },
                 });
 
-                this.map.on('click', 'parcels-fill', (e) => {
-                    const id = e.features[0].properties.id;
-                    if (id) window.location.href = '/parcels/' + id;
-                });
-                this.map.on('mouseenter', 'parcels-fill', () => { this.map.getCanvas().style.cursor = 'pointer'; });
-                this.map.on('mouseleave', 'parcels-fill', () => { this.map.getCanvas().style.cursor = ''; });
-
                 this.mapReady = true;
                 this.apply();
             });
+
+            this.map.on('click', 'parcels-fill', (e) => {
+                const id = e.features[0].properties.id;
+                if (id) window.location.href = '/parcels/' + id;
+            });
+            this.map.on('mouseenter', 'parcels-fill', () => { this.map.getCanvas().style.cursor = 'pointer'; });
+            this.map.on('mouseleave', 'parcels-fill', () => { this.map.getCanvas().style.cursor = ''; });
 
             // Raised by the owners table when a row's map button is pressed
             window.addEventListener('owner-map-select', (e) => {

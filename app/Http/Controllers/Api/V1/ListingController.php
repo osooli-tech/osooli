@@ -53,6 +53,21 @@ class ListingController extends ApiController
         return $this->respondCollection($mine);
     }
 
+    /** The parcels the signed-in owner asked to be put in touch about, and where each request stands. */
+    public function interests(): JsonResponse
+    {
+        $rows = array_map(function (array $row): array {
+            if ($row['listing'] !== null) {
+                $row['listing']['geometry'] = $row['listing']['geojson'] === null ? null : json_decode($row['listing']['geojson'], true);
+                unset($row['listing']['geojson']);
+            }
+
+            return $row;
+        }, $this->listings->interestsOf($this->owner()));
+
+        return $this->respondCollection($rows);
+    }
+
     /** The buyer asks Sukooki to put them in touch; neither side sees the other's number. */
     public function interest(StoreInquiryRequest $request, int $listing): JsonResponse
     {

@@ -951,7 +951,7 @@
     @if (! empty($ownerPortfolios))
         <section>
             <h2 class="text-sm font-semibold uppercase tracking-wide text-on-surface-variant dark:text-on-primary-container mb-4">
-                {{ __('owners.portfolios') }}
+                {{ __('portal.portfolios_title') }}
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach ($ownerPortfolios as $p)
@@ -959,7 +959,7 @@
                         <h3 class="font-semibold text-sm mb-2">{{ $p['name'] }}</h3>
                         <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
                             <span class="data-tabular">{{ $p['parcels'] }} {{ __('owners.portfolio_parcels_unit') }}</span>
-                            <span class="data-tabular">{{ number_format($p['area'] / 1000000, 2) }} {{ __('dashboard.area_unit_km') }}</span>
+                            <span class="data-tabular">{{ number_format($p['area']) }} {{ __('dashboard.area_unit_sqm') }}</span>
                         </div>
                         @if ($p['value'] !== null)
                             <p class="text-sm font-bold text-secondary data-tabular mt-1">

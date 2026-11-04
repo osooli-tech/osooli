@@ -12,6 +12,7 @@ use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelListing;
+use App\Models\ParcelPhoto;
 use App\Queries\OwnerParcelQuery;
 use App\Services\Owner\LinkedParcelsService;
 use App\Services\Owner\OwnerInsightsService;
@@ -91,6 +92,12 @@ class ParcelController extends Controller
             'frontage' => ParcelFrontage::read($found->boundary),
             'massing' => $this->massingOf($found),
             'twin' => $twin->for($found),
+            'myPhotos' => ParcelPhoto::query()->forReview()
+                ->where('parcel_id', $found->id)
+                ->where('uploaded_by_owner', $owner->getKey())
+                ->where('status', '!=', ParcelPhoto::STATUS_APPROVED)
+                ->latest('id')
+                ->get(),
             'openListing' => ParcelListing::query()->where('parcel_id', $found->id)->whereIn('status', ListingStatus::openValues())->latest('id')->first(),
             'market' => $found->plan?->district_id === null ? null
                 : ($insights->marketAverages(collect([$found->plan->district_id]), $owner->parcels()->pluck('parcels.id'))[$found->plan->district_id] ?? null),

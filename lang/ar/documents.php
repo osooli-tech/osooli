@@ -94,4 +94,5 @@ return [
         'parcel_short' => 'ق :no',
         'plan_short' => 'مخطط :no',
     ],
+    'owner_upload' => 'من المالك',
 ];

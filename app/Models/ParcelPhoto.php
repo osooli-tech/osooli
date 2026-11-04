@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
  * @property int|null $size_bytes
  * @property string|null $storage_disk
  * @property int|null $uploaded_by
+ * @property int|null $uploaded_by_owner
  * @property int|null $reviewed_by
  * @property Carbon|null $reviewed_at
  * @property string|null $rejection_reason
@@ -62,6 +63,7 @@ class ParcelPhoto extends Model
         'size_bytes',
         'storage_disk',
         'uploaded_by',
+        'uploaded_by_owner',
         'reviewed_by',
         'reviewed_at',
         'rejection_reason',
@@ -139,6 +141,12 @@ class ParcelPhoto extends Model
      * @return array{disk: string, path: string}
      */
     /** A site photo (aerial or ground) shown as a picture; everything else is a filed document. */
+    /** @return BelongsTo<Owner, $this> the owner who sent it from the portal or the app, if one did */
+    public function ownerUploader(): BelongsTo
+    {
+        return $this->belongsTo(Owner::class, 'uploaded_by_owner');
+    }
+
     public function isGalleryImage(): bool
     {
         return in_array($this->photo_type, [PhotoType::Aerial, PhotoType::Ground], true);

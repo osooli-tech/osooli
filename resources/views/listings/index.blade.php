@@ -31,11 +31,18 @@ function listingsReviewMap(collection, labels) {
                 zoom: 5,
             });
             map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
+            map.addControl(window.sakukiBasemapToggle({
+                street: () => document.documentElement.classList.contains('dark') ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
+                labels: { streets: @js(__('parcels.show_streets')), satellite: @js(__('parcels.show_satellite')) },
+            }), 'top-left');
 
             const colour = ['match', ['get', 'status'],
                 'pending', '#c9a84c', 'approved', '#006c4e', 'rejected', '#ba1a1a', '#74777f'];
 
-            map.on('load', () => {
+            let framed = false;
+            // Every style load — the first and each basemap switch, which wipes layers.
+            map.on('style.load', () => {
+                if (map.getSource('listings')) return;
                 map.addSource('listings', { type: 'geojson', data: collection });
                 map.addLayer({ id: 'listings-fill', type: 'fill', source: 'listings', paint: { 'fill-color': colour, 'fill-opacity': 0.45 } });
                 map.addLayer({ id: 'listings-line', type: 'line', source: 'listings', paint: {
@@ -43,6 +50,8 @@ function listingsReviewMap(collection, labels) {
                     'line-width': ['case', ['>', ['get', 'new_inquiries'], 0], 4, 1.5],
                 } });
 
+                if (framed) return;
+                framed = true;
                 const bounds = new mapboxgl.LngLatBounds();
                 const extend = (c) => (typeof c[0] === 'number' ? bounds.extend(c) : c.forEach(extend));
                 collection.features.forEach((f) => extend(f.geometry.coordinates));

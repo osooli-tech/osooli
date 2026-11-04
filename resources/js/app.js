@@ -131,3 +131,48 @@ window.loadMapbox = function loadMapbox() {
 
     return mapboxLoading;
 };
+
+// ── Basemap switch ─────────────────────────────────────────────────────────
+// One Mapbox control for every map on the site: flips between the aerial and
+// the street background. setStyle() wipes the map's own layers, so each map
+// re-adds them from its 'style.load' handler. `street` is a function, so a
+// map that follows the light/dark theme gets the right street style.
+window.sakukiBasemapToggle = function sakukiBasemapToggle({ street, satellite = 'mapbox://styles/mapbox/satellite-streets-v12', startOnSatellite = false, labels }) {
+    let map;
+    let button;
+    let onSatellite = startOnSatellite;
+
+    const paint = () => {
+        const label = onSatellite ? labels.streets : labels.satellite;
+        button.title = label;
+        button.setAttribute('aria-label', label);
+        button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;color:#333;">${onSatellite ? 'map' : 'satellite_alt'}</span>`;
+    };
+
+    return {
+        onAdd(mapInstance) {
+            map = mapInstance;
+            const container = document.createElement('div');
+            container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+            button = document.createElement('button');
+            button.type = 'button';
+            paint();
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onSatellite = !onSatellite;
+                // A full rebuild, not a diff: diffing between these styles
+                // fails part-way and can leave the old background showing.
+                map.setStyle(onSatellite ? satellite : street(), { diff: false });
+                paint();
+            });
+            container.appendChild(button);
+            return container;
+        },
+        onRemove() {
+            button?.parentNode?.remove();
+            map = undefined;
+        },
+        onSatellite: () => onSatellite,
+    };
+};

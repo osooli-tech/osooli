@@ -44,12 +44,18 @@ class DashboardController extends Controller
         ]);
     }
 
-    /** @return list<array{name: string, parcels: int, area: float, value: float|null}> */
+    /**
+     * The portfolios the owner's land was split into, then whatever sits in
+     * none of them — under the owner's own name when nothing was split, so
+     * every owner with land sees at least one portfolio.
+     *
+     * @return list<array{name: string, parcels: int, area: float, value: float|null}>
+     */
     private function ownerPortfolios(Owner $owner): array
     {
         $service = app(OwnerPortfolioService::class);
 
-        return $owner->portfolios()->get()
+        $portfolios = $owner->portfolios()->get()
             ->map(function ($portfolio) use ($service): array {
                 $summary = $service->summary($portfolio);
 
@@ -61,5 +67,19 @@ class DashboardController extends Controller
                 ];
             })
             ->all();
+
+        $rest = $service->unassignedSummary($owner);
+        if ($rest['parcels'] > 0) {
+            $portfolios[] = [
+                'name' => $portfolios === []
+                    ? __('portal.linked_portfolio_of', ['name' => $owner->name])
+                    : __('portal.portfolio_unassigned'),
+                'parcels' => $rest['parcels'],
+                'area' => $rest['area'],
+                'value' => $rest['value'],
+            ];
+        }
+
+        return $portfolios;
     }
 }

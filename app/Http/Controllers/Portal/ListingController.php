@@ -36,6 +36,7 @@ class ListingController extends Controller
             'listings' => $page->getCollection()->map(fn (ParcelListing $l): array => $this->listings->present($l, $owner))->all(),
             'page' => $page,
             'map' => $this->listings->marketMap($owner),
+            'interests' => $this->listings->interestsOf($owner),
             'mine' => ParcelListing::query()
                 ->where('owner_id', $owner->getKey())
                 ->with('parcel:id,parcel_no')

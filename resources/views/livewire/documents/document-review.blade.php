@@ -104,7 +104,12 @@
                             </td>
 
                             <td class="px-4 py-3 text-on-surface-variant dark:text-on-primary-container">
-                                {{ $reviewers[$document->uploaded_by] ?? __('documents.unknown_user') }}
+                                @if ($document->uploaded_by_owner !== null)
+                                    {{ $document->ownerUploader?->name ?? __('documents.unknown_user') }}
+                                    <span class="block text-[11px] text-tertiary">{{ __('documents.owner_upload') }}</span>
+                                @else
+                                    {{ $reviewers[$document->uploaded_by] ?? __('documents.unknown_user') }}
+                                @endif
                             </td>
 
                             {{-- Status, plus the reason and reviewer behind a decided one:

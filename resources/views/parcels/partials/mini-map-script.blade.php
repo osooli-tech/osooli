@@ -33,14 +33,19 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo, opts = {}) {
             });
 
             map.addControl(new mapboxgl.NavigationControl({ showCompass: true, showZoom: true }), 'bottom-left');
-            const basemapControl = basemapToggleControl(streetStyle, satelliteStyle);
+            const basemapControl = window.sakukiBasemapToggle({
+                street: streetStyle,
+                satellite: satelliteStyle,
+                startOnSatellite: true,
+                labels: { streets: @js(__('parcels.show_streets')), satellite: @js(__('parcels.show_satellite')) },
+            });
             map.addControl(basemapControl, 'top-left');
 
             // The aerial background has no dark variant; only the street one follows the theme.
             window.addEventListener('sakuki:theme-changed', ({ detail }) => {
                 isDark = detail.dark;
                 if (basemapControl.onSatellite()) return;
-                map.setStyle(streetStyle());
+                map.setStyle(streetStyle(), { diff: false });
             });
 
             function addLayers() {
@@ -123,40 +128,4 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo, opts = {}) {
     };
 }
 
-// A small Mapbox IControl that switches the mini-map between the aerial
-// (default) background and the plain street style; the map's 'style.load'
-// handler puts the parcel layers back after each swap.
-function basemapToggleControl(streetStyle, satelliteStyle) {
-    let map;
-    let onSatellite = true;
-    let button;
-
-    const icon = () => onSatellite ? 'map' : 'satellite_alt';
-    const title = () => onSatellite ? '{{ __('parcels.show_streets') }}' : '{{ __('parcels.show_satellite') }}';
-
-    return {
-        onAdd(mapInstance) {
-            map = mapInstance;
-            const container = document.createElement('div');
-            container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
-            button = document.createElement('button');
-            button.type = 'button';
-            button.title = title();
-            button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;color:#333;">${icon()}</span>`;
-            button.addEventListener('click', () => {
-                onSatellite = !onSatellite;
-                map.setStyle(onSatellite ? satelliteStyle : streetStyle());
-                button.title = title();
-                button.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;line-height:29px;color:#333;">${icon()}</span>`;
-            });
-            container.appendChild(button);
-            return container;
-        },
-        onSatellite: () => onSatellite,
-        onRemove() {
-            button?.parentNode?.parentNode?.removeChild(button.parentNode);
-            map = undefined;
-        },
-    };
-}
 </script>

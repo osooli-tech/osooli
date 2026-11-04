@@ -11,6 +11,7 @@ use App\Http\Controllers\Portal\LinkedParcelController;
 use App\Http\Controllers\Portal\ListingController;
 use App\Http\Controllers\Portal\ModificationRequestController;
 use App\Http\Controllers\Portal\ParcelController;
+use App\Http\Controllers\Portal\ParcelPhotoController;
 use App\Http\Controllers\Portal\ProfileController;
 use App\Http\Controllers\Portal\ServiceController;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +77,7 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+        Route::post('/parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->middleware('throttle:10,1')->name('parcels.photos.store');
         Route::post('/parcels/{parcel}/modification-requests', [ModificationRequestController::class, 'store'])->name('parcels.modification-requests.store');
         Route::get('/parcels/{parcel}/documents', [DocumentController::class, 'index'])->name('parcels.documents');
         Route::get('/documents/{photo}/preview', [DocumentController::class, 'preview'])->name('documents.preview');

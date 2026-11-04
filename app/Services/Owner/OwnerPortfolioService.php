@@ -111,6 +111,39 @@ class OwnerPortfolioService
         ];
     }
 
+    /**
+     * The owner's held parcels that sit in none of their portfolios, with the
+     * same figures as summary() — so an owner who never split their land, or
+     * split only part of it, still sees all of it as portfolios.
+     *
+     * @return array{parcels: int, area: float, priced: int, value: float|null}
+     */
+    public function unassignedSummary(Owner $owner): array
+    {
+        $assigned = DB::table('owner_portfolio_parcels')->where('owner_id', $owner->id)->pluck('parcel_id')->all();
+        $ids = $owner->parcels()->whereNotIn('parcels.id', $assigned)->pluck('parcels.id')->all();
+
+        $row = $ids === [] ? null : Parcel::query()
+            ->whereKey($ids)
+            ->whereNotNull('parcels.geom')
+            ->selectRaw('
+                COUNT(parcels.id) AS parcels,
+                COALESCE(SUM('.Spatial::areaSqm('parcels.geom').'), 0) AS area,
+                COUNT(parcels.m_price) AS priced,
+                SUM(parcels.m_price * '.Spatial::areaSqm('parcels.geom').') AS value
+            ')
+            ->first();
+
+        $value = $row?->getAttribute('value');
+
+        return [
+            'parcels' => (int) ($row?->getAttribute('parcels') ?? 0),
+            'area' => round((float) ($row?->getAttribute('area') ?? 0), 2),
+            'priced' => (int) ($row?->getAttribute('priced') ?? 0),
+            'value' => $value === null ? null : round((float) $value, 2),
+        ];
+    }
+
     private function assertHeldBy(Owner $owner, Parcel $parcel): void
     {
         if (! $owner->parcels()->whereKey($parcel->id)->exists()) {

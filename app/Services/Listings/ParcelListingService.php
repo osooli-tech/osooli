@@ -217,6 +217,28 @@ class ParcelListingService
         return $inquiry;
     }
 
+    /**
+     * The parcels a buyer asked about, newest first, each shown as the market
+     * shows it while it is still listed for them — and only its date and
+     * status once it is not, so a withdrawn or sold parcel reveals nothing.
+     *
+     * @return list<array{id: int, listing_id: int, status: string, status_label: string, asked_at: string|null, listing: array<string, mixed>|null}>
+     */
+    public function interestsOf(Owner $buyer): array
+    {
+        $inquiries = ListingInquiry::query()->where('owner_id', $buyer->getKey())->latest('id')->get();
+        $visible = $this->market($buyer)->whereKey($inquiries->pluck('parcel_listing_id')->all())->get()->keyBy('id');
+
+        return $inquiries->map(fn (ListingInquiry $i): array => [
+            'id' => $i->id,
+            'listing_id' => $i->parcel_listing_id,
+            'status' => $i->status->value,
+            'status_label' => $i->status->label(),
+            'asked_at' => $i->created_at?->toDateString(),
+            'listing' => $visible->has($i->parcel_listing_id) ? $this->present($visible->get($i->parcel_listing_id), $buyer) : null,
+        ])->values()->all();
+    }
+
     public function handleInquiry(ListingInquiry $inquiry, InquiryStatus $status, User $by): void
     {
         $inquiry->update(['status' => $status, 'handled_by' => $by->getKey(), 'handled_at' => now()]);
