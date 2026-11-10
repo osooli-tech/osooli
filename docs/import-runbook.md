@@ -512,6 +512,17 @@ log on its own.
 | 403/404 immediately on `/imports` | Account lacks `imports.create` | §3 |
 | Document upload reports unmatched files | Filenames don't match the deed (`^\d{10,14}$`) or `<left> - <right>` survey-map pattern | Re-check the archive's filenames against §5 |
 | `deeds` count doesn't match `parcels` count after a GDB import | **Expected on this dataset** — read §4.4 before assuming a bug | §4.4 |
+| An owner cannot sign in to the portal with the phone in the file; the result warns "Phone … was not enabled" | The phone already opens another owner (or differs from the one on record), and "Accept one phone for several owners" was off | Portal accounts → Waiting for review: approve it. For an office's number on a whole family, re-run the import with the option on |
+
+The `Phone` column is the owner's portal sign-in, not just a contact number.
+A phone the owner has no other phone for, and that opens no one else, is
+enabled straight away. The same phone on several owners becomes one portal
+account opening them all only when **Accept one phone for several owners**
+is ticked on the review screen; otherwise the first owner gets it and the
+rest wait for review. A phone that differs from the one on record never
+overwrites it — it waits for review. The template zip
+(`resources/templates/sakuki-gdb-template.zip`) is rebuilt from
+`database/data/templates/build_gdb_template.py` on a machine with GDAL ≥ 3.7.
 
 ---
 

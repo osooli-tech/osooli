@@ -168,6 +168,7 @@ final class ImportWizard extends Component
             'qrar' => $pick($o['qrar'] ?? null, ['number', 'source', 'ignore'], 'ignore'),
             'folder' => $pick($o['folder'] ?? null, ['folder', 'ignore'], 'ignore'),
             'portfolios' => (bool) ($o['portfolios'] ?? false),
+            'shared_phones' => (bool) ($o['shared_phones'] ?? false),
             'deedless' => $pick($o['deedless'] ?? null, ['placeholder', 'skip'], 'placeholder'),
             'no_plan' => $pick($o['no_plan'] ?? null, ['district_plan', 'none'], 'district_plan'),
             'office_id' => $int($o['office_id'] ?? null),

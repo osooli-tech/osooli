@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Import;
 
+use App\Enums\PortalGrantSource;
+use App\Enums\PortalRelation;
 use App\Models\Owner;
+use App\Services\Portal\PortalAccessService;
 use App\Support\Database\Spatial;
 use App\Support\DatabaseEnum;
 use App\Support\Geo\Locator;
@@ -61,6 +64,13 @@ final class ParcelGeoJsonImporter implements Importer
      * @var array<string, array<string, int>>
      */
     private array $unknown = [];
+
+    /**
+     * Phones from the file left waiting for staff review, phone => owner names.
+     *
+     * @var array<string, list<string>>
+     */
+    private array $pendingPhones = [];
 
     /**
      * Plans the file puts in a district other than the one on record,
@@ -171,6 +181,7 @@ final class ParcelGeoJsonImporter implements Importer
             $o['office_id'] = $this->findOrCreate('engineering_offices', ['name' => $o['office_name']]);
         }
         $this->unknown = [];
+        $this->pendingPhones = [];
         $this->planConflicts = [];
         $this->pendingParents = [];
 
@@ -244,6 +255,10 @@ final class ParcelGeoJsonImporter implements Importer
             ]);
         }
 
+        foreach ($this->pendingPhones as $phone => $names) {
+            $warnings[] = __('imports.warnings.pending_phone', ['phone' => $phone, 'owners' => implode('، ', array_unique($names))]);
+        }
+
         $created = count(array_filter($outcomes));
 
         return new ImportResult(
@@ -311,7 +326,7 @@ final class ParcelGeoJsonImporter implements Importer
      * @param  array<string, mixed>  $options
      * @return array{legacy: bool, districts: list<array{name: string, district_id: int|null, city_id: int|null, match: string}>,
      *     district_match: string, parcel_districts: array<string, int>, default_city_id: int|null, plan_placeholders: list<string>, borders: string, qrar: string,
-     *     folder: string, portfolios: bool, deedless: string, no_plan: string, office_id: int|null, office_name: string}
+     *     folder: string, portfolios: bool, shared_phones: bool, deedless: string, no_plan: string, office_id: int|null, office_name: string}
      */
     public static function options(array $options): array
     {
@@ -358,6 +373,8 @@ final class ParcelGeoJsonImporter implements Importer
             'qrar' => $pick('qrar', ['number', 'source', 'ignore'], 'source'),
             'folder' => $pick('folder', ['folder', 'ignore'], 'folder'),
             'portfolios' => (bool) ($options['portfolios'] ?? false),
+            // One phone opening several owners (an office's number on a family): only when chosen.
+            'shared_phones' => (bool) ($options['shared_phones'] ?? false),
             'deedless' => $pick('deedless', ['placeholder', 'skip'], 'placeholder'),
             // A parcel with no real plan: into its district's stand-in plan, or no plan.
             'no_plan' => $pick('no_plan', ['district_plan', 'none'], $legacy ? 'none' : 'district_plan'),
@@ -496,15 +513,16 @@ final class ParcelGeoJsonImporter implements Importer
             }
 
             // Contact details, where the file has them; an empty one leaves
-            // what is on record.
-            $phone = $this->str($fp['Phone'] ?? null);
-            $contact = $this->filled([
-                'phone' => $phone,
-                'phone_normalized' => $phone === null ? null : (Owner::normalisePhone($phone) ?: null),
-                'email' => $this->str($fp['Email'] ?? null),
-            ]);
+            // what is on record. The phone is the owner's portal sign-in, so
+            // it goes through the portal's own rules instead.
+            $contact = $this->filled(['email' => $this->str($fp['Email'] ?? null)]);
             if ($contact !== []) {
                 DB::table('owners')->where('id', $ownerId)->update($contact + ['updated_at' => now()]);
+            }
+
+            $phone = $this->str($fp['Phone'] ?? null);
+            if ($phone !== null) {
+                $this->portalPhone($ownerId, $phone, $o['shared_phones']);
             }
 
             DB::table('deed_owners')->insertOrIgnore([
@@ -630,6 +648,34 @@ final class ParcelGeoJsonImporter implements Importer
         DB::table('parcels')->where('id', $parcelId)->update(['parent_parcel_id' => $parentId]);
 
         return true;
+    }
+
+    /**
+     * The file's phone becomes the owner's portal sign-in only when that
+     * changes nobody else's: the owner has no other phone on record, and the
+     * phone opens no other owner — unless staff chose, for this import, that
+     * one phone may open several (an office's number on a family). Anything
+     * else waits for review, so a typo never opens a stranger's land.
+     */
+    private function portalPhone(int $ownerId, string $phone, bool $sharedPhones): void
+    {
+        $owner = Owner::query()->find($ownerId);
+        $normalised = Owner::normalisePhone($phone);
+
+        if ($owner === null || $normalised === '') {
+            return;
+        }
+
+        $access = app(PortalAccessService::class);
+        $current = Owner::normalisePhone((string) $owner->phone);
+        $opensOthers = $access->ownersSharingPhone($phone, $ownerId)->isNotEmpty();
+        $waits = ($current !== '' && $current !== $normalised) || ($opensOthers && ! $sharedPhones);
+
+        $grant = $access->grant($access->accountForPhone($phone), $owner, PortalRelation::Self_, true, PortalGrantSource::Import, null, needsReview: $waits);
+
+        if ($grant->needs_review) {
+            $this->pendingPhones[$normalised][] = (string) $owner->name;
+        }
     }
 
     /** Links the parcel to its parent owner, if one holds that national id; says whether one did. */

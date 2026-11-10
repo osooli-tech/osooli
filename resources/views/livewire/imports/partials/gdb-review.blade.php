@@ -472,6 +472,12 @@
                     @endforeach
                 </p>
             @endif
+            {{-- One phone on several owners (an office's number on a family): one portal account for them all. --}}
+            <label class="{{ $radio }} mt-3">
+                <input type="checkbox" wire:model.live="options.shared_phones" class="mt-1">
+                {{ __('imports.gdb.shared_phones') }}
+            </label>
+            <p class="mt-1 ms-6 {{ $muted }}">{{ __('imports.gdb.shared_phones_hint') }}</p>
         </section>
     @endif
 

@@ -98,6 +98,7 @@ return [
         'multi_page' => 'Multi-page files whose name names no parcel: :files. Upload them from "Upload a multi-parcel PDF", which splits them and matches each page to its parcel.',
         'no_rule' => 'No file in the archive follows a naming rule: a deed number (e.g. 310101000001.pdf) or "parcel-plan" (e.g. 131-623.pdf).',
         'unknown_values' => 'Unknown values in «:field» were not written: :values',
+        'pending_phone' => 'Phone :phone was not enabled for portal sign-in for: :owners, because it opens another owner or differs from the phone on record. Review it under Portal accounts → Waiting for review.',
     ],
     'gdb' => [
         'layers' => 'Layers in the file',
@@ -205,6 +206,8 @@ return [
         'owners_count' => ':count distinct owners in the file, matched by national ID.',
         'odd_ids' => 'National IDs that are not 10 digits:',
         'portfolios' => 'Create owner portfolios from Real_Estate_portfolio (:count portfolios) and put each parcel in its portfolio',
+        'shared_phones' => 'Accept one phone for several owners',
+        'shared_phones_hint' => 'When one phone appears on several owners (such as an office managing a family\'s land), it becomes one portal account that opens them all. Without this, the phone is enabled for the first owner only and the others wait for review.',
         'empty_never_erases' => 'An empty field in the file never erases the value on record.',
         'custom' => [
             'new' => 'A new layer',
