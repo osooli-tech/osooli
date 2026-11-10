@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\PhotoType;
+use App\Models\Concerns\RecordsPortalAccount;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -30,9 +31,12 @@ use Illuminate\Support\Str;
  * @property string $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property int|null $portal_account_id
  */
 class ParcelPhoto extends Model
 {
+    use RecordsPortalAccount;
+
     public const STATUS_PENDING = 'معلق';
 
     public const STATUS_APPROVED = 'معتمد';

@@ -8,6 +8,7 @@ use App\Enums\PortalGrantSource;
 use App\Enums\PortalRelation;
 use App\Models\Owner;
 use App\Models\PortalAccount;
+use App\Models\PortalAccountOwner;
 use App\Services\Portal\PortalAccessService;
 
 /**
@@ -46,9 +47,9 @@ trait SignsInOwners
     }
 
     /**
-     * The owner's own account when they have a phone. An owner with none is
-     * opened through an account made for the test, so their record is left
-     * exactly as the test built it.
+     * The owner's own account. An owner with no phone gets one made for the
+     * test, its grant written directly so their record is left exactly as the
+     * test built it (the service would write the account's phone onto them).
      */
     protected function portalAccountFor(Owner $owner): PortalAccount
     {
@@ -62,7 +63,10 @@ trait SignsInOwners
         }
 
         $account = $access->accountForPhone('059'.str_pad((string) $owner->id, 7, '0', STR_PAD_LEFT));
-        $access->grant($account, $owner, PortalRelation::Delegate, true, PortalGrantSource::Staff, null);
+        PortalAccountOwner::query()->firstOrCreate(
+            ['portal_account_id' => $account->id, 'owner_id' => $owner->id],
+            ['relation' => PortalRelation::Self_, 'can_manage' => true, 'source' => PortalGrantSource::Staff],
+        );
 
         return $account;
     }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ListingStatus;
+use App\Models\Concerns\RecordsPortalAccount;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,9 +28,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $reviewed_at
  * @property Carbon|null $withdrawn_at
  * @property Carbon|null $created_at
+ * @property int|null $portal_account_id
  */
 class ParcelListing extends Model
 {
+    use RecordsPortalAccount;
+
     protected $fillable = [
         'parcel_id',
         'owner_id',
@@ -85,14 +89,20 @@ class ParcelListing extends Model
      * them, on a parcel the seller still holds — a parcel sold since drops out
      * on its own. The seller and their co-holders see it too, marked as theirs.
      *
+     * A block on any owner the viewer's portal account opens hides it from the
+     * viewer too, so switching owners cannot get round a block.
+     *
      * @param  Builder<ParcelListing>  $query
+     * @param  list<int>  $circle  every owner the viewer's account opens; the viewer alone when empty
      * @return Builder<ParcelListing>
      */
-    public function scopeVisibleTo(Builder $query, Owner $viewer): Builder
+    public function scopeVisibleTo(Builder $query, Owner $viewer, array $circle = []): Builder
     {
+        $blockedFor = $circle === [] ? [(int) $viewer->getKey()] : $circle;
+
         return $query
             ->where('parcel_listings.status', ListingStatus::Approved->value)
-            ->whereDoesntHave('blockedOwners', fn (Builder $q) => $q->whereKey($viewer->getKey()))
+            ->whereDoesntHave('blockedOwners', fn (Builder $q) => $q->whereKey($blockedFor))
             ->whereHas('parcel.heldDeed.owners', fn (Builder $q) => $q->whereColumn('owners.id', 'parcel_listings.owner_id'));
     }
 }

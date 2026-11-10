@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\GeoJsonController as InternalGeoJsonController;
+use App\Http\Controllers\Portal\AccountController;
 use App\Http\Controllers\Portal\AuthController;
 use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\DocumentController;
@@ -41,6 +42,11 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
     Route::middleware(['auth:owner', 'portal.account'])->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+        // An account that opens several owners moves between them.
+        Route::post('/switch/{owner}', [AccountController::class, 'switch'])->whereNumber('owner')->name('switch');
+        Route::get('/overview', [AccountController::class, 'overview'])->name('overview');
+        Route::get('/overview/map', [AccountController::class, 'overviewMap'])->name('overview.map');
+
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/parcels', [ParcelController::class, 'index'])->name('parcels.index');
@@ -68,17 +74,17 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
         // Parcels owners offer for sale, shown to the others once staff approve them.
         Route::get('/market', [ListingController::class, 'index'])->name('listings.index');
         Route::get('/market/{listing}', [ListingController::class, 'show'])->name('listings.show');
-        Route::post('/market/{listing}/interest', [ListingController::class, 'interest'])->middleware('throttle:10,1')->name('listings.interest');
-        Route::post('/parcels/{parcel}/listing', [ListingController::class, 'store'])->middleware('throttle:10,1')->name('parcels.listing.store');
-        Route::delete('/listings/{listing}', [ListingController::class, 'destroy'])->name('listings.destroy');
+        Route::post('/market/{listing}/interest', [ListingController::class, 'interest'])->middleware(['portal.manage', 'throttle:10,1'])->name('listings.interest');
+        Route::post('/parcels/{parcel}/listing', [ListingController::class, 'store'])->middleware(['portal.manage', 'throttle:10,1'])->name('parcels.listing.store');
+        Route::delete('/listings/{listing}', [ListingController::class, 'destroy'])->middleware('portal.manage')->name('listings.destroy');
 
         Route::get('/documents', [DocumentController::class, 'list'])->name('documents.index');
         Route::get('/modification-requests', [ModificationRequestController::class, 'index'])->name('modification-requests.index');
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile', [ProfileController::class, 'update'])->middleware('portal.manage:self')->name('profile.update');
 
-        Route::post('/parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->middleware('throttle:10,1')->name('parcels.photos.store');
-        Route::post('/parcels/{parcel}/modification-requests', [ModificationRequestController::class, 'store'])->name('parcels.modification-requests.store');
+        Route::post('/parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->middleware(['portal.manage', 'throttle:10,1'])->name('parcels.photos.store');
+        Route::post('/parcels/{parcel}/modification-requests', [ModificationRequestController::class, 'store'])->middleware('portal.manage')->name('parcels.modification-requests.store');
         Route::get('/parcels/{parcel}/documents', [DocumentController::class, 'index'])->name('parcels.documents');
         Route::get('/documents/{photo}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
         Route::get('/documents/{photo}/download', [DocumentController::class, 'download'])->name('documents.download');

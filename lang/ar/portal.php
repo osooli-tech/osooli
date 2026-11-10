@@ -230,4 +230,22 @@ return [
     'request_none' => 'لا توجد طلبات تعديل لهذه القطعة',
     'request_history' => 'طلباتك السابقة',
     'modification_request_sent' => 'تم إرسال طلب التعديل',
+
+    // One account, several owners
+    'switch_owner' => 'التبديل بين الملاك',
+    'signed_in_as' => 'داخل بحساب :account',
+    'view_only' => 'مشاهدة فقط',
+    'view_only_refused' => 'هذا الحساب يملك صلاحية المشاهدة فقط لهذا المالك.',
+    'nav_overview' => 'نظرة شاملة',
+    'overview_title' => 'نظرة شاملة',
+    'overview_subtitle' => 'جميع الملاك الذين يفتحهم حسابك، وأملاك كل منهم بنصيبه.',
+    'overview_owners' => 'الملاك',
+    'overview_open' => 'افتح',
+    'overview_share' => 'النصيب',
+    'overview_parcels' => 'القطع',
+    'overview_area' => 'المساحة',
+    'overview_value' => 'القيمة',
+    'overview_total_note' => 'القطعة المشتركة بين أكثر من مالك تُحسب في الإجمالي مرة واحدة.',
+    'overview_map' => 'خريطة جميع القطع',
+    'overview_owner_parcels' => 'قطع :name',
 ];

@@ -51,6 +51,12 @@ class AppServiceProvider extends ServiceProvider
         View::composer('portal.layout', function (ViewContract $view): void {
             $owner = Auth::guard('owner')->user();
             $view->with('hasLinkedParcels', $owner instanceof Owner && $owner->linkedParcels()->exists());
+
+            // The account that signed in, and the owners it may switch to.
+            $context = app(PortalContext::class);
+            $view->with('portalAccount', $context->account());
+            $view->with('portalSwitchable', $owner instanceof Owner ? $context->switchable() : []);
+            $view->with('portalCanManage', $owner instanceof Owner && $context->canManage());
         });
 
         Blade::directive('ar', fn (string $expression) => "<?php echo \App\Support\PdfArabicText::render($expression); ?>");

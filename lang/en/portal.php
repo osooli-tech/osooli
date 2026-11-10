@@ -230,4 +230,22 @@ return [
     'request_none' => 'No change requests for this parcel',
     'request_history' => 'Your previous requests',
     'modification_request_sent' => 'Your change request was sent',
+
+    // One account, several owners
+    'switch_owner' => 'Switch owner',
+    'signed_in_as' => 'Signed in as :account',
+    'view_only' => 'View only',
+    'view_only_refused' => 'This account may only view this owner.',
+    'nav_overview' => 'Overview',
+    'overview_title' => 'Overview',
+    'overview_subtitle' => 'Every owner your account opens, and what each holds by their share.',
+    'overview_owners' => 'Owners',
+    'overview_open' => 'Open',
+    'overview_share' => 'Share',
+    'overview_parcels' => 'Parcels',
+    'overview_area' => 'Area',
+    'overview_value' => 'Value',
+    'overview_total_note' => 'A parcel shared by several owners counts once in the totals.',
+    'overview_map' => 'Map of all parcels',
+    'overview_owner_parcels' => 'Parcels of :name',
 ];

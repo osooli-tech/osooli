@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\InquiryStatus;
+use App\Models\Concerns\RecordsPortalAccount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -20,9 +21,12 @@ use Illuminate\Support\Carbon;
  * @property int|null $handled_by
  * @property Carbon|null $handled_at
  * @property Carbon|null $created_at
+ * @property int|null $portal_account_id
  */
 class ListingInquiry extends Model
 {
+    use RecordsPortalAccount;
+
     protected $fillable = [
         'parcel_listing_id',
         'owner_id',

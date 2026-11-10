@@ -59,6 +59,7 @@
 
         <nav class="relative flex-grow overflow-y-auto py-5 px-3 space-y-1">
             @foreach ([
+                ...(count($portalSwitchable ?? []) > 1 ? [['route' => 'portal.overview', 'label' => 'portal.nav_overview', 'icon' => 'dashboard']] : []),
                 ['route' => 'portal.dashboard', 'label' => 'portal.nav_dashboard', 'icon' => 'grid_view'],
                 ['route' => 'portal.parcels.index', 'label' => 'portal.nav_parcels', 'icon' => 'map'],
                 ...(($hasLinkedParcels ?? false) ? [['route' => 'portal.linked.index', 'label' => 'portal.nav_linked', 'icon' => 'family_restroom']] : []),
@@ -124,12 +125,48 @@
         </nav>
 
         <div class="relative px-3 pb-4 shrink-0">
+            {{-- An account that opens several owners switches between them here. --}}
+            @if (count($portalSwitchable ?? []) > 1)
+                <div x-data="{ open: false }" class="mb-2">
+                    <button type="button" @click="open = ! open" :aria-expanded="open"
+                            class="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-start text-xs text-primary-fixed-dim hover:text-white hover:bg-white/10 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">swap_horiz</span>
+                        <span class="flex-1 truncate">{{ __('portal.switch_owner') }}</span>
+                        <span class="material-symbols-outlined text-[18px] transition-transform" :class="open && 'rotate-180'">expand_more</span>
+                    </button>
+                    <div x-show="open" x-cloak class="mt-1 space-y-1">
+                        @foreach ($portalSwitchable as $choice)
+                            @if ($choice['current'])
+                                <div class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-white bg-white/15">
+                                    <span class="material-symbols-outlined text-[18px]">check</span>
+                                    <span class="flex-1 truncate">{{ $choice['name'] }}</span>
+                                </div>
+                            @else
+                                <form method="POST" action="{{ route('portal.switch', $choice['id']) }}">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-start text-sm text-primary-fixed-dim hover:text-white hover:bg-white/10 transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">person</span>
+                                        <span class="flex-1 truncate">{{ $choice['name'] }}</span>
+                                        @unless ($choice['can_manage'])
+                                            <span class="text-[11px] opacity-80">{{ __('portal.view_only') }}</span>
+                                        @endunless
+                                    </button>
+                                </form>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <div class="flex items-center gap-3 rounded-2xl p-3 bg-white/10 ring-1 ring-white/10 backdrop-blur-sm">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-tertiary-container to-tertiary flex items-center justify-center shrink-0 text-white text-sm font-bold">
                     {{ mb_substr(auth('owner')->user()?->name ?? 'م', 0, 1) }}
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-white text-sm font-medium truncate">{{ auth('owner')->user()?->name }}</p>
+                    @if (count($portalSwitchable ?? []) > 1 && $portalAccount)
+                        <p class="text-primary-fixed-dim text-xs truncate">{{ __('portal.signed_in_as', ['account' => $portalAccount->label()]) }}</p>
+                    @endif
                 </div>
                 <form method="POST" action="{{ route('portal.logout') }}" class="shrink-0">
                     @csrf

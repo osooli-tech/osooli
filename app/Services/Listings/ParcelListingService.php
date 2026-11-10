@@ -14,6 +14,7 @@ use App\Models\ParcelListing;
 use App\Models\User;
 use App\Support\Database\Spatial;
 use App\Support\ParcelFrontage;
+use App\Support\Portal\PortalContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -113,7 +114,7 @@ class ParcelListingService
     public function market(Owner $viewer): Builder
     {
         return ParcelListing::query()
-            ->visibleTo($viewer)
+            ->visibleTo($viewer, $this->circle($viewer))
             ->with([
                 'parcel' => fn ($q) => $q->select('parcels.id', 'parcels.plan_id', 'parcels.asset_type')
                     ->selectRaw('ST_AsGeoJSON(parcels.geom, 6) AS geom_json')
@@ -188,9 +189,9 @@ class ParcelListingService
             'frontage' => $frontage,
             'streets' => $streets,
             'my_interest' => $mine?->status->value,
-            // The seller and their co-holders: shown their own offer, never asked to be interested in it.
-            'is_mine' => $viewer !== null && ($listing->owner_id === $viewer->getKey()
-                || (bool) $parcel->heldDeed?->owners->contains('id', $viewer->getKey())),
+            // The seller and their co-holders — and any account acting for one of
+            // them: shown their own offer, never asked to be interested in it.
+            'is_mine' => $viewer !== null && $this->isOwnListing($listing, $this->circle($viewer)),
             'listed_at' => $listing->reviewed_at?->toDateString(),
         ];
     }
@@ -253,6 +254,33 @@ class ParcelListingService
         }
 
         $listing->update([...$attributes, 'status' => $to]);
+    }
+
+    /**
+     * The owners the viewer stands for in the market: everyone the signed-in
+     * portal account opens when the viewer is the owner it is acting for,
+     * else the viewer alone.
+     *
+     * @return list<int>
+     */
+    private function circle(Owner $viewer): array
+    {
+        $context = app(PortalContext::class);
+        $ids = $context->owner()?->is($viewer) ? $context->ownerIds() : [];
+
+        return $ids === [] ? [(int) $viewer->getKey()] : $ids;
+    }
+
+    /** @param list<int> $circle */
+    private function isOwnListing(ParcelListing $listing, array $circle): bool
+    {
+        if (in_array((int) $listing->owner_id, $circle, true)) {
+            return true;
+        }
+
+        $holders = $listing->parcel->heldDeed?->owners->pluck('id')->map(fn ($id): int => (int) $id)->all() ?? [];
+
+        return array_intersect($holders, $circle) !== [];
     }
 
     private function audit(string $action, ParcelListing $listing, ?User $user = null, ?Owner $owner = null): void

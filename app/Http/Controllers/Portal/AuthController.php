@@ -105,7 +105,8 @@ class AuthController extends Controller
 
         $this->context->signIn($account, $owner);
 
-        return redirect()->intended(route('portal.dashboard'));
+        // An account that opens several owners lands on the view across them.
+        return redirect()->intended(route($this->context->hasMany() ? 'portal.overview' : 'portal.dashboard'));
     }
 
     public function resendOtp(): RedirectResponse

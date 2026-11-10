@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ModificationRequestStatus;
+use App\Models\Concerns\RecordsPortalAccount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -22,9 +23,12 @@ use Illuminate\Support\Facades\Lang;
  * @property Carbon|null $resolved_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property int|null $portal_account_id
  */
 class ModificationRequest extends Model
 {
+    use RecordsPortalAccount;
+
     protected $table = 'modification_requests';
 
     protected $fillable = [
