@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Owners;
 
 use App\Models\Owner;
+use App\Models\User;
+use App\Services\Portal\PortalAccessService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
@@ -29,6 +31,11 @@ class OwnerEditForm extends Component
     public string $nationalId = '';
 
     public string $phone = '';
+
+    /** @var list<string> owners the new phone already opens, awaiting a yes */
+    public array $sharedWith = [];
+
+    public bool $sharedConfirmed = false;
 
     public function mount(int $ownerId): void
     {
@@ -72,14 +79,47 @@ class OwnerEditForm extends Component
             'phone' => __('owners.phone'),
         ]);
 
-        $this->owner()->update([
+        $owner = $this->owner();
+        $phone = (string) ($validated['phone'] ?? '');
+        $phoneChanged = Owner::normalisePhone($phone) !== Owner::normalisePhone((string) $owner->phone);
+
+        // The phone signs in to the portal: if it already opens other owners,
+        // say so and wait for a yes before this owner joins them.
+        if ($phoneChanged && $phone !== '' && ! $this->sharedConfirmed) {
+            $this->sharedWith = app(PortalAccessService::class)->ownersSharingPhone($phone, (int) $owner->id)->pluck('name')->all();
+
+            if ($this->sharedWith !== []) {
+                return;
+            }
+        }
+
+        $owner->update([
             'name' => $validated['name'],
             'national_id' => $validated['nationalId'] ?: null,
-            'phone' => $validated['phone'] ?: null,
         ]);
 
+        if ($phoneChanged) {
+            app(PortalAccessService::class)->changeOwnerPhone($owner, $phone === '' ? null : $phone, $this->staff());
+        }
+
+        $this->sharedWith = [];
+        $this->sharedConfirmed = false;
         $this->editing = false;
         $this->dispatch('owner-updated');
+    }
+
+    /** Saves the phone after staff agreed it may open this owner beside the others. */
+    public function confirmSharedPhone(): void
+    {
+        $this->sharedConfirmed = true;
+        $this->save();
+    }
+
+    private function staff(): ?User
+    {
+        $user = auth()->user();
+
+        return $user instanceof User ? $user : null;
     }
 
     public function render(): View

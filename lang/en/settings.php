@@ -73,6 +73,8 @@ return [
         'imports_run' => 'Import data from a file',
         'owners_create' => 'Add an owner',
         'owners_edit' => 'Edit owner details',
+        'portal_accounts_view' => 'View portal accounts',
+        'portal_accounts_manage' => 'Manage portal accounts and their access',
         'presentation_requests_view' => 'View presentation requests',
         'modification_requests_view' => 'View modification requests',
         'modification_requests_manage' => 'Manage modification requests',

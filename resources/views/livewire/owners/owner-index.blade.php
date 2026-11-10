@@ -342,6 +342,13 @@
                                     <div class="mt-5 pt-4 border-t border-outline-variant dark:border-white/10">
                                         <livewire:owners.portfolio-manager :owner-id="$owner->id" :key="'portfolio-'.$owner->id" />
                                     </div>
+
+                                    {{-- Which phones open this owner in the portal --}}
+                                    @can('portal_accounts.view')
+                                        <div class="mt-5 pt-4 border-t border-outline-variant dark:border-white/10">
+                                            <livewire:owners.portal-access-panel :owner-id="$owner->id" :key="'portal-access-'.$owner->id" />
+                                        </div>
+                                    @endcan
                                 </td>
                             </tr>
                         @endif

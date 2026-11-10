@@ -112,6 +112,11 @@ Route::middleware(['auth', 'user.active', 'set.locale'])->group(function () {
         ->middleware('can:listings.view')
         ->name('listings.index');
 
+    // Who signs in to the owner portal, and which owners each phone opens.
+    Route::get('/portal-accounts', fn () => view('portal-accounts.index'))
+        ->middleware('can:portal_accounts.view')
+        ->name('portal-accounts.index');
+
     // Presentation (demo) Requests
     Route::get('/presentation-requests', fn () => view('presentation-requests.index'))
         ->middleware('can:presentation_requests.view')

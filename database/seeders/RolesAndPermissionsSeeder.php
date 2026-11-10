@@ -61,6 +61,8 @@ class RolesAndPermissionsSeeder extends Seeder
         'parcels.placement_fix',
         'listings.view',
         'listings.manage',
+        'portal_accounts.view',
+        'portal_accounts.manage',
     ];
 
     private const ROLES = [

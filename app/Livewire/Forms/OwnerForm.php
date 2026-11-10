@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Forms;
 
 use App\Models\Owner;
+use App\Models\User;
+use App\Services\Portal\PortalAccessService;
 use App\Support\Concerns\WritesSafely;
 use Closure;
 use Livewire\Form;
@@ -97,7 +99,18 @@ class OwnerForm extends Form
             'owner.create',
             'owner',
             null,
-            fn (): Owner => Owner::create($this->attributes())
+            function (): Owner {
+                $attributes = $this->attributes();
+                $owner = Owner::create(['phone' => null] + $attributes);
+
+                // The phone is the owner's portal sign-in: set through the
+                // service, which gives the owner their own account for it.
+                if ($attributes['phone'] !== null) {
+                    $this->portalAccess()->changeOwnerPhone($owner, $attributes['phone'], $this->staff());
+                }
+
+                return $owner->refresh();
+            }
         );
     }
 
@@ -117,11 +130,31 @@ class OwnerForm extends Form
                 // Through the model, not a raw update: Owner::booted() keeps
                 // `phone_normalized` in step with every phone change, and a
                 // direct query would leave the lookup column stale.
-                $owner->update($this->attributes());
+                $attributes = $this->attributes();
+                $phone = $attributes['phone'];
+                unset($attributes['phone']);
+                $owner->update($attributes);
+
+                // A new phone moves the owner's own portal account with it.
+                if (Owner::normalisePhone((string) $phone) !== Owner::normalisePhone((string) $owner->phone)) {
+                    $this->portalAccess()->changeOwnerPhone($owner, $phone, $this->staff());
+                }
 
                 return $owner->refresh();
             }
         );
+    }
+
+    private function portalAccess(): PortalAccessService
+    {
+        return app(PortalAccessService::class);
+    }
+
+    private function staff(): ?User
+    {
+        $user = auth()->user();
+
+        return $user instanceof User ? $user : null;
     }
 
     /**

@@ -33,7 +33,7 @@ class RoleManager extends Component
         'archive' => ['archive.view', 'archive.restore'],
         'exports' => ['exports.create', 'exports.bulk', 'imports.run'],
         'requests' => ['modification_requests.view', 'modification_requests.manage', 'presentation_requests.view', 'listings.view', 'listings.manage'],
-        'owners' => ['owners.create', 'owners.edit'],
+        'owners' => ['owners.create', 'owners.edit', 'portal_accounts.view', 'portal_accounts.manage'],
         'users' => ['users.view', 'users.create', 'users.edit', 'users.delete'],
         'admin' => ['roles.manage', 'audit_logs.view', 'sync.view', 'database.manage'],
         'imports' => ['imports.create'],

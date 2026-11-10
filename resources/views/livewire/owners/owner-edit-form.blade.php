@@ -60,6 +60,12 @@
                               bg-surface dark:bg-[#1a2435] border border-outline-variant dark:border-white/10
                               text-on-surface dark:text-white focus:outline-none focus:ring-2 focus:ring-secondary/40">
                 @error('phone') <p class="text-[11px] text-error mt-1">{{ $message }}</p> @enderror
+                @if ($sharedWith !== [])
+                    <div class="mt-2 rounded-lg p-2 text-[11px] bg-tertiary-container/30">
+                        <p>{{ __('portal_accounts.shared_warning', ['names' => implode('، ', $sharedWith)]) }}</p>
+                        <button type="button" wire:click="confirmSharedPhone" class="mt-1 px-2 py-1 rounded-md bg-secondary/10 text-secondary font-medium">{{ __('portal_accounts.shared_confirm') }}</button>
+                    </div>
+                @endif
             </div>
             <div class="sm:col-span-3 flex items-center gap-2">
                 <button type="submit"

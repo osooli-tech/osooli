@@ -73,6 +73,8 @@ return [
         'imports_run' => 'استيراد البيانات من ملف',
         'owners_create' => 'إضافة مالك',
         'owners_edit' => 'تعديل بيانات المُلّاك',
+        'portal_accounts_view' => 'عرض حسابات البوابة',
+        'portal_accounts_manage' => 'إدارة حسابات البوابة وصلاحياتها',
         'presentation_requests_view' => 'عرض طلبات العرض التقديمي',
         'modification_requests_view' => 'عرض طلبات التعديل',
         'modification_requests_manage' => 'إدارة طلبات التعديل',

@@ -30,6 +30,7 @@ class Sidebar extends Component
                 ['route' => 'parcels.index', 'label' => 'nav.parcels', 'icon' => 'map', 'permission' => 'parcels.view'],
                 ['route' => 'parcels.placement', 'label' => 'nav.placement', 'icon' => 'wrong_location', 'permission' => 'parcels.placement'],
                 ['route' => 'owners.index', 'label' => 'nav.owners', 'icon' => 'group', 'permission' => 'parcels.view'],
+                ['route' => 'portal-accounts.index', 'label' => 'portal_accounts.title', 'icon' => 'phonelink_lock', 'permission' => 'portal_accounts.view'],
             ],
         ],
         [
