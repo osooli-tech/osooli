@@ -160,21 +160,26 @@ class LinkedParcelsService
     private function rows(Owner $owner, bool $showValue): Collection
     {
         $holdings = app(OwnerHoldings::class);
+        $rows = [];
 
-        return $this->query($owner)->get()->flatMap(function (Parcel $parcel) use ($showValue, $holdings): array {
-            $holders = $parcel->heldDeed?->owners ?? collect();
+        foreach ($this->query($owner)->get() as $parcel) {
+            $holders = $parcel->heldDeed->owners ?? collect();
 
             // A parcel between deeds has no holder on record; it is grouped under 0.
             if ($holders->isEmpty()) {
-                return [$this->row($parcel, $showValue, 0, __('portal.linked_no_holder'), 1.0)];
+                $rows[] = $this->row($parcel, $showValue, 0, __('portal.linked_no_holder'), 1.0);
+
+                continue;
             }
 
             $shares = $holdings->shares($parcel);
 
-            return $holders
-                ->map(fn (Owner $holder): array => $this->row($parcel, $showValue, (int) $holder->id, (string) $holder->name, $shares[$holder->id] ?? 0.0))
-                ->all();
-        });
+            foreach ($holders as $holder) {
+                $rows[] = $this->row($parcel, $showValue, (int) $holder->id, (string) $holder->name, $shares[$holder->id] ?? 0.0);
+            }
+        }
+
+        return collect($rows);
     }
 
     /** @return array<string, mixed> */

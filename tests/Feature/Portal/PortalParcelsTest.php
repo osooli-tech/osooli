@@ -53,7 +53,7 @@ class PortalParcelsTest extends TestCase
 
     public function test_the_parcel_list_shows_only_the_signed_in_owners_parcels(): void
     {
-        $response = $this->actingAs($this->owner, 'owner')->get(route('portal.parcels.index'));
+        $response = $this->actingAsOwner($this->owner)->get(route('portal.parcels.index'));
 
         // parcel_no alone is too short to assert on reliably here — "202" is
         // also a substring of any 2026 date the page renders. deed_no doesn't collide.
@@ -64,21 +64,21 @@ class PortalParcelsTest extends TestCase
 
     public function test_an_owner_can_open_their_own_parcel(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.show', $this->ownedParcel))
             ->assertOk();
     }
 
     public function test_an_owner_cannot_reach_another_owners_parcel(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.show', $this->foreignParcel))
             ->assertNotFound();
     }
 
     public function test_the_map_feed_only_carries_the_signed_in_owners_parcels(): void
     {
-        $response = $this->actingAs($this->owner, 'owner')
+        $response = $this->actingAsOwner($this->owner)
             ->getJson(route('portal.geo.parcels'))
             ->assertOk();
 
@@ -92,21 +92,21 @@ class PortalParcelsTest extends TestCase
 
     public function test_an_owner_can_open_their_own_parcels_twin(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.twin', $this->ownedParcel))
             ->assertOk();
     }
 
     public function test_an_owner_cannot_reach_another_owners_twin(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.twin', $this->foreignParcel))
             ->assertNotFound();
     }
 
     public function test_printing_the_owners_own_parcel_returns_a_pdf(): void
     {
-        $response = $this->actingAs($this->owner, 'owner')
+        $response = $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.print', $this->ownedParcel));
 
         $response->assertOk();
@@ -115,14 +115,14 @@ class PortalParcelsTest extends TestCase
 
     public function test_an_owner_cannot_print_another_owners_parcel(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.print', $this->foreignParcel))
             ->assertNotFound();
     }
 
     public function test_an_owner_can_request_a_change_on_their_own_parcel(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->post(route('portal.parcels.modification-requests.store', $this->ownedParcel), [
                 'field_name' => 'asset_type',
                 'new_value' => 'شقة',
@@ -140,7 +140,7 @@ class PortalParcelsTest extends TestCase
 
     public function test_an_owner_cannot_request_a_change_on_another_owners_parcel(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->post(route('portal.parcels.modification-requests.store', $this->foreignParcel), [
                 'field_name' => 'asset_type',
                 'new_value' => 'شقة',
@@ -152,7 +152,7 @@ class PortalParcelsTest extends TestCase
 
     public function test_a_change_request_only_accepts_the_editable_fields(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->post(route('portal.parcels.modification-requests.store', $this->ownedParcel), [
                 'field_name' => 'parcel_no',
                 'new_value' => '999',
@@ -162,12 +162,12 @@ class PortalParcelsTest extends TestCase
 
     public function test_the_documents_feed_is_scoped_to_the_owner(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->getJson(route('portal.parcels.documents', $this->ownedParcel))
             ->assertOk()
             ->assertJsonStructure(['documents', 'images']);
 
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->getJson(route('portal.parcels.documents', $this->foreignParcel))
             ->assertNotFound();
     }
@@ -175,13 +175,13 @@ class PortalParcelsTest extends TestCase
     public function test_the_documents_requests_and_profile_pages_open(): void
     {
         foreach (['portal.documents.index', 'portal.modification-requests.index', 'portal.profile'] as $name) {
-            $this->actingAs($this->owner, 'owner')->get(route($name))->assertOk();
+            $this->actingAsOwner($this->owner)->get(route($name))->assertOk();
         }
     }
 
     public function test_an_owner_can_update_their_contact_details_but_not_their_identity(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->put(route('portal.profile.update'), [
                 'name' => 'اسم جديد',
                 'email' => 'new@example.com',
@@ -198,7 +198,7 @@ class PortalParcelsTest extends TestCase
 
     public function test_the_map_boundaries_feed_is_available_to_a_signed_in_owner(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->getJson(route('portal.geo.boundaries', 'districts'))
             ->assertOk()
             ->assertJsonPath('type', 'FeatureCollection');
@@ -216,7 +216,7 @@ class PortalParcelsTest extends TestCase
     public function test_the_service_pages_render_inside_the_portal(): void
     {
         foreach (['survey-request', 'engineering-design', 'solar-energy', 'valuation', 'investment', 'municipal'] as $slug) {
-            $this->actingAs($this->owner, 'owner')
+            $this->actingAsOwner($this->owner)
                 ->get(route('portal.services.'.$slug))
                 ->assertOk();
         }
@@ -241,7 +241,7 @@ class PortalParcelsTest extends TestCase
     {
         $this->ownedParcel->deeds()->update(['deed_status' => null]);
 
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.show', $this->ownedParcel->id))
             ->assertOk();
         $this->assertTrue($this->owner->parcels()->whereKey($this->ownedParcel->id)->exists());
@@ -251,7 +251,7 @@ class PortalParcelsTest extends TestCase
     {
         $this->ownedParcel->deeds()->update(['deed_status' => DeedStatus::Old->value]);
 
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.parcels.show', $this->ownedParcel->id))
             ->assertNotFound();
     }

@@ -35,7 +35,7 @@ class OwnerHoldings
     public function shares(Parcel $parcel): array
     {
         $parcel->loadMissing(self::RELATIONS);
-        $holders = $parcel->heldDeed?->deedOwners ?? collect();
+        $holders = $parcel->heldDeed->deedOwners ?? collect();
 
         if ($holders->isEmpty()) {
             return [];

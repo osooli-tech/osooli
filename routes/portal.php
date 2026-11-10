@@ -38,7 +38,7 @@ Route::prefix('portal')->name('portal.')->middleware('set.locale')->group(functi
         Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->middleware('throttle:10,1')->name('otp.resend');
     });
 
-    Route::middleware('auth:owner')->group(function (): void {
+    Route::middleware(['auth:owner', 'portal.account'])->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

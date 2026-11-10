@@ -60,6 +60,10 @@ class OwnerApiTest extends TestCase
             'phone' => '0500000002',
         ]);
 
+        // Signing in goes through each phone's portal account.
+        $this->portalAccountFor($this->owner);
+        $this->portalAccountFor($this->otherOwner);
+
         $this->ownedParcel = $this->makeParcel($plan->id, '101', 'geo-101', $this->owner);
         $this->foreignParcel = $this->makeParcel($plan->id, '202', 'geo-202', $this->otherOwner);
     }
@@ -139,7 +143,9 @@ class OwnerApiTest extends TestCase
 
     public function test_the_other_owners_tokens_are_left_alone(): void
     {
-        $otherToken = $this->otherOwner->createToken('other-device')->plainTextToken;
+        $issued = $this->otherOwner->createToken('other-device');
+        $issued->accessToken->forceFill(['portal_account_id' => $this->portalAccountFor($this->otherOwner)->id])->save();
+        $otherToken = $issued->plainTextToken;
 
         $this->postJson('/api/v1/auth/request-otp', ['phone' => '0500000001']);
         $this->postJson('/api/v1/auth/verify-otp', ['phone' => '0500000001', 'otp' => '6666'])
@@ -159,7 +165,7 @@ class OwnerApiTest extends TestCase
 
     public function test_parcels_index_is_paginated_and_lists_only_owned_parcels(): void
     {
-        $response = $this->actingAsOwner()->getJson('/api/v1/parcels')
+        $response = $this->apiAsOwner($this->owner)->getJson('/api/v1/parcels')
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [['id', 'parcel_no', 'asset_type', 'city', 'district', 'current_deed']],
@@ -172,14 +178,14 @@ class OwnerApiTest extends TestCase
 
     public function test_per_page_is_capped_so_a_client_cannot_request_an_unbounded_page(): void
     {
-        $this->actingAsOwner()->getJson('/api/v1/parcels?per_page=5000')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/parcels?per_page=5000')
             ->assertOk()
             ->assertJsonPath('meta.per_page', 100);
     }
 
     public function test_parcel_detail_returns_the_documented_shape(): void
     {
-        $this->actingAsOwner()->getJson("/api/v1/parcels/{$this->ownedParcel->id}")
+        $this->apiAsOwner($this->owner)->getJson("/api/v1/parcels/{$this->ownedParcel->id}")
             ->assertOk()
             ->assertJsonStructure([
                 'data' => [
@@ -192,7 +198,7 @@ class OwnerApiTest extends TestCase
 
     public function test_another_owners_parcel_is_reported_as_not_found(): void
     {
-        $this->actingAsOwner()->getJson("/api/v1/parcels/{$this->foreignParcel->id}")
+        $this->apiAsOwner($this->owner)->getJson("/api/v1/parcels/{$this->foreignParcel->id}")
             ->assertStatus(404)
             ->assertJsonStructure(['message']);
     }
@@ -205,13 +211,13 @@ class OwnerApiTest extends TestCase
             'photo_type' => PhotoType::Deed->value,
         ]);
 
-        $this->actingAsOwner()->getJson("/api/v1/documents/{$foreignDocument->id}/download")
+        $this->apiAsOwner($this->owner)->getJson("/api/v1/documents/{$foreignDocument->id}/download")
             ->assertStatus(404);
     }
 
     public function test_dashboard_counts_only_the_signed_in_owners_records(): void
     {
-        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/dashboard')
             ->assertOk()
             ->assertJsonPath('data.stats.parcels_total', 1)
             ->assertJsonStructure([
@@ -226,7 +232,7 @@ class OwnerApiTest extends TestCase
 
     public function test_dashboard_portfolio_sums_owned_parcel_values(): void
     {
-        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/dashboard')
             ->assertOk()
             // Sole owner of one parcel priced at 1,500,000 in makeParcel().
             ->assertJsonPath('data.portfolio.total_value', 1500000)
@@ -242,7 +248,7 @@ class OwnerApiTest extends TestCase
         $deed->owners()->updateExistingPivot($this->owner->id, ['ownership_share' => 25]);
         $deed->owners()->attach($this->otherOwner->id, ['ownership_share' => 75]);
 
-        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/dashboard')
             ->assertOk()
             ->assertJsonPath('data.portfolio.total_value', 375000);
     }
@@ -252,19 +258,19 @@ class OwnerApiTest extends TestCase
         // Neither co-owner has a recorded share — assume equal halves.
         $this->ownedParcel->latestDeed->owners()->attach($this->otherOwner->id);
 
-        $this->actingAsOwner()->getJson('/api/v1/dashboard')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/dashboard')
             ->assertOk()
             ->assertJsonPath('data.portfolio.total_value', 750000);
     }
 
     public function test_parcel_responses_include_prices(): void
     {
-        $this->actingAsOwner()->getJson('/api/v1/parcels')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/parcels')
             ->assertOk()
             ->assertJsonPath('data.0.m_price', 1500)
             ->assertJsonPath('data.0.parcel_price', 1500000);
 
-        $this->actingAsOwner()->getJson("/api/v1/parcels/{$this->ownedParcel->id}")
+        $this->apiAsOwner($this->owner)->getJson("/api/v1/parcels/{$this->ownedParcel->id}")
             ->assertOk()
             ->assertJsonPath('data.m_price', 1500)
             ->assertJsonPath('data.parcel_price', 1500000);
@@ -272,7 +278,7 @@ class OwnerApiTest extends TestCase
 
     public function test_deeds_index_is_paginated_and_scoped_to_the_owner(): void
     {
-        $this->actingAsOwner()->getJson('/api/v1/deeds')
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/deeds')
             ->assertOk()
             ->assertJsonPath('meta.total', 1)
             ->assertJsonStructure([
@@ -283,7 +289,7 @@ class OwnerApiTest extends TestCase
 
     public function test_modification_request_is_created_for_an_owned_parcel(): void
     {
-        $this->actingAsOwner()->postJson('/api/v1/modification-requests', [
+        $this->apiAsOwner($this->owner)->postJson('/api/v1/modification-requests', [
             'parcel_id' => $this->ownedParcel->id,
             'field_name' => 'asset_type',
             'new_value' => 'فيلا',
@@ -295,7 +301,7 @@ class OwnerApiTest extends TestCase
 
     public function test_modification_request_rejects_an_unowned_parcel(): void
     {
-        $this->actingAsOwner()->postJson('/api/v1/modification-requests', [
+        $this->apiAsOwner($this->owner)->postJson('/api/v1/modification-requests', [
             'parcel_id' => $this->foreignParcel->id,
             'field_name' => 'asset_type',
             'new_value' => 'فيلا',
@@ -306,7 +312,7 @@ class OwnerApiTest extends TestCase
 
     public function test_modification_request_rejects_a_field_that_is_not_editable(): void
     {
-        $this->actingAsOwner()->postJson('/api/v1/modification-requests', [
+        $this->apiAsOwner($this->owner)->postJson('/api/v1/modification-requests', [
             'parcel_id' => $this->ownedParcel->id,
             'field_name' => 'parcel_no',
             'new_value' => '999',
@@ -317,7 +323,7 @@ class OwnerApiTest extends TestCase
 
     public function test_profile_update_ignores_officially_sourced_fields(): void
     {
-        $this->actingAsOwner()->patchJson('/api/v1/me', [
+        $this->apiAsOwner($this->owner)->patchJson('/api/v1/me', [
             'email' => 'owner@example.test',
             'name' => 'اسم مزوّر',
         ])->assertOk();
@@ -336,7 +342,7 @@ class OwnerApiTest extends TestCase
             throw new RuntimeException('database credentials leaked in this message');
         });
 
-        $response = $this->actingAsOwner()->getJson('/api/v1/testing-explode')
+        $response = $this->apiAsOwner($this->owner)->getJson('/api/v1/testing-explode')
             ->assertStatus(500)
             ->assertJsonStructure(['message']);
 
@@ -344,11 +350,6 @@ class OwnerApiTest extends TestCase
         $this->assertStringNotContainsString('database credentials leaked', $body);
         $this->assertStringNotContainsString('RuntimeException', $body);
         $this->assertStringNotContainsString('vendor', $body);
-    }
-
-    private function actingAsOwner(): static
-    {
-        return $this->withToken($this->owner->createToken('test')->plainTextToken);
     }
 
     /** Creates a parcel with geometry, a deed and an owner link. */

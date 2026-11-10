@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Tests\Concerns\SignsInOwners;
 
 abstract class TestCase extends BaseTestCase
 {
+    use SignsInOwners;
+
     protected function setUp(): void
     {
         parent::setUp();

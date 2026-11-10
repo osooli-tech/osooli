@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace App\Services\Auth;
 
 use App\Models\Owner;
+use App\Models\PortalAccount;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Issues and verifies the one-time codes owners use to sign in to the mobile app.
+ * Issues and verifies the one-time codes used to sign in to the portal and
+ * the mobile app.
+ *
+ * A code is issued to a portal account — the phone that signs in — not to an
+ * owner: one phone may open several owners.
  *
  * While no SMS provider is connected, a fixed test code is accepted instead of a
  * generated one. Swapping in real delivery only changes `issue()` — the request
@@ -21,7 +26,21 @@ class OwnerOtpService
     private const MAX_VERIFY_ATTEMPTS = 5;
 
     /**
+     * The account that may sign in with this phone: active, and opening at
+     * least one owner. Pending grants alone do not count.
+     */
+    public function findAccountByPhone(string $phone): ?PortalAccount
+    {
+        $account = PortalAccount::findByPhone($phone);
+
+        return $account !== null && $account->usableGrants()->exists() ? $account : null;
+    }
+
+    /**
      * Finds an owner by phone number, ignoring formatting differences.
+     *
+     * This is how sign-in found an owner before portal accounts; it is kept
+     * for the backfill, which must reproduce that choice exactly.
      *
      * Stored numbers vary (05…, +9665…, 9665…), so both sides are reduced to
      * the same national form before comparing.
@@ -46,19 +65,19 @@ class OwnerOtpService
      *
      * @return int seconds until expiry
      */
-    public function issue(Owner $owner): int
+    public function issue(PortalAccount $account): int
     {
         $ttlMinutes = (int) config('auth.mobile_otp.ttl_minutes', 5);
         $length = self::codeLength();
-        $testCode = $this->testCodeFor($owner);
+        $testCode = $this->testCodeFor($account);
         $code = $testCode ?? str_pad((string) random_int(0, 10 ** $length - 1), $length, '0', STR_PAD_LEFT);
 
-        Cache::put($this->cacheKey($owner), $code, now()->addMinutes($ttlMinutes));
-        Cache::put($this->attemptsKey($owner), 0, now()->addMinutes($ttlMinutes));
+        Cache::put($this->cacheKey($account), $code, now()->addMinutes($ttlMinutes));
+        Cache::put($this->attemptsKey($account), 0, now()->addMinutes($ttlMinutes));
 
         if ($testCode === null) {
             // TODO: send via SMS provider once credentials are available.
-            Log::info('Owner OTP issued', ['owner_id' => $owner->id]);
+            Log::info('Portal OTP issued', ['portal_account_id' => $account->id]);
         }
 
         return $ttlMinutes * 60;
@@ -71,9 +90,9 @@ class OwnerOtpService
     }
 
     /** Verifies a code and consumes it so it cannot be replayed. */
-    public function verify(Owner $owner, string $code): bool
+    public function verify(PortalAccount $account, string $code): bool
     {
-        $cached = Cache::get($this->cacheKey($owner));
+        $cached = Cache::get($this->cacheKey($account));
 
         if ($cached === null) {
             return false;
@@ -82,17 +101,17 @@ class OwnerOtpService
         if (! hash_equals((string) $cached, $code)) {
             // A short code is only safe while guesses are counted: after a few
             // wrong ones the code is burnt and a new one has to be requested.
-            if (Cache::increment($this->attemptsKey($owner)) >= self::MAX_VERIFY_ATTEMPTS) {
-                Cache::forget($this->cacheKey($owner));
-                Cache::forget($this->attemptsKey($owner));
-                Log::warning('Owner OTP burnt after repeated wrong codes', ['owner_id' => $owner->id]);
+            if (Cache::increment($this->attemptsKey($account)) >= self::MAX_VERIFY_ATTEMPTS) {
+                Cache::forget($this->cacheKey($account));
+                Cache::forget($this->attemptsKey($account));
+                Log::warning('Portal OTP burnt after repeated wrong codes', ['portal_account_id' => $account->id]);
             }
 
             return false;
         }
 
-        Cache::forget($this->cacheKey($owner));
-        Cache::forget($this->attemptsKey($owner));
+        Cache::forget($this->cacheKey($account));
+        Cache::forget($this->attemptsKey($account));
 
         return true;
     }
@@ -103,14 +122,14 @@ class OwnerOtpService
         return Owner::normalisePhone($phone);
     }
 
-    private function cacheKey(Owner $owner): string
+    private function cacheKey(PortalAccount $account): string
     {
-        return "owner_otp_{$owner->id}";
+        return "portal_otp_{$account->id}";
     }
 
-    private function attemptsKey(Owner $owner): string
+    private function attemptsKey(PortalAccount $account): string
     {
-        return "owner_otp_attempts_{$owner->id}";
+        return "portal_otp_attempts_{$account->id}";
     }
 
     /**
@@ -118,7 +137,7 @@ class OwnerOtpService
      * limited to the listed test numbers, so a real owner's number never
      * opens with a code anyone could guess.
      */
-    private function testCodeFor(Owner $owner): ?string
+    private function testCodeFor(PortalAccount $account): ?string
     {
         $code = config('auth.mobile_otp.test_code');
 
@@ -129,7 +148,7 @@ class OwnerOtpService
         if (app()->environment('production')) {
             /** @var list<string> $allowed */
             $allowed = config('auth.mobile_otp.test_phones', []);
-            $phone = $this->normalisePhone((string) $owner->phone);
+            $phone = $account->phone_normalized;
             $listed = $phone !== '' && in_array($phone, array_map($this->normalisePhone(...), $allowed), true);
 
             return $listed ? (string) $code : null;

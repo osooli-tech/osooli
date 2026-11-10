@@ -38,13 +38,13 @@ class SecurityHardeningTest extends TestCase
         config(['auth.mobile_otp.test_code' => '6666']);
         $owner = Owner::create(['name' => 'مالك', 'national_id' => '1000000001', 'phone' => '0500000001']);
         $otp = app(OwnerOtpService::class);
-        $otp->issue($owner);
+        $otp->issue($this->portalAccountFor($owner));
 
         foreach (range(1, 5) as $guess) {
-            $this->assertFalse($otp->verify($owner, '000'.$guess));
+            $this->assertFalse($otp->verify($this->portalAccountFor($owner), '000'.$guess));
         }
 
-        $this->assertFalse($otp->verify($owner, '6666'), 'the right code no longer works once the guesses ran out');
+        $this->assertFalse($otp->verify($this->portalAccountFor($owner), '6666'), 'the right code no longer works once the guesses ran out');
     }
 
     public function test_a_staff_code_is_burnt_after_five_wrong_guesses(): void
@@ -113,12 +113,11 @@ class SecurityHardeningTest extends TestCase
             'photo_type' => PhotoType::Deed->value,
         ]);
 
-        $this->withToken($former->createToken('t')->plainTextToken)
+        $this->apiAsOwner($former)
             ->get("/api/v1/documents/{$document->id}/download")->assertNotFound();
 
-        // Within one test the guard would otherwise keep answering as the first caller.
-        $this->app['auth']->forgetGuards();
-        $this->withToken($current->createToken('t')->plainTextToken)
+        // apiAsOwner() forgets the guard, which would otherwise keep answering as the first caller.
+        $this->apiAsOwner($current)
             ->get("/api/v1/documents/{$document->id}/download")->assertOk();
 
         $this->assertDatabaseHas('audit_logs', ['action' => 'download', 'target_id' => $document->id, 'owner_id' => $current->id]);
@@ -134,8 +133,8 @@ class SecurityHardeningTest extends TestCase
             'photo_type' => PhotoType::Ground->value,
         ]);
 
-        $this->actingAs($former, 'owner')->get(route('portal.documents.preview', $photo))->assertNotFound();
-        $this->actingAs($current, 'owner')->get(route('portal.documents.preview', $photo))->assertOk();
+        $this->actingAsOwner($former)->get(route('portal.documents.preview', $photo))->assertNotFound();
+        $this->actingAsOwner($current)->get(route('portal.documents.preview', $photo))->assertOk();
     }
 
     public function test_legacy_public_documents_move_to_the_private_disk(): void

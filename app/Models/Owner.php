@@ -129,6 +129,16 @@ class Owner extends Authenticatable
         return $this->hasMany(OwnerPortfolio::class);
     }
 
+    /**
+     * The portal accounts that open this owner, pending ones included.
+     *
+     * @return HasMany<PortalAccountOwner, $this>
+     */
+    public function portalGrants(): HasMany
+    {
+        return $this->hasMany(PortalAccountOwner::class);
+    }
+
     /** @return HasMany<DeedOwner, $this> */
     public function deedOwners(): HasMany
     {

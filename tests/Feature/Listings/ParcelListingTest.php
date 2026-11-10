@@ -17,7 +17,6 @@ use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Laravel\Sanctum\Sanctum;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -57,7 +56,7 @@ class ParcelListingTest extends TestCase
 
     public function test_an_owner_asks_and_nobody_sees_it_before_approval(): void
     {
-        $this->actingAs($this->seller, 'owner')
+        $this->actingAsOwner($this->seller)
             ->post(route('portal.parcels.listing.store', $this->parcel->id), ['contact_phone' => '0555 123 456'])
             ->assertRedirect(route('portal.parcels.show', $this->parcel->id));
 
@@ -65,21 +64,21 @@ class ParcelListingTest extends TestCase
         $this->assertSame(ListingStatus::Pending, $listing->status);
         $this->assertSame('0555123456', $listing->contact_phone);
 
-        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))->assertOk()->assertDontSee('0555123456');
+        $this->actingAsOwner($this->viewer)->get(route('portal.listings.index'))->assertOk()->assertDontSee('0555123456');
         $this->get(route('portal.listings.show', $listing->id))->assertNotFound();
     }
 
     public function test_only_a_holder_may_list_and_only_once_at_a_time(): void
     {
-        $this->actingAs($this->viewer, 'owner')
+        $this->actingAsOwner($this->viewer)
             ->post(route('portal.parcels.listing.store', $this->parcel->id), ['contact_phone' => '0555123456'])
             ->assertNotFound();
 
         // A co-owner may ask; a second open listing on the same parcel is refused.
-        $this->actingAs($this->partner, 'owner')
+        $this->actingAsOwner($this->partner)
             ->post(route('portal.parcels.listing.store', $this->parcel->id), ['contact_phone' => '0555123456'])
             ->assertRedirect();
-        $this->actingAs($this->seller, 'owner')
+        $this->actingAsOwner($this->seller)
             ->post(route('portal.parcels.listing.store', $this->parcel->id), ['contact_phone' => '0555000000'])
             ->assertSessionHasErrors('contact_phone', null, 'listing');
 
@@ -90,7 +89,7 @@ class ParcelListingTest extends TestCase
     {
         $listing = $this->approvedListing();
 
-        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
+        $this->actingAsOwner($this->viewer)->get(route('portal.listings.index'))
             ->assertOk()->assertSee('600')->assertDontSee('البائع الأول')->assertDontSee('0555123456');
 
         $this->get(route('portal.listings.show', $listing->id))
@@ -109,7 +108,7 @@ class ParcelListingTest extends TestCase
     public function test_the_api_shows_the_same_and_nothing_more(): void
     {
         $listing = $this->approvedListing();
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
 
         $item = $this->getJson(route('api.listings.show', $listing->id))->assertOk()->json('data');
 
@@ -128,10 +127,10 @@ class ParcelListingTest extends TestCase
         $listing = $this->approvedListing();
         $listing->blockedOwners()->attach($this->viewer->id);
 
-        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))->assertOk()->assertDontSee('0555123456');
+        $this->actingAsOwner($this->viewer)->get(route('portal.listings.index'))->assertOk()->assertDontSee('0555123456');
         $this->get(route('portal.listings.show', $listing->id))->assertNotFound();
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(0, 'data');
         $this->getJson(route('api.listings.show', $listing->id))->assertNotFound();
     }
@@ -141,20 +140,20 @@ class ParcelListingTest extends TestCase
         $listing = $this->approvedListing();
 
         foreach ([$this->seller, $this->partner] as $holder) {
-            Sanctum::actingAs($holder, [], 'sanctum');
+            $this->apiAsOwner($holder);
             $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.is_mine', true);
             $this->postJson(route('api.listings.interest', $listing->id))->assertUnprocessable();
         }
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->getJson(route('api.listings.index'))->assertJsonPath('data.0.is_mine', false);
 
-        $this->actingAs($this->seller, 'owner')->get(route('portal.listings.show', $listing->id))
+        $this->actingAsOwner($this->seller)->get(route('portal.listings.show', $listing->id))
             ->assertOk()
             ->assertSee(__('listings.yours_hint'))
             ->assertDontSee(__('listings.interest_submit'));
 
-        Sanctum::actingAs($this->seller, [], 'sanctum');
+        $this->apiAsOwner($this->seller);
         $this->getJson(route('api.listings.mine'))->assertOk()->assertJsonPath('data.0.status', 'approved');
         $this->assertSame(0, ListingInquiry::count());
     }
@@ -167,7 +166,7 @@ class ParcelListingTest extends TestCase
         $newDeed = Deed::create(['parcel_id' => $this->parcel->id, 'deed_no' => '444556', 'deed_area' => 600, 'deed_status' => DeedStatus::Updated->value]);
         $newDeed->owners()->attach($buyer->id);
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(0, 'data');
     }
 
@@ -175,14 +174,14 @@ class ParcelListingTest extends TestCase
     {
         $listing = $this->approvedListing();
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->deleteJson(route('api.listings.destroy', $listing->id))->assertNotFound();
 
-        Sanctum::actingAs($this->seller, [], 'sanctum');
+        $this->apiAsOwner($this->seller);
         $this->deleteJson(route('api.listings.destroy', $listing->id))->assertOk();
         $this->assertSame(ListingStatus::Withdrawn, $listing->fresh()?->status);
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->getJson(route('api.listings.index'))->assertOk()->assertJsonCount(0, 'data');
     }
 
@@ -229,7 +228,7 @@ class ParcelListingTest extends TestCase
     {
         $listing = $this->approvedListing();
 
-        $this->actingAs($this->viewer, 'owner')
+        $this->actingAsOwner($this->viewer)
             ->post(route('portal.listings.interest', $listing->id), ['note' => 'أبغى أعرف السعر'])
             ->assertRedirect(route('portal.listings.show', $listing->id));
         $this->post(route('portal.listings.interest', $listing->id), ['note' => 'مرة ثانية']);
@@ -243,7 +242,7 @@ class ParcelListingTest extends TestCase
             ->assertSee(__('listings.interest_status', ['status' => InquiryStatus::New->label()]))
             ->assertDontSee('0555123456');
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->getJson(route('api.listings.show', $listing->id))->assertJsonPath('data.my_interest', 'new');
     }
 
@@ -252,12 +251,12 @@ class ParcelListingTest extends TestCase
         $listing = $this->approvedListing();
         ListingInquiry::create(['parcel_listing_id' => $listing->id, 'owner_id' => $this->viewer->id, 'status' => InquiryStatus::Contacted]);
 
-        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
+        $this->actingAsOwner($this->viewer)->get(route('portal.listings.index'))
             ->assertOk()
             ->assertSee(__('listings.interests_title'))
             ->assertSee(InquiryStatus::Contacted->label());
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->getJson(route('api.listings.interests'))->assertOk()
             ->assertJsonPath('data.0.status', 'contacted')
             ->assertJsonPath('data.0.listing.area', 600);
@@ -265,7 +264,7 @@ class ParcelListingTest extends TestCase
         // Withdrawn since: the row stays, the parcel's details do not.
         $listing->update(['status' => ListingStatus::Withdrawn]);
         $this->getJson(route('api.listings.interests'))->assertOk()->assertJsonPath('data.0.listing', null);
-        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))->assertSee(__('listings.interest_gone'));
+        $this->actingAsOwner($this->viewer)->get(route('portal.listings.index'))->assertSee(__('listings.interest_gone'));
     }
 
     public function test_a_hidden_owner_cannot_ask_and_the_api_asks_the_same_way(): void
@@ -274,10 +273,10 @@ class ParcelListingTest extends TestCase
         $hidden = Owner::create(['name' => 'ممنوع', 'national_id' => '1000000015', 'phone' => '0500000015']);
         $listing->blockedOwners()->attach($hidden->id);
 
-        Sanctum::actingAs($hidden, [], 'sanctum');
+        $this->apiAsOwner($hidden);
         $this->postJson(route('api.listings.interest', $listing->id))->assertNotFound();
 
-        Sanctum::actingAs($this->viewer, [], 'sanctum');
+        $this->apiAsOwner($this->viewer);
         $this->postJson(route('api.listings.interest', $listing->id), ['note' => 'مهتم'])->assertCreated()->assertJsonPath('data.status', 'new');
         $this->assertSame(1, ListingInquiry::count());
     }
@@ -320,7 +319,7 @@ class ParcelListingTest extends TestCase
     {
         $this->approvedListing();
 
-        $this->actingAs($this->viewer, 'owner')->get(route('portal.listings.index'))
+        $this->actingAsOwner($this->viewer)->get(route('portal.listings.index'))
             ->assertOk()
             ->assertViewHas('map', fn (array $map): bool => count($map['features']) === 1
                 && array_keys($map['features'][0]['properties']) === ['id', 'area', 'asset_type', 'place', 'streets', 'is_mine']);

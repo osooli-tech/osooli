@@ -119,7 +119,7 @@ class EncryptionAtRestTest extends TestCase
         $this->artisan('documents:encrypt')->assertSuccessful();
         $this->assertSame($once, $disk->get('deeds/x.pdf'));
 
-        $response = $this->actingAs($owner, 'owner')->get(route('portal.documents.download', $document));
+        $response = $this->actingAsOwner($owner)->get(route('portal.documents.download', $document));
         $response->assertOk()->assertHeader('Content-Type', 'application/pdf');
         $this->assertSame('%PDF-1.7 the deed itself', $response->streamedContent());
     }

@@ -77,7 +77,7 @@ class LinkedParcelsTest extends TestCase
 
     public function test_the_parent_owner_sees_the_given_parcel_but_not_the_sold_one(): void
     {
-        $this->actingAs($this->father, 'owner')->get(route('portal.linked.index'))
+        $this->actingAsOwner($this->father)->get(route('portal.linked.index'))
             ->assertOk()
             ->assertSee('الابن')->assertSee('501')
             ->assertDontSee('المشتري')->assertDontSee('502');
@@ -88,7 +88,7 @@ class LinkedParcelsTest extends TestCase
 
     public function test_the_parents_own_holdings_lead_as_a_portfolio_in_their_name(): void
     {
-        $this->actingAs($this->father, 'owner')->get(route('portal.linked.index'))
+        $this->actingAsOwner($this->father)->get(route('portal.linked.index'))
             ->assertOk()
             ->assertSeeInOrder([__('portal.linked_portfolio_of', ['name' => 'الأب']), '503', __('portal.linked_portfolio_of', ['name' => 'الابن']), '501'])
             ->assertSee(route('portal.parcels.show', Parcel::where('parcel_no', '503')->value('id')), false);
@@ -110,7 +110,7 @@ class LinkedParcelsTest extends TestCase
         $this->assertSame(['501'], $this->father->linkedParcels()->pluck('parcel_no')->all(), 'one they still hold is theirs, not linked');
 
         // The own-parcel page, and a change request on it, stay closed.
-        $this->actingAs($this->father, 'owner')->get(route('portal.parcels.show', $this->given->id))->assertNotFound();
+        $this->actingAsOwner($this->father)->get(route('portal.parcels.show', $this->given->id))->assertNotFound();
     }
 
     public function test_the_headline_figures_take_the_given_parcels_in(): void
@@ -140,7 +140,7 @@ class LinkedParcelsTest extends TestCase
 
     public function test_nobody_else_reaches_it_and_the_son_is_unaffected(): void
     {
-        $this->actingAs($this->son, 'owner')->get(route('portal.linked.index'))->assertOk()->assertDontSee('501');
+        $this->actingAsOwner($this->son)->get(route('portal.linked.index'))->assertOk()->assertDontSee('501');
         $this->get(route('portal.linked.show', $this->given->id))->assertNotFound();
         $this->get(route('portal.parcels.show', $this->given->id))->assertOk();
     }
@@ -151,7 +151,7 @@ class LinkedParcelsTest extends TestCase
             PortalSetting::SHOW_VALUE => false, PortalSetting::SHOW_DEED => false, PortalSetting::SHOW_DOCUMENTS => false,
         ]]);
 
-        $this->actingAs($this->father, 'owner')->get(route('portal.linked.show', $this->given->id))
+        $this->actingAsOwner($this->father)->get(route('portal.linked.show', $this->given->id))
             ->assertOk()
             ->assertDontSee('444444')
             ->assertDontSee('750,000')
@@ -163,7 +163,7 @@ class LinkedParcelsTest extends TestCase
 
     public function test_by_default_the_parent_owner_sees_it_as_their_own(): void
     {
-        $this->actingAs($this->father, 'owner')->get(route('portal.linked.show', $this->given->id))
+        $this->actingAsOwner($this->father)->get(route('portal.linked.show', $this->given->id))
             ->assertOk()
             ->assertSee('444444')
             ->assertSee('750,000')
@@ -175,7 +175,7 @@ class LinkedParcelsTest extends TestCase
 
     public function test_the_map_feed_marks_linked_parcels_and_hides_what_is_switched_off(): void
     {
-        $features = collect($this->actingAs($this->father, 'owner')->getJson(route('portal.geo.parcels'))->assertOk()->json('features'))
+        $features = collect($this->actingAsOwner($this->father)->getJson(route('portal.geo.parcels'))->assertOk()->json('features'))
             ->keyBy('properties.parcel_no');
 
         $this->assertSame(['501', '503'], $features->keys()->map(fn ($k) => (string) $k)->sort()->values()->all());

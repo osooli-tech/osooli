@@ -29,6 +29,8 @@ class PortalAuthTest extends TestCase
             'national_id' => '1000000001',
             'phone' => '0500000001',
         ]);
+        // Signing in goes through the phone's portal account.
+        $this->portalAccountFor($this->owner);
     }
 
     public function test_a_guest_visiting_the_portal_is_sent_to_the_portals_own_login(): void
@@ -98,7 +100,7 @@ class PortalAuthTest extends TestCase
 
     public function test_a_signed_in_owner_can_reach_the_dashboard(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->get(route('portal.dashboard'))
             ->assertOk();
     }

@@ -5,24 +5,28 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
-use App\Models\Owner;
+use App\Models\PortalAccount;
 use App\Services\Auth\OwnerOtpService;
+use App\Support\Portal\PortalContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 /**
  * Phone + OTP sign-in for the owner portal — the same OwnerOtpService the
  * mobile app uses, through the session-based `owner` guard instead of a
- * Sanctum token. The pending owner id lives in the session between the two
- * steps, so — unlike the mobile API, which is stateless — the OTP step here
- * never needs the phone number resubmitted.
+ * Sanctum token. The phone signs in as a portal account; the account then
+ * acts for one of the owners it opens. The pending account id lives in the
+ * session between the two steps, so — unlike the mobile API, which is
+ * stateless — the OTP step here never needs the phone number resubmitted.
  */
 class AuthController extends Controller
 {
-    public function __construct(private readonly OwnerOtpService $otp) {}
+    public function __construct(
+        private readonly OwnerOtpService $otp,
+        private readonly PortalContext $context,
+    ) {}
 
     public function showLogin(): View
     {
@@ -47,25 +51,25 @@ class AuthController extends Controller
         RateLimiter::hit($throttleKey, 3600);
         RateLimiter::hit($phoneKey, 3600);
 
-        $owner = $this->otp->findOwnerByPhone($phone);
+        $account = $this->otp->findAccountByPhone($phone);
 
-        if ($owner === null) {
+        if ($account === null) {
             return back()->withErrors(['phone' => __('portal.phone_not_registered')]);
         }
 
-        $this->otp->issue($owner);
-        session(['portal_otp_owner_id' => $owner->id]);
+        $this->otp->issue($account);
+        session(['portal_otp_account_id' => $account->id]);
 
         return redirect()->route('portal.otp');
     }
 
     public function showOtp(): View|RedirectResponse
     {
-        if (! session()->has('portal_otp_owner_id')) {
+        if (! session()->has('portal_otp_account_id')) {
             return redirect()->route('portal.login');
         }
 
-        $phone = (string) $this->pendingOwner()?->phone;
+        $phone = (string) $this->pendingAccount()?->phone;
 
         return view('portal.auth.otp', [
             'resendSeconds' => config('auth.mobile_otp.ttl_minutes') * 60,
@@ -79,32 +83,40 @@ class AuthController extends Controller
     {
         $request->validate(['otp' => ['required', 'string', 'digits:'.OwnerOtpService::codeLength()]]);
 
-        $owner = $this->pendingOwner();
+        $account = $this->pendingAccount();
 
-        if ($owner === null) {
+        if ($account === null) {
             return redirect()->route('portal.login');
         }
 
-        if (! $this->otp->verify($owner, (string) $request->string('otp'))) {
+        if (! $this->otp->verify($account, (string) $request->string('otp'))) {
             return back()->withErrors(['otp' => __('portal.otp_invalid')]);
         }
 
-        session()->forget('portal_otp_owner_id');
-        Auth::guard('owner')->login($owner);
-        $request->session()->regenerate();
+        session()->forget('portal_otp_account_id');
+
+        // Grants can change between the two steps; sign in only to an owner
+        // the account still opens.
+        $owner = $account->defaultOwner();
+
+        if ($owner === null) {
+            return redirect()->route('portal.login')->withErrors(['phone' => __('portal.phone_not_registered')]);
+        }
+
+        $this->context->signIn($account, $owner);
 
         return redirect()->intended(route('portal.dashboard'));
     }
 
     public function resendOtp(): RedirectResponse
     {
-        $owner = $this->pendingOwner();
+        $account = $this->pendingAccount();
 
-        if ($owner === null) {
+        if ($account === null) {
             return redirect()->route('portal.login');
         }
 
-        $this->otp->issue($owner);
+        $this->otp->issue($account);
 
         return back()->with('resent', true);
     }
@@ -114,19 +126,20 @@ class AuthController extends Controller
         // The portal shares the browser session with the staff dashboard, so
         // only the owner is signed out: invalidate() would sign a staff member
         // out too and expire any dashboard page open in another tab (419).
-        Auth::guard('owner')->logout();
-        $request->session()->forget('portal_otp_owner_id');
+        $this->context->signOut();
         $request->session()->regenerate(true);
         $request->session()->regenerateToken();
 
         return redirect()->route('portal.login');
     }
 
-    private function pendingOwner(): ?Owner
+    /** The account waiting for its code, if it may still sign in. */
+    private function pendingAccount(): ?PortalAccount
     {
-        $ownerId = session('portal_otp_owner_id');
+        $accountId = session('portal_otp_account_id');
+        $account = $accountId === null ? null : PortalAccount::find($accountId);
 
-        return $ownerId === null ? null : Owner::find($ownerId);
+        return $account !== null && $account->is_active ? $account : null;
     }
 
     /** Throttles per phone number and IP, so one attacker cannot lock out others. */

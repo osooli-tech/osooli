@@ -16,7 +16,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -53,7 +52,7 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
 
     public function test_an_owner_uploads_photos_that_wait_for_review(): void
     {
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->post(route('portal.parcels.photos.store', $this->parcel->id), [
                 'photos' => [UploadedFile::fake()->image('front.jpg'), UploadedFile::fake()->image('side.png')],
             ])
@@ -71,11 +70,11 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
 
     public function test_only_images_on_ones_own_parcel_are_accepted(): void
     {
-        $this->actingAs($this->stranger, 'owner')
+        $this->actingAsOwner($this->stranger)
             ->post(route('portal.parcels.photos.store', $this->parcel->id), ['photos' => [UploadedFile::fake()->image('x.jpg')]])
             ->assertNotFound();
 
-        $this->actingAs($this->owner, 'owner')
+        $this->actingAsOwner($this->owner)
             ->post(route('portal.parcels.photos.store', $this->parcel->id), ['photos' => [UploadedFile::fake()->create('virus.pdf', 10, 'application/pdf')]])
             ->assertSessionHasErrors('photos.0', null, 'photos');
 
@@ -84,20 +83,20 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
 
     public function test_the_app_uploads_the_same_way(): void
     {
-        Sanctum::actingAs($this->owner, [], 'sanctum');
+        $this->apiAsOwner($this->owner);
 
         $this->post(route('api.parcels.photos.store', $this->parcel->id), ['photos' => [UploadedFile::fake()->image('a.jpg')]], ['Accept' => 'application/json'])
             ->assertCreated()
             ->assertJsonPath('data.photos.0.status', 'pending');
 
-        Sanctum::actingAs($this->stranger, [], 'sanctum');
+        $this->apiAsOwner($this->stranger);
         $this->post(route('api.parcels.photos.store', $this->parcel->id), ['photos' => [UploadedFile::fake()->image('a.jpg')]], ['Accept' => 'application/json'])
             ->assertNotFound();
     }
 
     public function test_an_owner_who_never_split_their_land_sees_one_portfolio_in_their_name(): void
     {
-        $this->actingAs($this->owner, 'owner')->get(route('portal.dashboard'))
+        $this->actingAsOwner($this->owner)->get(route('portal.dashboard'))
             ->assertOk()
             ->assertSee(__('portal.portfolios_title'))
             ->assertSee(__('portal.linked_portfolio_of', ['name' => 'صاحب الأرض']));
@@ -108,7 +107,7 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
         $portfolio = OwnerPortfolio::create(['owner_id' => $this->owner->id, 'name' => 'محفظة الرياض']);
         DB::table('owner_portfolio_parcels')->insert(['owner_id' => $this->owner->id, 'owner_portfolio_id' => $portfolio->id, 'parcel_id' => $this->parcel->id]);
 
-        $this->actingAs($this->owner, 'owner')->get(route('portal.dashboard'))
+        $this->actingAsOwner($this->owner)->get(route('portal.dashboard'))
             ->assertOk()
             ->assertSee('محفظة الرياض')
             ->assertSee(__('portal.portfolio_unassigned'))

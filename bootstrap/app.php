@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsurePortalAccount;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\ReportLocale;
 use App\Http\Middleware\SecurityHeaders;
@@ -56,6 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'set.locale' => SetLocale::class,
             'user.active' => EnsureUserIsActive::class,
             'report.locale' => ReportLocale::class,
+            'portal.account' => EnsurePortalAccount::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

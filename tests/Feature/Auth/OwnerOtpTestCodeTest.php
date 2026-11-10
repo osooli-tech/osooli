@@ -32,9 +32,9 @@ class OwnerOtpTestCodeTest extends TestCase
     {
         $owner = $this->owner('0551234567');
 
-        app(OwnerOtpService::class)->issue($owner);
+        app(OwnerOtpService::class)->issue($this->portalAccountFor($owner));
 
-        $this->assertSame('6666', Cache::get("owner_otp_{$owner->id}"));
+        $this->assertSame('6666', Cache::get("portal_otp_{$this->portalAccountFor($owner)->id}"));
     }
 
     public function test_in_production_a_listed_test_number_gets_the_test_code(): void
@@ -43,9 +43,9 @@ class OwnerOtpTestCodeTest extends TestCase
         // Listed as +966…, stored as 05… — both sides are compared in one form.
         $owner = $this->owner('0500000000');
 
-        app(OwnerOtpService::class)->issue($owner);
+        app(OwnerOtpService::class)->issue($this->portalAccountFor($owner));
 
-        $this->assertSame('6666', Cache::get("owner_otp_{$owner->id}"));
+        $this->assertSame('6666', Cache::get("portal_otp_{$this->portalAccountFor($owner)->id}"));
     }
 
     public function test_in_production_any_other_number_gets_a_random_code(): void
@@ -55,10 +55,10 @@ class OwnerOtpTestCodeTest extends TestCase
         config(['auth.mobile_otp.test_code' => '66666']);
         $owner = $this->owner('0551234567');
 
-        app(OwnerOtpService::class)->issue($owner);
+        app(OwnerOtpService::class)->issue($this->portalAccountFor($owner));
 
-        $this->assertMatchesRegularExpression('/^\d{4}$/', (string) Cache::get("owner_otp_{$owner->id}"));
-        $this->assertFalse(app(OwnerOtpService::class)->verify($owner, '66666'));
+        $this->assertMatchesRegularExpression('/^\d{4}$/', (string) Cache::get("portal_otp_{$this->portalAccountFor($owner)->id}"));
+        $this->assertFalse(app(OwnerOtpService::class)->verify($this->portalAccountFor($owner), '66666'));
     }
 
     private function owner(string $phone): Owner

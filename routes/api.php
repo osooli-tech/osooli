@@ -39,7 +39,7 @@ Route::middleware('throttle:10,1')->group(function (): void {
 Route::get('legal/{key}', [LegalController::class, 'show'])
     ->name('api.legal.show');
 
-Route::middleware(['auth:sanctum', 'throttle:120,1'])->group(function (): void {
+Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(function (): void {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
 
     Route::get('me', [ProfileController::class, 'show'])->name('api.me');

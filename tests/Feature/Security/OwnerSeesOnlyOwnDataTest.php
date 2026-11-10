@@ -58,7 +58,7 @@ class OwnerSeesOnlyOwnDataTest extends TestCase
     public function test_of_the_earlier_holder_only_the_name_is_shown(): void
     {
         foreach (['portal.parcels.show', 'portal.parcels.twin'] as $route) {
-            $this->actingAs($this->current, 'owner')->get(route($route, $this->parcel->id))
+            $this->actingAsOwner($this->current)->get(route($route, $this->parcel->id))
                 ->assertOk()
                 ->assertSee('222222')
                 ->assertDontSee('111111')
@@ -71,7 +71,7 @@ class OwnerSeesOnlyOwnDataTest extends TestCase
 
     public function test_a_co_owner_is_named_but_their_national_id_is_not_shown(): void
     {
-        $this->actingAs($this->current, 'owner')->get(route('portal.parcels.twin', $this->parcel->id))
+        $this->actingAsOwner($this->current)->get(route('portal.parcels.twin', $this->parcel->id))
             ->assertOk()
             ->assertSee('الشريك')
             ->assertSee('1000000001')
@@ -80,7 +80,7 @@ class OwnerSeesOnlyOwnDataTest extends TestCase
 
     public function test_the_earlier_holders_deed_scan_is_neither_listed_nor_downloadable(): void
     {
-        $listed = $this->actingAs($this->current, 'owner')
+        $listed = $this->actingAsOwner($this->current)
             ->getJson(route('portal.parcels.documents', $this->parcel->id))->assertOk()->json('documents.*.id');
 
         $this->assertSame([$this->ownScan->id], $listed);
@@ -90,7 +90,9 @@ class OwnerSeesOnlyOwnDataTest extends TestCase
 
     public function test_the_mobile_api_follows_the_same_rule(): void
     {
-        $token = $this->current->createToken('t')->plainTextToken;
+        $issued = $this->current->createToken('t');
+        $issued->accessToken->forceFill(['portal_account_id' => $this->portalAccountFor($this->current)->id])->save();
+        $token = $issued->plainTextToken;
 
         $detail = $this->withToken($token)->getJson("/api/v1/parcels/{$this->parcel->id}")->assertOk();
         $body = json_encode($detail->json(), JSON_UNESCAPED_UNICODE);

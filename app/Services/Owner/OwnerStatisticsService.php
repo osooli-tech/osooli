@@ -101,7 +101,7 @@ class OwnerStatisticsService
         return (float) $this->owner->parcels()
             ->with(OwnerHoldings::RELATIONS)
             ->get(['parcels.id'])
-            ->sum(fn (Parcel $parcel): float => (float) ($parcel->heldDeed?->deed_area ?? 0) * $holdings->share($parcel, $ownerId));
+            ->sum(fn (Parcel $parcel): float => (float) ($parcel->heldDeed->deed_area ?? 0) * $holdings->share($parcel, $ownerId));
     }
 
     /** Compact counters for the profile screen. */

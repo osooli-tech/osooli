@@ -8,6 +8,7 @@ use App\Http\Middleware\SetLocale;
 use App\Models\Owner;
 use App\Services\Import\ArchiveExtractor;
 use App\Support\Database\DatabaseSettings;
+use App\Support\Portal\PortalContext;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -20,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(DatabaseSettings::class);
+        $this->app->scoped(PortalContext::class);
 
         // Before anything opens a connection: the dashboard's database
         // settings decide which database is primary and how to reach both.
