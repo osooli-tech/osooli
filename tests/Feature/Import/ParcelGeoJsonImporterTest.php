@@ -255,6 +255,34 @@ final class ParcelGeoJsonImporterTest extends TestCase
         $this->assertSame('محدث', DB::table('deeds')->where('deed_no', '311608002898')->value('deed_status'));
     }
 
+    /** The parent owner's own row may come after the child's: one import still links them. */
+    public function test_a_parent_owner_described_later_in_the_file_is_linked(): void
+    {
+        [$child, $parent] = array_slice($this->fixtureFeatures(), 0, 2);
+        $child['properties']['Parent_Owner_ID'] = $parent['properties']['Woner_ID'];
+
+        $result = $this->importer()->importFeatures([$child, $parent]);
+
+        $parentId = DB::table('owners')->where('national_id_hash', NationalId::hash((string) $parent['properties']['Woner_ID']))->value('id');
+        $this->assertNotNull($parentId);
+        $this->assertSame($parentId, DB::table('parcels')->where('geo_id', $child['properties']['Geo_ID'])->value('parent_owner_id'));
+        $this->assertStringNotContainsString('Parent_Owner_ID', implode(' ', $result->warnings), 'an owner in the same file is not unknown');
+    }
+
+    /** A flat may come before the building that holds it: one import still links them. */
+    public function test_a_parent_parcel_described_later_in_the_file_is_linked(): void
+    {
+        [$flat, $building] = array_slice($this->fixtureFeatures(), 0, 2);
+        $flat['properties']['Parent_Geo_ID'] = $building['properties']['Geo_ID'];
+
+        $this->importer()->importFeatures([$flat, $building]);
+
+        $this->assertSame(
+            DB::table('parcels')->where('geo_id', $building['properties']['Geo_ID'])->value('id'),
+            DB::table('parcels')->where('geo_id', $flat['properties']['Geo_ID'])->value('parent_parcel_id'),
+        );
+    }
+
     public function test_it_stores_geometry_as_multipolygon_in_4326(): void
     {
         $this->importer()->commit($this->fixture());

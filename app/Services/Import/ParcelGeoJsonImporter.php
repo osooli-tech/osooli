@@ -70,6 +70,15 @@ final class ParcelGeoJsonImporter implements Importer
      */
     private array $planConflicts = [];
 
+    /**
+     * Parents named by a feature but not on record when its group ran — the
+     * parent's own row may come later in the file. Linked once every group
+     * has run; see linkPendingParents().
+     *
+     * @var list<array{parcel_id: int, geo_id: string|null, owner_nid: string|null}>
+     */
+    private array $pendingParents = [];
+
     public function analyze(string $sourcePath): ImportPreview
     {
         return $this->previewFeatures($this->readFeatures($sourcePath));
@@ -163,6 +172,7 @@ final class ParcelGeoJsonImporter implements Importer
         }
         $this->unknown = [];
         $this->planConflicts = [];
+        $this->pendingParents = [];
 
         $stats = ['inserted' => 0, 'updated' => 0, 'deeds' => 0, 'owners' => 0, 'boundaries' => 0, 'decisions' => 0, 'portfolios' => 0, 'located' => 0, 'not_located' => 0, 'errors' => 0];
         $warnings = [];
@@ -190,6 +200,7 @@ final class ParcelGeoJsonImporter implements Importer
             }
 
             $insertedBefore = $stats['inserted'];
+            $pendingBefore = count($this->pendingParents);
 
             try {
                 // Regular closure with `use (&$stats)` — an arrow fn would capture
@@ -204,8 +215,12 @@ final class ParcelGeoJsonImporter implements Importer
             } catch (Throwable $e) {
                 $stats['errors']++;
                 $warnings[] = $geoId.': '.$e->getMessage();
+                // The group was rolled back, and with it the parcel its pending parents point from.
+                array_splice($this->pendingParents, $pendingBefore);
             }
         }
+
+        $this->linkPendingParents();
 
         if ($skipped > 0) {
             $warnings[] = trans_choice('imports.warnings.no_geo_id', $skipped);
@@ -396,28 +411,23 @@ final class ParcelGeoJsonImporter implements Importer
         ]));
         $isNew ? $stats['inserted']++ : $stats['updated']++;
 
-        // The parent (a building holding this flat), by its GEO ID — when that
-        // parcel is on record already, or came earlier in the file.
+        // The parent (a building holding this flat), by its GEO ID; and the
+        // parent owner, by national id — the owner this parcel stays under in
+        // the portal although its deed names someone else. Either may be
+        // described later in the file, so one not on record yet waits for
+        // linkPendingParents().
         $parentGeoId = $this->str($p['Parent_Geo_ID'] ?? null);
-        if ($parentGeoId !== null && $parentGeoId !== $geoId) {
-            $parentId = DB::table('parcels')->where('geo_id', $parentGeoId)->value('id');
-            if ($parentId !== null) {
-                DB::table('parcels')->where('id', $parcelId)->update(['parent_parcel_id' => $parentId]);
-            }
+        if ($parentGeoId === $geoId || ($parentGeoId !== null && $this->linkParentParcel($parcelId, $parentGeoId))) {
+            $parentGeoId = null;
         }
 
-        // The parent owner, by national id: the owner this parcel stays under
-        // in the portal although its deed names someone else. A number that is
-        // on no owner yet is reported and changes nothing.
         $parentOwnerNid = $this->str($p['Parent_Owner_ID'] ?? null);
-        if ($parentOwnerNid !== null) {
-            $parentOwnerId = DB::table('owners')->where('national_id_hash', NationalId::lookup($parentOwnerNid))->value('id');
-            if ($parentOwnerId !== null) {
-                DB::table('parcels')->where('id', $parcelId)->update(['parent_owner_id' => $parentOwnerId]);
-            } else {
-                // Listed with the other values the file gave that could not be written.
-                $this->unknown['Parent_Owner_ID'][$parentOwnerNid] = ($this->unknown['Parent_Owner_ID'][$parentOwnerNid] ?? 0) + 1;
-            }
+        if ($parentOwnerNid !== null && $this->linkParentOwner($parcelId, $parentOwnerNid)) {
+            $parentOwnerNid = null;
+        }
+
+        if ($parentGeoId !== null || $parentOwnerNid !== null) {
+            $this->pendingParents[] = ['parcel_id' => $parcelId, 'geo_id' => $parentGeoId, 'owner_nid' => $parentOwnerNid];
         }
 
         // Geometry — always stored as MultiPolygon
@@ -607,6 +617,55 @@ final class ParcelGeoJsonImporter implements Importer
         } else {
             DB::table('survey_decisions')->where('id', $decision)->update($values + ['updated_at' => now()]);
         }
+    }
+
+    /** Links the parcel to the parcel holding it, if that one is on record; says whether it was. */
+    private function linkParentParcel(int $parcelId, string $parentGeoId): bool
+    {
+        $parentId = DB::table('parcels')->where('geo_id', $parentGeoId)->value('id');
+        if ($parentId === null) {
+            return false;
+        }
+
+        DB::table('parcels')->where('id', $parcelId)->update(['parent_parcel_id' => $parentId]);
+
+        return true;
+    }
+
+    /** Links the parcel to its parent owner, if one holds that national id; says whether one did. */
+    private function linkParentOwner(int $parcelId, string $nationalId): bool
+    {
+        // Found by the fingerprint: the stored number is encrypted and cannot be compared.
+        $ownerId = DB::table('owners')->where('national_id_hash', NationalId::lookup($nationalId))->value('id');
+        if ($ownerId === null) {
+            return false;
+        }
+
+        DB::table('parcels')->where('id', $parcelId)->update(['parent_owner_id' => $ownerId]);
+
+        return true;
+    }
+
+    /**
+     * The parents every group has now had the chance to put on record. A
+     * parent owner still on no owner is reported and changes nothing; a
+     * parent parcel still missing is left unlinked, as before.
+     */
+    private function linkPendingParents(): void
+    {
+        foreach ($this->pendingParents as $pending) {
+            if ($pending['geo_id'] !== null) {
+                $this->linkParentParcel($pending['parcel_id'], $pending['geo_id']);
+            }
+
+            $nid = $pending['owner_nid'];
+            if ($nid !== null && ! $this->linkParentOwner($pending['parcel_id'], $nid)) {
+                // Listed with the other values the file gave that could not be written.
+                $this->unknown['Parent_Owner_ID'][$nid] = ($this->unknown['Parent_Owner_ID'][$nid] ?? 0) + 1;
+            }
+        }
+
+        $this->pendingParents = [];
     }
 
     /**
