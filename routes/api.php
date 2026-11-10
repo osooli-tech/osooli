@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeedController;
@@ -42,8 +43,12 @@ Route::get('legal/{key}', [LegalController::class, 'show'])
 Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(function (): void {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.auth.logout');
 
+    // An account that opens several owners: moving between them, and the view across them.
+    Route::post('auth/switch-owner', [AccountController::class, 'switchOwner'])->middleware('throttle:30,1')->name('api.auth.switch-owner');
+    Route::get('account/overview', [AccountController::class, 'overview'])->name('api.account.overview');
+
     Route::get('me', [ProfileController::class, 'show'])->name('api.me');
-    Route::patch('me', [ProfileController::class, 'update'])->name('api.me.update');
+    Route::patch('me', [ProfileController::class, 'update'])->middleware('portal.manage:self')->name('api.me.update');
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('api.dashboard');
     Route::get('search', [SearchController::class, 'index'])->name('api.search');
@@ -53,7 +58,7 @@ Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(f
     Route::get('parcels', [ParcelController::class, 'index'])->name('api.parcels.index');
     Route::get('parcels/{parcel}', [ParcelController::class, 'show'])->name('api.parcels.show');
     Route::get('parcels/{parcel}/documents', [ParcelController::class, 'documents'])->name('api.parcels.documents');
-    Route::post('parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->whereNumber('parcel')->middleware('throttle:10,1')->name('api.parcels.photos.store');
+    Route::post('parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage', 'throttle:10,1'])->name('api.parcels.photos.store');
 
     Route::get('deeds', [DeedController::class, 'index'])->name('api.deeds.index');
 
@@ -64,10 +69,10 @@ Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(f
     Route::get('listings/mine', [ListingController::class, 'mine'])->name('api.listings.mine');
     Route::get('listings/interests', [ListingController::class, 'interests'])->name('api.listings.interests');
     Route::get('listings/{listing}', [ListingController::class, 'show'])->whereNumber('listing')->name('api.listings.show');
-    Route::post('listings/{listing}/interest', [ListingController::class, 'interest'])->whereNumber('listing')->middleware('throttle:10,1')->name('api.listings.interest');
-    Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->name('api.listings.destroy');
-    Route::post('parcels/{parcel}/listing', [ListingController::class, 'store'])->whereNumber('parcel')->middleware('throttle:10,1')->name('api.listings.store');
+    Route::post('listings/{listing}/interest', [ListingController::class, 'interest'])->whereNumber('listing')->middleware(['portal.manage', 'throttle:10,1'])->name('api.listings.interest');
+    Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->middleware('portal.manage')->name('api.listings.destroy');
+    Route::post('parcels/{parcel}/listing', [ListingController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage', 'throttle:10,1'])->name('api.listings.store');
 
     Route::get('modification-requests', [ModificationRequestController::class, 'index'])->name('api.modification-requests.index');
-    Route::post('modification-requests', [ModificationRequestController::class, 'store'])->name('api.modification-requests.store');
+    Route::post('modification-requests', [ModificationRequestController::class, 'store'])->middleware('portal.manage')->name('api.modification-requests.store');
 });

@@ -106,6 +106,57 @@ class AccountApiTest extends TestCase
         $this->withToken($token)->getJson('/api/v1/me')->assertStatus(401);
     }
 
+    public function test_switching_issues_a_token_for_the_other_owner(): void
+    {
+        $token = $this->apiToken($this->najla, $this->office);
+
+        $switched = $this->withToken($token)->postJson('/api/v1/auth/switch-owner', ['owner_id' => $this->saud->id])
+            ->assertOk()
+            ->assertJsonPath('data.owner.id', $this->saud->id)
+            ->json('data.token');
+        Auth::forgetGuards();
+
+        $this->withToken($switched)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.id', $this->saud->id);
+        $this->assertSame($this->saud->id, $this->office->fresh()->last_owner_id);
+    }
+
+    public function test_the_old_token_stops_working_after_a_switch(): void
+    {
+        $token = $this->apiToken($this->najla, $this->office);
+
+        $this->withToken($token)->postJson('/api/v1/auth/switch-owner', ['owner_id' => $this->saud->id])->assertOk();
+        Auth::forgetGuards();
+
+        $this->withToken($token)->getJson('/api/v1/me')->assertStatus(401);
+    }
+
+    public function test_switching_to_an_ungranted_owner_is_403(): void
+    {
+        $stranger = Owner::create(['name' => 'غريب', 'national_id' => '1000000009']);
+        $token = $this->apiToken($this->najla, $this->office);
+
+        $this->withToken($token)->postJson('/api/v1/auth/switch-owner', ['owner_id' => $stranger->id])->assertForbidden();
+    }
+
+    public function test_overview_lists_the_accounts_owners(): void
+    {
+        $token = $this->apiToken($this->najla, $this->office);
+
+        $this->withToken($token)->getJson('/api/v1/account/overview')
+            ->assertOk()
+            ->assertJsonCount(2, 'data.owners')
+            ->assertJsonPath('data.owners.0.owner_id', $this->najla->id)
+            ->assertJsonPath('data.totals.parcels', 0);
+    }
+
+    public function test_view_only_token_cannot_post_a_change_request(): void
+    {
+        $token = $this->apiToken($this->saud, $this->office);
+
+        $this->withToken($token)->postJson('/api/v1/modification-requests', ['parcel_id' => 1, 'field_name' => 'asset_type', 'new_value' => 'أرض'])
+            ->assertForbidden();
+    }
+
     private function apiToken(Owner $owner, PortalAccount $account): string
     {
         $issued = $owner->createToken('mobile');
