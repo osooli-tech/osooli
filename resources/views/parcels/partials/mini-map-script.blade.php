@@ -41,6 +41,58 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo, opts = {}) {
             });
             map.addControl(basemapControl, 'top-left');
 
+            // Portal maps start in 3D. `threeD` is the owner's current choice;
+            // it and the last camera outlive a basemap swap, which rebuilds
+            // the style, so switching the background never re-tilts the map.
+            let threeD = !!opts.threeD;
+            let camera = null;
+            let framed = false;
+            const TILT = { pitch: 55, bearing: -22 };
+            const FLAT = { pitch: 0, bearing: 0 };
+            map.on('moveend', () => {
+                if (!framed) return;
+                camera = { center: map.getCenter(), zoom: map.getZoom(), pitch: map.getPitch(), bearing: map.getBearing() };
+            });
+            const show3d = () => ['parcel-3d', 'neighbours-3d'].forEach((id) => {
+                if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', threeD ? 'visible' : 'none');
+            });
+            if (opts.threeD) {
+                map.addControl(viewToggle(), 'top-left');
+            }
+
+            // A 2D/3D switch styled like the basemap one: it shows the view it switches to.
+            function viewToggle() {
+                let button;
+                const paint = () => {
+                    const label = threeD ? @js(__('portal.map_3d_off')) : @js(__('portal.map_3d_on'));
+                    button.title = label;
+                    button.setAttribute('aria-label', label);
+                    button.innerHTML = `<span style="font:700 11px/29px system-ui,sans-serif;color:#333;">${threeD ? '2D' : '3D'}</span>`;
+                };
+                return {
+                    onAdd() {
+                        const container = document.createElement('div');
+                        container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+                        button = document.createElement('button');
+                        button.type = 'button';
+                        paint();
+                        button.addEventListener('click', (event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            threeD = !threeD;
+                            show3d();
+                            map.easeTo({ ...(threeD ? TILT : FLAT), duration: 1200 });
+                            paint();
+                        });
+                        container.appendChild(button);
+                        return container;
+                    },
+                    onRemove() {
+                        button?.parentNode?.remove();
+                    },
+                };
+            }
+
             // The aerial background has no dark variant; only the street one follows the theme.
             window.addEventListener('sakuki:theme-changed', ({ detail }) => {
                 isDark = detail.dark;
@@ -112,14 +164,23 @@ function parcelMiniMap(geojson, neighboursJson, parcelNo, opts = {}) {
                     map.addLayer({ id: 'parcel-3d', type: 'fill-extrusion', source: 'parcel',
                         paint: { 'fill-extrusion-color': opts.massing?.color ?? '#c9a84c', 'fill-extrusion-height': opts.massing?.height ?? 28,
                                  'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true } });
+                    show3d();
+                }
+
+                // After a basemap swap: keep the view the owner had, flat or tilted.
+                if (camera) {
+                    map.jumpTo(camera);
+                    return;
                 }
 
                 map.fitBounds(
                     [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
                     { padding: 40, maxZoom: opts.threeD ? 16.6 : 17 }
                 );
+                framed = true;
                 if (opts.threeD) {
-                    map.once('moveend', () => map.easeTo({ pitch: 55, bearing: -22, duration: 1800 }));
+                    // Tilt once framed, unless the owner already chose 2D.
+                    map.once('moveend', () => { if (threeD) map.easeTo({ ...TILT, duration: 1800 }); });
                 }
             }
 
