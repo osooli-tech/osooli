@@ -49,11 +49,11 @@ class OwnerInsightsService
                 'boundary.engineeringOffice',
                 'surveyDecisions',
                 'photos.deed',
-                'heldDeed',
+                'heldDeed.deedOwners',
             ])
             ->get();
 
-        $rows = $parcels->map(fn (Parcel $parcel): array => $this->row($parcel));
+        $rows = $parcels->map(fn (Parcel $parcel): array => $this->row($parcel, (int) $owner->getKey()));
         $priceComparison = $this->priceComparison($rows);
 
         // Parcels held under the owner in another's name count in the headline
@@ -82,7 +82,7 @@ class OwnerInsightsService
     }
 
     /** @return array<string, mixed> */
-    private function row(Parcel $parcel): array
+    private function row(Parcel $parcel, int $ownerId): array
     {
         $twin = $this->twin->for($parcel);
         $deedArea = $twin['area']['deed'];
@@ -110,18 +110,20 @@ class OwnerInsightsService
             'computed_area' => $computed,
             'deed_age' => HijriDate::ageInYears($parcel->heldDeed?->deed_date_hijri),
             'co_owned' => ($parcel->deeds->firstWhere('id', $parcel->heldDeed?->id)?->deedOwners->count() ?? 0) > 1,
+            // The owner's part of this parcel; the headline figures count only that part.
+            'share' => app(OwnerHoldings::class)->share($parcel, $ownerId),
         ];
     }
 
     /** @param Collection<int, array<string, mixed>> $rows */
     private function portfolio(Collection $rows): array
     {
-        $area = (float) $rows->sum('area');
+        $area = (float) $rows->sum(fn (array $row): float => (float) $row['area'] * $row['share']);
         $priced = $rows->whereNotNull('value');
 
         return [
             'parcels' => $rows->count(),
-            'value' => $priced->isEmpty() ? null : (float) $priced->sum('value'),
+            'value' => $priced->isEmpty() ? null : (float) $priced->sum(fn (array $row): float => (float) $row['value'] * $row['share']),
             'area' => $area,
             'football_pitches' => $area / self::FOOTBALL_PITCH_SQM,
             'districts' => $rows->pluck('district')->filter()->unique()->count(),

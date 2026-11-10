@@ -30,8 +30,7 @@ class LinkedParcelsService
         // The switch governs what the owner sees in the portal; staff always see values.
         $showValue = $forStaff || PortalSetting::allows(PortalSetting::SHOW_VALUE);
 
-        return $this->query($owner)->get()
-            ->map(fn (Parcel $parcel): array => $this->row($parcel, $showValue))
+        return $this->rows($owner, $showValue)
             ->groupBy('holder_id')
             ->map(fn (Collection $rows): array => [
                 'holder_id' => (int) $rows->first()['holder_id'],
@@ -54,13 +53,15 @@ class LinkedParcelsService
      */
     public function totals(Owner $owner, bool $forStaff = false): array
     {
-        $groups = $this->groups($owner, $forStaff);
-        $values = array_filter(array_column($groups, 'value'), static fn ($v): bool => $v !== null);
+        $showValue = $forStaff || PortalSetting::allows(PortalSetting::SHOW_VALUE);
+        $rows = $this->rows($owner, $showValue);
+        $values = $rows->pluck('value')->filter(static fn ($v): bool => $v !== null);
 
         return [
-            'parcels' => (int) array_sum(array_column($groups, 'parcels_count')),
-            'area' => (float) array_sum(array_column($groups, 'area')),
-            'value' => $values === [] ? null : (float) array_sum($values),
+            // A parcel shared by several holders is one parcel.
+            'parcels' => $rows->pluck('id')->unique()->count(),
+            'area' => (float) $rows->sum('area'),
+            'value' => $values->isEmpty() ? null : (float) $values->sum(),
         ];
     }
 
@@ -119,10 +120,10 @@ class LinkedParcelsService
     {
         $rows = $owner->parcels()
             ->select('parcels.*')
-            ->with(['plan.district.city', 'heldDeed.owners'])
+            ->with(['plan.district.city', 'heldDeed.owners', 'heldDeed.deedOwners'])
             ->orderBy('parcels.parcel_no')
             ->get()
-            ->map(fn (Parcel $parcel): array => $this->row($parcel, true));
+            ->map(fn (Parcel $parcel): array => $this->row($parcel, true, (int) $owner->getKey(), (string) $owner->name, app(OwnerHoldings::class)->share($parcel, (int) $owner->getKey())));
 
         if ($rows->isEmpty()) {
             return null;
@@ -146,15 +147,40 @@ class LinkedParcelsService
     {
         return $owner->linkedParcels()
             ->select('parcels.*')
-            ->with(['plan.district.city', 'heldDeed.owners'])
+            ->with(['plan.district.city', 'heldDeed.owners', 'heldDeed.deedOwners'])
             ->orderBy('parcels.parcel_no');
     }
 
+    /**
+     * One row per holder of each linked parcel: a deed shared by three
+     * reads as the parcel in each holder's portfolio, at that holder's share.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function rows(Owner $owner, bool $showValue): Collection
+    {
+        $holdings = app(OwnerHoldings::class);
+
+        return $this->query($owner)->get()->flatMap(function (Parcel $parcel) use ($showValue, $holdings): array {
+            $holders = $parcel->heldDeed?->owners ?? collect();
+
+            // A parcel between deeds has no holder on record; it is grouped under 0.
+            if ($holders->isEmpty()) {
+                return [$this->row($parcel, $showValue, 0, __('portal.linked_no_holder'), 1.0)];
+            }
+
+            $shares = $holdings->shares($parcel);
+
+            return $holders
+                ->map(fn (Owner $holder): array => $this->row($parcel, $showValue, (int) $holder->id, (string) $holder->name, $shares[$holder->id] ?? 0.0))
+                ->all();
+        });
+    }
+
     /** @return array<string, mixed> */
-    private function row(Parcel $parcel, bool $showValue): array
+    private function row(Parcel $parcel, bool $showValue, int $holderId, string $holderName, float $share): array
     {
         $deed = $parcel->heldDeed;
-        $holder = $deed?->owners->first();
         $area = $deed?->deed_area === null ? 0.0 : (float) $deed->deed_area;
         $value = $parcel->parcel_price ?? ($parcel->m_price === null ? null : (float) $parcel->m_price * $area);
 
@@ -165,11 +191,11 @@ class LinkedParcelsService
             'district' => $parcel->plan?->district?->name_ar,
             'city' => $parcel->plan?->district?->city?->name_ar,
             'asset_type' => $parcel->asset_type,
-            'area' => $area,
-            'value' => $showValue && $value !== null ? (float) $value : null,
-            // A parcel between deeds has no holder on record; it is grouped under 0.
-            'holder_id' => $holder === null ? 0 : $holder->id,
-            'holder' => $deed?->owners->pluck('name')->implode('، ') ?: __('portal.linked_no_holder'),
+            'share' => $share,
+            'area' => $area * $share,
+            'value' => $showValue && $value !== null ? (float) $value * $share : null,
+            'holder_id' => $holderId,
+            'holder' => $holderName,
         ];
     }
 }

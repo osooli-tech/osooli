@@ -85,30 +85,12 @@ class OwnerPortfolioService
      */
     public function summary(OwnerPortfolio $portfolio): array
     {
-        // Not $portfolio->parcels() here: a BelongsToMany relation always
-        // appends its own pivot columns to the select list, which Postgres
-        // then refuses next to a bare aggregate with no GROUP BY. A plain
-        // join sidesteps that entirely.
-        $row = Parcel::query()
-            ->join('owner_portfolio_parcels', 'owner_portfolio_parcels.parcel_id', '=', 'parcels.id')
-            ->where('owner_portfolio_parcels.owner_portfolio_id', $portfolio->id)
-            ->whereNotNull('parcels.geom')
-            ->selectRaw('
-                COUNT(parcels.id) AS parcels,
-                COALESCE(SUM('.Spatial::areaSqm('parcels.geom').'), 0) AS area,
-                COUNT(parcels.m_price) AS priced,
-                SUM(parcels.m_price * '.Spatial::areaSqm('parcels.geom').') AS value
-            ')
-            ->first();
+        $ids = DB::table('owner_portfolio_parcels')
+            ->where('owner_portfolio_id', $portfolio->id)
+            ->pluck('parcel_id')
+            ->all();
 
-        $value = $row?->getAttribute('value');
-
-        return [
-            'parcels' => (int) ($row?->getAttribute('parcels') ?? 0),
-            'area' => round((float) ($row?->getAttribute('area') ?? 0), 2),
-            'priced' => (int) ($row?->getAttribute('priced') ?? 0),
-            'value' => $value === null ? null : round((float) $value, 2),
-        ];
+        return $this->figures($ids, (int) $portfolio->owner_id);
     }
 
     /**
@@ -123,24 +105,48 @@ class OwnerPortfolioService
         $assigned = DB::table('owner_portfolio_parcels')->where('owner_id', $owner->id)->pluck('parcel_id')->all();
         $ids = $owner->parcels()->whereNotIn('parcels.id', $assigned)->pluck('parcels.id')->all();
 
-        $row = $ids === [] ? null : Parcel::query()
+        return $this->figures($ids, (int) $owner->id);
+    }
+
+    /**
+     * Count, live-computed area and value of the given parcels, each area and
+     * value taken at the owner's share of the parcel. Only parcels with a
+     * shape count, as before.
+     *
+     * @param  list<int|string>  $ids
+     * @return array{parcels: int, area: float, priced: int, value: float|null}
+     */
+    private function figures(array $ids, int $ownerId): array
+    {
+        $parcels = $ids === [] ? collect() : Parcel::query()
             ->whereKey($ids)
             ->whereNotNull('parcels.geom')
-            ->selectRaw('
-                COUNT(parcels.id) AS parcels,
-                COALESCE(SUM('.Spatial::areaSqm('parcels.geom').'), 0) AS area,
-                COUNT(parcels.m_price) AS priced,
-                SUM(parcels.m_price * '.Spatial::areaSqm('parcels.geom').') AS value
-            ')
-            ->first();
+            ->with(OwnerHoldings::RELATIONS)
+            ->select(['parcels.id', 'parcels.m_price'])
+            ->selectRaw(Spatial::areaSqm('parcels.geom').' AS area_sqm')
+            ->get();
 
-        $value = $row?->getAttribute('value');
+        $holdings = app(OwnerHoldings::class);
+        $area = 0.0;
+        $value = null;
+        $priced = 0;
+
+        foreach ($parcels as $parcel) {
+            $share = $holdings->share($parcel, $ownerId);
+            $parcelArea = (float) $parcel->getAttribute('area_sqm');
+            $area += $parcelArea * $share;
+
+            if ($parcel->m_price !== null) {
+                $priced++;
+                $value = ($value ?? 0.0) + (float) $parcel->m_price * $parcelArea * $share;
+            }
+        }
 
         return [
-            'parcels' => (int) ($row?->getAttribute('parcels') ?? 0),
-            'area' => round((float) ($row?->getAttribute('area') ?? 0), 2),
-            'priced' => (int) ($row?->getAttribute('priced') ?? 0),
-            'value' => $value === null ? null : round((float) $value, 2),
+            'parcels' => $parcels->count(),
+            'area' => round($area, 2),
+            'priced' => $priced,
+            'value' => $value === null ? null : round($value, 2),
         ];
     }
 

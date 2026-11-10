@@ -42,7 +42,7 @@ class OwnerStatisticsService
             'deeds_expired' => (int) ($deedCounts[DeedStatus::Old->value] ?? 0),
             'parcels_without_deed' => max(0, $parcelIds->count() - $parcelsWithDeed),
             'survey_decisions_total' => $this->countIn('survey_decisions'),
-            'area_total_sqm' => round((float) $this->ownedDeeds()->sum('deed_area'), 2),
+            'area_total_sqm' => round($this->heldArea(), 2),
             'cities_count' => count($this->byCity()),
             'documents_count' => $this->countIn('parcel_photos'),
         ];
@@ -60,8 +60,9 @@ class OwnerStatisticsService
     public function portfolio(): array
     {
         $parcels = $this->owner->parcels()
-            ->with('latestDeed.deedOwners')
+            ->with(OwnerHoldings::RELATIONS)
             ->get(['parcels.id', 'parcels.m_price', 'parcels.parcel_price']);
+        $holdings = app(OwnerHoldings::class);
 
         $total = 0.0;
         $priced = 0;
@@ -77,7 +78,7 @@ class OwnerStatisticsService
             }
 
             $priced++;
-            $total += (float) $parcel->parcel_price * $this->shareIn($parcel);
+            $total += (float) $parcel->parcel_price * $holdings->share($parcel, (int) $this->owner->getKey());
         }
 
         return [
@@ -89,32 +90,18 @@ class OwnerStatisticsService
     }
 
     /**
-     * The owner's fraction (0..1) of one parcel, read from the latest deed.
-     *
-     * A NULL ownership_share means the share is only written as prose inside
-     * the deed document, so co-owners are assumed to hold equal parts. Owners
-     * reached through an older deed only are treated as full holders rather
-     * than silently dropping the parcel from the total.
+     * The area the owner holds: each deed in force times their share of it.
+     * A deed the parcel has since been re-issued past counts for nothing.
      */
-    private function shareIn(Parcel $parcel): float
+    private function heldArea(): float
     {
-        $deed = $parcel->latestDeed;
+        $holdings = app(OwnerHoldings::class);
+        $ownerId = (int) $this->owner->getKey();
 
-        if ($deed === null || $deed->deedOwners->isEmpty()) {
-            return 1.0;
-        }
-
-        $mine = $deed->deedOwners->firstWhere('owner_id', $this->owner->getKey());
-
-        if ($mine === null) {
-            return 1.0;
-        }
-
-        if ($mine->ownership_share !== null) {
-            return min(100.0, max(0.0, (float) $mine->ownership_share)) / 100;
-        }
-
-        return 1.0 / max(1, $deed->deedOwners->count());
+        return (float) $this->owner->parcels()
+            ->with(OwnerHoldings::RELATIONS)
+            ->get(['parcels.id'])
+            ->sum(fn (Parcel $parcel): float => (float) ($parcel->heldDeed?->deed_area ?? 0) * $holdings->share($parcel, $ownerId));
     }
 
     /** Compact counters for the profile screen. */
