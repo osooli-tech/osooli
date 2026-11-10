@@ -85,7 +85,7 @@ class AccountOverviewService
         }
 
         return [
-            'totals' => ['parcels' => $parcels->count(), 'area' => $area, 'value' => $value],
+            'totals' => ['parcels' => count($parcels), 'area' => $area, 'value' => $value],
             'owners' => $owners,
         ];
     }
@@ -143,12 +143,12 @@ class AccountOverviewService
      * keeping only the account's owners.
      *
      * @param  list<int|string>  $ownerIds
-     * @return Collection<int, array{parcel: Parcel, shares: array<int, float>, area: float, value: float|null}>
+     * @return list<array{parcel: Parcel, shares: array<int, float>, area: float, value: float|null}>
      */
-    private function parcels(array $ownerIds, bool $withShape = false): Collection
+    private function parcels(array $ownerIds, bool $withShape = false): array
     {
         if ($ownerIds === []) {
-            return collect();
+            return [];
         }
 
         $wanted = array_flip(array_map('intval', $ownerIds));
@@ -179,6 +179,6 @@ class AccountOverviewService
             ];
         }
 
-        return collect($rows);
+        return $rows;
     }
 }
