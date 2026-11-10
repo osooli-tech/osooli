@@ -43,5 +43,6 @@ return [
     'shared_confirm' => 'Yes, save',
     'saved' => 'Saved',
     'created' => 'Account created',
+    'self_one_owner' => '"The owner" makes this phone the owner\'s own, so it is for one owner only. For several owners choose "Delegate".',
     'no_owners' => 'Choose at least one owner.',
 ];

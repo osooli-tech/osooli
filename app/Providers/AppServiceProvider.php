@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsurePortalAccount;
 use App\Http\Middleware\SetLocale;
 use App\Models\Owner;
 use App\Services\Import\ArchiveExtractor;
@@ -41,7 +42,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // SetLocale must also run on Livewire AJAX update requests,
         // which bypass the web middleware group defined in routes/web.php.
-        Livewire::addPersistentMiddleware([SetLocale::class]);
+        // The portal's account check too: a deactivated account or a revoked
+        // grant must stop a page's Livewire requests, not only page loads.
+        Livewire::addPersistentMiddleware([SetLocale::class, EnsurePortalAccount::class]);
 
         // dompdf does not shape Arabic text or apply the bidi algorithm, so any
         // Arabic string renders character-reversed. @ar(...) pre-shapes it into

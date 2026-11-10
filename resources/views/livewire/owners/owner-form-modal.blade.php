@@ -38,6 +38,12 @@
                                   :label="__('owners.phone')"
                                   :hint="__('owners.phone_hint')"
                                   ltr />
+                    @if ($sharedWith !== [])
+                        <div class="rounded-lg p-3 text-sm bg-tertiary-container/30" role="alert">
+                            <p>{{ __('portal_accounts.shared_warning', ['names' => implode('، ', $sharedWith)]) }}</p>
+                            <button type="button" wire:click="confirmSharedPhone" class="mt-2 px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary font-medium">{{ __('portal_accounts.shared_confirm') }}</button>
+                        </div>
+                    @endif
 
                     <x-form.input name="form.email"
                                   type="email"

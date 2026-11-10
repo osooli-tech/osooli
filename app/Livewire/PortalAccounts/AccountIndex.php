@@ -72,6 +72,14 @@ class AccountIndex extends Component
             'newName' => __('portal_accounts.name'),
         ]);
 
+        // "The owner themselves" makes this phone the owner's own, replacing
+        // theirs; one phone is one person's own, so for one owner only.
+        if ($this->newRelation === PortalRelation::Self_->value && count($this->newOwnerIds) > 1) {
+            $this->addError('newOwnerIds', __('portal_accounts.self_one_owner'));
+
+            return;
+        }
+
         $owners = Owner::query()->whereKey($this->newOwnerIds)->get()->filter(fn (Owner $o): bool => $this->inScope((int) $o->id));
         $account = $access->accountForPhone($this->newPhone, $this->newName !== '' ? $this->newName : null);
         $relation = PortalRelation::from($this->newRelation);
@@ -86,7 +94,7 @@ class AccountIndex extends Component
 
     public function startRename(int $accountId): void
     {
-        $this->renaming[$accountId] = (string) PortalAccount::findOrFail($accountId)->name;
+        $this->renaming[$accountId] = (string) $this->wholeAccount($accountId)->name;
     }
 
     public function rename(int $accountId, PortalAccessService $access): void

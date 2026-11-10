@@ -98,6 +98,7 @@ return [
         'multi_page' => 'Multi-page files whose name names no parcel: :files. Upload them from "Upload a multi-parcel PDF", which splits them and matches each page to its parcel.',
         'no_rule' => 'No file in the archive follows a naming rule: a deed number (e.g. 310101000001.pdf) or "parcel-plan" (e.g. 131-623.pdf).',
         'unknown_values' => 'Unknown values in «:field» were not written: :values',
+        'shared_phone' => 'Phone :phone is now one account opening these owners: :owners. Check they all belong together; any of them can be revoked under Portal accounts.',
         'pending_phone' => 'Phone :phone was not enabled for portal sign-in for: :owners, because it opens another owner or differs from the phone on record. Review it under Portal accounts → Waiting for review.',
     ],
     'gdb' => [

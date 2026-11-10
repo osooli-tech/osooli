@@ -73,6 +73,13 @@ final class ParcelGeoJsonImporter implements Importer
     private array $pendingPhones = [];
 
     /**
+     * Phones from the file now opening several owners, phone => owner names.
+     *
+     * @var array<string, list<string>>
+     */
+    private array $sharedPhones = [];
+
+    /**
      * Plans the file puts in a district other than the one on record,
      * plan number => how many parcels; they stay where they are.
      *
@@ -182,6 +189,7 @@ final class ParcelGeoJsonImporter implements Importer
         }
         $this->unknown = [];
         $this->pendingPhones = [];
+        $this->sharedPhones = [];
         $this->planConflicts = [];
         $this->pendingParents = [];
 
@@ -253,6 +261,10 @@ final class ParcelGeoJsonImporter implements Importer
                 'field' => $field,
                 'values' => implode('، ', array_map(static fn (string $v, int $n): string => "{$v} ({$n})", array_keys($values), $values)),
             ]);
+        }
+
+        foreach ($this->sharedPhones as $phone => $names) {
+            $warnings[] = __('imports.warnings.shared_phone', ['phone' => $phone, 'owners' => implode('، ', $names)]);
         }
 
         foreach ($this->pendingPhones as $phone => $names) {
@@ -668,13 +680,20 @@ final class ParcelGeoJsonImporter implements Importer
 
         $access = app(PortalAccessService::class);
         $current = Owner::normalisePhone((string) $owner->phone);
-        $opensOthers = $access->ownersSharingPhone($phone, $ownerId)->isNotEmpty();
-        $waits = ($current !== '' && $current !== $normalised) || ($opensOthers && ! $sharedPhones);
+        $others = $access->ownersSharingPhone($phone, $ownerId);
+        $waits = ($current !== '' && $current !== $normalised) || ($others->isNotEmpty() && ! $sharedPhones);
 
         $grant = $access->grant($access->accountForPhone($phone), $owner, PortalRelation::Self_, true, PortalGrantSource::Import, null, needsReview: $waits);
 
         if ($grant->needs_review) {
             $this->pendingPhones[$normalised][] = (string) $owner->name;
+        } elseif ($others->isNotEmpty()) {
+            // Shared as asked — still named, so a typo among them is seen.
+            $this->sharedPhones[$normalised] = array_values(array_unique([
+                ...($this->sharedPhones[$normalised] ?? []),
+                ...$others->pluck('name')->map(fn ($n): string => (string) $n)->all(),
+                (string) $owner->name,
+            ]));
         }
     }
 

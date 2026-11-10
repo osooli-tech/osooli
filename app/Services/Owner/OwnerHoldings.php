@@ -12,7 +12,9 @@ use App\Models\Parcel;
  * owner holds the parcel at all (Owner::parcels()).
  *
  * A recorded share is used, clamped to 0..100. A missing one means the share
- * is only written as prose inside the deed, so the holders split it equally.
+ * is only written as prose inside the deed, so the holders without one split
+ * equally what the recorded shares leave. Recorded shares that add up past
+ * the whole are scaled down, so a parcel is never held more than once over.
  * An owner who is not on the held deed holds nothing, even if an older deed
  * still names them.
  */
@@ -41,14 +43,31 @@ class OwnerHoldings
             return [];
         }
 
-        $equal = 1.0 / $holders->count();
         $shares = [];
+        $blank = [];
 
         foreach ($holders as $holder) {
             $recorded = $holder->ownership_share;
-            $shares[(int) $holder->owner_id] = $recorded === null
-                ? $equal
-                : min(100.0, max(0.0, (float) $recorded)) / 100;
+
+            if ($recorded === null) {
+                $blank[] = (int) $holder->owner_id;
+
+                continue;
+            }
+
+            $shares[(int) $holder->owner_id] = min(100.0, max(0.0, (float) $recorded)) / 100;
+        }
+
+        // Those without a recorded share split what the others leave.
+        $left = max(0.0, 1.0 - array_sum($shares));
+        foreach ($blank as $ownerId) {
+            $shares[$ownerId] = $left / count($blank);
+        }
+
+        // Recorded shares past the whole are read as proportions of it.
+        $total = array_sum($shares);
+        if ($total > 1.0) {
+            $shares = array_map(static fn (float $share): float => $share / $total, $shares);
         }
 
         return $shares;
