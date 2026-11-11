@@ -16,9 +16,9 @@ use Illuminate\Support\Facades\Log;
  * A code is issued to a portal account — the phone that signs in — not to an
  * owner: one phone may open several owners.
  *
- * While no SMS provider is connected, a fixed test code is accepted instead of a
- * generated one. Swapping in real delivery only changes `issue()` — the request
- * and response shapes the app depends on stay the same.
+ * A real code goes out by the configured channel (WhatsApp until a Saudi SMS
+ * sender name is registered); the listed test phones keep a fixed code. The
+ * request and response shapes the app depends on stay the same.
  */
 class OwnerOtpService
 {
@@ -76,8 +76,11 @@ class OwnerOtpService
         Cache::put($this->attemptsKey($account), 0, now()->addMinutes($ttlMinutes));
 
         if ($testCode === null) {
-            // TODO: send via SMS provider once credentials are available.
             Log::info('Portal OTP issued', ['portal_account_id' => $account->id]);
+
+            if (config('auth.mobile_otp.channel') === 'whatsapp') {
+                app(WhatsAppOtpSender::class)->send($account->phone, $code, $ttlMinutes);
+            }
         }
 
         return $ttlMinutes * 60;

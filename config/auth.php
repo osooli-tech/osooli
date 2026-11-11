@@ -155,6 +155,8 @@ return [
         'max_attempts_per_hour' => 5,
         'code_length' => 4,
         'test_code' => env('MOBILE_OTP_TEST_CODE', '6666'),
+        // How a real code reaches the owner: 'log' (nowhere — development) or 'whatsapp' (UltraMsg).
+        'channel' => env('MOBILE_OTP_CHANNEL', 'log'),
         // In production the test code works only for these numbers (comma-separated),
         // until SMS delivery is live; every other owner gets a random code.
         'test_phones' => array_values(array_filter(array_map('trim', explode(',', (string) env('MOBILE_OTP_TEST_PHONES', ''))))),

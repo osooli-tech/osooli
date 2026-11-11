@@ -213,6 +213,8 @@ return [
     'explorer_none' => 'No parcels match your selection',
     'explorer_of' => 'of',
     'explorer_on_map' => 'On the map',
+    'otp_whatsapp_message' => 'Your Sukooki sign-in code: :code
+Valid for :minutes minutes. Do not share it.',
     'linked_hint' => 'Parcels given to the portfolio\'s holder, with the deed in their name',
     'view_cards' => 'Cards',
     'view_table' => 'Table',

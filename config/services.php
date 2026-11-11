@@ -26,6 +26,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // WhatsApp delivery of portal sign-in codes, until a Saudi SMS sender name is registered.
+    'ultramsg' => [
+        'url' => env('ULTRAMSG_URL', 'https://api.ultramsg.com'),
+        'instance' => env('ULTRAMSG_INSTANCE'),
+        'token' => env('ULTRAMSG_TOKEN'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],

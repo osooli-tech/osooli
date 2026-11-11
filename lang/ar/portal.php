@@ -213,6 +213,8 @@ return [
     'explorer_none' => 'لا توجد قطع تطابق ما اخترته',
     'explorer_of' => 'من',
     'explorer_on_map' => 'على الخريطة',
+    'otp_whatsapp_message' => 'رمز الدخول إلى صكوكي: :code
+صالح لمدة :minutes دقائق. لا تشاركه مع أحد.',
     'linked_hint' => 'قطع معطاة لصاحب المحفظة وصكها باسمه',
     'view_cards' => 'بطاقات',
     'view_table' => 'جدول',
