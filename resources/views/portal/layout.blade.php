@@ -125,8 +125,10 @@
         </nav>
 
         <div class="relative px-3 pb-4 shrink-0">
-            {{-- An account that opens several owners switches between them here. --}}
-            @if (count($portalSwitchable ?? []) > 1)
+            {{-- An account that opens several owners switches between them here. A company
+                 does not need to: it sees them all, and a parcel opens as its holder. --}}
+            @php $asCompany = (bool) $portalAccount?->isCompany(); @endphp
+            @if (count($portalSwitchable ?? []) > 1 && ! $asCompany)
                 <div x-data="{ open: false }" class="mb-2">
                     <button type="button" @click="open = ! open" :aria-expanded="open"
                             class="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-start text-xs text-primary-fixed-dim hover:text-white hover:bg-white/10 transition-colors">
@@ -160,11 +162,13 @@
 
             <div class="flex items-center gap-3 rounded-2xl p-3 bg-white/10 ring-1 ring-white/10 backdrop-blur-sm">
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-tertiary-container to-tertiary flex items-center justify-center shrink-0 text-white text-sm font-bold">
-                    {{ mb_substr(auth('owner')->user()?->name ?? 'م', 0, 1) }}
+                    {{ mb_substr(($asCompany ? $portalAccount->name : null) ?? auth('owner')->user()?->name ?? 'م', 0, 1) }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-white text-sm font-medium truncate">{{ auth('owner')->user()?->name }}</p>
-                    @if (count($portalSwitchable ?? []) > 1 && $portalAccount)
+                    <p class="text-white text-sm font-medium truncate">{{ ($asCompany ? $portalAccount->name : null) ?? auth('owner')->user()?->name }}</p>
+                    @if ($asCompany && $portalAccount->cr_number)
+                        <p class="text-primary-fixed-dim text-xs truncate">{{ __('portal.cr_number') }} <span class="data-tabular" dir="ltr">{{ $portalAccount->cr_number }}</span></p>
+                    @elseif (count($portalSwitchable ?? []) > 1 && $portalAccount)
                         <p class="text-primary-fixed-dim text-xs truncate">{{ __('portal.signed_in_as', ['account' => $portalAccount->label()]) }}</p>
                     @endif
                 </div>

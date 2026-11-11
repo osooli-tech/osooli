@@ -85,6 +85,16 @@ class AgentAccountTest extends TestCase
         $this->assertEqualsCanonicalizing(['1066', '1308'], array_map(fn (array $f): string => (string) $f['properties']['parcel_no'], $features));
     }
 
+    public function test_a_company_goes_by_its_own_name_with_no_owner_switcher(): void
+    {
+        $this->actingAsOwner($this->najla, $this->office)->get(route('portal.dashboard'))
+            ->assertOk()
+            ->assertSee('مكتب ركن الشمال الذهبي للعقارات')
+            ->assertSee('7003374043')
+            ->assertDontSee(route('portal.switch', $this->saud), false)
+            ->assertDontSee(__('portal.switch_owner'));
+    }
+
     public function test_the_overview_explorer_carries_each_owner_and_each_parcel_once(): void
     {
         // Saud and Najla share a third parcel half each.
