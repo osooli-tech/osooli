@@ -21,6 +21,9 @@ use Illuminate\Support\Collection;
  */
 class AccountOverviewService
 {
+    /** One colour per owner, in grant order — the same on the map, the chips and the cards. */
+    public const PALETTE = ['#0ea5a4', '#f59e0b', '#8b5cf6', '#ef4444', '#3b82f6', '#22c55e', '#ec4899', '#f97316'];
+
     public function __construct(private readonly OwnerHoldings $holdings) {}
 
     /**
@@ -132,6 +135,61 @@ class AccountOverviewService
         return ['type' => 'FeatureCollection', 'features' => $features];
     }
 
+    /**
+     * Everything the overview explorer filters in the browser, in one go:
+     * each owner with their colour and figures, and each parcel once — its
+     * shape, place, type, area, value and which of the account's owners hold
+     * it at what share. Value only where it may be shown.
+     *
+     * @return array{
+     *     owners: list<array{id: int, name: string, color: string, can_manage: bool, parcels: int, area: float, value: float|null}>,
+     *     parcels: list<array<string, mixed>>
+     * }
+     */
+    public function explorer(PortalAccount $account, bool $showValue): array
+    {
+        $cards = $this->for($account, $showValue)['owners'];
+        $colors = [];
+        $owners = [];
+
+        foreach ($cards as $i => $card) {
+            $colors[$card['owner_id']] = self::PALETTE[$i % count(self::PALETTE)];
+            $owners[] = [
+                'id' => $card['owner_id'],
+                'name' => $card['name'],
+                'color' => $colors[$card['owner_id']],
+                'can_manage' => $card['can_manage'],
+                'parcels' => $card['parcels'],
+                'area' => round($card['area'], 2),
+                'value' => $card['value'] === null ? null : round($card['value'], 2),
+            ];
+        }
+
+        $parcels = [];
+        foreach ($this->parcels(array_keys($colors), withShape: true) as $row) {
+            $parcel = $row['parcel'];
+            $geometry = $parcel->getAttribute('geom_json');
+            $parcels[] = [
+                'id' => $parcel->id,
+                'parcel_no' => $parcel->parcel_no,
+                'plan_no' => $parcel->plan?->plan_no,
+                'district' => $parcel->plan?->district?->name_ar,
+                'city' => $parcel->plan?->district?->city?->name_ar,
+                'asset_type' => $parcel->asset_type,
+                'area' => round($row['area'] * array_sum($row['shares']), 2),
+                'value' => $showValue && $row['value'] !== null ? round($row['value'] * array_sum($row['shares']), 2) : null,
+                'owners' => array_map(
+                    static fn (int $id, float $share): array => ['id' => $id, 'share' => round($share, 4)],
+                    array_keys($row['shares']),
+                    $row['shares'],
+                ),
+                'geometry' => $geometry === null ? null : json_decode((string) $geometry, true),
+            ];
+        }
+
+        return ['owners' => $owners, 'parcels' => $parcels];
+    }
+
     /** @return Collection<int, PortalAccountOwner> */
     private function grants(PortalAccount $account): Collection
     {
@@ -160,7 +218,8 @@ class AccountOverviewService
             ->orderBy('parcels.parcel_no');
 
         if ($withShape) {
-            $query->whereNotNull('parcels.geom')->selectRaw('ST_AsGeoJSON(parcels.geom, 6) AS geom_json');
+            // A parcel without a drawn shape still counts; the map just has nothing to draw for it.
+            $query->selectRaw('ST_AsGeoJSON(parcels.geom, 6) AS geom_json');
         }
 
         $rows = [];

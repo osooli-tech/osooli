@@ -85,6 +85,25 @@ class AgentAccountTest extends TestCase
         $this->assertEqualsCanonicalizing(['1066', '1308'], array_map(fn (array $f): string => (string) $f['properties']['parcel_no'], $features));
     }
 
+    public function test_the_overview_explorer_carries_each_owner_and_each_parcel_once(): void
+    {
+        // Saud and Najla share a third parcel half each.
+        $shared = Parcel::create(['parcel_no' => '2018', 'geo_id' => 'geo-2018', 'plan_id' => $this->najlasParcel->plan_id]);
+        $deed = Deed::create(['parcel_id' => $shared->id, 'deed_no' => 'D2018', 'deed_area' => 750, 'deed_status' => DeedStatus::Updated->value]);
+        $deed->owners()->attach([$this->najla->id => ['ownership_share' => 50], $this->saud->id => ['ownership_share' => 50]]);
+
+        $explorer = $this->actingAsOwner($this->najla, $this->office)->get(route('portal.overview'))
+            ->assertOk()
+            ->assertSee('7003374043')
+            ->viewData('explorer');
+
+        $this->assertSame(['نجلاء', 'سعود'], array_column($explorer['owners'], 'name'));
+        $this->assertCount(3, $explorer['parcels']);
+        $row = collect($explorer['parcels'])->firstWhere('parcel_no', '2018');
+        $this->assertCount(2, $row['owners']);
+        $this->assertEqualsWithDelta(750.0, $row['area'], 0.01);
+    }
+
     public function test_a_parcel_of_another_owner_opens_as_the_one_who_holds_it(): void
     {
         $this->actingAsOwner($this->najla, $this->office);

@@ -36,6 +36,7 @@ class AccountController extends Controller
         return view('portal.overview', [
             'account' => $account,
             'overview' => $overviews->for($account, $showValue),
+            'explorer' => $overviews->explorer($account, $showValue),
             'showValue' => $showValue,
         ]);
     }

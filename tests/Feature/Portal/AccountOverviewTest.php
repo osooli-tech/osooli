@@ -131,12 +131,15 @@ class AccountOverviewTest extends TestCase
         $this->post(route('portal.login.submit'), ['phone' => '0536664026'])->assertRedirect(route('portal.otp'));
         $this->post(route('portal.otp.verify'), ['otp' => '6666'])->assertRedirect(route('portal.overview'));
 
-        $this->get(route('portal.overview'))
+        // The owners and parcels are drawn in the browser from the page's data.
+        $explorer = $this->get(route('portal.overview'))
             ->assertOk()
             ->assertSee('مكتب ركن الشمال الذهبي للعقارات')
-            ->assertSee('بندر بن سعود بن عبدالله طالب')
-            ->assertSee('2018')
-            ->assertSee('33.33');
+            ->viewData('explorer');
+
+        $this->assertContains('بندر بن سعود بن عبدالله طالب', array_column($explorer['owners'], 'name'));
+        $shared = collect($explorer['parcels'])->firstWhere('parcel_no', '2018');
+        $this->assertEqualsWithDelta(1 / 3, $shared['owners'][0]['share'], 0.001);
     }
 
     public function test_the_overview_page_follows_the_show_value_switch(): void
