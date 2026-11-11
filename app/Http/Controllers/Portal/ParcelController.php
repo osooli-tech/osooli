@@ -29,8 +29,10 @@ use App\Support\OwnerVisibility;
 use App\Support\ParcelFrontage;
 use App\Support\ParcelMassing;
 use App\Support\ParcelStory;
+use App\Support\Portal\PortalContext;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +50,7 @@ class ParcelController extends Controller
     /** The list itself is the Portal\ParcelIndex Livewire component, embedded in the view. */
     public function index(): View
     {
-        $stats = new OwnerStatisticsService($this->owner());
+        $stats = new OwnerStatisticsService($this->readingOwner());
         $summary = $stats->summary();
         $portfolio = $stats->portfolio();
 
@@ -63,8 +65,11 @@ class ParcelController extends Controller
         return view('portal.parcels.index', ['summary' => $summary, 'portfolio' => $portfolio]);
     }
 
-    public function show(int $parcel, OwnerInsightsService $insights, DigitalTwinService $twin): View
+    public function show(int $parcel, OwnerInsightsService $insights, DigitalTwinService $twin): View|RedirectResponse
     {
+        if ($moved = $this->openAsHolder($parcel)) {
+            return $moved;
+        }
         $owner = $this->owner();
 
         /** @var Parcel $found */
@@ -115,8 +120,11 @@ class ParcelController extends Controller
     }
 
     /** The unified property file, read-only — same as the internal ParcelController::twin(). */
-    public function twin(int $parcel, DigitalTwinService $twin, OwnerInsightsService $insights): View
+    public function twin(int $parcel, DigitalTwinService $twin, OwnerInsightsService $insights): View|RedirectResponse
     {
+        if ($moved = $this->openAsHolder($parcel)) {
+            return $moved;
+        }
         $owner = $this->owner();
 
         /** @var Parcel $found */
@@ -153,7 +161,10 @@ class ParcelController extends Controller
         ParcelDocumentRenderService $documentRender,
         ParcelSatelliteImageService $satelliteImage,
         ParcelQrCodeService $qrCode
-    ): Response {
+    ): Response|RedirectResponse {
+        if ($moved = $this->openAsHolder($parcel)) {
+            return $moved;
+        }
         $owner = $this->owner();
 
         /** @var Parcel $found */
@@ -259,6 +270,29 @@ class ParcelController extends Controller
                 'properties' => ['parcel_no' => $row->parcel_no],
             ], $neighbourRows),
         ]);
+    }
+
+    /**
+     * A parcel the home or the list showed may be another of the account's
+     * owners'. Rather than a 404, act for the one who holds it and open the
+     * same page again — so what it shows and allows is that owner's.
+     */
+    private function openAsHolder(int $parcel): ?RedirectResponse
+    {
+        if ($this->owner()->parcels()->whereKey($parcel)->exists()) {
+            return null;
+        }
+
+        return app(PortalContext::class)->actAsHolderOf($parcel) ? redirect()->to(request()->fullUrl()) : null;
+    }
+
+    /** The owner standing for every owner the account opens, for page totals. */
+    private function readingOwner(): Owner
+    {
+        /** @var Owner $owner */
+        $owner = app(PortalContext::class)->readingOwner();
+
+        return $owner;
     }
 
     private function owner(): Owner

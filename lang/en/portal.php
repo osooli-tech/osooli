@@ -192,6 +192,8 @@ return [
     'photos_uploaded' => ':count photo(s) received; they appear once reviewed',
     'photo_pending' => 'Under review',
     'photo_rejected' => 'Rejected',
+    'overview_company_subtitle' => 'All the land of the owners this company acts for, a portfolio per owner',
+    'cr_number' => 'Commercial registration',
     'linked_hint' => 'Parcels given to the portfolio\'s holder, with the deed in their name',
     'view_cards' => 'Cards',
     'view_table' => 'Table',

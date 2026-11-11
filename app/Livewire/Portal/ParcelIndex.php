@@ -11,11 +11,11 @@ use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Owner;
 use App\Models\Parcel;
 use App\Queries\OwnerParcelQuery;
+use App\Support\Portal\PortalContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -113,7 +113,7 @@ class ParcelIndex extends Component
     public function parcels(): LengthAwarePaginator
     {
         /** @var Owner $owner */
-        $owner = Auth::guard('owner')->user();
+        $owner = app(PortalContext::class)->readingOwner();
 
         return (new OwnerParcelQuery($owner))
             ->filtered(['search' => $this->search ?: null, 'asset_type' => $this->filterAssetType ?: null])

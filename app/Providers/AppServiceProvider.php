@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Enums\PortalPermission;
 use App\Http\Middleware\EnsurePortalAccount;
 use App\Http\Middleware\SetLocale;
 use App\Models\Owner;
@@ -60,6 +61,17 @@ class AppServiceProvider extends ServiceProvider
             $view->with('portalAccount', $context->account());
             $view->with('portalSwitchable', $owner instanceof Owner ? $context->switchable() : []);
             $view->with('portalCanManage', $owner instanceof Owner && $context->canManage());
+        });
+
+        // What the signed-in account may do for the owner being shown: the
+        // routes refuse the rest; the pages leave out what would be refused.
+        View::composer(['portal.layout', 'portal.parcels.show'], function (ViewContract $view): void {
+            $context = app(PortalContext::class);
+            $view->with('portalCan', collect(PortalPermission::cases())
+                ->mapWithKeys(fn (PortalPermission $p): array => [$p->value => $context->can($p)])
+                // The documents page lists every owner's; it shows while any of them allows it.
+                ->put(PortalPermission::Documents->value.'_any', $context->canAny(PortalPermission::Documents))
+                ->all());
         });
 
         Blade::directive('ar', fn (string $expression) => "<?php echo \App\Support\PdfArabicText::render($expression); ?>");

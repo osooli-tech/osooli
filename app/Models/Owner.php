@@ -156,6 +156,9 @@ class Owner extends Authenticatable
      *
      * @return HasMany<Parcel, $this>
      */
+    /** @var list<int>|null see standingFor() */
+    private ?array $holderGroup = null;
+
     public function parcelsUnderParent(): HasMany
     {
         return $this->hasMany(Parcel::class, 'parent_owner_id');
@@ -187,9 +190,39 @@ class Owner extends Authenticatable
      */
     public function parcels(): Builder
     {
+        $ids = $this->holderIds();
+
         return Parcel::whereHas(
             'heldDeed.owners',
-            fn (Builder $query) => $query->whereKey($this->getKey())
+            fn (Builder $query) => $query->whereIn($query->qualifyColumn('id'), $ids)
         );
+    }
+
+    /**
+     * For one request, let this owner stand for every owner a portal account
+     * opens — a family, or a company acting for them — so the home, the
+     * parcel list, the map and the documents read all their land at once.
+     * Kept off the model's attributes: it is never saved. A parcel itself is
+     * always opened as the one owner who holds it (PortalContext::actAsHolderOf).
+     *
+     * @param  list<int>  $ownerIds
+     */
+    public function standingFor(array $ownerIds): static
+    {
+        $ids = array_values(array_unique(array_map('intval', $ownerIds)));
+        $this->holderGroup = $ids === [(int) $this->getKey()] ? null : $ids;
+
+        return $this;
+    }
+
+    /** @return list<int> the owners whose land this owner reads as theirs: themselves, or the account's whole set */
+    public function holderIds(): array
+    {
+        return $this->holderGroup ?? [(int) $this->getKey()];
+    }
+
+    public function standsForMany(): bool
+    {
+        return $this->holderGroup !== null;
     }
 }

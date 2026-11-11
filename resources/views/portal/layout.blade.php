@@ -64,7 +64,7 @@
                 ['route' => 'portal.parcels.index', 'label' => 'portal.nav_parcels', 'icon' => 'map'],
                 ...(($hasLinkedParcels ?? false) ? [['route' => 'portal.linked.index', 'label' => 'portal.nav_linked', 'icon' => 'family_restroom']] : []),
                 ['route' => 'portal.listings.index', 'label' => 'listings.nav', 'icon' => 'storefront'],
-                ['route' => 'portal.documents.index', 'label' => 'portal.nav_documents', 'icon' => 'folder'],
+                ...(($portalCan['documents_any'] ?? true) ? [['route' => 'portal.documents.index', 'label' => 'portal.nav_documents', 'icon' => 'folder']] : []),
                 ['route' => 'portal.modification-requests.index', 'label' => 'portal.nav_requests', 'icon' => 'edit_note'],
                 ['route' => 'portal.profile', 'label' => 'portal.nav_profile', 'icon' => 'person'],
             ] as $item)
@@ -74,7 +74,7 @@
                         || ($item['route'] === 'portal.linked.index' && request()->routeIs('portal.linked.*'))
                         || ($item['route'] === 'portal.listings.index' && request()->routeIs('portal.listings.*'));
                 @endphp
-                <a href="{{ route($item['route']) }}"
+                <a href="{{ route($item['route'], $item['params'] ?? []) }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
                           {{ $isActive
                               ? 'bg-gradient-to-l from-tertiary-container/35 to-white/5 text-white ring-1 ring-tertiary-container/40 shadow-[0_0_18px_-4px_rgba(201,168,76,0.55)]'

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\PortalAccounts;
 
 use App\Enums\PortalGrantSource;
+use App\Enums\PortalPermission;
 use App\Enums\PortalRelation;
 use App\Models\Owner;
 use App\Models\PortalAccount;
@@ -15,6 +16,7 @@ use App\Support\OwnerScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -90,6 +92,78 @@ class AccountIndex extends Component
 
         $this->reset('newPhone', 'newName', 'newOwnerIds', 'ownerSearch');
         $this->dispatch('toast', message: __('portal_accounts.created'), type: 'success');
+    }
+
+    /** The account whose identity and per-owner permissions are open for editing. */
+    public ?int $settingsId = null;
+
+    public string $settingsKind = PortalAccount::KIND_PERSON;
+
+    public string $settingsName = '';
+
+    public string $settingsCr = '';
+
+    /** @var array<int, bool> grant id => may act, not only look */
+    public array $settingsManage = [];
+
+    /** @var array<int, array<string, bool>> grant id => permission => allowed */
+    public array $settingsPerms = [];
+
+    public function openSettings(int $accountId): void
+    {
+        $account = $this->wholeAccount($accountId);
+        $this->settingsId = $account->id;
+        $this->settingsKind = $account->kind;
+        $this->settingsName = (string) $account->name;
+        $this->settingsCr = (string) $account->cr_number;
+        $this->settingsManage = [];
+        $this->settingsPerms = [];
+
+        foreach ($account->grants as $grant) {
+            $this->settingsManage[$grant->id] = $grant->can_manage;
+            foreach (PortalPermission::cases() as $permission) {
+                $this->settingsPerms[$grant->id][$permission->value] = ($grant->permissions[$permission->value] ?? true) !== false;
+            }
+        }
+    }
+
+    #[Computed]
+    public function settingsAccount(): ?PortalAccount
+    {
+        return $this->settingsId === null ? null : PortalAccount::with('grants.owner:id,name')->find($this->settingsId);
+    }
+
+    public function closeSettings(): void
+    {
+        $this->reset('settingsId', 'settingsKind', 'settingsName', 'settingsCr', 'settingsManage', 'settingsPerms');
+    }
+
+    public function saveSettings(PortalAccessService $access): void
+    {
+        abort_if($this->settingsId === null, 404);
+        $account = $this->wholeAccount($this->settingsId);
+
+        $this->validate([
+            'settingsKind' => ['required', 'in:'.PortalAccount::KIND_PERSON.','.PortalAccount::KIND_COMPANY],
+            'settingsName' => ['nullable', 'string', 'max:150'],
+            'settingsCr' => ['nullable', 'regex:/^\d{10}$/'],
+        ], [], [
+            'settingsName' => __('portal_accounts.name'),
+            'settingsCr' => __('portal_accounts.cr_number'),
+        ]);
+
+        $access->setIdentity($account, $this->settingsKind, $this->settingsName, $this->settingsCr, $this->user());
+
+        foreach ($account->grants as $grant) {
+            $manage = (bool) ($this->settingsManage[$grant->id] ?? $grant->can_manage);
+            if ($manage !== $grant->can_manage) {
+                $access->setManage($grant, $manage, $this->user());
+            }
+            $access->setPermissions($grant, array_map('boolval', $this->settingsPerms[$grant->id] ?? []), $this->user());
+        }
+
+        $this->closeSettings();
+        $this->dispatch('toast', type: 'success', message: __('portal_accounts.saved'));
     }
 
     public function startRename(int $accountId): void

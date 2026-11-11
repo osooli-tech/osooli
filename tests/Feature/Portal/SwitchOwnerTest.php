@@ -104,13 +104,23 @@ class SwitchOwnerTest extends TestCase
         $this->post(route('portal.switch', $this->stranger))->assertForbidden();
     }
 
-    public function test_after_switching_another_owners_parcel_is_still_not_found(): void
+    public function test_after_switching_another_owners_parcel_opens_as_her_again(): void
     {
         $this->actingAsOwner($this->najla, $this->office);
         $this->post(route('portal.switch', $this->saud));
 
-        // Acting for Saud now: Najla's parcel is hers, not his.
-        $this->get(route('portal.parcels.show', $this->najlasParcel))->assertNotFound();
+        // Acting for Saud now: Najla's parcel is hers, so the account acts for her to open it —
+        // the page and what it allows are hers, never shown as his.
+        $url = route('portal.parcels.show', $this->najlasParcel);
+        $this->get($url)->assertRedirect($url);
+        $this->assertSame($this->najla->id, auth('owner')->id());
+    }
+
+    public function test_a_parcel_no_owner_of_the_account_holds_is_still_not_found(): void
+    {
+        $foreign = $this->parcel(Plan::firstOrFail(), '9999', $this->stranger);
+
+        $this->actingAsOwner($this->najla, $this->office)->get(route('portal.parcels.show', $foreign))->assertNotFound();
     }
 
     public function test_view_only_cannot_list_upload_request_or_show_interest(): void

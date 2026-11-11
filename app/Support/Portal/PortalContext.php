@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Portal;
 
+use App\Enums\PortalPermission;
 use App\Models\Owner;
 use App\Models\PortalAccount;
 use App\Models\PortalAccountOwner;
@@ -103,6 +104,12 @@ class PortalContext
         return (bool) $this->grant()?->can_manage;
     }
 
+    /** May do this one thing for the owner being acted for (see PortalAccountOwner::allows()). */
+    public function can(PortalPermission $permission): bool
+    {
+        return (bool) $this->grant()?->allows($permission);
+    }
+
     /** Signed in as the owner themselves. */
     public function isSelf(): bool
     {
@@ -140,6 +147,73 @@ class PortalContext
 
         $this->remember($account);
         app(PortalAccessService::class)->audit('portal_signed_in', $account, $owner, null);
+    }
+
+    /**
+     * The owner being acted for, standing for every owner the account opens:
+     * what the home, the parcel list, the map and the documents read, so an
+     * account for a family or a company sees all their land on one page.
+     * Given a permission, only the owners whose grant allows it count — the
+     * documents of an owner who withheld them stay out of the shared list.
+     */
+    public function readingOwner(?PortalPermission $allowing = null): ?Owner
+    {
+        $owner = $this->owner();
+        $account = $this->account();
+
+        if ($owner !== null && $account !== null && $this->hasMany()) {
+            $grants = $account->usableGrants()->with('account')->get();
+            $ids = $grants
+                ->filter(fn (PortalAccountOwner $grant): bool => $allowing === null || $grant->allows($allowing))
+                ->pluck('owner_id')
+                ->map(fn ($id): int => (int) $id)
+                ->values()
+                ->all();
+            // Standing for nobody must read nothing, never fall back to the owner alone.
+            $owner->standingFor($ids === [] ? [0, -1] : $ids);
+        }
+
+        return $owner;
+    }
+
+    /** Whether any owner the account opens lets it do this — what decides showing a shared page at all. */
+    public function canAny(PortalPermission $permission): bool
+    {
+        $account = $this->account();
+
+        if ($account === null || ! $this->hasMany()) {
+            return $this->can($permission);
+        }
+
+        return $account->usableGrants()->with('account')->get()->contains(fn (PortalAccountOwner $grant): bool => $grant->allows($permission));
+    }
+
+    /**
+     * Web: a parcel listed on a read page may belong to another of the
+     * account's owners. Act for the one who holds it, so the page, and what
+     * it allows, are that owner's. False when the account opens nobody who does.
+     */
+    public function actAsHolderOf(int $parcelId): bool
+    {
+        $account = $this->account();
+
+        if ($account === null || ! $this->hasMany()) {
+            return false;
+        }
+
+        $holder = Owner::query()
+            ->whereKey($account->usableOwnerIds())
+            ->whereKeyNot((int) $this->owner()?->id)
+            ->get()
+            ->first(fn (Owner $owner): bool => $owner->parcels()->whereKey($parcelId)->exists());
+
+        if ($holder === null) {
+            return false;
+        }
+
+        $this->switchTo($holder);
+
+        return true;
     }
 
     /**

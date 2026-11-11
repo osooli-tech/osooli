@@ -30,6 +30,19 @@ class OwnerHoldings
     }
 
     /**
+     * The fraction several owners hold together — an account's owners, where
+     * a parcel shared among them counts once, in full.
+     *
+     * @param  list<int>  $ownerIds
+     */
+    public function shareOf(Parcel $parcel, array $ownerIds): float
+    {
+        $shares = $this->shares($parcel);
+
+        return min(1.0, array_sum(array_map(fn (int $id): float => $shares[$id] ?? 0.0, $ownerIds)));
+    }
+
+    /**
      * Every holder's fraction of the parcel.
      *
      * @return array<int, float> owner id => share (0..1)

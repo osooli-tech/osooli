@@ -102,7 +102,10 @@
                             @if (isset($renaming[$account->id]))
                                 <input type="text" wire:model="renaming.{{ $account->id }}" wire:keydown.enter="rename({{ $account->id }})" aria-label="{{ __('portal_accounts.name') }}" class="{{ $inputCls }} max-w-xs">
                             @else
-                                <p class="font-semibold">{{ $account->name ?: '—' }}
+                                <p class="font-semibold">
+                                    @if ($account->isCompany())<span class="material-symbols-outlined text-[16px] align-middle text-tertiary">domain</span>@endif
+                                    {{ $account->name ?: '—' }}
+                                    @if ($account->isCompany() && $account->cr_number)<span class="ms-1 text-xs font-normal text-on-surface-variant dark:text-on-primary-container">· {{ __('portal_accounts.cr_number') }} <span dir="ltr" class="data-tabular">{{ $account->cr_number }}</span></span>@endif
                                     @unless ($account->is_active)<span class="ms-2 text-xs px-2 py-0.5 rounded-full bg-error/10 text-error">{{ __('portal_accounts.inactive') }}</span>@endunless
                                 </p>
                             @endif
@@ -118,6 +121,7 @@
                                 @else
                                     <button type="button" wire:click="startRename({{ $account->id }})" class="{{ $btnCls }} bg-surface-container dark:bg-white/5">{{ __('portal_accounts.rename') }}</button>
                                 @endif
+                                <button type="button" wire:click="openSettings({{ $account->id }})" class="{{ $btnCls }} bg-primary/10 text-primary dark:text-white">{{ __('portal_accounts.settings') }}</button>
                                 <button type="button" wire:click="signOutEverywhere({{ $account->id }})" wire:confirm="{{ __('portal_accounts.sign_out_everywhere') }}؟" class="{{ $btnCls }} bg-surface-container dark:bg-white/5">{{ __('portal_accounts.sign_out_everywhere') }}</button>
                                 @if ($account->is_active)
                                     <button type="button" wire:click="deactivate({{ $account->id }})" wire:confirm="{{ __('portal_accounts.deactivate') }} {{ $account->phone }}؟" class="{{ $btnCls }} bg-error/10 text-error">{{ __('portal_accounts.deactivate') }}</button>
@@ -143,5 +147,75 @@
             @endforelse
             <div class="p-4">{{ $accounts->links() }}</div>
         </section>
+    @endif
+
+    {{-- Who the account is, and what it may do for each owner it opens --}}
+    @if ($settingsAccount = $this->settingsAccount)
+        <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50" wire:click.self="closeSettings">
+            <div class="w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl bg-surface-container-lowest dark:bg-[#1a1f2e] shadow-xl">
+                <div class="px-6 py-4 border-b border-outline-variant dark:border-white/10 shrink-0">
+                    <h3 class="font-semibold">{{ __('portal_accounts.settings') }} — <span dir="ltr" class="data-tabular">{{ $settingsAccount->phone }}</span></h3>
+                </div>
+                <div class="flex-1 min-h-0 overflow-y-auto px-6 py-5 space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium mb-1">{{ __('portal_accounts.kind') }}</label>
+                            <select wire:model.live="settingsKind" class="{{ $inputCls }}">
+                                <option value="person">{{ __('portal_accounts.kind_person') }}</option>
+                                <option value="company">{{ __('portal_accounts.kind_company') }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1">{{ $settingsKind === 'company' ? __('portal_accounts.company_name') : __('portal_accounts.name') }}</label>
+                            <input type="text" wire:model="settingsName" maxlength="150" class="{{ $inputCls }}">
+                            @error('settingsName') <p class="mt-1 text-xs text-error">{{ $message }}</p> @enderror
+                        </div>
+                        @if ($settingsKind === 'company')
+                            <div>
+                                <label class="block text-xs font-medium mb-1">{{ __('portal_accounts.cr_number') }}</label>
+                                <input type="text" wire:model="settingsCr" dir="ltr" maxlength="10" inputmode="numeric" class="{{ $inputCls }} data-tabular">
+                                @error('settingsCr') <p class="mt-1 text-xs text-error">{{ $message }}</p> @enderror
+                            </div>
+                        @endif
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold">{{ __('portal_accounts.permissions_title') }}</h4>
+                        <p class="text-xs text-on-surface-variant dark:text-on-primary-container mb-3">{{ __('portal_accounts.permissions_hint') }}</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-outline-variant dark:border-white/10 text-[11px] font-bold text-on-surface-variant dark:text-on-primary-container">
+                                        <th class="px-2 py-2 text-start">{{ __('portal_accounts.owner') }}</th>
+                                        <th class="px-2 py-2 text-center">{{ __('portal_accounts.can_manage') }}</th>
+                                        @foreach (\App\Enums\PortalPermission::cases() as $permission)
+                                            <th class="px-2 py-2 text-center">{{ $permission->label() }}</th>
+                                        @endforeach
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant/40 dark:divide-white/5">
+                                    @foreach ($settingsAccount->grants as $grant)
+                                        <tr wire:key="perm-{{ $grant->id }}">
+                                            <td class="px-2 py-2">
+                                                {{ $grant->owner?->name ?? '—' }}
+                                                @if ($grant->needs_review)<span class="block text-[11px] text-tertiary">{{ __('portal_accounts.tab_review') }}</span>@endif
+                                            </td>
+                                            <td class="px-2 py-2 text-center"><input type="checkbox" wire:model="settingsManage.{{ $grant->id }}" aria-label="{{ __('portal_accounts.can_manage') }}"></td>
+                                            @foreach (\App\Enums\PortalPermission::cases() as $permission)
+                                                <td class="px-2 py-2 text-center"><input type="checkbox" wire:model="settingsPerms.{{ $grant->id }}.{{ $permission->value }}" aria-label="{{ $permission->label() }}"></td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 border-t border-outline-variant dark:border-white/10 flex items-center justify-between gap-3 shrink-0">
+                    <button type="button" wire:click="closeSettings" class="{{ $btnCls }} bg-surface-container dark:bg-white/5">{{ __('portal_accounts.close') }}</button>
+                    <button type="button" wire:click="saveSettings" class="{{ $btnCls }} bg-secondary text-white">{{ __('portal_accounts.save') }}</button>
+                </div>
+            </div>
+        </div>
     @endif
 </div>

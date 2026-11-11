@@ -10,8 +10,12 @@
     $palette = ['#1f6f8b', '#c9a84c', '#5b8c5a', '#a05195', '#d45087', '#2f4b7c', '#f95d6a', '#665191'];
 @endphp
 <div class="space-y-5">
-    <x-portal.page-hero icon="dashboard" :title="__('portal.overview_title')" :subtitle="__('portal.overview_subtitle')" id="overview">
-        @if ($account->name)
+    <x-portal.page-hero :icon="$account->isCompany() ? 'domain' : 'dashboard'"
+                        :title="$account->isCompany() && $account->name ? $account->name : __('portal.overview_title')"
+                        :subtitle="$account->isCompany() ? __('portal.overview_company_subtitle') : __('portal.overview_subtitle')" id="overview">
+        @if ($account->isCompany() && $account->cr_number)
+            <p class="mt-2 text-sm font-medium opacity-90">{{ __('portal.cr_number') }}: <span class="data-tabular" dir="ltr">{{ $account->cr_number }}</span></p>
+        @elseif (! $account->isCompany() && $account->name)
             <p class="mt-2 text-sm font-medium opacity-90">{{ $account->name }}</p>
         @endif
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6">

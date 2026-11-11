@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Portal;
 
 use App\Enums\PortalGrantSource;
+use App\Enums\PortalPermission;
 use App\Enums\PortalRelation;
 use App\Models\AuditLog;
 use App\Models\Owner;
@@ -153,6 +154,42 @@ class PortalAccessService
             $this->grant($this->accountForPhone($phone), $owner, PortalRelation::Self_, true, PortalGrantSource::Staff, $by);
             $owner->forceFill(['phone' => $phone])->save();
         });
+    }
+
+    /**
+     * Whether the account is a person or a company acting as agent, with the
+     * company's name and commercial registration.
+     */
+    public function setIdentity(PortalAccount $account, string $kind, ?string $name, ?string $crNumber, User $by): void
+    {
+        $company = $kind === PortalAccount::KIND_COMPANY;
+        $account->update([
+            'kind' => $company ? PortalAccount::KIND_COMPANY : PortalAccount::KIND_PERSON,
+            'name' => $name === null ? null : (trim($name) ?: null),
+            'cr_number' => $company && $crNumber !== null ? (trim($crNumber) ?: null) : null,
+        ]);
+
+        $this->audit('portal_account_identity_changed', $account, null, $by);
+    }
+
+    /**
+     * What the account may do for this owner. Only what is turned off is
+     * stored, so a permission added later is allowed until someone says not.
+     *
+     * @param  array<string, bool>  $allowed  permission value => allowed
+     */
+    public function setPermissions(PortalAccountOwner $grant, array $allowed, User $by): void
+    {
+        $off = [];
+        foreach (PortalPermission::cases() as $permission) {
+            if (($allowed[$permission->value] ?? true) === false) {
+                $off[$permission->value] = false;
+            }
+        }
+
+        $grant->update(['permissions' => $off === [] ? null : $off]);
+
+        $this->audit('portal_grant_permissions_changed', $grant->account, $grant->owner, $by);
     }
 
     public function rename(PortalAccount $account, ?string $name, User $by): void

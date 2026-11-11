@@ -57,12 +57,12 @@ Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(f
     Route::get('parcels/map', [ParcelController::class, 'map'])->name('api.parcels.map');
     Route::get('parcels', [ParcelController::class, 'index'])->name('api.parcels.index');
     Route::get('parcels/{parcel}', [ParcelController::class, 'show'])->name('api.parcels.show');
-    Route::get('parcels/{parcel}/documents', [ParcelController::class, 'documents'])->name('api.parcels.documents');
-    Route::post('parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage', 'throttle:10,1'])->name('api.parcels.photos.store');
+    Route::get('parcels/{parcel}/documents', [ParcelController::class, 'documents'])->middleware('portal.manage:documents')->name('api.parcels.documents');
+    Route::post('parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage:upload_photos', 'throttle:10,1'])->name('api.parcels.photos.store');
 
     Route::get('deeds', [DeedController::class, 'index'])->name('api.deeds.index');
 
-    Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('api.documents.download');
+    Route::get('documents/{document}/download', [DocumentController::class, 'download'])->middleware('portal.manage:documents')->name('api.documents.download');
 
     // Parcels owners offer for sale; others see an approved one without price, deed or name.
     Route::get('listings', [ListingController::class, 'index'])->name('api.listings.index');
@@ -70,9 +70,9 @@ Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(f
     Route::get('listings/interests', [ListingController::class, 'interests'])->name('api.listings.interests');
     Route::get('listings/{listing}', [ListingController::class, 'show'])->whereNumber('listing')->name('api.listings.show');
     Route::post('listings/{listing}/interest', [ListingController::class, 'interest'])->whereNumber('listing')->middleware(['portal.manage', 'throttle:10,1'])->name('api.listings.interest');
-    Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->middleware('portal.manage')->name('api.listings.destroy');
-    Route::post('parcels/{parcel}/listing', [ListingController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage', 'throttle:10,1'])->name('api.listings.store');
+    Route::delete('listings/{listing}', [ListingController::class, 'destroy'])->whereNumber('listing')->middleware('portal.manage:sell')->name('api.listings.destroy');
+    Route::post('parcels/{parcel}/listing', [ListingController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage:sell', 'throttle:10,1'])->name('api.listings.store');
 
     Route::get('modification-requests', [ModificationRequestController::class, 'index'])->name('api.modification-requests.index');
-    Route::post('modification-requests', [ModificationRequestController::class, 'store'])->middleware('portal.manage')->name('api.modification-requests.store');
+    Route::post('modification-requests', [ModificationRequestController::class, 'store'])->middleware('portal.manage:request_changes')->name('api.modification-requests.store');
 });

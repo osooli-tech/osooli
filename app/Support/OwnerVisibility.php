@@ -32,7 +32,7 @@ final class OwnerVisibility
         $parcel->setRelation('previousHolders', self::previousHolders($parcel, $owner));
 
         $own = $parcel->deeds
-            ->filter(fn (Deed $deed): bool => $deed->owners->contains('id', $owner->getKey()))
+            ->filter(fn (Deed $deed): bool => $deed->owners->whereIn('id', $owner->holderIds())->isNotEmpty())
             ->values();
         $ownIds = $own->pluck('id');
 
@@ -52,10 +52,10 @@ final class OwnerVisibility
      */
     private static function previousHolders(Parcel $parcel, Owner $owner): Collection
     {
-        $firstOwn = $parcel->deeds->filter(fn (Deed $deed): bool => $deed->owners->contains('id', $owner->getKey()))->min('id');
+        $firstOwn = $parcel->deeds->filter(fn (Deed $deed): bool => $deed->owners->whereIn('id', $owner->holderIds())->isNotEmpty())->min('id');
 
         $before = $parcel->deeds
-            ->filter(fn (Deed $deed): bool => $firstOwn !== null && $deed->id < $firstOwn && ! $deed->owners->contains('id', $owner->getKey()))
+            ->filter(fn (Deed $deed): bool => $firstOwn !== null && $deed->id < $firstOwn && ! $deed->owners->whereIn('id', $owner->holderIds())->isNotEmpty())
             ->sortByDesc('id')
             ->first();
 
@@ -74,7 +74,7 @@ final class OwnerVisibility
             ->whereIn('parcel_id', $owner->parcels()->select('parcels.id'))
             ->where(fn (Builder $q) => $q
                 ->whereNull('deed_id')
-                ->orWhereIn('deed_id', DB::table('deed_owners')->where('owner_id', $owner->getKey())->select('deed_id')));
+                ->orWhereIn('deed_id', DB::table('deed_owners')->whereIn('owner_id', $owner->holderIds())->select('deed_id')));
     }
 
     public static function canSeeDocument(Owner $owner, ParcelPhoto $photo): bool

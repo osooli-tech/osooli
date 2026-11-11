@@ -53,7 +53,7 @@ class OwnerInsightsService
             ])
             ->get();
 
-        $rows = $parcels->map(fn (Parcel $parcel): array => $this->row($parcel, (int) $owner->getKey()));
+        $rows = $parcels->map(fn (Parcel $parcel): array => $this->row($parcel, $owner->holderIds()));
         $priceComparison = $this->priceComparison($rows);
 
         // Parcels held under the owner in another's name count in the headline
@@ -81,8 +81,11 @@ class OwnerInsightsService
         ];
     }
 
-    /** @return array<string, mixed> */
-    private function row(Parcel $parcel, int $ownerId): array
+    /**
+     * @param  list<int>  $ownerIds  the owner, or every owner an account stands for
+     * @return array<string, mixed>
+     */
+    private function row(Parcel $parcel, array $ownerIds): array
     {
         $twin = $this->twin->for($parcel);
         $deedArea = $twin['area']['deed'];
@@ -111,7 +114,7 @@ class OwnerInsightsService
             'deed_age' => HijriDate::ageInYears($parcel->heldDeed?->deed_date_hijri),
             'co_owned' => ($parcel->deeds->firstWhere('id', $parcel->heldDeed?->id)?->deedOwners->count() ?? 0) > 1,
             // The owner's part of this parcel; the headline figures count only that part.
-            'share' => app(OwnerHoldings::class)->share($parcel, $ownerId),
+            'share' => app(OwnerHoldings::class)->shareOf($parcel, $ownerIds),
         ];
     }
 

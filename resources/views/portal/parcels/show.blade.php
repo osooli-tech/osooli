@@ -523,6 +523,7 @@
         @endphp
 
         {{-- Photos: the approved ones, and a way for the owner to add more --}}
+        @if ($portalCan['documents'])
             <div class="bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5
                         border border-outline-variant dark:border-white/10 shadow-sm">
                 <div class="flex items-center gap-2 mb-4">
@@ -563,6 +564,7 @@
                     </ul>
                 @endif
 
+                @if ($portalCan['upload_photos'])
                 <form method="POST" action="{{ route('portal.parcels.photos.store', $parcel) }}" enctype="multipart/form-data"
                       class="mt-4 pt-4 border-t border-outline-variant dark:border-white/10 space-y-2.5">
                     @csrf
@@ -580,6 +582,7 @@
                         {{ __('portal.photos_upload_submit') }}
                     </button>
                 </form>
+                @endif
             </div>
 
         {{-- Documents (deed scans, boundary survey cards) — download only,
@@ -626,6 +629,7 @@
                 </p>
             @endif
         </div>
+        @endif
 
     </div>
 
@@ -633,6 +637,7 @@
 
 {{-- ── Offer for sale ─────────────────────────────────────────────────── --}}
 @php $owner = auth('owner')->user(); @endphp
+@if ($portalCan['sell'])
 <div class="mt-5 bg-surface-container-lowest dark:bg-[#1a1f2e] rounded-2xl p-5 border border-outline-variant dark:border-white/10 shadow-sm">
     <div class="flex items-center gap-2 mb-1">
         <span class="material-symbols-outlined text-[18px] text-tertiary">sell</span>
@@ -677,8 +682,10 @@
         </form>
     @endif
 </div>
+@endif
 
 {{-- ── Data-change requests ───────────────────────────────────────────── --}}
+@if ($portalCan['request_changes'])
 @php
     $requestOptions = [
         'asset_type' => __('parcels.asset_types'),
@@ -753,6 +760,7 @@
         @endforelse
     </div>
 </div>
+@endif
 
 {{-- ── Boundaries + Mini-Map (full width, side by side) ────────────────── --}}
 <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 mt-5">

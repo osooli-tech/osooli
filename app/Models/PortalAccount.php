@@ -20,6 +20,8 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property string|null $name
+ * @property string $kind person, or company — an agent that owns nothing itself
+ * @property string|null $cr_number commercial registration, for a company
  * @property string $phone
  * @property string $phone_normalized
  * @property string|null $email
@@ -30,7 +32,11 @@ use Illuminate\Support\Carbon;
  */
 class PortalAccount extends Model
 {
-    protected $fillable = ['name', 'phone', 'email', 'is_active', 'session_version', 'last_owner_id', 'last_login_at'];
+    public const KIND_PERSON = 'person';
+
+    public const KIND_COMPANY = 'company';
+
+    protected $fillable = ['name', 'kind', 'cr_number', 'phone', 'email', 'is_active', 'session_version', 'last_owner_id', 'last_login_at'];
 
     /** @return array<string, string> */
     protected function casts(): array
@@ -48,6 +54,11 @@ class PortalAccount extends Model
         static::saving(function (PortalAccount $account): void {
             $account->phone_normalized = Owner::normalisePhone($account->phone);
         });
+    }
+
+    public function isCompany(): bool
+    {
+        return $this->kind === self::KIND_COMPANY;
     }
 
     /** The active account signing in with this phone, in any accepted format. */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Portal;
 
+use App\Enums\PortalPermission;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Owner;
@@ -13,6 +14,7 @@ use App\Queries\OwnerParcelQuery;
 use App\Services\Owner\LinkedParcelsService;
 use App\Support\DocumentVault;
 use App\Support\OwnerVisibility;
+use App\Support\Portal\PortalContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,7 +32,7 @@ class DocumentController extends Controller
     /** A site photo shown inline; 404 unless it sits on one of the owner's parcels. Not audited — it is a page view. */
     public function preview(ParcelPhoto $photo): Response
     {
-        abort_unless($photo->isGalleryImage() && OwnerVisibility::canSeeDocument($this->owner(), $photo), 404);
+        abort_unless($photo->isGalleryImage() && OwnerVisibility::canSeeDocument($this->documentReader(), $photo), 404);
 
         return DocumentVault::response($photo, download: false, headers: ['Cache-Control' => 'private, max-age=3600']);
     }
@@ -45,7 +47,7 @@ class DocumentController extends Controller
         // The scan of a deed the owner is not on (an earlier holder's) is a 404 as well.
         // A parcel held under them in another's name opens only if the administrator allows it.
         abort_unless(
-            OwnerVisibility::canSeeDocument($owner, $photo) || app(LinkedParcelsService::class)->canSeeDocument($owner, $photo),
+            OwnerVisibility::canSeeDocument($this->documentReader(), $photo) || app(LinkedParcelsService::class)->canSeeDocument($owner, $photo),
             404
         );
 
@@ -74,7 +76,7 @@ class DocumentController extends Controller
     public function index(int $parcel): JsonResponse
     {
         /** @var Parcel|null $found */
-        $found = (new OwnerParcelQuery($this->owner()))->base()->with('photos')->find($parcel);
+        $found = (new OwnerParcelQuery($this->documentReader()))->base()->with('photos')->find($parcel);
 
         // Not their own: a parcel held under them in another's name, with whatever the settings allow.
         if ($found === null) {
@@ -90,7 +92,7 @@ class DocumentController extends Controller
             ]);
         }
 
-        OwnerVisibility::narrow($found, $this->owner());
+        OwnerVisibility::narrow($found, $this->documentReader());
 
         $isGalleryImage = fn (ParcelPhoto $photo): bool => $photo->isGalleryImage();
 
@@ -105,6 +107,15 @@ class DocumentController extends Controller
                 'url' => route('portal.documents.preview', $photo),
             ]),
         ]);
+    }
+
+    /** The owner, standing for every owner of the account who lets it see their documents. */
+    private function documentReader(): Owner
+    {
+        /** @var Owner $owner */
+        $owner = app(PortalContext::class)->readingOwner(PortalPermission::Documents);
+
+        return $owner;
     }
 
     private function owner(): Owner

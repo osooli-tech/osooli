@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\Portal;
 
 use App\Enums\PhotoType;
+use App\Enums\PortalPermission;
 use App\Livewire\Concerns\FiltersByCreatedAt;
 use App\Models\Owner;
 use App\Models\ParcelPhoto;
 use App\Support\OwnerVisibility;
+use App\Support\Portal\PortalContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -46,7 +47,7 @@ class DocumentIndex extends Component
     private function ownedDocuments(): Builder
     {
         /** @var Owner $owner */
-        $owner = Auth::guard('owner')->user();
+        $owner = app(PortalContext::class)->readingOwner(PortalPermission::Documents);
 
         return OwnerVisibility::documents(ParcelPhoto::query(), $owner);
     }

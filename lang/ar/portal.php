@@ -192,6 +192,8 @@ return [
     'photos_uploaded' => 'وصلت :count صورة، وتظهر بعد مراجعتها',
     'photo_pending' => 'قيد المراجعة',
     'photo_rejected' => 'مرفوضة',
+    'overview_company_subtitle' => 'كل أراضي الملاك الذين تمثّلهم الشركة، ومحفظة لكل مالك',
+    'cr_number' => 'السجل التجاري',
     'linked_hint' => 'قطع معطاة لصاحب المحفظة وصكها باسمه',
     'view_cards' => 'بطاقات',
     'view_table' => 'جدول',

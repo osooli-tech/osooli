@@ -11,8 +11,8 @@ use App\Models\PortalSetting;
 use App\Queries\OwnerParcelQuery;
 use App\Support\Database\Dialect;
 use App\Support\ParcelMassing;
+use App\Support\Portal\PortalContext;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * The portal map's own parcel feed — the same shape map.js already expects
@@ -84,7 +84,7 @@ class GeoJsonController extends Controller
         }
 
         /** @var Owner $owner */
-        $owner = Auth::guard('owner')->user();
+        $owner = app(PortalContext::class)->readingOwner();
 
         $parcels = (new OwnerParcelQuery($owner))
             ->withGeometry()
@@ -94,7 +94,7 @@ class GeoJsonController extends Controller
 
         $features = $parcels->map(function (Parcel $parcel) use ($owner): array {
             // Only the deeds this owner is on; an earlier holder's deed is not theirs to see.
-            $ownDeeds = $parcel->deeds->filter(fn ($deed) => $deed->deedOwners->contains('owner_id', $owner->id));
+            $ownDeeds = $parcel->deeds->filter(fn ($deed) => $deed->deedOwners->whereIn('owner_id', $owner->holderIds())->isNotEmpty());
             $latestDeed = $ownDeeds->sortByDesc('id')->first();
 
             $owners = $ownDeeds

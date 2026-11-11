@@ -78,7 +78,7 @@ class OwnerStatisticsService
             }
 
             $priced++;
-            $total += (float) $parcel->parcel_price * $holdings->share($parcel, (int) $this->owner->getKey());
+            $total += (float) $parcel->parcel_price * $holdings->shareOf($parcel, $this->owner->holderIds());
         }
 
         return [
@@ -96,12 +96,12 @@ class OwnerStatisticsService
     private function heldArea(): float
     {
         $holdings = app(OwnerHoldings::class);
-        $ownerId = (int) $this->owner->getKey();
+        $ownerIds = $this->owner->holderIds();
 
         return (float) $this->owner->parcels()
             ->with(OwnerHoldings::RELATIONS)
             ->get(['parcels.id'])
-            ->sum(fn (Parcel $parcel): float => (float) ($parcel->heldDeed->deed_area ?? 0) * $holdings->share($parcel, $ownerId));
+            ->sum(fn (Parcel $parcel): float => (float) ($parcel->heldDeed->deed_area ?? 0) * $holdings->shareOf($parcel, $ownerIds));
     }
 
     /** Compact counters for the profile screen. */
@@ -115,7 +115,7 @@ class OwnerStatisticsService
             // which comes from an Eloquent relation and is already filtered.
             'deeds_count' => DB::table('deed_owners')
                 ->join('deeds', 'deeds.id', '=', 'deed_owners.deed_id')
-                ->where('deed_owners.owner_id', $this->owner->getKey())
+                ->whereIn('deed_owners.owner_id', $this->owner->holderIds())
                 ->whereNull('deeds.deleted_at')
                 ->distinct()
                 ->count('deed_owners.deed_id'),
@@ -265,7 +265,7 @@ class OwnerStatisticsService
     {
         return Deed::whereHas(
             'owners',
-            fn (Builder $query) => $query->whereKey($this->owner->getKey())
+            fn (Builder $query) => $query->whereIn($query->qualifyColumn('id'), $this->owner->holderIds())
         );
     }
 
