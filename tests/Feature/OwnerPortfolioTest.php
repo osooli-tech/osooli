@@ -134,6 +134,25 @@ class OwnerPortfolioTest extends TestCase
         $this->assertSame([$this->ownedParcel->id], $rows->first()['parcelIds']);
     }
 
+    public function test_an_owner_with_no_portfolio_still_shows_one_in_their_name(): void
+    {
+        Livewire::test(PortfolioManager::class, ['ownerId' => $this->owner->id])
+            ->assertViewHas('restIds', [$this->ownedParcel->id])
+            ->assertSee(__('owners.linked_portfolio_of', ['name' => 'مالك تجريبي']))
+            ->assertDontSee(__('owners.no_portfolios'));
+    }
+
+    public function test_parcels_left_out_of_every_portfolio_get_a_card_of_their_own(): void
+    {
+        $second = $this->makeParcel((int) $this->ownedParcel->plan_id, '102', null, $this->owner);
+        $portfolio = $this->service->create($this->owner, 'مشروع أ');
+        $this->service->assign($this->owner, $this->ownedParcel, $portfolio);
+
+        Livewire::test(PortfolioManager::class, ['ownerId' => $this->owner->id])
+            ->assertViewHas('restIds', [$second->id])
+            ->assertSee(__('owners.portfolio_unassigned'));
+    }
+
     private function makeParcel(int $planId, string $parcelNo, ?float $price, Owner $owner): Parcel
     {
         $parcel = Parcel::create([

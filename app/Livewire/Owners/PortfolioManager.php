@@ -72,15 +72,21 @@ class PortfolioManager extends Component
     public function render(OwnerPortfolioService $service): View
     {
         $owner = $this->owner();
+        $parcelRows = $service->parcelsWithAssignment($owner);
 
         return view('livewire.owners.portfolio-manager', [
+            // Whatever sits in no portfolio still reads as one: under the
+            // owner's own name when nothing was split, so no owner has none.
+            'rest' => $service->unassignedSummary($owner),
+            'restIds' => collect($parcelRows)->whereNull('portfolio_id')->map(fn (array $r): int => $r['parcel']->id)->values()->all(),
             'portfolios' => $owner->portfolios()->get()
                 ->map(fn ($p) => [
                     'portfolio' => $p,
                     'summary' => $service->summary($p),
                     'parcelIds' => $p->parcels()->pluck('parcels.id')->all(),
                 ]),
-            'parcelRows' => $service->parcelsWithAssignment($owner),
+            'parcelRows' => $parcelRows,
+            'ownerName' => $owner->name,
         ]);
     }
 

@@ -36,6 +36,7 @@ return [
     'no_portfolios' => 'لا توجد محافظ بعد لهذا المالك.',
     'confirm_delete_portfolio' => 'حذف هذه المحفظة؟ القطع المرتبطة بها تصبح بلا محفظة، ولا تُحذف.',
     'linked_count' => 'منها :count معطاة',
+    'portfolio_unassigned' => 'قطع غير مصنّفة في محفظة',
     'linked_hint' => 'قطع أعطاها المالك لغيره وصكها باسم من أُعطيت له، وبقي هو مالكها الأساسي',
     'linked_portfolios' => 'محافظ المستفيدين',
     'linked_portfolio_of' => 'محفظة :name',

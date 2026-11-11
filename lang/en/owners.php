@@ -36,6 +36,7 @@ return [
     'no_portfolios' => 'This owner has no portfolios yet.',
     'confirm_delete_portfolio' => 'Delete this portfolio? Its parcels become unassigned; they are not deleted.',
     'linked_count' => ':count of them given',
+    'portfolio_unassigned' => 'Parcels in no portfolio',
     'linked_hint' => 'Parcels the owner gave to someone else — the deed is in that person\'s name and the owner remains the parent owner',
     'linked_portfolios' => 'Beneficiary portfolios',
     'linked_portfolio_of' => 'Portfolio of :name',

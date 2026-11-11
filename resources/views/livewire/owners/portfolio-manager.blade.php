@@ -22,7 +22,7 @@
         </div>
         @error('newPortfolioName') <p class="text-xs text-error mb-2">{{ $message }}</p> @enderror
 
-        @if ($portfolios->isEmpty())
+        @if ($portfolios->isEmpty() && $rest['parcels'] === 0)
             <p class="text-xs text-on-surface-variant dark:text-on-primary-container py-2">
                 {{ __('owners.no_portfolios') }}
             </p>
@@ -53,7 +53,7 @@
                         </div>
                         <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
                             <span class="data-tabular">{{ $summary['parcels'] }} {{ __('owners.portfolio_parcels_unit') }}</span>
-                            <span class="data-tabular">{{ number_format($summary['area'] / 1000000, 2) }} {{ __('dashboard.area_unit_km') }}</span>
+                            <span class="data-tabular">{{ number_format($summary['area']) }} {{ __('dashboard.area_unit_sqm') }}</span>
                         </div>
                         @if ($summary['value'] !== null)
                             <p class="text-sm font-bold text-secondary data-tabular mt-1">
@@ -71,6 +71,30 @@
                         @endif
                     </div>
                 @endforeach
+
+                {{-- Parcels in no portfolio: one more card, under the owner's name when nothing was split --}}
+                @if ($rest['parcels'] > 0)
+                    @php $restName = $portfolios->isEmpty() ? __('owners.linked_portfolio_of', ['name' => $ownerName]) : __('owners.portfolio_unassigned'); @endphp
+                    <div class="bg-surface dark:bg-[#1a2435] rounded-xl p-3 border border-dashed border-outline dark:border-white/20">
+                        <p class="font-semibold text-sm text-on-surface dark:text-white truncate mb-1.5">{{ $restName }}</p>
+                        <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
+                            <span class="data-tabular">{{ $rest['parcels'] }} {{ __('owners.portfolio_parcels_unit') }}</span>
+                            <span class="data-tabular">{{ number_format($rest['area']) }} {{ __('dashboard.area_unit_sqm') }}</span>
+                        </div>
+                        @if ($rest['value'] !== null)
+                            <p class="text-sm font-bold text-secondary data-tabular mt-1">
+                                {{ number_format($rest['value'], 0) }}
+                                <span class="text-[11px] font-normal text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.currency') }}</span>
+                            </p>
+                        @endif
+                        <button type="button"
+                                onclick="window.dispatchEvent(new CustomEvent('portfolio-map-select', { detail: { ids: @js($restIds), name: @js($restName) } }))"
+                                class="flex items-center gap-1.5 mt-2 text-xs font-medium text-secondary hover:underline">
+                            <span class="material-symbols-outlined text-[14px]">map</span>
+                            {{ __('owners.show_on_map') }}
+                        </button>
+                    </div>
+                @endif
             </div>
         @endif
     </div>
