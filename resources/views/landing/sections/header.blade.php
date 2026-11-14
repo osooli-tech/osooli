@@ -20,12 +20,18 @@
 
             {{-- Someone already signed in gets the way back to their work, not
                  an invitation to sign in again. --}}
-            @auth
+            {{-- The public sign-in is the owners' portal; staff reach the
+                 dashboard sign-in at /login directly. --}}
+            @auth('web')
                 <a class="btn btn--sm btn--go" href="{{ route('dashboard') }}">
                     {{ __('landing.nav_dashboard') }}
                 </a>
+            @elseauth('owner')
+                <a class="btn btn--sm btn--go" href="{{ route('portal.dashboard') }}">
+                    {{ __('landing.nav_dashboard') }}
+                </a>
             @else
-                <a class="btn btn--sm btn--wire-l" href="{{ route('login') }}">
+                <a class="btn btn--sm btn--wire-l" href="{{ route('portal.login') }}">
                     {{ __('landing.nav_login') }}
                 </a>
                 <a class="btn btn--sm btn--go" href="{{ url("/") }}#contact">

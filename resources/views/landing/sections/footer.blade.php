@@ -40,10 +40,12 @@
                     {{-- <li><a href="{{ url('/') }}#pricing">{{ __('landing.nav_pricing') }}</a></li> --}}
                     {{-- The header drops its sign-in button on small screens, so this
                          is the way in there. --}}
-                    @auth
+                    @auth('web')
                         <li><a href="{{ route('dashboard') }}">{{ __('landing.nav_dashboard') }}</a></li>
+                    @elseauth('owner')
+                        <li><a href="{{ route('portal.dashboard') }}">{{ __('landing.nav_dashboard') }}</a></li>
                     @else
-                        <li><a href="{{ route('login') }}">{{ __('landing.nav_login') }}</a></li>
+                        <li><a href="{{ route('portal.login') }}">{{ __('landing.nav_login') }}</a></li>
                     @endauth
                 </ul>
             </nav>

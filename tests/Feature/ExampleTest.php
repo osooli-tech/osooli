@@ -17,4 +17,14 @@ class ExampleTest extends TestCase
 
         $this->get('/')->assertOk();
     }
+
+    public function test_the_landing_sign_in_link_opens_the_owner_portal_not_the_dashboard(): void
+    {
+        $this->withoutVite();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('href="'.route('portal.login').'"', false)
+            ->assertDontSee('href="'.route('login').'"', false);
+    }
 }
