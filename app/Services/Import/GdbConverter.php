@@ -208,12 +208,23 @@ final class GdbConverter
             \RecursiveIteratorIterator::SELF_FIRST
         );
 
+        // A .gdb folder can hold another: unpacking X.gdb.rar on Windows wraps
+        // the geodatabase in a folder named X.gdb, and zipping that nests it.
+        // GDAL opens only the folder holding the tables, and every File
+        // Geodatabase has its catalog table a00000001.gdbtable, so that folder
+        // wins; the first .gdb found stays the fallback.
+        $first = null;
+
         foreach ($iterator as $entry) {
             if ($entry->isDir() && str_ends_with(strtolower($entry->getFilename()), '.gdb')) {
-                return $entry->getPathname();
+                if (is_file($entry->getPathname().DIRECTORY_SEPARATOR.'a00000001.gdbtable')) {
+                    return $entry->getPathname();
+                }
+
+                $first ??= $entry->getPathname();
             }
         }
 
-        return null;
+        return $first;
     }
 }

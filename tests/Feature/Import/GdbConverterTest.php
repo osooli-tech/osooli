@@ -68,6 +68,28 @@ final class GdbConverterTest extends TestCase
         app(GdbConverter::class)->convert($zip, $this->tmp.'/work');
     }
 
+    public function test_it_finds_a_geodatabase_zipped_inside_a_folder_of_the_same_name(): void
+    {
+        // Unpacking Sakuki_Filled.gdb.rar on Windows wraps the geodatabase in
+        // a folder named after the archive, Sakuki_Filled.gdb; zipping that
+        // folder gives a .gdb holding the real .gdb. GDAL cannot open the
+        // outer one, so the import must reach the folder with the tables.
+        config(['imports.ogr2ogr_path' => PHP_BINARY]);
+
+        $zip = $this->tmp.'/nested.zip';
+        $archive = new ZipArchive;
+        $archive->open($zip, ZipArchive::CREATE);
+        foreach (['gdb', 'timestamps', 'a00000001.gdbtable', 'a00000001.gdbtablx'] as $file) {
+            $archive->addFromString('Sakuki_Filled.gdb/Sakuki_Filled.gdb/'.$file, 'x');
+        }
+        $archive->close();
+
+        $gdb = app(GdbConverter::class)->extractGeodatabase($zip, $this->tmp.'/work');
+
+        $this->assertFileExists($gdb.'/a00000001.gdbtable');
+        $this->assertStringEndsWith('Sakuki_Filled.gdb'.DIRECTORY_SEPARATOR.'Sakuki_Filled.gdb', $gdb);
+    }
+
     public function test_it_passes_a_geojson_file_straight_through(): void
     {
         $geojson = $this->tmp.'/data.geojson';
