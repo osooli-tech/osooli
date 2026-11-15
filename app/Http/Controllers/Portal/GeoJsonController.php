@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Portal;
 
+use App\Enums\QrarSource;
 use App\Http\Controllers\Controller;
 use App\Models\Owner;
 use App\Models\Parcel;
@@ -97,7 +98,7 @@ class GeoJsonController extends Controller
 
         $parcels = (new OwnerParcelQuery($owner))
             ->withGeometry()
-            ->with(['plan.district.city', 'deeds.deedOwners.owner'])
+            ->with(['plan.district.city', 'deeds.deedOwners.owner', 'boundary.engineeringOffice:id,name', 'surveyDecisions:id,parcel_id,qrar_source'])
             ->withCount('photos')
             ->get();
 
@@ -129,6 +130,9 @@ class GeoJsonController extends Controller
                     'deed_area' => $latestDeed?->deed_area,
                     'deed_status' => $latestDeed?->deed_status,
                     'deed_class' => $latestDeed?->deed_class,
+                    // Let a chart on the home show its parcels on the map.
+                    'office_name' => $parcel->boundary?->engineeringOffice?->name,
+                    'qrar_sources' => $parcel->surveyDecisions->pluck('qrar_source')->filter()->map(fn (QrarSource $s): string => $s->value)->unique()->implode(',') ?: null,
                     'massing' => ParcelMassing::categoryOf($parcel->asset_type, $latestDeed?->deed_class),
                     'centroid_lat' => $parcel->getAttribute('centroid_lat') === null ? null : (float) $parcel->getAttribute('centroid_lat'),
                     'centroid_lng' => $parcel->getAttribute('centroid_lng') === null ? null : (float) $parcel->getAttribute('centroid_lng'),

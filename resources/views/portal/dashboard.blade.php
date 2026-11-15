@@ -29,27 +29,40 @@
 @endphp
 <div class="space-y-6">
 
-    {{-- Portfolio filter: the whole home — map, figures, charts — narrows to the one chosen --}}
+    {{-- Portfolio filter, folded away until asked for: the whole home narrows to the one chosen --}}
     @if (count($ownerPortfolios) > 1)
-        <nav class="flex flex-wrap items-center gap-2" aria-label="{{ __('portal.portfolios_title') }}">
-            <span class="flex items-center gap-1 text-xs font-semibold text-on-surface-variant dark:text-on-primary-container me-1">
+        <div x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false" class="relative z-30 flex flex-wrap items-center gap-2">
+            <button type="button" @click="open = ! open" :aria-expanded="open"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-outline-variant dark:border-white/10 bg-surface-container-lowest dark:bg-[#1a1f2e] hover:border-primary">
                 <span class="material-symbols-outlined text-[18px]">filter_alt</span>{{ __('portal.portfolio_filter') }}
-            </span>
-            <a href="{{ route('portal.dashboard') }}"
-               @class(['px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                       'bg-primary text-white border-primary' => $activePortfolio === null,
-                       'border-outline-variant dark:border-white/10 hover:border-primary' => $activePortfolio !== null])>
-                {{ __('portal.portfolio_all') }}
-            </a>
-            @foreach ($ownerPortfolios as $p)
-                <a href="{{ route('portal.dashboard', ['portfolio' => $p['key']]) }}"
-                   @class(['flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                           'bg-primary text-white border-primary' => ($activePortfolio['key'] ?? null) === $p['key'],
-                           'border-outline-variant dark:border-white/10 hover:border-primary' => ($activePortfolio['key'] ?? null) !== $p['key']])>
-                    {{ $p['name'] }}<span class="data-tabular opacity-70">{{ $p['parcels'] }}</span>
+                <span class="font-semibold">{{ $activePortfolio['name'] ?? __('portal.portfolio_all') }}</span>
+                <span class="material-symbols-outlined text-[18px] transition-transform" :class="open && 'rotate-180'">expand_more</span>
+            </button>
+            @if ($activePortfolio !== null)
+                <a href="{{ route('portal.dashboard') }}" class="flex items-center gap-1 text-xs text-primary dark:text-tertiary-container hover:underline">
+                    <span class="material-symbols-outlined text-[16px]">close</span>{{ __('portal.portfolio_all') }}
                 </a>
-            @endforeach
-        </nav>
+            @endif
+
+            <nav x-show="open" x-cloak x-transition aria-label="{{ __('portal.portfolios_title') }}"
+                 class="absolute top-full start-0 mt-2 z-30 w-72 max-h-80 overflow-y-auto rounded-2xl p-2 shadow-xl
+                        bg-surface-container-lowest dark:bg-[#1a1f2e] border border-outline-variant dark:border-white/10">
+                <a href="{{ route('portal.dashboard') }}"
+                   @class(['flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm',
+                           'bg-primary text-white' => $activePortfolio === null,
+                           'hover:bg-surface-container dark:hover:bg-white/5' => $activePortfolio !== null])>
+                    {{ __('portal.portfolio_all') }}
+                </a>
+                @foreach ($ownerPortfolios as $p)
+                    <a href="{{ route('portal.dashboard', ['portfolio' => $p['key']]) }}"
+                       @class(['flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-sm',
+                               'bg-primary text-white' => ($activePortfolio['key'] ?? null) === $p['key'],
+                               'hover:bg-surface-container dark:hover:bg-white/5' => ($activePortfolio['key'] ?? null) !== $p['key']])>
+                        <span class="truncate">{{ $p['name'] }}</span><span class="data-tabular opacity-70 shrink-0">{{ $p['parcels'] }}</span>
+                    </a>
+                @endforeach
+            </nav>
+        </div>
     @endif
 
     {{-- ══ Bento row 1: the 3D map beside the portfolio's value and health ══ --}}
@@ -601,15 +614,21 @@
             @if (empty($insights['byDistrict']))
                 <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
             @else
-                <div wire:ignore x-data="{ init() {
+                {{-- A district's tile shows its parcels on the map above --}}
+                <div wire:ignore class="cursor-pointer" x-data="{ init() {
+                    const rows = @js(array_map(fn ($r) => ['x' => $r['name'], 'y' => round($r['value']), 'parcels' => $r['parcels']], $insights['byDistrict']));
                     themedChart(this.$refs.el, (dark) => ({
-                        chart: { type: 'treemap', height: 300, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                        series: [{ data: @js(array_map(fn ($r) => ['x' => $r['name'], 'y' => round($r['value'])], $insights['byDistrict'])) }],
+                        chart: { type: 'treemap', height: 300, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}',
+                            events: { dataPointSelection: (e, c, cfg) => {
+                                const name = rows[cfg.dataPointIndex]?.x;
+                                if (name !== '—') mapFilter('district', name);
+                            } } },
+                        series: [{ data: rows.map(({ x, y }) => ({ x, y })) }],
                         colors: ['#002444', '#006c4e', '#c9a84c', '#1b3a5c', '#68dbae', '#755b00', '#436084'],
                         theme: { mode: dark ? 'dark' : 'light' },
                         plotOptions: { treemap: { distributed: true, enableShades: false, borderRadius: 10 } },
                         dataLabels: { enabled: true, style: { fontSize: '14px', fontWeight: 700 },
-                            formatter: (text, op) => [text, (op.value / 1e6).toFixed(1) + ' ' + @js(__('portal.unit_million'))] },
+                            formatter: (text, op) => [text, (op.value / 1e6).toFixed(1) + ' ' + @js(__('portal.unit_million')), @js(__('portal.parcels_count_label')).replace(':count', rows[op.dataPointIndex]?.parcels ?? 0)] },
                         tooltip: { y: { formatter: (v) => Number(v).toLocaleString() + ' ' + @js(__('parcels.currency')) } },
                         legend: { show: false },
                     }));
@@ -840,13 +859,13 @@
     @php
         $palette = ['#002444', '#006c4e', '#c9a84c', '#68dbae', '#436084', '#755b00', '#abc9f2'];
         $donuts = [
-            ['title' => __('dashboard.distribution_by_type'), 'icon' => 'category', 'rows' => $byAssetType],
-            ['title' => __('dashboard.distribution_by_qrar_source'), 'icon' => 'gavel', 'rows' => $byQrarSource],
+            ['title' => __('dashboard.distribution_by_type'), 'icon' => 'category', 'rows' => $byAssetType, 'filter' => 'asset_type'],
+            ['title' => __('dashboard.distribution_by_qrar_source'), 'icon' => 'gavel', 'rows' => $byQrarSource, 'filter' => 'qrar_source'],
         ];
         $ranked = [
-            ['title' => __('dashboard.distribution_by_city'), 'icon' => 'location_city', 'rows' => $byCity, 'bar' => 'from-secondary to-secondary-fixed-dim'],
-            ['title' => __('dashboard.distribution_by_district'), 'icon' => 'holiday_village', 'rows' => $byDistrict, 'bar' => 'from-tertiary to-tertiary-container'],
-            ['title' => __('dashboard.distribution_by_office'), 'icon' => 'engineering', 'rows' => $byEngineeringOffice, 'bar' => 'from-primary to-surface-tint'],
+            ['title' => __('dashboard.distribution_by_city'), 'icon' => 'location_city', 'rows' => $byCity, 'filter' => 'city', 'bar' => 'from-secondary to-secondary-fixed-dim'],
+            ['title' => __('dashboard.distribution_by_district'), 'icon' => 'holiday_village', 'rows' => $byDistrict, 'filter' => 'district', 'bar' => 'from-tertiary to-tertiary-container'],
+            ['title' => __('dashboard.distribution_by_office'), 'icon' => 'engineering', 'rows' => $byEngineeringOffice, 'filter' => 'office', 'bar' => 'from-primary to-surface-tint'],
         ];
     @endphp
     <section>
@@ -867,9 +886,11 @@
                         <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
                     @else
                         <div class="grid grid-cols-1 sm:grid-cols-[13rem_1fr] gap-4 items-center">
-                            <div wire:ignore x-data="{ init() {
+                            <div wire:ignore class="cursor-pointer" x-data="{ init() {
+                                const names = @js(array_column($d['rows'], 'name'));
                                 themedChart(this.$refs.el, (dark) => ({
-                                    chart: { type: 'donut', height: 220, background: 'transparent', fontFamily: '{{ $font }}', animations: { speed: 900 } },
+                                    chart: { type: 'donut', height: 220, background: 'transparent', fontFamily: '{{ $font }}', animations: { speed: 900 },
+                                        events: { dataPointSelection: (e, c, cfg) => mapFilter(@js($d['filter']), names[cfg.dataPointIndex]) } },
                                     series: @js(array_column($d['rows'], 'parcels_count')),
                                     labels: @js(array_column($d['rows'], 'name')),
                                     colors: @js($palette),
@@ -888,6 +909,8 @@
                                 @foreach ($d['rows'] as $i => $row)
                                     @php $pct = $total > 0 ? round($row['parcels_count'] / $total * 100) : 0; @endphp
                                     <li>
+                                        <button type="button" x-data x-on:click="mapFilter(@js($d['filter']), @js($row['name']))" title="{{ __('dashboard.show_on_map') }}"
+                                                class="block w-full text-start rounded-lg hover:bg-surface-container dark:hover:bg-white/5">
                                         <div class="flex items-center justify-between gap-2 text-sm">
                                             <span class="flex items-center gap-2 min-w-0"><span class="w-3 h-3 rounded-full shrink-0" style="background: {{ $palette[$i % count($palette)] }}"></span><span class="truncate">{{ $row['name'] }}</span></span>
                                             <span class="data-tabular shrink-0"><span class="font-bold">{{ $row['parcels_count'] }}</span> <span class="text-xs text-on-surface-variant dark:text-on-primary-container">· {{ $pct }}%</span></span>
@@ -895,6 +918,7 @@
                                         <div class="mt-1 h-1.5 rounded-full bg-surface-container dark:bg-white/10 overflow-hidden">
                                             <div class="h-full rounded-full" style="width: {{ $pct }}%; background: {{ $palette[$i % count($palette)] }}"></div>
                                         </div>
+                                        </button>
                                     </li>
                                 @endforeach
                             </ul>
@@ -915,9 +939,11 @@
                     @if (empty($r['rows']))
                         <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
                     @else
-                        <ol class="space-y-3">
-                            @foreach (array_slice($r['rows'], 0, 6) as $i => $row)
-                                <li class="flex items-center gap-3">
+                        <ol class="space-y-1 max-h-72 overflow-y-auto pe-1">
+                            @foreach ($r['rows'] as $i => $row)
+                                <li>
+                                <button type="button" x-data x-on:click="mapFilter(@js($r['filter']), @js($row['name']))" title="{{ __('dashboard.show_on_map') }}"
+                                        class="flex w-full items-center gap-3 text-start rounded-lg p-1 hover:bg-surface-container dark:hover:bg-white/5">
                                     <span class="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold data-tabular
                                                  {{ $i === 0 ? 'bg-gradient-to-br from-tertiary-fixed-dim to-tertiary text-white shadow-sm' : 'bg-surface-container dark:bg-white/10' }}">{{ $i + 1 }}</span>
                                     <div class="flex-1 min-w-0">
@@ -929,6 +955,7 @@
                                             <div class="h-full rounded-full bg-gradient-to-l {{ $r['bar'] }}" style="width: {{ round($row['parcels_count'] / $top * 100) }}%"></div>
                                         </div>
                                     </div>
+                                </button>
                                 </li>
                             @endforeach
                         </ol>
@@ -980,7 +1007,9 @@
                 @foreach ($ownerPortfolios as $p)
                     {{-- Like the staff dashboard: the card shows its parcels on the map above --}}
                     <button type="button" title="{{ __('dashboard.portfolio_show_on_map') }}"
-                            x-data x-on:click="window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'parcelIds', value: @js($p['parcel_ids']) } }))"
+                            x-data x-on:click="{{ $activePortfolio !== null && $activePortfolio['key'] !== $p['key']
+                                ? 'window.location.href = '.Js::from(route('portal.dashboard', ['portfolio' => $p['key']]))
+                                : 'mapFilter(\'parcelIds\', '.Js::from($p['parcel_ids']).')' }}"
                             @class([$cardCls, 'group block w-full text-start hover:border-primary transition-colors', 'ring-2 ring-primary' => ($activePortfolio['key'] ?? null) === $p['key']])>
                         <h3 class="font-semibold text-sm mb-2">{{ $p['name'] }}</h3>
                         <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
@@ -1005,5 +1034,12 @@
 @endsection
 
 @push('scripts')
+    <script>
+        // Any chart or list on the home shows its parcels on the map above.
+        function mapFilter(type, value) {
+            if (value === undefined || value === null || value === '') return;
+            window.dispatchEvent(new CustomEvent('map-filter', { detail: { type, value } }));
+        }
+    </script>
     @vite(['resources/js/map.js', 'resources/js/portal-map-3d.js'])
 @endpush
