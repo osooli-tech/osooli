@@ -29,6 +29,29 @@
 @endphp
 <div class="space-y-6">
 
+    {{-- Portfolio filter: the whole home — map, figures, charts — narrows to the one chosen --}}
+    @if (count($ownerPortfolios) > 1)
+        <nav class="flex flex-wrap items-center gap-2" aria-label="{{ __('portal.portfolios_title') }}">
+            <span class="flex items-center gap-1 text-xs font-semibold text-on-surface-variant dark:text-on-primary-container me-1">
+                <span class="material-symbols-outlined text-[18px]">filter_alt</span>{{ __('portal.portfolio_filter') }}
+            </span>
+            <a href="{{ route('portal.dashboard') }}"
+               @class(['px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                       'bg-primary text-white border-primary' => $activePortfolio === null,
+                       'border-outline-variant dark:border-white/10 hover:border-primary' => $activePortfolio !== null])>
+                {{ __('portal.portfolio_all') }}
+            </a>
+            @foreach ($ownerPortfolios as $p)
+                <a href="{{ route('portal.dashboard', ['portfolio' => $p['key']]) }}"
+                   @class(['flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                           'bg-primary text-white border-primary' => ($activePortfolio['key'] ?? null) === $p['key'],
+                           'border-outline-variant dark:border-white/10 hover:border-primary' => ($activePortfolio['key'] ?? null) !== $p['key']])>
+                    {{ $p['name'] }}<span class="data-tabular opacity-70">{{ $p['parcels'] }}</span>
+                </a>
+            @endforeach
+        </nav>
+    @endif
+
     {{-- ══ Bento row 1: the 3D map beside the portfolio's value and health ══ --}}
     <div class="grid grid-cols-12 gap-5">
 
@@ -57,7 +80,7 @@
             <div id="sakuki-map"
                  class="w-full h-full bg-surface-container-lowest dark:bg-[#1a1f2e]"
                  data-token="{{ config('services.mapbox.token') }}"
-                 data-geojson-url="{{ route('portal.geo.parcels') }}"
+                 data-geojson-url="{{ route('portal.geo.parcels', $activePortfolio ? ['portfolio' => $activePortfolio['key']] : []) }}"
                  data-boundaries-url="{{ route('portal.geo.boundaries', '__LEVEL__') }}"
                  data-colors="{{ json_encode($mapColors) }}"
                  data-massing="{{ json_encode($massing) }}"
@@ -168,12 +191,12 @@
             </div>
 
             {{-- 3D switch, beside the layers button --}}
-            <button id="map-3d-toggle" type="button" aria-pressed="true"
+            <button id="map-3d-toggle" type="button" aria-pressed="false"
                     data-on="{{ __('portal.map_3d_on') }}" data-off="{{ __('portal.map_3d_off') }}"
                     class="absolute top-3 end-36 z-10 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold
                            bg-gradient-to-l from-tertiary-container to-tertiary-fixed-dim text-on-tertiary-container shadow-lg">
                 <span class="material-symbols-outlined text-[16px]">view_in_ar</span>
-                <span data-label>{{ __('portal.map_3d_on') }}</span>
+                <span data-label>{{ __('portal.map_3d_off') }}</span>
             </button>
 
             {{-- What the 3D blocks mean: by property type (default) or by price --}}
@@ -955,7 +978,8 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach ($ownerPortfolios as $p)
-                    <div class="{{ $cardCls }}">
+                    <a href="{{ route('portal.dashboard', ['portfolio' => $p['key']]) }}"
+                       @class([$cardCls, 'block hover:border-primary transition-colors', 'ring-2 ring-primary' => ($activePortfolio['key'] ?? null) === $p['key']])>
                         <h3 class="font-semibold text-sm mb-2">{{ $p['name'] }}</h3>
                         <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
                             <span class="data-tabular">{{ $p['parcels'] }} {{ __('owners.portfolio_parcels_unit') }}</span>
@@ -967,7 +991,7 @@
                                 <span class="text-[11px] font-normal text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.currency') }}</span>
                             </p>
                         @endif
-                    </div>
+                    </a>
                 @endforeach
             </div>
         </section>

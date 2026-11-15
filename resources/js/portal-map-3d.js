@@ -13,7 +13,7 @@ if (container) {
     const LAYERS = { type: 'parcels-3d-type', price: 'parcels-3d-price' };
     const MAX_HEIGHT_M = 90;
     const MIN_HEIGHT_M = 8;
-    let enabled = true;
+    let enabled = false; // Flat by default; the owner switches the blocks on.
     let mode = 'type';
     let flown = false;
 

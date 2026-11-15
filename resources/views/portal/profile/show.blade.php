@@ -10,7 +10,7 @@
 @endphp
 <div class="space-y-5">
 
-    {{-- Identity header --}}
+    {{-- Identity header: the company itself when a company signed in --}}
     <div class="{{ $cardCls }} overflow-hidden">
         <div class="relative h-24 overflow-hidden bg-gradient-to-br from-primary via-primary-container to-on-secondary-fixed-variant">
             <div class="absolute -top-16 end-10 w-56 h-56 rounded-full bg-tertiary-container/25 blur-3xl"></div>
@@ -19,20 +19,54 @@
         <div class="px-5 pb-5 flex flex-wrap items-start gap-4">
             <div class="-mt-10 w-20 h-20 rounded-2xl bg-secondary text-white text-3xl font-bold flex items-center justify-center
                         ring-4 ring-surface-container-lowest dark:ring-[#1a1f2e] shrink-0">
-                {{ mb_substr($owner->name, 0, 1) }}
+                @if ($company)
+                    <span class="material-symbols-outlined text-[36px]">apartment</span>
+                @else
+                    {{ mb_substr($owner->name, 0, 1) }}
+                @endif
             </div>
             <div class="flex-1 min-w-0 pt-3">
-                <h1 class="text-lg font-bold truncate">{{ $owner->name }}</h1>
-                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant dark:text-on-primary-container mt-1">
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">call</span><span dir="ltr">{{ $owner->phone ?? '—' }}</span></span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">badge</span><span dir="ltr">{{ $owner->national_id ?? '—' }}</span></span>
-                    @if ($owner->email)
-                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">mail</span><span dir="ltr">{{ $owner->email }}</span></span>
-                    @endif
-                </div>
+                @if ($company)
+                    <p class="text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('portal.profile_company_title') }}</p>
+                    <h1 class="text-lg font-bold truncate">{{ $company->name }}</h1>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant dark:text-on-primary-container mt-1">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">call</span><span dir="ltr">{{ $company->phone ?? '—' }}</span></span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">badge</span>{{ __('portal.profile_cr') }} <span dir="ltr" class="data-tabular">{{ $company->cr_number ?? '—' }}</span></span>
+                    </div>
+                @else
+                    <h1 class="text-lg font-bold truncate">{{ $owner->name }}</h1>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-on-surface-variant dark:text-on-primary-container mt-1">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">call</span><span dir="ltr">{{ $owner->phone ?? '—' }}</span></span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">badge</span><span dir="ltr">{{ $owner->national_id ?? '—' }}</span></span>
+                        @if ($owner->email)
+                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">mail</span><span dir="ltr">{{ $owner->email }}</span></span>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>
+
+    {{-- Every owner this account stands for --}}
+    @if ($representedOwners !== [])
+        <div class="{{ $cardCls }} p-5">
+            <h2 class="flex items-center gap-2 font-semibold text-sm mb-3">
+                <span class="material-symbols-outlined text-[18px] text-primary">groups</span>{{ __('portal.profile_represented_owners') }}
+                <span class="data-tabular text-xs text-on-surface-variant dark:text-on-primary-container">({{ count($representedOwners) }})</span>
+            </h2>
+            <ul class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                @foreach ($representedOwners as $ro)
+                    <li class="flex items-center gap-3 rounded-xl bg-surface-container dark:bg-white/5 p-3">
+                        <span class="w-9 h-9 rounded-xl bg-primary text-white font-bold flex items-center justify-center shrink-0">{{ mb_substr($ro['name'], 0, 1) }}</span>
+                        <span class="min-w-0">
+                            <span class="block text-sm font-medium truncate">{{ $ro['name'] }}</span>
+                            <span class="block text-xs text-on-surface-variant dark:text-on-primary-container data-tabular">{{ __('portal.profile_owner_parcels', ['count' => $ro['parcels']]) }}</span>
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     {{-- At a glance --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -52,7 +86,8 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-        {{-- Contact details --}}
+        {{-- Contact details: an owner's own; a company does not edit the owners' records --}}
+        @unless ($company)
         <form method="POST" action="{{ route('portal.profile.update') }}" class="xl:col-span-2 {{ $cardCls }} p-5 space-y-4">
             @csrf
             @method('PUT')
@@ -90,16 +125,17 @@
                 {{ __('portal.profile_save') }}
             </button>
         </form>
+        @endunless
 
         {{-- Sign-in & security --}}
-        <div class="{{ $cardCls }} p-5 space-y-3">
+        <div @class([$cardCls, "p-5 space-y-3", "xl:col-span-3" => $company])>
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-[18px] text-secondary">shield_lock</span>
                 <h2 class="font-semibold text-sm">{{ __('portal.profile_security_section') }}</h2>
             </div>
             <div class="rounded-xl bg-surface-container dark:bg-white/5 p-3 text-xs space-y-2">
                 <p class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">sms</span>{{ __('portal.profile_signin_method') }}</p>
-                <p class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">call</span><span dir="ltr">{{ $owner->phone ?? '—' }}</span></p>
+                <p class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-secondary">call</span><span dir="ltr">{{ $company?->phone ?? $owner->phone ?? '—' }}</span></p>
             </div>
             <p class="text-xs text-on-surface-variant dark:text-on-primary-container">{{ __('portal.profile_readonly_hint') }}</p>
         </div>

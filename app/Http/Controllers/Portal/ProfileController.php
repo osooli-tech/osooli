@@ -12,21 +12,30 @@ use App\Models\ModificationRequest;
 use App\Models\Owner;
 use App\Models\ParcelPhoto;
 use App\Services\Owner\OwnerStatisticsService;
+use App\Services\Portal\AccountOverviewService;
 use App\Support\OwnerVisibility;
+use App\Support\Portal\PortalContext;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function show(): View
+    public function show(PortalContext $context, AccountOverviewService $overviews): View
     {
-        $owner = $this->owner();
+        // A company or family account sees itself and every owner it stands for.
+        /** @var Owner $owner */
+        $owner = $context->readingOwner();
+        $account = $context->account();
         $parcelIds = $owner->parcels()->pluck('parcels.id');
         $summary = (new OwnerStatisticsService($owner))->summary();
 
         return view('portal.profile.show', [
             'owner' => $owner,
+            'company' => $account?->isCompany() ? $account : null,
+            'representedOwners' => $owner->standsForMany() && $account !== null
+                ? $overviews->for($account, false)['owners']
+                : [],
             'stats' => [
                 'parcels' => $parcelIds->count(),
                 'deeds' => $summary['deeds_active'] + $summary['deeds_expired'],

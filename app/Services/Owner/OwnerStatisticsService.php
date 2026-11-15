@@ -116,6 +116,7 @@ class OwnerStatisticsService
             'deeds_count' => DB::table('deed_owners')
                 ->join('deeds', 'deeds.id', '=', 'deed_owners.deed_id')
                 ->whereIn('deed_owners.owner_id', $this->owner->holderIds())
+                ->when($this->owner->parcelFocus() !== null, fn ($q) => $q->whereIn('deeds.parcel_id', $this->parcelIds()))
                 ->whereNull('deeds.deleted_at')
                 ->distinct()
                 ->count('deed_owners.deed_id'),
@@ -266,7 +267,7 @@ class OwnerStatisticsService
         return Deed::whereHas(
             'owners',
             fn (Builder $query) => $query->whereIn($query->qualifyColumn('id'), $this->owner->holderIds())
-        );
+        )->when($this->owner->parcelFocus() !== null, fn (Builder $query) => $query->whereIn('parcel_id', $this->parcelIds()));
     }
 
     /** @return Collection<string, int> */

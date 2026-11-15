@@ -20,14 +20,16 @@
                 <div wire:ignore
                      x-data="{
                          c: null,
+                         labels: @js(array_keys($byDeedStatus)),
+                         show(i) { const v = this.labels[i]; if (v !== undefined) window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'deed_status', value: v } })); },
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
+                                 chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}', events: { dataPointSelection: (e, c, cfg) => this.show(cfg.dataPointIndex), legendClick: (c, i) => this.show(i) } },
                                  series: @js(array_values($byDeedStatus)),
                                  labels: @js(array_keys($byDeedStatus)),
                                  colors: ['#006c4e', '#b3261e'],
                                  theme: { mode: {{ $isDark }} },
-                                 legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
+                                 legend: { position: 'bottom', onItemClick: { toggleDataSeries: false }, fontSize: '12px', fontFamily: '{{ $font }}' },
                                  dataLabels: { enabled: true, style: { fontSize: '11px' } },
                                  plotOptions: { pie: { donut: { size: '60%' } } },
                                  stroke: { width: 2 },
@@ -36,7 +38,7 @@
                              window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
-                    <div x-ref="el"></div>
+                    <div x-ref="el" class="cursor-pointer"></div>
                 </div>
             @endif
         </div>
@@ -50,14 +52,16 @@
                 <div wire:ignore
                      x-data="{
                          c: null,
+                         labels: @js(array_keys($byAssetType)),
+                         show(i) { const v = this.labels[i]; if (v !== undefined) window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'asset_type', value: v } })); },
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
+                                 chart: { type: 'donut', height: 180, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}', events: { dataPointSelection: (e, c, cfg) => this.show(cfg.dataPointIndex), legendClick: (c, i) => this.show(i) } },
                                  series: @js(array_values($byAssetType)),
                                  labels: @js(array_keys($byAssetType)),
                                  colors: ['#002444','#006c4e','#c9a84c','#abc9f2','#68dbae'],
                                  theme: { mode: {{ $isDark }} },
-                                 legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
+                                 legend: { position: 'bottom', onItemClick: { toggleDataSeries: false }, fontSize: '12px', fontFamily: '{{ $font }}' },
                                  dataLabels: { enabled: false },
                                  plotOptions: { pie: { donut: { size: '60%' } } },
                                  stroke: { width: 2 },
@@ -66,7 +70,7 @@
                              window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
-                    <div x-ref="el"></div>
+                    <div x-ref="el" class="cursor-pointer"></div>
                 </div>
             @endif
         </div>
@@ -82,39 +86,7 @@
             @if (empty($byCity))
                 <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
             @else
-                <div wire:ignore
-                     x-data="{
-                         c: null,
-                         init() {
-                             this.c = new ApexCharts(this.$refs.el, {
-                                 chart: {
-                                     type: 'bar', height: 220, toolbar: { show: false },
-                                     background: 'transparent', fontFamily: '{{ $font }}',
-                                     // Clicking a city's bar shows that city's parcels on
-                                     // the map above, the same filter the city dropdown
-                                     // and the city-portfolio cards use.
-                                     events: {
-                                         dataPointSelection: (event, chartContext, config) => {
-                                             const city = @js(array_keys($byCity))[config.dataPointIndex];
-                                             if (! city) return;
-                                             window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'city', value: city } }));
-                                         },
-                                     },
-                                 },
-                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byCity)) }],
-                                 xaxis: { categories: @js(array_keys($byCity)), labels: { style: { fontSize: '11px' } } },
-                                 colors: ['#006c4e'],
-                                 theme: { mode: {{ $isDark }} },
-                                 dataLabels: { enabled: false },
-                                 plotOptions: { bar: { borderRadius: 4 } },
-                                 grid: { borderColor: 'rgba(0,0,0,0.05)' },
-                             });
-                             this.c.render();
-                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
-                         }
-                     }">
-                    <div x-ref="el" class="cursor-pointer"></div>
-                </div>
+                <x-rank-bars :items="$byCity" filter="city" bar="bg-secondary" />
             @endif
         </div>
 
@@ -124,36 +96,7 @@
             @if (empty($byDistrict))
                 <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
             @else
-                <div wire:ignore
-                     x-data="{
-                         c: null,
-                         init() {
-                             this.c = new ApexCharts(this.$refs.el, {
-                                 chart: {
-                                     type: 'bar', height: 220, toolbar: { show: false },
-                                     background: 'transparent', fontFamily: '{{ $font }}',
-                                     events: {
-                                         dataPointSelection: (event, chartContext, config) => {
-                                             const district = @js(array_keys($byDistrict))[config.dataPointIndex];
-                                             if (! district) return;
-                                             window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'district', value: district } }));
-                                         },
-                                     },
-                                 },
-                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byDistrict)) }],
-                                 xaxis: { categories: @js(array_keys($byDistrict)), labels: { style: { fontSize: '11px' } } },
-                                 colors: ['#c9a84c'],
-                                 theme: { mode: {{ $isDark }} },
-                                 dataLabels: { enabled: false },
-                                 plotOptions: { bar: { borderRadius: 4 } },
-                                 grid: { borderColor: 'rgba(0,0,0,0.05)' },
-                             });
-                             this.c.render();
-                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
-                         }
-                     }">
-                    <div x-ref="el" class="cursor-pointer"></div>
-                </div>
+                <x-rank-bars :items="$byDistrict" filter="district" bar="bg-tertiary-container" />
             @endif
         </div>
 
@@ -171,14 +114,16 @@
                 <div wire:ignore
                      x-data="{
                          c: null,
+                         labels: @js(array_keys($byQrarSource)),
+                         show(i) { const v = this.labels[i]; if (v !== undefined) window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'qrar_source', value: v } })); },
                          init() {
                              this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'donut', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
+                                 chart: { type: 'donut', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}', events: { dataPointSelection: (e, c, cfg) => this.show(cfg.dataPointIndex), legendClick: (c, i) => this.show(i) } },
                                  series: @js(array_values($byQrarSource)),
                                  labels: @js(array_keys($byQrarSource)),
                                  colors: ['#006c4e', '#c9a84c', '#8a8f98'],
                                  theme: { mode: {{ $isDark }} },
-                                 legend: { position: 'bottom', fontSize: '12px', fontFamily: '{{ $font }}' },
+                                 legend: { position: 'bottom', onItemClick: { toggleDataSeries: false }, fontSize: '12px', fontFamily: '{{ $font }}' },
                                  dataLabels: { enabled: true, style: { fontSize: '12px' } },
                                  plotOptions: { pie: { donut: { size: '60%' } } },
                                  stroke: { width: 2 },
@@ -187,37 +132,18 @@
                              window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
                          }
                      }">
-                    <div x-ref="el"></div>
+                    <div x-ref="el" class="cursor-pointer"></div>
                 </div>
             @endif
         </div>
 
-        {{-- 7 · By engineering office (horizontal bar) --}}
+        {{-- 7 · By engineering office --}}
         <div class="{{ $cardCls }}">
             <h3 class="{{ $titleCls }}">{{ __('dashboard.distribution_by_office') }}</h3>
             @if (empty($byEngineeringOffice))
                 <div class="{{ $emptyCls }}">{{ __('dashboard.no_data') }}</div>
             @else
-                <div wire:ignore
-                     x-data="{
-                         c: null,
-                         init() {
-                             this.c = new ApexCharts(this.$refs.el, {
-                                 chart: { type: 'bar', height: 220, toolbar: { show: false }, background: 'transparent', fontFamily: '{{ $font }}' },
-                                 series: [{ name: '{{ __('dashboard.total_parcels') }}', data: @js(array_values($byEngineeringOffice)) }],
-                                 xaxis: { categories: @js(array_keys($byEngineeringOffice)), labels: { style: { fontSize: '11px' } } },
-                                 colors: ['#abc9f2'],
-                                 theme: { mode: {{ $isDark }} },
-                                 dataLabels: { enabled: false },
-                                 plotOptions: { bar: { borderRadius: 4, horizontal: true } },
-                                 grid: { borderColor: 'rgba(0,0,0,0.05)' },
-                             });
-                             this.c.render();
-                             window.addEventListener('sakuki:theme-changed', ({ detail }) => this.c.updateOptions({ theme: { mode: detail.dark ? 'dark' : 'light' } }));
-                         }
-                     }">
-                    <div x-ref="el"></div>
-                </div>
+                <x-rank-bars :items="$byEngineeringOffice" filter="office" bar="bg-primary" />
             @endif
         </div>
 

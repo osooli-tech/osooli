@@ -67,6 +67,9 @@ if (! container) {
         map.addControl(new mapboxgl.ScaleControl(), 'bottom-right');
 
         let allFeatures = [];
+        // The "show me this" filter in force, kept so a click made before the
+        // parcels finish loading, or a basemap switch, does not lose it.
+        let activeFilter = null;
         let hoveredId = null;
         let selectedId = null;
         let cameraPositioned = false;
@@ -224,9 +227,9 @@ if (! container) {
             const applyBounds = (data) => {
                 if (! data.features?.length) return;
                 allFeatures = data.features;
-                positionCamera(allFeatures);
                 populateMarkers(allFeatures);
                 populateCityFilter(allFeatures);
+                activeFilter ? paintFilter() : positionCamera(allFeatures);
             };
 
             if (allFeatures.length) {
@@ -295,15 +298,37 @@ if (! container) {
         // a hidden parcel's fill, outline and label all disappear as one.
         const FILTERABLE_LAYERS = ['parcels-fill', 'parcels-outline', 'parcels-labels', 'parcels-markers'];
 
-        function matchesFilter(properties, type, value) {
-            if (type === 'city') return properties?.city_name === value;
-            if (type === 'district') return properties?.district_name === value;
-            if (type === 'parcelIds') return value.includes(properties?.id);
+        // Which feature property each "show me this" filter reads. A parcel
+        // may carry several survey-decision sources, kept comma-joined.
+        const FILTER_PROPS = {
+            city: 'city_name',
+            district: 'district_name',
+            asset_type: 'asset_type',
+            deed_status: 'deed_status',
+            office: 'office_name',
+            qrar_source: 'qrar_sources',
+        };
+        const LISTED_PROPS = new Set(['qrar_sources']);
 
-            return true;
+        function matchesFilter(properties, type, value) {
+            if (type === 'parcelIds') return value.includes(properties?.id);
+            const prop = FILTER_PROPS[type];
+            if (! prop) return true;
+            if (LISTED_PROPS.has(prop)) return String(properties?.[prop] ?? '').split(',').includes(value);
+
+            return properties?.[prop] === value;
+        }
+
+        function filterExpression(type, value) {
+            if (type === 'parcelIds') return ['in', ['get', 'id'], ['literal', value]];
+            const prop = FILTER_PROPS[type];
+            if (LISTED_PROPS.has(prop)) return ['in', value, ['coalesce', ['get', prop], '']];
+
+            return ['==', ['get', prop], value];
         }
 
         function clearMapFilter() {
+            activeFilter = null;
             FILTERABLE_LAYERS.forEach((id) => {
                 if (map.getLayer(id)) map.setFilter(id, null);
             });
@@ -315,9 +340,15 @@ if (! container) {
         // owner-portfolio card, and the "by city" dashboard chart — every
         // one of them just needs to say what to show, not how the map shows it.
         function applyMapFilter(type, value) {
-            const expression = type === 'parcelIds'
-                ? ['in', ['get', 'id'], ['literal', value]]
-                : ['==', ['get', type === 'city' ? 'city_name' : 'district_name'], value];
+            if (type !== 'parcelIds' && ! FILTER_PROPS[type]) return;
+            activeFilter = { type, value };
+            paintFilter();
+            document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function paintFilter() {
+            const { type, value } = activeFilter;
+            const expression = filterExpression(type, value);
 
             FILTERABLE_LAYERS.forEach((id) => {
                 if (map.getLayer(id)) map.setFilter(id, expression);
@@ -337,8 +368,6 @@ if (! container) {
                 });
                 if (! bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, maxZoom: 16 });
             }
-
-            document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         window.addEventListener('map-filter', (e) => {

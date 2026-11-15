@@ -198,6 +198,43 @@ class AgentAccountTest extends TestCase
             ->assertHasErrors('settingsCr');
     }
 
+    public function test_the_company_profile_shows_the_company_and_every_owner_it_represents(): void
+    {
+        $this->actingAsOwner($this->najla, $this->office)->get(route('portal.profile'))
+            ->assertOk()
+            ->assertSee('مكتب ركن الشمال الذهبي للعقارات')
+            ->assertSee('7003374043')
+            ->assertSee('نجلاء')
+            ->assertSee('سعود')
+            ->assertDontSee('name="whatsapp"', false);
+    }
+
+    public function test_choosing_an_owners_portfolio_narrows_the_home_and_its_map(): void
+    {
+        DB::update("UPDATE parcels SET geom = ST_GeomFromText('MULTIPOLYGON(((46.3 24.7, 46.31 24.7, 46.31 24.71, 46.3 24.71, 46.3 24.7)))', 4326)");
+        $this->actingAsOwner($this->najla, $this->office);
+        $key = 'o'.$this->saud->id;
+
+        $response = $this->get(route('portal.dashboard', ['portfolio' => $key]))->assertOk();
+        $this->assertSame($key, $response->viewData('activePortfolio')['key']);
+        $this->assertSame(1, $response->viewData('portfolio')['total_parcels']);
+        $this->assertCount(2, $response->viewData('ownerPortfolios'));
+
+        $features = $this->getJson(route('portal.geo.parcels', ['portfolio' => $key]))->assertOk()->json('features');
+        $this->assertSame(['1308'], array_map(fn (array $f): string => (string) $f['properties']['parcel_no'], $features));
+    }
+
+    public function test_a_portfolio_key_that_is_not_theirs_shows_everything(): void
+    {
+        $stranger = Owner::create(['name' => 'غريب', 'national_id' => '1041721999']);
+
+        $response = $this->actingAsOwner($this->najla, $this->office)
+            ->get(route('portal.dashboard', ['portfolio' => 'o'.$stranger->id]))->assertOk();
+
+        $this->assertNull($response->viewData('activePortfolio'));
+        $this->assertSame(2, $response->viewData('portfolio')['total_parcels']);
+    }
+
     private function grant(Owner $owner): PortalAccountOwner
     {
         return PortalAccountOwner::query()->where('portal_account_id', $this->office->id)->where('owner_id', $owner->id)->firstOrFail();

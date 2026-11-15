@@ -41,6 +41,7 @@ return [
     'distribution_by_city' => 'Distribution by City',
     'distribution_by_district' => 'Distribution by District',
     'distribution_by_office' => 'Engineering Offices',
+    'show_on_map' => 'Show on the map',
     'no_data' => 'No data available',
 
     // ── Section 3: operational ──────────────────────────────────

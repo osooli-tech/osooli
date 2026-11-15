@@ -41,6 +41,7 @@ return [
     'distribution_by_city' => 'التوزيع حسب المدينة',
     'distribution_by_district' => 'التوزيع حسب الحي',
     'distribution_by_office' => 'المكاتب الهندسية',
+    'show_on_map' => 'اعرضها على الخريطة',
     'no_data' => 'لا توجد بيانات',
 
     // ── Section 3: operational ──────────────────────────────────

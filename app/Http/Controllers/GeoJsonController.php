@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\QrarSource;
 use App\Models\MapLayer;
 use App\Models\Parcel;
 use App\Models\User;
@@ -33,7 +34,7 @@ class GeoJsonController extends Controller
         // fields and the owner-name aggregation below from the same rows —
         // one extra query total, not one per parcel.
         $parcels = Parcel::query()
-            ->with(['plan.district.city', 'deeds.deedOwners.owner'])
+            ->with(['plan.district.city', 'deeds.deedOwners.owner', 'boundary.engineeringOffice:id,name', 'surveyDecisions:id,parcel_id,qrar_source'])
             ->withCount('photos')
             ->whereNotNull('geom')
             ->when($parcelIds !== null, fn ($q) => $q->whereIn('id', $parcelIds))
@@ -83,6 +84,9 @@ class GeoJsonController extends Controller
                     'is_priced' => $parcel->m_price !== null,
                     'owner_names' => $owners->pluck('name')->implode('، ') ?: null,
                     'owner_ids' => $owners->pluck('id')->implode(',') ?: null,
+                    // Let a dashboard chart slice show its parcels on the map.
+                    'office_name' => $parcel->boundary?->engineeringOffice?->name,
+                    'qrar_sources' => $parcel->surveyDecisions->pluck('qrar_source')->filter()->map(fn (QrarSource $s): string => $s->value)->unique()->implode(',') ?: null,
                 ],
             ];
         })->values()->all();

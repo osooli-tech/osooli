@@ -22,10 +22,10 @@ class DistributionCharts extends Component
     /** @var array<string, int> asset_type distribution */
     public array $byAssetType = [];
 
-    /** @var array<string, int> parcels per city (top 10) */
+    /** @var array<string, int> parcels per city, every city */
     public array $byCity = [];
 
-    /** @var array<string, int> parcels per district (top 10) */
+    /** @var array<string, int> parcels per district, every district */
     public array $byDistrict = [];
 
     /** @var array<string, int> parcels per engineering office */
@@ -94,7 +94,6 @@ class DistributionCharts extends Component
             ->selectRaw('cities.name_ar, COUNT(parcels.id) as cnt')
             ->groupBy('cities.name_ar')
             ->orderByDesc('cnt')
-            ->limit(10)
             ->pluck('cnt', 'name_ar')
             ->map(fn ($v) => (int) $v)
             ->toArray();
@@ -108,7 +107,6 @@ class DistributionCharts extends Component
             ->selectRaw('districts.name_ar, COUNT(parcels.id) as cnt')
             ->groupBy('districts.name_ar')
             ->orderByDesc('cnt')
-            ->limit(10)
             ->pluck('cnt', 'name_ar')
             ->map(fn ($v) => (int) $v)
             ->toArray();
@@ -124,7 +122,6 @@ class DistributionCharts extends Component
             ->selectRaw('engineering_offices.name, COUNT(parcel_boundaries.parcel_id) as cnt')
             ->groupBy('engineering_offices.name')
             ->orderByDesc('cnt')
-            ->limit(10)
             ->pluck('cnt', 'name')
             ->map(fn ($v) => (int) $v)
             ->toArray();

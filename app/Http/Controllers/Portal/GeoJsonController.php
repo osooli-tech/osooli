@@ -9,6 +9,7 @@ use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\PortalSetting;
 use App\Queries\OwnerParcelQuery;
+use App\Services\Portal\PortfolioFocus;
 use App\Support\Database\Dialect;
 use App\Support\ParcelMassing;
 use App\Support\Portal\PortalContext;
@@ -83,8 +84,16 @@ class GeoJsonController extends Controller
             return response()->json(['type' => 'FeatureCollection', 'features' => []]);
         }
 
+        $context = app(PortalContext::class);
         /** @var Owner $owner */
-        $owner = app(PortalContext::class)->readingOwner();
+        $owner = $context->readingOwner();
+
+        // The home narrowed to one portfolio draws only that portfolio.
+        $key = request()->string('portfolio')->toString();
+        if ($key !== '') {
+            $focus = app(PortfolioFocus::class);
+            $focus->apply($owner, $key, $focus->list($owner, $context->account()));
+        }
 
         $parcels = (new OwnerParcelQuery($owner))
             ->withGeometry()

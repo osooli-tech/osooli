@@ -6,6 +6,7 @@
 @php
     $totalParcels = array_sum(array_column($groups, 'parcels_count'));
     $totalArea = array_sum(array_column($groups, 'area'));
+    $palette = \App\Services\Portal\AccountOverviewService::PALETTE;
 @endphp
 <div class="space-y-5">
     <x-portal.page-hero icon="family_restroom" :title="__('portal.linked_title')" :subtitle="__('portal.linked_subtitle')" id="linked">
@@ -15,6 +16,27 @@
             <x-portal.hero-stat icon="square_foot" :label="__('dashboard.total_area')" :value="$totalArea" :suffix="__('dashboard.area_unit_sqm')" />
         </div>
     </x-portal.page-hero>
+
+    {{-- Every portfolio on one map: a chip, or a portfolio's own button, shows just that portfolio --}}
+    @if ($shapes !== [])
+        <section x-data="linkedMap" @linked-focus.window="show($event.detail)" id="linked-map"
+                 class="rounded-3xl overflow-hidden bg-surface-container-lowest dark:bg-[#141b29] border border-outline-variant/70 dark:border-white/10 shadow-sm scroll-mt-20">
+            <div class="flex flex-wrap items-center gap-2 px-4 py-3">
+                <button type="button" @click="show(null)"
+                        :class="active === null ? 'bg-primary text-white border-primary' : 'border-outline-variant dark:border-white/10'"
+                        class="px-3 py-1.5 rounded-full text-xs font-medium border">{{ __('portal.portfolio_all') }}</button>
+                @foreach ($groups as $i => $group)
+                    <button type="button" @click="show({{ $i }})"
+                            :class="active === {{ $i }} ? 'bg-primary text-white border-primary' : 'border-outline-variant dark:border-white/10'"
+                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background: {{ $palette[$i % count($palette)] }}"></span>{{ $group['holder'] }}
+                        <span class="data-tabular opacity-70">{{ $group['parcels_count'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+            <div x-ref="map" class="h-[420px] w-full bg-surface-container"></div>
+        </section>
+    @endif
 
     @forelse ($groups as $group)
         {{-- One holder = one portfolio under the parent owner --}}
@@ -32,6 +54,12 @@
                     </div>
                 </div>
                 <dl class="flex items-center gap-5 text-sm">
+                    @if ($shapes !== [])
+                        <button type="button" @click="$dispatch('linked-focus', {{ $loop->index }})"
+                                class="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-primary/10 text-primary dark:bg-white/10 dark:text-white hover:bg-primary/20">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span>{{ __('dashboard.portfolio_show_on_map') }}
+                        </button>
+                    @endif
                     <div class="text-center">
                         <dd class="font-bold data-tabular">{{ $group['parcels_count'] }}</dd>
                         <dt class="text-[11px] text-on-surface-variant dark:text-on-primary-container">{{ __('owners.portfolio_parcels_unit') }}</dt>
@@ -80,3 +108,78 @@
     @endforelse
 </div>
 @endsection
+
+@if ($shapes !== [])
+@push('scripts')
+<script>
+document.addEventListener('alpine:init', () => {
+    const shapes = @js($shapes);
+    const palette = @js($palette);
+    const urls = @js(collect($groups)->map(fn ($g) => ($g['own'] ?? false) ? route('portal.parcels.show', '__ID__') : route('portal.linked.show', '__ID__'))->all());
+
+    Alpine.data('linkedMap', () => ({
+        active: null,
+        map: null,
+        init() {
+            const token = @js(config('services.mapbox.token'));
+            if (! token || ! window.loadMapbox) return;
+            window.loadMapbox().then((mapboxgl) => this.draw(mapboxgl, token))
+                .catch(() => console.warn('[Sakuki] mapbox-gl failed to load; the portfolios map is unavailable.'));
+        },
+        features() {
+            return {
+                type: 'FeatureCollection',
+                features: shapes
+                    .filter((s) => this.active === null || s.groups.includes(this.active))
+                    .map((s) => {
+                        const g = this.active ?? s.groups[0];
+                        return { type: 'Feature', geometry: s.geometry, properties: { id: s.id, no: String(s.parcel_no ?? ''), color: palette[g % palette.length], url: urls[g].replace('__ID__', s.id) } };
+                    }),
+            };
+        },
+        draw(mapboxgl, token) {
+            this.mapboxgl = mapboxgl;
+            mapboxgl.accessToken = token;
+            const map = new mapboxgl.Map({ container: this.$refs.map, style: 'mapbox://styles/mapbox/satellite-streets-v12', center: [46.7, 24.7], zoom: 9, attributionControl: false });
+            this.map = map;
+            map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+            map.addControl(window.sakukiBasemapToggle({
+                street: () => document.documentElement.classList.contains('dark') ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
+                startOnSatellite: true,
+                labels: { streets: @js(__('parcels.show_streets')), satellite: @js(__('parcels.show_satellite')) },
+            }), 'top-left');
+            let framed = false;
+            // Every style load: the first and each basemap switch, which wipes layers.
+            map.on('style.load', () => {
+                map.addSource('lk', { type: 'geojson', data: this.features() });
+                map.addLayer({ id: 'lk-fill', type: 'fill', source: 'lk', paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.55 } });
+                map.addLayer({ id: 'lk-edge', type: 'line', source: 'lk', paint: { 'line-color': '#ffffff', 'line-width': 1.6 } });
+                map.addLayer({ id: 'lk-label', type: 'symbol', source: 'lk', minzoom: 14, layout: { 'text-field': ['get', 'no'], 'text-size': 12 }, paint: { 'text-color': '#ffffff', 'text-halo-color': '#0b1c30', 'text-halo-width': 2 } });
+                if (framed) return;
+                framed = true;
+                this.fit(0);
+                map.on('click', 'lk-fill', (e) => { window.location.href = e.features[0].properties.url; });
+                map.on('mouseenter', 'lk-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
+                map.on('mouseleave', 'lk-fill', () => { map.getCanvas().style.cursor = ''; });
+            });
+        },
+        show(index) {
+            this.active = index;
+            this.$root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (! this.map || ! this.map.getSource('lk')) return;
+            this.map.getSource('lk').setData(this.features());
+            this.fit();
+        },
+        fit(duration = 800) {
+            const bounds = new this.mapboxgl.LngLatBounds();
+            this.features().features.forEach((f) => {
+                const c = f.geometry.coordinates;
+                (f.geometry.type === 'Polygon' ? c[0] : c.flat(2)).forEach((q) => bounds.extend(q));
+            });
+            if (! bounds.isEmpty()) this.map.fitBounds(bounds, { padding: 50, maxZoom: 17, duration });
+        },
+    }));
+});
+</script>
+@endpush
+@endif

@@ -8,6 +8,7 @@ use App\Models\Owner;
 use App\Models\Parcel;
 use App\Models\ParcelPhoto;
 use App\Models\PortalSetting;
+use App\Support\Database\Dialect;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -140,6 +141,42 @@ class LinkedParcelsService
             'value' => $values->isEmpty() ? null : (float) $values->sum(),
             'parcels' => $rows->values()->all(),
         ];
+    }
+
+    /**
+     * The shapes of every parcel in the given portfolios, each tagged with the
+     * portfolios (by index) it sits in — for the map under the portfolios page.
+     *
+     * @param  list<array{parcels: list<array<string, mixed>>}>  $groups
+     * @return list<array{id: int, parcel_no: string|null, groups: list<int>, geometry: array<string, mixed>}>
+     */
+    public function shapes(array $groups): array
+    {
+        $groupsOf = [];
+        foreach ($groups as $index => $group) {
+            foreach ($group['parcels'] as $row) {
+                $groupsOf[(int) $row['id']][] = $index;
+            }
+        }
+
+        if ($groupsOf === [] || ! Dialect::isSpatial()) {
+            return [];
+        }
+
+        return Parcel::query()
+            ->whereIn('id', array_keys($groupsOf))
+            ->whereNotNull('geom')
+            ->select(['id', 'parcel_no'])
+            ->selectRaw('ST_AsGeoJSON(geom, 6) AS geom_json')
+            ->get()
+            ->map(fn (Parcel $parcel): array => [
+                'id' => $parcel->id,
+                'parcel_no' => $parcel->parcel_no,
+                'groups' => array_values(array_unique($groupsOf[$parcel->id])),
+                'geometry' => json_decode((string) $parcel->getAttribute('geom_json'), true),
+            ])
+            ->values()
+            ->all();
     }
 
     /** @return Builder<Parcel> */

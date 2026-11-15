@@ -113,4 +113,25 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
             ->assertSee(__('portal.portfolio_unassigned'))
             ->assertDontSee(__('portal.linked_portfolio_of', ['name' => 'صاحب الأرض']));
     }
+
+    public function test_choosing_a_portfolio_narrows_the_home_to_its_parcels(): void
+    {
+        $portfolio = OwnerPortfolio::create(['owner_id' => $this->owner->id, 'name' => 'محفظة الرياض']);
+        DB::table('owner_portfolio_parcels')->insert(['owner_id' => $this->owner->id, 'owner_portfolio_id' => $portfolio->id, 'parcel_id' => $this->parcel->id]);
+        $this->actingAsOwner($this->owner);
+
+        $named = $this->get(route('portal.dashboard', ['portfolio' => 'p'.$portfolio->id]))->assertOk();
+        $this->assertSame(1, $named->viewData('portfolio')['total_parcels']);
+        $this->assertSame(['7001'], array_map(fn (array $f): string => (string) $f['properties']['parcel_no'],
+            $this->getJson(route('portal.geo.parcels', ['portfolio' => 'p'.$portfolio->id]))->json('features')));
+
+        $rest = $this->get(route('portal.dashboard', ['portfolio' => 'rest']))->assertOk();
+        $this->assertSame(1, $rest->viewData('portfolio')['total_parcels']);
+        $this->assertSame(['7002'], array_map(fn (array $f): string => (string) $f['properties']['parcel_no'],
+            $this->getJson(route('portal.geo.parcels', ['portfolio' => 'rest']))->json('features')));
+
+        // Someone else's portfolio narrows nothing.
+        $theirs = OwnerPortfolio::create(['owner_id' => $this->stranger->id, 'name' => 'ليست لك']);
+        $this->assertNull($this->get(route('portal.dashboard', ['portfolio' => 'p'.$theirs->id]))->viewData('activePortfolio'));
+    }
 }

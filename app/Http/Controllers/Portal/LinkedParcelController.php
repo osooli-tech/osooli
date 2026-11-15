@@ -30,6 +30,7 @@ class LinkedParcelController extends Controller
 
         return view('portal.linked.index', [
             'groups' => $groups,
+            'shapes' => $linked->shapes($groups),
             'showValue' => PortalSetting::allows(PortalSetting::SHOW_VALUE),
         ]);
     }

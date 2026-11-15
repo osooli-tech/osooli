@@ -159,6 +159,9 @@ class Owner extends Authenticatable
     /** @var list<int>|null see standingFor() */
     private ?array $holderGroup = null;
 
+    /** @var list<int>|null one portfolio's parcels the portal is narrowed to, for this request only */
+    private ?array $parcelFocus = null;
+
     public function parcelsUnderParent(): HasMany
     {
         return $this->hasMany(Parcel::class, 'parent_owner_id');
@@ -195,7 +198,26 @@ class Owner extends Authenticatable
         return Parcel::whereHas(
             'heldDeed.owners',
             fn (Builder $query) => $query->whereIn($query->qualifyColumn('id'), $ids)
-        );
+        )->when($this->parcelFocus !== null, fn (Builder $query) => $query->whereIn('parcels.id', $this->parcelFocus));
+    }
+
+    /**
+     * Narrows what this owner reads to some of their parcels — one portfolio
+     * on the portal home. Never widens: parcels() still requires holding them.
+     *
+     * @param  list<int|string>|null  $parcelIds  null lifts the narrowing
+     */
+    public function focusOn(?array $parcelIds): static
+    {
+        $this->parcelFocus = $parcelIds === null ? null : array_map('intval', $parcelIds);
+
+        return $this;
+    }
+
+    /** @return list<int>|null */
+    public function parcelFocus(): ?array
+    {
+        return $this->parcelFocus;
     }
 
     /**

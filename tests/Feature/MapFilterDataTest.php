@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\QrarSource;
+use App\Livewire\Dashboard\DistributionCharts;
 use App\Livewire\Dashboard\OwnerPortfolios;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Deed;
 use App\Models\District;
+use App\Models\EngineeringOffice;
 use App\Models\Owner;
 use App\Models\OwnerPortfolio;
 use App\Models\Parcel;
+use App\Models\ParcelBoundary;
 use App\Models\Plan;
 use App\Models\Region;
+use App\Models\SurveyDecision;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -102,5 +107,36 @@ class MapFilterDataTest extends TestCase
         $deed->owners()->attach($owner->id);
 
         return $parcel->refresh();
+    }
+
+    public function test_the_map_feed_carries_the_office_and_survey_sources_a_chart_filters_by(): void
+    {
+        $parcel = Parcel::create(['parcel_no' => '2', 'geo_id' => 'geo-2']);
+        DB::update("UPDATE parcels SET geom = ST_GeomFromText('MULTIPOLYGON(((46.3 24.7, 46.4 24.7, 46.4 24.8, 46.3 24.8, 46.3 24.7)))', 4326) WHERE id = ?", [$parcel->id]);
+        $office = EngineeringOffice::create(['name' => 'مكتب الإسناد']);
+        ParcelBoundary::create(['parcel_id' => $parcel->id, 'engineering_office_id' => $office->id]);
+        SurveyDecision::create(['parcel_id' => $parcel->id, 'qrar_source' => QrarSource::Municipal->value]);
+        SurveyDecision::create(['parcel_id' => $parcel->id, 'qrar_source' => QrarSource::Engineering->value]);
+
+        $user = User::create(['name' => 'مستخدم', 'email' => 'geo2@sakuki.test', 'password' => bcrypt('password'), 'is_active' => true]);
+
+        $props = $this->actingAs($user)->getJson(route('geo.parcels'))->assertOk()->json('features.0.properties');
+        $this->assertSame('مكتب الإسناد', $props['office_name']);
+        $this->assertEqualsCanonicalizing(['بلدي', 'مكتب هندسي'], explode(',', $props['qrar_sources']));
+    }
+
+    public function test_the_district_chart_lists_every_district_not_only_the_top_ten(): void
+    {
+        $country = Country::create(['name_ar' => 'السعودية']);
+        $region = Region::create(['country_id' => $country->id, 'name_ar' => 'القصيم']);
+        $city = City::create(['region_id' => $region->id, 'name_ar' => 'بريدة']);
+        foreach (range(1, 12) as $i) {
+            $district = District::create(['city_id' => $city->id, 'name_ar' => 'حي '.$i]);
+            $plan = Plan::create(['plan_no' => 'p'.$i, 'district_id' => $district->id]);
+            Parcel::create(['parcel_no' => (string) $i, 'geo_id' => 'g-'.$i, 'plan_id' => $plan->id]);
+        }
+        $user = User::create(['name' => 'مستخدم', 'email' => 'geo3@sakuki.test', 'password' => bcrypt('password'), 'is_active' => true]);
+
+        $this->assertCount(12, Livewire::actingAs($user)->test(DistributionCharts::class)->get('byDistrict'));
     }
 }
