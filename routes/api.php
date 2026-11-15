@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeedController;
 use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\HoldingsController;
 use App\Http\Controllers\Api\V1\LegalController;
 use App\Http\Controllers\Api\V1\ListingController;
 use App\Http\Controllers\Api\V1\ModificationRequestController;
@@ -46,11 +47,16 @@ Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(f
     // An account that opens several owners: moving between them, and the view across them.
     Route::post('auth/switch-owner', [AccountController::class, 'switchOwner'])->middleware('throttle:30,1')->name('api.auth.switch-owner');
     Route::get('account/overview', [AccountController::class, 'overview'])->name('api.account.overview');
+    Route::get('account/explorer', [AccountController::class, 'explorer'])->name('api.account.explorer');
 
     Route::get('me', [ProfileController::class, 'show'])->name('api.me');
     Route::patch('me', [ProfileController::class, 'update'])->middleware('portal.manage:self')->name('api.me.update');
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('api.dashboard');
+    // The estate as the web home shows it: portfolios, and land handed on but still stood over.
+    Route::get('portfolios', [HoldingsController::class, 'portfolios'])->name('api.portfolios.index');
+    Route::get('linked', [HoldingsController::class, 'linked'])->name('api.linked.index');
+    Route::get('linked/{parcel}', [HoldingsController::class, 'linkedShow'])->whereNumber('parcel')->name('api.linked.show');
     Route::get('search', [SearchController::class, 'index'])->name('api.search');
 
     // The literal /parcels/map must be declared before the {parcel} wildcard.
@@ -58,6 +64,7 @@ Route::middleware(['auth:sanctum', 'portal.account', 'throttle:120,1'])->group(f
     Route::get('parcels', [ParcelController::class, 'index'])->name('api.parcels.index');
     Route::get('parcels/{parcel}', [ParcelController::class, 'show'])->name('api.parcels.show');
     Route::get('parcels/{parcel}/documents', [ParcelController::class, 'documents'])->middleware('portal.manage:documents')->name('api.parcels.documents');
+    Route::get('parcels/{parcel}/photos/mine', [ParcelPhotoController::class, 'mine'])->whereNumber('parcel')->name('api.parcels.photos.mine');
     Route::post('parcels/{parcel}/photos', [ParcelPhotoController::class, 'store'])->whereNumber('parcel')->middleware(['portal.manage:upload_photos', 'throttle:10,1'])->name('api.parcels.photos.store');
 
     Route::get('deeds', [DeedController::class, 'index'])->name('api.deeds.index');

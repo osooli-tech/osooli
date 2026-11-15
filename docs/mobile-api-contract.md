@@ -1,8 +1,8 @@
 # Osooli Mobile API — عقد الواجهة (v1)
 
-> **الحالة:** مقترح للمراجعة — لم يُنفَّذ بعد.
+> **الحالة:** منفَّذ. الأقسام 3.2 و3.3 و3.5 و3.6 و3.7 محدّثة لحسابات البوابة (2026-11). بقية الأقسام كما كتبت في v1، والمسارات الأحدث مسرودة في البند 16.
 > **الغرض:** تثبيت شكل الطلبات والاستجابات ليبدأ فريق الموبايل بالتوازي مع تنفيذ الـ backend.
-> **آخر تحديث:** 2026-07-23
+> **آخر تحديث:** 2026-11-14
 
 ---
 
@@ -133,15 +133,59 @@ POST /auth/verify-otp
       "name": "عبدالعزيز خالد محمد بن خميس",
       "national_id": "1001227220",
       "phone": "0512345678",
-      "email": null
-    }
+      "email": null,
+      "whatsapp": null
+    },
+    "account": {
+      "id": 5,
+      "name": "مكتب ركن الشمال الذهبي",
+      "phone": "0536664026",
+      "kind": "company",
+      "cr_number": "7003374043"
+    },
+    "owners": [
+      {
+        "id": 1,
+        "name": "عبدالعزيز خالد محمد بن خميس",
+        "relation": "delegate",
+        "can_manage": true,
+        "permissions": {
+          "sell": false,
+          "request_changes": true,
+          "upload_photos": true,
+          "documents": true,
+          "interest": true,
+          "edit_profile": false
+        }
+      }
+    ]
   }
 }
 ```
 
+- **`owner`**: المالك الذي يعمل التوكن باسمه الآن. كل المسارات تقرأ بياناته هو فقط.
+- **`account`**: رقم الجوال الذي دخل. `kind` = `person` أو `company`. الشركة تظهر باسمها (`name`) وسجلها التجاري (`cr_number`)، وتُعامَل دائمًا كوكيل حتى لو كانت صلاحيتها `self`.
+- **`owners`**: الملاك الذين يفتحهم الحساب، بترتيب منحهم. أكثر من واحد يعني أن التطبيق يعرض التبديل (3.5) والنظرة الشاملة (3.6).
+  - `relation`: `self` (المالك نفسه) أو `delegate` (مفوَّض).
+  - `can_manage`: `false` تعني **مشاهدة فقط**.
+  - `permissions`: ما يحق للحساب فعله لهذا المالك. نفس إجابة المسارات، فيخفي التطبيق ما سيعود `403`:
+
+| المفتاح | المسار الذي يحكمه |
+|---|---|
+| `sell` | `POST /parcels/{id}/listing` و`DELETE /listings/{id}` |
+| `request_changes` | `POST /modification-requests` |
+| `upload_photos` | `POST /parcels/{id}/photos` |
+| `documents` | `GET /parcels/{id}/documents` و`GET /documents/{id}/download`. عند `false` تعود `documents` فارغة في `GET /parcels/{id}` |
+| `interest` | `POST /listings/{id}/interest` |
+| `edit_profile` | `PATCH /me` |
+
 > التوكن يُخزَّن بأمان في التطبيق ويُرسل في كل طلب لاحق. لا انتهاء تلقائي حاليًا؛ `401` تعني أعد الدخول.
 
-> **جهاز واحد فقط في نفس الوقت:** كل نجاح لـ `verify-otp` يُلغي أي توكن سابق لنفس المالك فورًا. لو سجّل نفس الرقم دخول من جهاز ثاني، الجهاز الأول يستلم `401` في أول طلب لاحق له ولازم يعيد تسجيل الدخول.
+> **جهاز واحد لكل حساب:** كل نجاح لـ `verify-otp` يُلغي توكنات **هذا الحساب** السابقة. حسابان يفتحان المالك نفسه يبقى كلٌّ منهما داخلًا على جهازه.
+
+> **`401` أيضًا** عند إيقاف الحساب، أو سحب صلاحيته على المالك الحالي، أو أرشفة المالك.
+
+> **`403` "مشاهدة فقط"**: `{"message": "هذا الحساب يملك صلاحية المشاهدة فقط لهذا المالك."}` لأي إجراء لا تسمح به `permissions`. لا يُخرج المستخدم.
 
 **خطأ 422** — رمز خاطئ
 ```json
@@ -161,10 +205,15 @@ GET /me
     "national_id": "1001227220",
     "phone": "0512345678",
     "email": null,
-    "stats": { "parcels_count": 2, "deeds_count": 2, "documents_count": 2 }
+    "whatsapp": "0512345678",
+    "stats": { "parcels_count": 2, "deeds_count": 2, "documents_count": 2 },
+    "account": { "id": 5, "name": "…", "phone": "…", "kind": "person", "cr_number": null },
+    "owners": [ { "id": 1, "name": "…", "relation": "self", "can_manage": true, "permissions": { } } ]
   }
 }
 ```
+
+> `account` و`owners` بنفس شكل 3.2. يقرأها التطبيق عند كل فتح، لأن الموظف قد يغيّر الصلاحيات أو الملاك بعد الدخول.
 
 ### 3.4 تسجيل الخروج
 
@@ -174,6 +223,71 @@ POST /auth/logout
 ```json
 { "data": { "message": "تم تسجيل الخروج" } }
 ```
+
+### 3.5 التبديل إلى مالك آخر في الحساب
+
+```http
+POST /auth/switch-owner
+```
+```json
+{ "owner_id": 2 }
+```
+
+**الاستجابة 200**: بنفس شكل 3.2 (`token`, `owner`, `account`, `owners`).
+
+- التوكن المستعمل في الطلب **يُلغى**، ويُستعمل الجديد من الآن.
+- `403` إن كان الحساب لا يفتح هذا المالك.
+- حد: 30 طلبًا في الدقيقة.
+
+### 3.6 نظرة شاملة على الحساب
+
+```http
+GET /account/overview
+```
+```json
+{
+  "data": {
+    "totals": { "parcels": 3, "area": 2500.0, "value": null },
+    "owners": [
+      {
+        "owner_id": 1,
+        "name": "عبدالله",
+        "relation": "delegate",
+        "can_manage": true,
+        "parcels": 2,
+        "area": 1500.0,
+        "value": null,
+        "items": [
+          { "id": 2018, "parcel_no": "2018", "plan_no": "25", "district": "العمارية", "city": "الدرعية", "share": 0.5, "area": 500.0, "value": null }
+        ]
+      }
+    ]
+  }
+}
+```
+
+- `share` من 0 إلى 1. `area` و`value` في البطاقة وفي `items` **بنصيب المالك**.
+- `totals`: كل قطعة **مرة واحدة**، بالجزء الذي يملكه ملاك الحساب معًا.
+- `value` = `null` إذا أخفى المسؤول القيمة من إعدادات البوابة.
+- فتح قطعة مالك آخر: `switch-owner` أولًا ثم `GET /parcels/{id}`. بدونه تعود `404`.
+
+### 3.7 القراءة على مستوى الحساب
+
+الحساب الذي يفتح أكثر من مالك يقرأ أملاكهم كلها معًا، كما في البوابة، إذا أرسل التطبيق الترويسة:
+
+```http
+X-Read-Scope: account
+```
+
+| المسار | بالترويسة |
+|---|---|
+| `GET /parcels` و`GET /parcels/map` و`GET /search` | قطع كل ملاك الحساب، كل قطعة مرة واحدة، ومع كل عنصر `holder_ids`: ملاك الحساب الذين يملكونها |
+| `GET /deeds` | صكوك كل ملاك الحساب، مع `holder_ids`. صورة الصك (`document`) تُحذف لمالك منع المستندات |
+| `GET /dashboard` | أرقام الحساب كله. الشركة تُحيّا باسمها (`greeting_name`) |
+
+- **القراءة فقط.** صفحة القطعة (`GET /parcels/{id}`) ومستنداتها وكل إجراء (طلب تعديل، عرض للبيع، صور) تبقى للمالك الحالي في التوكن. لفتح قطعة مالك آخر في الحساب: `switch-owner` إلى أحد `holder_ids` أولًا (3.5)، وإلا تعود `404`.
+- بلا الترويسة، أو لحساب بمالك واحد: لا يتغيّر شيء، ولا يُرسل `holder_ids`.
+- مالك سُحبت صلاحيته يخرج من القراءة في الطلب التالي.
 
 ---
 
@@ -686,3 +800,31 @@ curl -X POST 'https://.../api/v1/auth/verify-otp' \
 curl 'https://.../api/v1/parcels' \
   -H 'Accept: application/json' -H 'Authorization: Bearer {token}'
 ```
+
+---
+
+## 16. مسارات أُضيفت بعد v1
+
+تُفصَّل في أقسامها عند بناء شاشاتها في التطبيق. كلها خلف `auth:sanctum`، ومحكومة بـ `permissions` (3.2) حيث يذكر الجدول.
+
+| المسار | الغرض | الصلاحية |
+|---|---|---|
+| `GET /legal/{privacy\|terms}` | نصوص قانونية (بلا تسجيل دخول) | — |
+| `POST /auth/switch-owner` | 3.5 | — |
+| `GET /account/overview` | 3.6 | — |
+| `GET /portfolios` | بطاقات المحافظ: `[{name, kind: portfolio\|unassigned\|owner, parcels, area, value}]`. مع `X-Read-Scope: account` بطاقة لكل مالك في الحساب | — |
+| `GET /linked` | القطع المرتبطة (المالك الأساسي): مجموعات `[{holder_id, holder, own?, parcels_count, area, value, parcels[{id, parcel_no, plan_no, district, city, asset_type, share, area, value, holder_id, holder}]}]`، وأملاك المالك نفسه أولًا (`own: true`) إن وُجدت مرتبطة | — |
+| `GET /linked/{id}` | قطعة مرتبطة: `{id, parcel_no, plan_no, district, city, asset_type, holders[], area, value, frontage, deed, geometry, documents[]}`. `value` و`deed` و`documents` بحسب إعدادات المسؤول. مستنداتها تُفتح من `GET /documents/{id}/download` | — |
+| `GET /account/explorer` | مستكشف النظرة الشاملة: `owners[{id, name, color, can_manage, parcels, area, value}]` و`parcels[{id, parcel_no, plan_no, district, city, asset_type, area, value, owners[{id, share}], geometry}]`. كل قطعة مرة واحدة، و`area`/`value` بأنصبة ملاك الحساب مجتمعين | — |
+| `POST /parcels/{id}/photos` | رفع صور القطعة (multipart `photos[]`، حتى 10، jpg/png/webp ≤ 10MB)، تنتظر مراجعة الموظف | `upload_photos` |
+| `GET /parcels/{id}/photos/mine` | صور المالك على القطعة التي لم تظهر بعد: `[{id, status: pending\|rejected, original_name, rejection_reason, uploaded_at}]`. المعتمدة تظهر في `documents` | — |
+| `GET /listings` | السوق: العروض المعتمدة، بلا سعر ولا صك ولا اسم بائع. `is_mine` و`my_interest` لكل عرض | — |
+| `GET /listings/{id}` | عرض واحد | — |
+| `GET /listings/mine` | عروض المالك الحالي وحالاتها | — |
+| `GET /listings/interests` | اهتماماتي بعروض الآخرين | — |
+| `POST /parcels/{id}/listing` | عرض قطعة للبيع `{contact_phone}`. عرض مفتوح واحد لكل قطعة | `sell` |
+| `DELETE /listings/{id}` | سحب العرض | `sell` |
+| `POST /listings/{id}/interest` | "مهتم — تواصلوا معي" `{note?}`. `422` على عرضك | `interest` |
+
+> القسم 10 (الإشعارات) **غير منفَّذ**: المساران غير موجودين.
+> `GET /dashboard` يعيد اليوم أيضًا `portfolio`, `by_region`, `by_owner`، ولم يعد يعيد `data_completeness`.

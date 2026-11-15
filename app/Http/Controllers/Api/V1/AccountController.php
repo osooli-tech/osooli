@@ -59,4 +59,17 @@ class AccountController extends ApiController
 
         return $this->respond($overviews->for($account, PortalSetting::allows(PortalSetting::SHOW_VALUE)));
     }
+
+    /**
+     * What the web overview's explorer draws and filters: each owner with
+     * their colour, and each parcel once with its shape, type, place, area,
+     * value and the account's owners on it at their shares.
+     */
+    public function explorer(AccountOverviewService $overviews): JsonResponse
+    {
+        $account = $this->context->account();
+        abort_if($account === null, 403);
+
+        return $this->respond($overviews->explorer($account, PortalSetting::allows(PortalSetting::SHOW_VALUE)));
+    }
 }

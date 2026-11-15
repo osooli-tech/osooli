@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Api;
 
 use App\Enums\PortalGrantSource;
+use App\Enums\PortalPermission;
 use App\Enums\PortalRelation;
 use App\Models\Owner;
 use App\Models\PortalAccount;
@@ -155,6 +156,61 @@ class AccountApiTest extends TestCase
 
         $this->withToken($token)->postJson('/api/v1/modification-requests', ['parcel_id' => 1, 'field_name' => 'asset_type', 'new_value' => 'أرض'])
             ->assertForbidden();
+    }
+
+    public function test_sign_in_tells_the_app_the_account_kind_and_what_it_may_do_per_owner(): void
+    {
+        $this->access->setIdentity($this->office, PortalAccount::KIND_COMPANY, 'مكتب ركن الشمال الذهبي للعقارات', '7003374043', $this->staff);
+        $najlasGrant = $this->office->grants()->where('owner_id', $this->najla->id)->firstOrFail();
+        $this->access->setPermissions($najlasGrant, [PortalPermission::Sell->value => false], $this->staff);
+
+        $this->postJson('/api/v1/auth/request-otp', ['phone' => '0536664026'])->assertOk();
+        $this->postJson('/api/v1/auth/verify-otp', ['phone' => '0536664026', 'otp' => '6666'])
+            ->assertOk()
+            ->assertJsonPath('data.account.kind', 'company')
+            ->assertJsonPath('data.account.cr_number', '7003374043')
+            ->assertJsonPath('data.account.name', 'مكتب ركن الشمال الذهبي للعقارات')
+            // Najla: managed, selling turned off by staff.
+            ->assertJsonPath('data.owners.0.permissions.sell', false)
+            ->assertJsonPath('data.owners.0.permissions.request_changes', true)
+            ->assertJsonPath('data.owners.0.permissions.documents', true)
+            ->assertJsonPath('data.owners.0.permissions.interest', true)
+            ->assertJsonPath('data.owners.0.permissions.edit_profile', false)
+            // Saud: view only, so nothing that acts; documents can still be read.
+            ->assertJsonPath('data.owners.1.permissions.sell', false)
+            ->assertJsonPath('data.owners.1.permissions.upload_photos', false)
+            ->assertJsonPath('data.owners.1.permissions.interest', false)
+            ->assertJsonPath('data.owners.1.permissions.documents', true);
+    }
+
+    public function test_an_owners_own_account_may_do_everything(): void
+    {
+        $own = $this->access->accountForPhone('0500000001');
+        $this->access->grant($own, $this->najla, PortalRelation::Self_, true, PortalGrantSource::Staff, $this->staff);
+
+        $this->withToken($this->apiToken($this->najla, $own))->getJson('/api/v1/me')
+            ->assertOk()
+            ->assertJsonPath('data.account.kind', 'person')
+            ->assertJsonPath('data.account.cr_number', null)
+            ->assertJsonPath('data.owners.0.permissions', [
+                'sell' => true,
+                'request_changes' => true,
+                'upload_photos' => true,
+                'documents' => true,
+                'interest' => true,
+                'edit_profile' => true,
+            ]);
+    }
+
+    public function test_me_reads_back_the_whatsapp_number_it_saved(): void
+    {
+        $own = $this->access->accountForPhone('0500000001');
+        $this->access->grant($own, $this->najla, PortalRelation::Self_, true, PortalGrantSource::Staff, $this->staff);
+
+        $this->withToken($this->apiToken($this->najla, $own))
+            ->patchJson('/api/v1/me', ['whatsapp' => '0512345678'])
+            ->assertOk()
+            ->assertJsonPath('data.whatsapp', '0512345678');
     }
 
     private function apiToken(Owner $owner, PortalAccount $account): string

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Concerns\ApiResponder;
 use App\Http\Controllers\Controller;
 use App\Models\Owner;
 use App\Queries\OwnerParcelQuery;
+use App\Support\Portal\PortalContext;
 use Illuminate\Http\Request;
 
 /**
@@ -25,6 +26,25 @@ abstract class ApiController extends Controller
         $owner = auth()->user();
 
         return $owner;
+    }
+
+    /** The header with which the app asks to read as the whole account. */
+    public const READ_SCOPE_HEADER = 'X-Read-Scope';
+
+    /**
+     * For read endpoints only: with `X-Read-Scope: account`, an account that
+     * opens several owners reads all their land at once, as the web portal
+     * does (PortalContext::readingOwner). Without the header — older apps —
+     * the token's owner alone, as before. Never used where something is done:
+     * acting stays with the one owner who holds the parcel.
+     */
+    protected function readingOwner(Request $request): Owner
+    {
+        if ($request->header(self::READ_SCOPE_HEADER) === 'account') {
+            return app(PortalContext::class)->readingOwner() ?? $this->owner();
+        }
+
+        return $this->owner();
     }
 
     /** Parcel queries restricted to the signed-in owner. */

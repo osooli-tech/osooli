@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Enums\PhotoType;
+use App\Http\Resources\Concerns\ReportsHolders;
 use App\Models\Deed;
+use App\Models\Owner;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,6 +18,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class DeedListResource extends JsonResource
 {
+    use ReportsHolders;
+
     /**
      * @return array<string, mixed>
      */
@@ -25,6 +29,18 @@ class DeedListResource extends JsonResource
         $district = $parcel?->plan?->district;
         // This deed's own scan — the parcel may also hold scans of other people's deeds.
         $document = $parcel?->photos->first(fn ($photo) => $photo->photo_type === PhotoType::Deed && $photo->deed_id === $this->id);
+
+        // Reading as an account: the account's owners on this deed, and its
+        // scan only where one of them lets the account read documents.
+        $viewer = $request->user();
+        $holders = null;
+        if ($viewer instanceof Owner && $viewer->standsForMany()) {
+            $onDeed = $this->owners->pluck('id')->map(fn ($id): int => (int) $id)->all();
+            $holders = array_values(array_intersect($viewer->holderIds(), $onDeed));
+            if (array_intersect($holders, $this->documentReaderIds($request)) === []) {
+                $document = null;
+            }
+        }
 
         return [
             'id' => $this->id,
@@ -44,6 +60,7 @@ class DeedListResource extends JsonResource
                 'id' => $document->id,
                 'download_url' => route('api.documents.download', $document->id),
             ],
+            'holder_ids' => $this->when($holders !== null, fn () => $holders),
         ];
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\ReportsHolders;
 use App\Models\Parcel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +16,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class SearchResultResource extends JsonResource
 {
+    use ReportsHolders;
+
     /**
      * @return array<string, mixed>
      */
@@ -29,6 +32,7 @@ class SearchResultResource extends JsonResource
             'title' => __('parcels.parcel_no').' '.$this->parcel_no,
             'subtitle' => $this->subtitle(),
             'badge' => $deed?->deed_status,
+            'holder_ids' => $this->when($this->holderIdsFor($this->resource, $request) !== null, fn () => $this->holderIdsFor($this->resource, $request)),
         ];
     }
 

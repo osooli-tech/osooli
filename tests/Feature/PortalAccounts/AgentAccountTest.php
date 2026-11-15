@@ -114,6 +114,38 @@ class AgentAccountTest extends TestCase
         $this->assertEqualsWithDelta(750.0, $row['area'], 0.01);
     }
 
+    public function test_the_app_reads_the_same_explorer(): void
+    {
+        $shared = Parcel::create(['parcel_no' => '2018', 'geo_id' => 'geo-2018', 'plan_id' => $this->najlasParcel->plan_id, 'asset_type' => 'أرض']);
+        $deed = Deed::create(['parcel_id' => $shared->id, 'deed_no' => 'D2018', 'deed_area' => 750, 'deed_status' => DeedStatus::Updated->value]);
+        $deed->owners()->attach([$this->najla->id => ['ownership_share' => 50], $this->saud->id => ['ownership_share' => 50]]);
+        DB::update("UPDATE parcels SET geom = ST_GeomFromText('MULTIPOLYGON(((46.3 24.7, 46.31 24.7, 46.31 24.71, 46.3 24.71, 46.3 24.7)))', 4326) WHERE id = ?", [$shared->id]);
+
+        $response = $this->apiAsOwner($this->saud, $this->office)
+            ->getJson(route('api.account.explorer'))
+            ->assertOk()
+            ->assertJsonPath('data.owners.0.name', 'نجلاء')
+            ->assertJsonPath('data.owners.0.color', '#0ea5a4')
+            ->assertJsonPath('data.owners.1.name', 'سعود')
+            ->assertJsonCount(3, 'data.parcels');
+
+        $row = collect($response->json('data.parcels'))->firstWhere('parcel_no', '2018');
+        $this->assertSame('أرض', $row['asset_type']);
+        $this->assertSame([$this->najla->id, $this->saud->id], array_column($row['owners'], 'id'));
+        $this->assertSame('MultiPolygon', $row['geometry']['type']);
+        $this->assertEqualsWithDelta(750.0, $row['area'], 0.01);
+    }
+
+    public function test_an_owner_on_their_own_gets_an_explorer_of_their_land_only(): void
+    {
+        $this->apiAsOwner($this->najla)
+            ->getJson(route('api.account.explorer'))
+            ->assertOk()
+            ->assertJsonCount(1, 'data.owners')
+            ->assertJsonCount(1, 'data.parcels')
+            ->assertJsonPath('data.parcels.0.parcel_no', '1066');
+    }
+
     public function test_a_parcel_of_another_owner_opens_as_the_one_who_holds_it(): void
     {
         $this->actingAsOwner($this->najla, $this->office);
@@ -187,6 +219,32 @@ class AgentAccountTest extends TestCase
         $this->apiAsOwner($this->saud, $this->office)
             ->postJson(route('api.modification-requests.store'), ['parcel_id' => $this->saudsParcel->id, 'field_name' => 'asset_type', 'new_value' => 'أرض'])
             ->assertForbidden();
+    }
+
+    public function test_the_app_keeps_documents_from_an_owner_who_withheld_them(): void
+    {
+        // Najla allows documents, Saud does not: Najla's grant must not open Saud's documents through his token.
+        $this->access->setPermissions($this->grant($this->saud), [PortalPermission::Documents->value => false], $this->staff);
+        Storage::disk(ParcelPhoto::PRIVATE_DISK)->put('d/saud.pdf', '%PDF');
+        $saudsDoc = ParcelPhoto::create(['parcel_id' => $this->saudsParcel->id, 'photo_url' => 'd/saud.pdf', 'storage_disk' => ParcelPhoto::PRIVATE_DISK, 'photo_type' => 'صك', 'status' => ParcelPhoto::STATUS_APPROVED]);
+
+        $this->apiAsOwner($this->saud, $this->office);
+        $this->get(route('api.documents.download', $saudsDoc->id))->assertForbidden();
+        $this->getJson(route('api.parcels.documents', $this->saudsParcel->id))->assertForbidden();
+        $this->getJson(route('api.parcels.show', $this->saudsParcel->id))
+            ->assertOk()
+            ->assertJsonCount(0, 'data.documents');
+    }
+
+    public function test_the_app_still_opens_documents_an_owner_allows(): void
+    {
+        Storage::disk(ParcelPhoto::PRIVATE_DISK)->put('d/najla.pdf', '%PDF');
+        $najlasDoc = ParcelPhoto::create(['parcel_id' => $this->najlasParcel->id, 'photo_url' => 'd/najla.pdf', 'storage_disk' => ParcelPhoto::PRIVATE_DISK, 'photo_type' => 'صك', 'status' => ParcelPhoto::STATUS_APPROVED]);
+
+        $this->apiAsOwner($this->najla, $this->office);
+        $this->get(route('api.documents.download', $najlasDoc->id))->assertOk();
+        $this->getJson(route('api.parcels.documents', $this->najlasParcel->id))->assertOk()->assertJsonCount(1, 'data');
+        $this->getJson(route('api.parcels.show', $this->najlasParcel->id))->assertOk()->assertJsonCount(1, 'data.documents');
     }
 
     public function test_a_commercial_registration_is_ten_digits(): void

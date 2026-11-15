@@ -27,8 +27,11 @@ class EnsurePortalCanManage
 
         $allowed = match (true) {
             $who === 'self' => $this->context->isSelf(),
-            // Documents are listed across every owner the account opens; each owner's own are filtered by their grant.
-            $permission === PortalPermission::Documents => $this->context->canAny($permission),
+            // Web: documents are listed across every owner the account opens; each owner's own are filtered by their grant.
+            // App: the token reads one owner only, so it is that owner's grant that decides.
+            $permission === PortalPermission::Documents => $this->context->viaToken()
+                ? $this->context->can($permission)
+                : $this->context->canAny($permission),
             $permission !== null => $this->context->can($permission),
             default => $this->context->canManage(),
         };

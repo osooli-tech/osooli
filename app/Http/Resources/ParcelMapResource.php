@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\ReportsHolders;
 use App\Models\Parcel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +16,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ParcelMapResource extends JsonResource
 {
+    use ReportsHolders;
+
     /**
      * @return array<string, mixed>
      */
@@ -41,6 +44,7 @@ class ParcelMapResource extends JsonResource
                 'parcel_price' => $this->parcel_price === null ? null : (float) $this->parcel_price,
                 // First recorded owner on the latest deed — used to color parcels per owner.
                 'owner_name' => $deed?->owners->first()?->name,
+                'holder_ids' => $this->when($this->holderIdsFor($this->resource, $request) !== null, fn () => $this->holderIdsFor($this->resource, $request)),
             ],
         ];
     }

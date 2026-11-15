@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\Concerns\ReportsHolders;
 use App\Models\Parcel;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +16,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class ParcelListResource extends JsonResource
 {
+    use ReportsHolders;
+
     /**
      * @return array<string, mixed>
      */
@@ -42,6 +45,7 @@ class ParcelListResource extends JsonResource
             ],
             'documents_count' => $this->whenCounted('photos'),
             'centroid' => $this->centroid(),
+            'holder_ids' => $this->when($this->holderIdsFor($this->resource, $request) !== null, fn () => $this->holderIdsFor($this->resource, $request)),
         ];
     }
 

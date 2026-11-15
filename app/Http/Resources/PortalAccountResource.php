@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Enums\PortalPermission;
 use App\Models\PortalAccount;
 use App\Models\PortalAccountOwner;
 use Illuminate\Http\Request;
@@ -23,24 +24,53 @@ class PortalAccountResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'phone' => $this->phone,
+            // person | company. A company goes by its own name and is always an agent for its owners.
+            'kind' => $this->kind ?? PortalAccount::KIND_PERSON,
+            'cr_number' => $this->cr_number,
         ];
     }
 
     /**
-     * The owners the account may act for, in the order they were granted.
+     * The owners the account may act for, in the order they were granted,
+     * each with what the account may do for them — the same answers the
+     * routes give, so the app hides what would only come back 403.
      *
-     * @return list<array{id: int, name: string, relation: string, can_manage: bool}>
+     * @return list<array{id: int, name: string, relation: string, can_manage: bool, permissions: array<string, bool>}>
      */
     public static function ownersOf(PortalAccount $account): array
     {
         return $account->usableGrants()->with('owner:id,name')->orderBy('id')->get()
-            ->map(fn (PortalAccountOwner $grant): array => [
-                'id' => (int) $grant->owner_id,
-                'name' => (string) $grant->owner?->name,
-                'relation' => $grant->relation->value,
-                'can_manage' => $grant->can_manage,
-            ])
+            ->map(function (PortalAccountOwner $grant) use ($account): array {
+                $grant->setRelation('account', $account);
+
+                return [
+                    'id' => (int) $grant->owner_id,
+                    'name' => (string) $grant->owner?->name,
+                    'relation' => $grant->relation->value,
+                    'can_manage' => $grant->can_manage,
+                    'permissions' => self::permissionsOf($grant),
+                ];
+            })
             ->values()
             ->all();
+    }
+
+    /**
+     * Mirrors EnsurePortalCanManage: each PortalPermission by allows(),
+     * `interest` by can_manage (portal.manage), `edit_profile` by isSelf() (portal.manage:self).
+     *
+     * @return array<string, bool>
+     */
+    private static function permissionsOf(PortalAccountOwner $grant): array
+    {
+        $permissions = [];
+        foreach (PortalPermission::cases() as $permission) {
+            $permissions[$permission->value] = $grant->allows($permission);
+        }
+
+        return $permissions + [
+            'interest' => (bool) $grant->can_manage,
+            'edit_profile' => $grant->isSelf(),
+        ];
     }
 }

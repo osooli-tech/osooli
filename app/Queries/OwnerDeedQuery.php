@@ -27,7 +27,8 @@ class OwnerDeedQuery
     {
         return Deed::whereHas(
             'owners',
-            fn (Builder $query) => $query->whereKey($this->owner->getKey())
+            // The owner, or every owner they stand for when reading as an account.
+            fn (Builder $query) => $query->whereKey($this->owner->holderIds())
         );
     }
 

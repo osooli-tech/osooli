@@ -14,9 +14,9 @@ class DeedController extends ApiController
     /** Deed history across every parcel the signed-in owner holds. */
     public function index(Request $request): JsonResponse
     {
-        $deeds = (new OwnerDeedQuery($this->owner()))
+        $deeds = (new OwnerDeedQuery($this->readingOwner($request)))
             ->filtered($request->only(['status', 'search']))
-            ->with(['parcel.plan.district.city', 'parcel.photos'])
+            ->with(['parcel.plan.district.city', 'parcel.photos', 'owners:id'])
             ->orderByDesc('id')
             ->paginate($this->perPage($request))
             ->withQueryString();

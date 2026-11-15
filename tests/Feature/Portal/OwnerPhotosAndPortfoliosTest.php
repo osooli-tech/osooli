@@ -94,6 +94,31 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_the_app_lists_the_owners_own_photos_still_under_review(): void
+    {
+        $this->apiAsOwner($this->owner);
+        $this->post(route('api.parcels.photos.store', $this->parcel->id), ['photos' => [UploadedFile::fake()->image('front.jpg'), UploadedFile::fake()->image('side.jpg')]], ['Accept' => 'application/json'])
+            ->assertCreated();
+        $rejected = ParcelPhoto::query()->forReview()->where('original_name', 'side.jpg')->firstOrFail();
+        $rejected->update(['status' => ParcelPhoto::STATUS_REJECTED, 'rejection_reason' => 'الصورة غير واضحة']);
+        // An approved one is a document now, listed with the documents instead.
+        ParcelPhoto::query()->forReview()->where('original_name', 'front.jpg')->firstOrFail()->replicate()
+            ->fill(['original_name' => 'old.jpg', 'status' => ParcelPhoto::STATUS_APPROVED])->save();
+
+        $this->getJson(route('api.parcels.photos.mine', $this->parcel->id))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.original_name', 'side.jpg')
+            ->assertJsonPath('data.0.status', 'rejected')
+            ->assertJsonPath('data.0.rejection_reason', 'الصورة غير واضحة')
+            ->assertJsonPath('data.1.original_name', 'front.jpg')
+            ->assertJsonPath('data.1.status', 'pending')
+            ->assertJsonPath('data.1.rejection_reason', null);
+
+        $this->apiAsOwner($this->stranger);
+        $this->getJson(route('api.parcels.photos.mine', $this->parcel->id))->assertNotFound();
+    }
+
     public function test_an_owner_who_never_split_their_land_sees_one_portfolio_in_their_name(): void
     {
         $this->actingAsOwner($this->owner)->get(route('portal.dashboard'))
@@ -133,5 +158,28 @@ class OwnerPhotosAndPortfoliosTest extends TestCase
         // Someone else's portfolio narrows nothing.
         $theirs = OwnerPortfolio::create(['owner_id' => $this->stranger->id, 'name' => 'ليست لك']);
         $this->assertNull($this->get(route('portal.dashboard', ['portfolio' => 'p'.$theirs->id]))->viewData('activePortfolio'));
+    }
+
+    public function test_the_app_reads_the_same_portfolios(): void
+    {
+        $this->apiAsOwner($this->owner);
+        $this->getJson(route('api.portfolios.index'))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', __('portal.linked_portfolio_of', ['name' => 'صاحب الأرض']))
+            ->assertJsonPath('data.0.kind', 'owner')
+            ->assertJsonPath('data.0.parcels', 2);
+
+        $portfolio = OwnerPortfolio::create(['owner_id' => $this->owner->id, 'name' => 'محفظة الرياض']);
+        DB::table('owner_portfolio_parcels')->insert(['owner_id' => $this->owner->id, 'owner_portfolio_id' => $portfolio->id, 'parcel_id' => $this->parcel->id]);
+
+        $this->getJson(route('api.portfolios.index'))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.name', 'محفظة الرياض')
+            ->assertJsonPath('data.0.kind', 'portfolio')
+            ->assertJsonPath('data.0.parcels', 1)
+            ->assertJsonPath('data.1.kind', 'unassigned')
+            ->assertJsonPath('data.1.parcels', 1);
     }
 }

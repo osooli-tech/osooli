@@ -245,4 +245,55 @@ class LinkedParcelsTest extends TestCase
 
         return $deed;
     }
+
+    public function test_the_app_lists_linked_parcels_after_the_parents_own(): void
+    {
+        $this->apiAsOwner($this->father);
+
+        $this->getJson(route('api.linked.index'))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.own', true)
+            ->assertJsonPath('data.0.holder', 'الأب')
+            ->assertJsonPath('data.1.holder', 'الابن')
+            ->assertJsonPath('data.1.parcels.0.parcel_no', '501');
+        // The sold parcel is nobody's to list.
+        $this->assertStringNotContainsString('502', $this->getJson(route('api.linked.index'))->getContent());
+    }
+
+    public function test_the_app_opens_a_linked_parcel_with_what_the_switches_allow(): void
+    {
+        $this->apiAsOwner($this->father);
+
+        $this->getJson(route('api.linked.show', $this->given->id))
+            ->assertOk()
+            ->assertJsonPath('data.parcel_no', '501')
+            ->assertJsonPath('data.holders', ['الابن'])
+            ->assertJsonPath('data.deed.deed_no', '444444')
+            ->assertJsonPath('data.value', 750000)
+            ->assertJsonPath('data.geometry.type', 'MultiPolygon')
+            ->assertJsonCount(1, 'data.documents');
+        // And the scan opens through the app's download.
+        $this->get(route('api.documents.download', $this->sonsDeedScan->id))->assertOk();
+
+        PortalSetting::query()->delete();
+        PortalSetting::create(['linked_parcels' => [
+            PortalSetting::SHOW_VALUE => false, PortalSetting::SHOW_DEED => false, PortalSetting::SHOW_DOCUMENTS => false,
+        ]]);
+        $this->getJson(route('api.linked.show', $this->given->id))
+            ->assertOk()
+            ->assertJsonPath('data.deed', null)
+            ->assertJsonPath('data.value', null)
+            ->assertJsonCount(0, 'data.documents');
+        $this->get(route('api.documents.download', $this->sonsDeedScan->id))->assertNotFound();
+    }
+
+    public function test_the_app_reaches_no_linked_parcel_of_someone_else(): void
+    {
+        $this->apiAsOwner($this->son);
+
+        $this->getJson(route('api.linked.index'))->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson(route('api.linked.show', $this->given->id))->assertNotFound();
+        $this->getJson(route('api.linked.show', $this->sold->id))->assertNotFound();
+    }
 }

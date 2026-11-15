@@ -24,6 +24,7 @@ class OwnerResource extends JsonResource
             'national_id' => $this->national_id,
             'phone' => $this->phone,
             'email' => $this->email,
+            'whatsapp' => $this->whatsapp,
         ];
     }
 }

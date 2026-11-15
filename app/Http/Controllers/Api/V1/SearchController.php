@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\SearchResultResource;
+use App\Queries\OwnerParcelQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,9 +28,9 @@ class SearchController extends ApiController
             return $this->respondCollection([]);
         }
 
-        $parcels = $this->parcels()
+        $parcels = (new OwnerParcelQuery($this->readingOwner($request)))
             ->searchBy((string) $request->string('type', 'deed'), $term)
-            ->with(['plan.district.city', 'latestDeed'])
+            ->with(['plan.district.city', 'latestDeed', 'heldDeed.owners'])
             ->limit(self::RESULT_LIMIT)
             ->get();
 

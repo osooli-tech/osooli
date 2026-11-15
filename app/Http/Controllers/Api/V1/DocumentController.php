@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\AuditLog;
 use App\Models\ParcelPhoto;
+use App\Services\Owner\LinkedParcelsService;
 use App\Support\DocumentVault;
 use App\Support\OwnerVisibility;
 use Illuminate\Http\Request;
@@ -31,7 +32,12 @@ class DocumentController extends ApiController
 
         // On a parcel the owner holds now, and not the scan of a deed they are
         // not on: neither a former owner nor the next one reads the other's deed.
-        abort_unless(OwnerVisibility::canSeeDocument($this->owner(), $photo), 404);
+        // Or of a parcel they handed on but still stand over, as the switches allow.
+        abort_unless(
+            OwnerVisibility::canSeeDocument($this->owner(), $photo)
+                || app(LinkedParcelsService::class)->canSeeDocument($this->owner(), $photo),
+            404,
+        );
 
         // Opened by the vault (files are encrypted at rest); a missing file is a 404, not a logged download.
         $response = DocumentVault::response($photo, download: true);
