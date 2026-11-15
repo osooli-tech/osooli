@@ -343,7 +343,7 @@ if (! container) {
             if (type !== 'parcelIds' && ! FILTER_PROPS[type]) return;
             activeFilter = { type, value };
             paintFilter();
-            document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            (document.getElementById('map') ?? container)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function paintFilter() {

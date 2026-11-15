@@ -360,14 +360,14 @@ function accountExplorer(data, labels, urlTemplate, showValue) {
         draw(mapboxgl, token) {
             this.mapboxgl = mapboxgl;
             mapboxgl.accessToken = token;
-            const map = new mapboxgl.Map({ container: this.$refs.map, style: 'mapbox://styles/mapbox/satellite-streets-v12', center: [46.7, 24.7], zoom: 9, attributionControl: false });
+            const street = () => document.documentElement.classList.contains('dark') ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11';
+            const map = new mapboxgl.Map({ container: this.$refs.map, style: street(), center: [46.7, 24.7], zoom: 9, attributionControl: false });
             this.map = map;
             map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'bottom-left');
             map.addControl(window.sakukiBasemapToggle({
-                street: () => document.documentElement.classList.contains('dark') ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11',
-                startOnSatellite: true,
+                street,
                 labels: { streets: labels.streets, satellite: labels.satellite },
-            }), 'top-left');
+            }), document.documentElement.dir === 'rtl' ? 'top-right' : 'top-left');
 
             let framed = false;
             // Every style load — the first and each basemap switch, which wipes layers.

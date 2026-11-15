@@ -978,8 +978,10 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach ($ownerPortfolios as $p)
-                    <a href="{{ route('portal.dashboard', ['portfolio' => $p['key']]) }}"
-                       @class([$cardCls, 'block hover:border-primary transition-colors', 'ring-2 ring-primary' => ($activePortfolio['key'] ?? null) === $p['key']])>
+                    {{-- Like the staff dashboard: the card shows its parcels on the map above --}}
+                    <button type="button" title="{{ __('dashboard.portfolio_show_on_map') }}"
+                            x-data x-on:click="window.dispatchEvent(new CustomEvent('map-filter', { detail: { type: 'parcelIds', value: @js($p['parcel_ids']) } }))"
+                            @class([$cardCls, 'group block w-full text-start hover:border-primary transition-colors', 'ring-2 ring-primary' => ($activePortfolio['key'] ?? null) === $p['key']])>
                         <h3 class="font-semibold text-sm mb-2">{{ $p['name'] }}</h3>
                         <div class="flex items-center gap-3 text-xs text-on-surface-variant dark:text-on-primary-container">
                             <span class="data-tabular">{{ $p['parcels'] }} {{ __('owners.portfolio_parcels_unit') }}</span>
@@ -991,7 +993,10 @@
                                 <span class="text-[11px] font-normal text-on-surface-variant dark:text-on-primary-container">{{ __('parcels.currency') }}</span>
                             </p>
                         @endif
-                    </a>
+                        <span class="mt-2 flex items-center gap-1 text-xs font-medium text-primary dark:text-tertiary-container">
+                            <span class="material-symbols-outlined text-[16px]">location_on</span>{{ __('dashboard.portfolio_show_on_map') }}
+                        </span>
+                    </button>
                 @endforeach
             </div>
         </section>
