@@ -253,6 +253,20 @@ class OwnerApiTest extends TestCase
             ->assertJsonPath('data.portfolio.total_value', 375000);
     }
 
+    public function test_dashboard_metre_price_is_weighted_by_area_held(): void
+    {
+        // A second, small and dear parcel: 250 m² at 9,000 beside the
+        // setUp parcel's 1,000 m² at 1,500. The plain mean would be 5,250;
+        // weighted by area it is (1,500×1,000 + 9,000×250) / 1,250 = 3,000.
+        $small = $this->makeParcel($this->ownedParcel->plan_id, '303', 'geo-303', $this->owner);
+        $small->update(['m_price' => 9000, 'parcel_price' => 2250000]);
+        $small->latestDeed->update(['deed_area' => 250]);
+
+        $this->apiAsOwner($this->owner)->getJson('/api/v1/dashboard')
+            ->assertOk()
+            ->assertJsonPath('data.portfolio.avg_m_price', 3000);
+    }
+
     public function test_dashboard_portfolio_splits_unrecorded_shares_equally(): void
     {
         // Neither co-owner has a recorded share — assume equal halves.

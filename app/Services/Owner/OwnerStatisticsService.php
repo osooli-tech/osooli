@@ -67,10 +67,22 @@ class OwnerStatisticsService
         $total = 0.0;
         $priced = 0;
         $mPrices = [];
+        // The metre price weighted by the area held, so it agrees with the
+        // total value over the total area beside it: a large cheap parcel
+        // and a small dear one do not count the same.
+        $pricedArea = 0.0;
+        $weighted = 0.0;
 
         foreach ($parcels as $parcel) {
+            $share = $holdings->shareOf($parcel, $this->owner->holderIds());
+
             if ($parcel->m_price !== null) {
                 $mPrices[] = (float) $parcel->m_price;
+                $area = (float) ($parcel->heldDeed->deed_area ?? 0) * $share;
+                if ($area > 0) {
+                    $pricedArea += $area;
+                    $weighted += (float) $parcel->m_price * $area;
+                }
             }
 
             if ($parcel->parcel_price === null) {
@@ -78,14 +90,21 @@ class OwnerStatisticsService
             }
 
             $priced++;
-            $total += (float) $parcel->parcel_price * $holdings->shareOf($parcel, $this->owner->holderIds());
+            $total += (float) $parcel->parcel_price * $share;
         }
+
+        $avg = match (true) {
+            $pricedArea > 0 => $weighted / $pricedArea,
+            // No areas to weigh by: the plain mean is all there is.
+            $mPrices !== [] => array_sum($mPrices) / count($mPrices),
+            default => null,
+        };
 
         return [
             'total_value' => $priced > 0 ? round($total, 2) : null,
             'priced_parcels' => $priced,
             'total_parcels' => $parcels->count(),
-            'avg_m_price' => $mPrices === [] ? null : round(array_sum($mPrices) / count($mPrices), 2),
+            'avg_m_price' => $avg === null ? null : round($avg, 2),
         ];
     }
 

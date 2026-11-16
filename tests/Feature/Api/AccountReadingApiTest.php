@@ -119,6 +119,25 @@ class AccountReadingApiTest extends TestCase
             ->assertJsonPath('data.greeting_name', 'مكتب ركن الشمال الذهبي');
     }
 
+    public function test_the_profile_counts_follow_the_read_scope_but_name_the_token_owner(): void
+    {
+        $this->apiAsOwner($this->najla, $this->office);
+
+        // As before: the token's owner alone.
+        $this->getJson('/api/v1/me')->assertOk()
+            ->assertJsonPath('data.name', 'نجلاء العتيبي')
+            ->assertJsonPath('data.stats.parcels_count', 2)
+            ->assertJsonPath('data.stats.deeds_count', 2);
+
+        // Reading as the account: every owner's land, counted once — the
+        // details stay the owner's, since editing them edits that owner.
+        $this->withHeaders(self::SCOPE)->getJson('/api/v1/me')->assertOk()
+            ->assertJsonPath('data.name', 'نجلاء العتيبي')
+            ->assertJsonPath('data.stats.parcels_count', 3)
+            ->assertJsonPath('data.stats.deeds_count', 3)
+            ->assertJsonPath('data.account.name', 'مكتب ركن الشمال الذهبي');
+    }
+
     public function test_a_shared_deed_list_names_the_holders_and_hides_withheld_scans(): void
     {
         $this->access->setPermissions($this->office->grants()->where('owner_id', $this->saud->id)->firstOrFail(), ['documents' => false], $this->staff);
